@@ -527,7 +527,6 @@ void func_00123978(int *record, RecordOutput *output, unsigned int *minimum, uns
     *maximum = high;
 }
 
-INCLUDE_ASM("asm/core", func_00123A00);
 
 INCLUDE_ASM("asm/core", func_00123B40);
 

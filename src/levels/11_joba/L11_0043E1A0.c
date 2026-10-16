@@ -278,7 +278,6 @@ INCLUDE_ASM("asm/levels", func_L11_00442E38);
 
 /* func_L11_00443380 lives in the sibling small-data unit (L11_0043E1A0-g8.c). */
 
-INCLUDE_ASM("asm/levels", func_L11_004433D8);
 
 INCLUDE_ASM("asm/levels", func_L11_00443498);
 

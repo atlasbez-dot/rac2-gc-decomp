@@ -145,7 +145,6 @@ void func_0029F390(u8 *param_1)
     *(int *)(param_1 + 92) = *(int *)(*(int *)(*(volatile int *)(param_1 + 36) + (param_1[67] << 2) + 72) + (param_1[65] << 2) + 28);
 }
 
-INCLUDE_ASM("asm/game", func_0029F450);
 
 INCLUDE_ASM("asm/game", func_0029F528);
 

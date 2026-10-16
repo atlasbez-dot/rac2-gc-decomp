@@ -170,7 +170,6 @@ void func_002E37B0(void)
         *(long long *)((char *)resident->table + index * 16) = 0;
 }
 
-INCLUDE_ASM("asm/game", func_002E3820);
 
 INCLUDE_ASM("asm/game", func_002E3938);
 
@@ -202,9 +201,7 @@ void func_002E4478(void *object)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002E4528);
 
-INCLUDE_ASM("asm/game", func_002E45C8);
 
 float func_002E46C0(char *self, char *p)
 {

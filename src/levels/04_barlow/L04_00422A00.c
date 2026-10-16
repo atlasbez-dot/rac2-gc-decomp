@@ -87,7 +87,6 @@ INCLUDE_ASM("asm/levels", func_L04_0044BC90);
 INCLUDE_ASM("asm/levels", func_L04_0044C598);
 INCLUDE_ASM("asm/levels", func_L04_0044D0C0);
 INCLUDE_ASM("asm/levels", func_L04_0044D428);
-INCLUDE_ASM("asm/levels", func_L04_0044D6A0);
 INCLUDE_ASM("asm/levels", func_L04_0044D860);
 
 /* subtracts the sub-structure's field from the owner's timer and reports it */

@@ -151,7 +151,6 @@ void func_L14_00423DC0(char *a0, int a1)
 
 INCLUDE_ASM("asm/levels", func_L14_00423E50);
 
-INCLUDE_ASM("asm/levels", func_L14_00425C08);
 
 INCLUDE_ASM("asm/levels", func_L14_00425CB0);
 
@@ -181,7 +180,6 @@ void func_L14_00426DE8(char *a0)
 
 INCLUDE_ASM("asm/levels", func_L14_00426F28);
 
-INCLUDE_ASM("asm/levels", func_L14_00427210);
 
 /* func_L14_00427250 lives in the -g8 sibling file (it reaches a global through $gp). */
 

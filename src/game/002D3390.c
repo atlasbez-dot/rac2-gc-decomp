@@ -132,7 +132,6 @@ int func_002D4E10(void)
 
 INCLUDE_ASM("asm/game", func_002D4E48);
 
-INCLUDE_ASM("asm/game", func_002D4FF0);
 
 extern int D_0025BA80;
 

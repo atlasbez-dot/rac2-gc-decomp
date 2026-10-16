@@ -27,7 +27,6 @@ s32 func_L18_00428100(char *a0) {
 }
 INCLUDE_ASM("asm/levels", func_L18_00428138);
 
-INCLUDE_ASM("asm/levels", func_L18_00428338);
 
 /* Maps the class identifier this level tags an object with to its small integer. */
 INCLUDE_ASM("asm/levels", func_L18_00428428);

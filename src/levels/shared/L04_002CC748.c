@@ -173,12 +173,10 @@ INCLUDE_ASM("asm/levels", func_L04_00378838);
 
 INCLUDE_ASM("asm/levels", func_L04_0039FA08);
 
-INCLUDE_ASM("asm/levels", func_L04_0039FC28);
 
 INCLUDE_ASM("asm/levels", func_L04_0039FEA8);
 
 
-INCLUDE_ASM("asm/levels", func_L04_003A0008);
 
 typedef struct {
     u8 pad00[0x20];
@@ -234,7 +232,6 @@ void func_L04_003A02A0(u32 a0, u32 a1) {
     func_002FD1B8(a0, a1, 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L04_003A0C40);
 
 INCLUDE_ASM("asm/levels", func_L04_003A0CE8);
 

@@ -7,7 +7,6 @@ void func_L00_002F4400(void)
 INCLUDE_ASM("asm/levels", func_L00_002F4510);
 
 
-INCLUDE_ASM("asm/levels", func_L00_002F46C8);
 
 extern short D_L00_0027D880[];
 
@@ -31,7 +30,6 @@ INCLUDE_ASM("asm/levels", func_L00_002F59A8);
 
 INCLUDE_ASM("asm/levels", func_L00_002F62D8);
 
-INCLUDE_ASM("asm/levels", func_L00_002F6B90);
 
 INCLUDE_ASM("asm/levels", func_L00_002F6ED0);
 

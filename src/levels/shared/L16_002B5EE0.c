@@ -30,7 +30,6 @@ extern void func_00283958(char *a, char *b);
 extern void func_00283738(char *a, char *b, char *c);
 
 /* steers the object along the ground normal the terrain query returns */
-INCLUDE_ASM("asm/levels", func_L16_00395C00);
 
 INCLUDE_ASM("asm/levels", func_L16_00395D30);
 

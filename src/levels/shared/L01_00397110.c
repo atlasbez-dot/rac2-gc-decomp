@@ -176,7 +176,6 @@ extern float func_2E33E0(float);
 
 extern void func_323310(int, int);
 
-INCLUDE_ASM("asm/levels", func_L01_0042E0A8);
 
 INCLUDE_ASM("asm/levels", func_L01_00446920);
 

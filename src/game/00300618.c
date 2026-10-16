@@ -222,7 +222,6 @@ INCLUDE_ASM("asm/game", func_00303568);
 
 INCLUDE_ASM("asm/game", func_00303738);
 
-INCLUDE_ASM("asm/game", func_00303AC8);
 
 INCLUDE_ASM("asm/game", func_00303BF8);
 
@@ -383,7 +382,6 @@ void func_003073E0(void *owner)
         *((unsigned char *)owner + 0x20) = 8;
 }
 
-INCLUDE_ASM("asm/game", func_00307440);
 
 INCLUDE_ASM("asm/game", func_00307500);
 

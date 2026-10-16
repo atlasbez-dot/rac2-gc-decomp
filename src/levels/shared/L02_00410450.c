@@ -48,7 +48,6 @@ INCLUDE_ASM("asm/levels", func_L02_004164A8);
 INCLUDE_ASM("asm/levels", func_L02_00416720);
 
 /* True when the record is in state 1 and its sub-object holds a cleared origin. */
-INCLUDE_ASM("asm/levels", func_L02_00416800);
 
 INCLUDE_ASM("asm/levels", func_L02_00421860);
 

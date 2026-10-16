@@ -280,7 +280,6 @@ void func_002B7340(s32 value)
         state->channels[1].value = value;
 }
 
-INCLUDE_ASM("asm/game", func_002B7380);
 
 INCLUDE_ASM("asm/game", func_002B7578);
 

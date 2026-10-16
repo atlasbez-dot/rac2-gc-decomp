@@ -93,7 +93,6 @@ void func_L02_0040B868(u8 *a0, int a1) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_0040B980);
 
 /* sweeps the two effect tracks of the actor relative to a head position */
 INCLUDE_ASM("asm/levels", func_L02_0040BAB8);

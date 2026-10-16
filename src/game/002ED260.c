@@ -29,7 +29,6 @@ void func_002ED260(u32_Fe8672ea5 object)
 
 INCLUDE_ASM("asm/game", func_002ED2B8);
 
-INCLUDE_ASM("asm/game", func_002ED368);
 
 INCLUDE_ASM("asm/game", func_002ED4B8);
 

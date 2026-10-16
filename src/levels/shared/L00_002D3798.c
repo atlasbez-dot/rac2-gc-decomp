@@ -407,7 +407,6 @@ int func_L00_002D4040(int a0)
     return D_L00_00139688[idx];
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002D40A0);
 
 extern int D_0018C0B4;
 

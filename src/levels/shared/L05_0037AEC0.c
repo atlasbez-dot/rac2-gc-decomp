@@ -51,7 +51,6 @@ void func_L05_0037AEC0(char *object, int flag)
         func_L05_0037AE40(object);
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0037AFD0);
 
 
 INCLUDE_ASM("asm/levels", func_L05_0037B108);
@@ -60,7 +59,6 @@ INCLUDE_ASM("asm/levels", func_L05_0037B210);
 
 INCLUDE_ASM("asm/levels", func_L05_0037B280);
 
-INCLUDE_ASM("asm/levels", func_L05_0037B3A0);
 
 INCLUDE_ASM("asm/levels", func_L05_0037B438);
 

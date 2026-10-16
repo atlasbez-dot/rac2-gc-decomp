@@ -100,7 +100,6 @@ notfound:
 
 INCLUDE_ASM("asm/levels", func_L00_002D1FD8);
 
-INCLUDE_ASM("asm/levels", func_L00_002D2070);
 
 INCLUDE_ASM("asm/levels", func_L00_002D20D0);
 
