@@ -184,7 +184,6 @@ void func_002B0910(int a0, int a1, int a2, int a3)
 
 INCLUDE_ASM("asm/game", func_002B0968);
 
-INCLUDE_ASM("asm/game", func_002B0990);
 
 INCLUDE_ASM("asm/game", func_002B0A08);
 
@@ -269,7 +268,6 @@ int func_002B0DB8(void)
     return count;
 }
 
-INCLUDE_ASM("asm/game", func_002B0E28);
 
 
 INCLUDE_ASM("asm/game", func_002B0ED8);

@@ -73,7 +73,6 @@ INCLUDE_ASM("asm/game", func_0033C1A8);
 
 
 
-INCLUDE_ASM("asm/game", func_0033C2D8);
 
 typedef struct { int ids[2]; } SolTextPair;
 extern SolTextPair D_L00_001AE110;

@@ -33,7 +33,6 @@ char *func_003439A0(char *p)
     return p;
 }
 
-INCLUDE_ASM("asm/game", func_00343A30);
 
 typedef struct { unsigned char pad[6]; short id; short tail; } SelectionRow;
 extern SelectionRow D_001AA810[];
@@ -67,7 +66,6 @@ void func_00343EE8(DobboGridState312 *state, unsigned int buttons)
     state->index = D_001AA810[state->column].id;
 }
 
-INCLUDE_ASM("asm/game", func_00343FF8);
 
 /* prioritized masks1000/4000/8000/2000 update signedcolumns43C/rows440 and mode448 with originalevent3 flags0/entitynull; index444=column+2row */
 void func_00344160(DobboGridState312 *state, unsigned int buttons)

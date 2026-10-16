@@ -20,4 +20,3 @@ float func_002AFF38(unsigned long first, unsigned long second, unsigned long thi
     return result[2];
 }
 
-INCLUDE_ASM("asm/game", func_002AFF60);

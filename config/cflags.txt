@@ -1,6 +1,55 @@
 src/core/001330D0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/core/001322B8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/core/00123A00-rc2.c	sdk -O2 -ffunction-sections -fno-builtin
+src/game/00287D98-rc2.c	-O2 -G8 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/002D4FF0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/002FAD68-rc2.c	sdk -O1 -ffunction-sections -fno-builtin
+src/game/00297F98-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/003415B8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00341558-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002B0E28-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/0028B650-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/002AFF60-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/002B0990-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/002E4528-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00281DE8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002D75E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00307440-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002A7398-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/0027DCE8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/0029F450-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/0032FDD0-rc2.c	-O2 -G4 -ffunction-sections -fno-builtin
+src/game/00310960-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00287FF8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002E45C8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002BB928-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002E3820-rc2.c	-O2 -fno-schedule-insns -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/003130F0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/game/002C1C88-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00303AC8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/0032ACF0-rc2.c	-O2 -fno-sched-interblock -G0 -ffunction-sections -fno-builtin
+src/game/003355A8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002C1B38-rc2.c	-O2 -G8 -mno-split-addresses -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/game/002ED368-rc2.c	-O2 -fno-strength-reduce -G4 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/game/00343FF8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/0032BA88-rc2.c	-O2 -G0 -fno-strength-reduce -ffunction-sections -fno-builtin
+src/game/003169D0-rc2.c	-O2 -G0 -fno-strength-reduce -ffunction-sections -fno-builtin
+src/game/002C6360-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/002BF390-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/game/00273B70-rc2.c	-O2 -G4 -ffunction-sections -fno-builtin
+src/game/002DC228-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00322A30-rc2.c	-O2 -G8 -fno-sched-interblock -ffunction-sections -fno-builtin
+src/game/002B7380-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/0031A340-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00338810-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/0034B070-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/00343260-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/002729A0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00341220-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/0028F410-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/00343A30-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/00346710-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/0033C2D8-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
 src/core/00131CA8-rc2.c	-O2 -G0 -mastra-sibcall -ffunction-sections -fno-builtin
 src/levels/shared/L00_00427290-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/game/00334710-rc2.c	-O2 -G0 -fno-delayed-branch -ffunction-sections -fno-builtin

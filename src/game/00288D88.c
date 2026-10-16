@@ -253,7 +253,6 @@ int func_0028B5D0(int key)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_0028B650);
 
 INCLUDE_ASM("asm/game", func_0028B6C0);
 

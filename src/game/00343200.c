@@ -36,7 +36,6 @@ u8 *func_00343200(u8 *a0) {
     return a0;
 }
 
-INCLUDE_ASM("asm/game", func_00343260);
 
 void func_00343538(QwenRecovery_a2544d80ec96_AbiByte22 *p1, const QwenRecovery_a2544d80ec96_AbiByte22 *table)
 {

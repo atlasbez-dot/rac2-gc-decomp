@@ -543,7 +543,6 @@ INCLUDE_ASM("asm/game", func_002725C8);
 
 INCLUDE_ASM("asm/game", func_002725E0);
 
-INCLUDE_ASM("asm/game", func_002729A0);
 
 INCLUDE_ASM("asm/game", func_00272CB0);
 
@@ -561,7 +560,6 @@ INCLUDE_ASM("asm/game", func_00273730);
 
 INCLUDE_ASM("asm/game", func_00273978);
 
-INCLUDE_ASM("asm/game", func_00273B70);
 
 int func_00273D10(char *obj)
 {
