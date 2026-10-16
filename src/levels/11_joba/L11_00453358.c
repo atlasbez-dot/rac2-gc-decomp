@@ -231,6 +231,5 @@ void func_L11_00460038(char *p, float scale)
     func_00282D30_2(p + 48, p + 48, scale);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_004600A0);
 
 INCLUDE_ASM("asm/levels", func_L11_00461308);

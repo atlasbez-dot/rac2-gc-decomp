@@ -317,7 +317,6 @@ void func_L00_003F0AA8(char *p, float scale)
     func_00282D30_2(p + 48, p + 48, scale);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F0B10);
 
 INCLUDE_ASM("asm/levels", func_L00_003F0CC8);
 
@@ -370,7 +369,6 @@ void func_L00_003F1E50(char *p, float scale)
     func_00282D30_2(p + 48, p + 48, scale);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F1EB8);
 
 INCLUDE_ASM("asm/levels", func_L00_003F26C8);
 
