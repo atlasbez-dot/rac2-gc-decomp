@@ -2,10 +2,15 @@
   <img src="assets/rac2-logo.png" alt="RAC2 — Going Commando" width="560">
 </p>
 <p align="center"><strong>Ratchet &amp; Clank: Going Commando</strong></p>
+<p align="center"><strong>RC2 decomp contributions</strong></p>
 
 <p align="center">
-  <a href="progress/report.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fllesieur99%2Frac2-decomp%2Fmaster%2Fprogress%2Freport.json&query=%24.percent&suffix=%25&label=C&style=flat-square&color=e89b35&labelColor=0d1117" alt="Progress"></a>
+  <a href="progress/report.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fatlasbez-dot%2Frac2-gc-decomp%2Fmaster%2Fprogress%2Freport.json&query=%24.measures.matched_functions&label=Matched%20functions&style=flat-square&color=e89b35&labelColor=0d1117" alt="Matched functions"></a>
   <a href="docs/BUILDING.md"><img src="https://img.shields.io/badge/PS2-USA_v1.01-c3cbd8?style=flat-square&amp;labelColor=0d1117" alt="PlayStation 2 USA version 1.01"></a>
+</p>
+<p align="center">
+  <a href="https://github.com/atlasbez-dot/rac2-gc-decomp/actions/workflows/checks.yml"><img src="https://github.com/atlasbez-dot/rac2-gc-decomp/actions/workflows/checks.yml/badge.svg?branch=master" alt="Checks"></a>
+  <a href="https://github.com/atlasbez-dot/rac2-gc-decomp/actions/workflows/progress.yml"><img src="https://github.com/atlasbez-dot/rac2-gc-decomp/actions/workflows/progress.yml/badge.svg?branch=master" alt="Progress report"></a>
 </p>
 
 A matching decompilation of Ratchet & Clank: Going Commando for the PlayStation 2 (USA v1.01,
@@ -29,12 +34,12 @@ The levels' data is not measured.
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 1,470 of 3,390 | 170,200 of 1,049,464 bytes |
-| Levels | 1,471 of 5,710 | 147,888 of 4,484,136 bytes |
-| **Total** | 2,941 of 9,100 | 318,088 of 5,533,600 bytes (5.75%) |
+| Boot executable | 1,768 of 3,390 | 210,828 of 1,049,464 bytes |
+| Levels | 1,591 of 5,710 | 165,984 of 4,484,136 bytes |
+| **Total** | 3,359 of 9,100 | 376,812 of 5,533,600 bytes (6.81%) |
 
-The 27 levels hold 106,337 function placements; C covers 38,445 of them.
-84 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
+The 27 levels hold 106,337 function placements; C covers 41,429 of them.
+251 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
 <!-- /progress -->
 
 
