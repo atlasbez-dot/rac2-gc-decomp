@@ -303,4 +303,3 @@ INCLUDE_ASM("asm/levels", func_L11_0043ACB0);
 INCLUDE_ASM("asm/levels", func_L11_0043E090);
 
 /* Maps the measured selector onto its large index. */
-INCLUDE_ASM("asm/levels", func_L11_0043E108);

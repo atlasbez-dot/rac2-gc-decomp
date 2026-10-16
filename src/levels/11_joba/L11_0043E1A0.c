@@ -65,7 +65,6 @@ void func_L11_004401C0(u8 *obj) {
     *(s32 *)(state + 0x170) = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00440238);
 INCLUDE_ASM("asm/levels", func_L11_00440360);
 
 INCLUDE_ASM("asm/levels", func_L11_00440790);
@@ -288,7 +287,6 @@ INCLUDE_ASM("asm/levels", func_L11_00443940);
 /* maps the class index to its measured identifier */
 extern u32 D_L11_002BB0E0[];
 
-INCLUDE_ASM("asm/levels", func_L11_00443CE0);
 
 INCLUDE_ASM("asm/levels", func_L11_00443D78);
 

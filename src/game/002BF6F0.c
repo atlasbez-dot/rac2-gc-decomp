@@ -234,7 +234,6 @@ INCLUDE_ASM("asm/game", func_002C1DB0);
 
 INCLUDE_ASM("asm/game", func_002C1E50);
 
-INCLUDE_ASM("asm/game", func_002C1EF0);
 
 /* func_002C1FC0 is defined in 002BF6F0-g8.c. */
 

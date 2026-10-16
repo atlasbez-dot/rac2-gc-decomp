@@ -29,7 +29,6 @@ void func_L05_0030C930(int a0, int a1) {
     p[0x10] = a0;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_00324DB8);
 
 INCLUDE_ASM("asm/levels", func_L05_00334358);
 
@@ -118,7 +117,6 @@ INCLUDE_ASM("asm/levels", func_L05_0037A218);
 
 INCLUDE_ASM("asm/levels", func_L05_0037A5F8);
 
-INCLUDE_ASM("asm/levels", func_L05_0037AA88);
 
 INCLUDE_ASM("asm/levels", func_L05_0037AB18);
 

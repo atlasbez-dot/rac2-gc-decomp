@@ -42,7 +42,6 @@ void func_L08_00425448(char *a0) {
     *(u8 *)(a0 + 0xBC) = 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L08_004254D0);
 
 s32 func_L08_00425518(s32 a0) {
     s32 v1;

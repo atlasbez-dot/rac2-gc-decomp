@@ -259,7 +259,6 @@ void func_00304C18(void *object) {
         *((unsigned char *)object + 0x20) = 8;
 }
 
-INCLUDE_ASM("asm/game", func_00304C78);
 
 INCLUDE_ASM("asm/game", func_00304D38);
 

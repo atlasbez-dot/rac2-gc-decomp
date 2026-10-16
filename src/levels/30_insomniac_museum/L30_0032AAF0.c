@@ -119,7 +119,6 @@ void func_L30_003847F8(char *a0) {
     func_3132D8(&buf, 0x80F0F0F0, v, 1, 0, -1, 0, 0, 0, 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L30_003848B8);
 
 int func_L30_00384980(char *a0) {
     char *st = *(char **)(a0 + 0x68);

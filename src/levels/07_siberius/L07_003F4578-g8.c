@@ -41,7 +41,6 @@ INCLUDE_ASM("asm/levels", func_L07_003F8780);
 INCLUDE_ASM("asm/levels", func_L07_003F6CF0);
 
 /* Steers the 0x54 yaw toward the argument and refreshes the two 0xF8 angles. */
-INCLUDE_ASM("asm/levels", func_L07_003F68F0);
 
 /* Feeds the four 0xA8 ids to the shared geometry pass. */
 INCLUDE_ASM("asm/levels", func_L07_0040F6B8);

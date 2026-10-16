@@ -102,7 +102,6 @@ void func_L03_003F6080(u8 *entity) {
 
 INCLUDE_ASM("asm/levels", func_L03_003F6158);
 
-INCLUDE_ASM("asm/levels", func_L03_003F62C8);
 
 /* draws a value distinct from the state's current one and stores the table word it names */
 void func_L03_003F6458(u8 *entity, s32 selector) {

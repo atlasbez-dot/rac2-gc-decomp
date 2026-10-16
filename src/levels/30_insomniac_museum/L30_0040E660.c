@@ -54,7 +54,6 @@ void func_L30_00418570(char *a0) {
     *(char **)(st + 0x50) = o;
 }
 
-INCLUDE_ASM("asm/levels", func_L30_004185E0);
 
 INCLUDE_ASM("asm/levels", func_L30_004186B0);
 

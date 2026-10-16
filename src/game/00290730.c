@@ -17,6 +17,5 @@ int func_00290748(void)
 
 INCLUDE_ASM("asm/game", func_00290758);
 
-INCLUDE_ASM("asm/game", func_002908D0);
 
 INCLUDE_ASM("asm/game", func_00290978);

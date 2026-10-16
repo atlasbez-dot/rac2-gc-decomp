@@ -69,7 +69,6 @@ extern float D_L18_001B152C __attribute__((sda));
 extern char D_L18_001B1480[] __attribute__((sda));
 extern char D_L18_001B1490[] __attribute__((nosda));
 
-INCLUDE_ASM("asm/levels", func_L18_0042FAA8);
 
 INCLUDE_ASM("asm/levels", func_L18_00433088);
 

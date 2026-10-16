@@ -165,7 +165,6 @@ void func_002FCDA8(void)
 
 ASM_FUNC("asm/game", func_002FCE18);
 
-INCLUDE_ASM("asm/game", func_002FCF18);
 
 #define MACRO_ADDR __attribute__((section(".sdata")))
 
@@ -350,13 +349,10 @@ INCLUDE_ASM("asm/game", func_002FFCF8);
 
 INCLUDE_ASM("asm/game", func_002FFD78);
 
-INCLUDE_ASM("asm/game", func_002FFFE0);
 
-INCLUDE_ASM("asm/game", func_00300048);
 
 INCLUDE_ASM("asm/game", func_00300180);
 
-INCLUDE_ASM("asm/game", func_00300190);
 
 INCLUDE_ASM("asm/game", func_003001E0);
 

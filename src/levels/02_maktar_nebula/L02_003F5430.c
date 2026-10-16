@@ -166,7 +166,6 @@ s32 func_L02_003FC0B8(char *a0) {
     return *(s32 *)(v1 + 0x84);
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003FC0D0);
 
 INCLUDE_ASM("asm/levels", func_L02_003FC1B0);
 

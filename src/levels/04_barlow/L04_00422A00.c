@@ -8,7 +8,6 @@ typedef signed short s16;
 typedef signed int s32;
 typedef float f32;
 
-INCLUDE_ASM("asm/levels", func_L04_00422A00);
 
 extern u8 D_L04_001395C7;
 extern u8 D_L04_002CA518;
@@ -27,7 +26,6 @@ extern void func_40A090(int a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, u8 *a5);
 INCLUDE_ASM("asm/levels", func_L04_00422D40);
 INCLUDE_ASM("asm/levels", func_L04_00422DA8);
 INCLUDE_ASM("asm/levels", func_L04_00423258);
-INCLUDE_ASM("asm/levels", func_L04_0042BF58);
 INCLUDE_ASM("asm/levels", func_L04_00434BB0);
 INCLUDE_ASM("asm/levels", func_L04_004389C0);
 INCLUDE_ASM("asm/levels", func_L04_00438B50);
@@ -74,7 +72,6 @@ extern u8 D_L04_002CA438[] __attribute__((sda));
 INCLUDE_ASM("asm/levels", func_L04_0043ABE0);
 
 INCLUDE_ASM("asm/levels", func_L04_0043AD48);
-INCLUDE_ASM("asm/levels", func_L04_00441100);
 
 void func_L04_00441178(u8 *a0) {
     if (a0[0x20] != 0)

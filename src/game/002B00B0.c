@@ -271,7 +271,6 @@ int func_002B0DB8(void)
 
 INCLUDE_ASM("asm/game", func_002B0E28);
 
-INCLUDE_ASM("asm/game", func_002B0E90);
 
 INCLUDE_ASM("asm/game", func_002B0ED8);
 

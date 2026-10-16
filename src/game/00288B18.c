@@ -9,4 +9,3 @@ void func_00288B18(void *owner)
     func_002889B8(owner);
 }
 
-INCLUDE_ASM("asm/game", func_00288B38);

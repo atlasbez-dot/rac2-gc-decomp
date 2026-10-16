@@ -114,7 +114,6 @@ INCLUDE_ASM("asm/levels", func_L03_003D09D0);
 
 INCLUDE_ASM("asm/levels", func_L03_003D0AE0);
 
-INCLUDE_ASM("asm/levels", func_L03_003D0FC8);
 
 INCLUDE_ASM("asm/levels", func_L03_003D9578);
 
@@ -180,7 +179,6 @@ void func_L03_003E5218(u8 *a0) {
     *(u32 *)(*(u8 **)(a0 + 0x68) + 0x60) = 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L03_00408068);
 
 INCLUDE_ASM("asm/levels", func_L03_00409248);
 
@@ -282,7 +280,6 @@ INCLUDE_ASM("asm/levels", func_L03_0041B848);
 
 INCLUDE_ASM("asm/levels", func_L03_00424C40);
 
-INCLUDE_ASM("asm/levels", func_L03_00425030);
 
 INCLUDE_ASM("asm/levels", func_L03_00425108);
 
@@ -298,7 +295,6 @@ void func_L03_0042B908(u8 *a0, u32 a1) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L03_0042B930);
 
 typedef struct {
     int a;

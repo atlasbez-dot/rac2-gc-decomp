@@ -57,4 +57,3 @@ void func_00343798(char *self, int arg)
 
 INCLUDE_ASM("asm/game", func_003438E0);
 
-INCLUDE_ASM("asm/game", func_003438E8);

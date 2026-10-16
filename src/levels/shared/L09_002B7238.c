@@ -61,7 +61,6 @@ int func_L09_00329178(char *object, int index)
 INCLUDE_ASM("asm/levels", func_L09_003364E0);
 
 
-INCLUDE_ASM("asm/levels", func_L09_0033E658);
 
 
 extern int func_L06_00382850(char *object, unsigned int entry);

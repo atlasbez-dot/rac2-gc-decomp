@@ -78,11 +78,9 @@ void func_L05_0037B6D0(char *obj)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0037B888);
 
 INCLUDE_ASM("asm/levels", func_L05_0037B948);
 
-INCLUDE_ASM("asm/levels", func_L05_0037BB28);
 
 INCLUDE_ASM("asm/levels", func_L05_0037BB78);
 
@@ -142,7 +140,6 @@ void func_L05_0037CDD8(char *obj, int value)
         *(int *)((char *)p + 0x114) = value;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0037CE08);
 
 int func_L05_0037CEB8(char *obj)
 {
@@ -196,7 +193,6 @@ INCLUDE_ASM("asm/levels", func_L05_003CF040);
 
 INCLUDE_ASM("asm/levels", func_L05_003CF350);
 
-INCLUDE_ASM("asm/levels", func_L05_003CF9C8);
 
 INCLUDE_ASM("asm/levels", func_L05_003CFAB8);
 
@@ -219,7 +215,6 @@ INCLUDE_ASM("asm/levels", func_L05_003D02C8);
 
 INCLUDE_ASM("asm/levels", func_L05_003D0320);
 
-INCLUDE_ASM("asm/levels", func_L05_003D0420);
 
 INCLUDE_ASM("asm/levels", func_L05_003D0538);
 
@@ -239,7 +234,6 @@ INCLUDE_ASM("asm/levels", func_L05_003D0960);
 
 INCLUDE_ASM("asm/levels", func_L05_003D0B20);
 
-INCLUDE_ASM("asm/levels", func_L05_003D1058);
 
 INCLUDE_ASM("asm/levels", func_L05_003D1148);
 

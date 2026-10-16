@@ -87,7 +87,6 @@ void func_L04_0040A310(void)
 
 INCLUDE_ASM("asm/levels", func_L04_0040A3B8);
 
-INCLUDE_ASM("asm/levels", func_L04_0040A5C0);
 
 INCLUDE_ASM("asm/levels", func_L04_0040A628);
 
@@ -117,7 +116,6 @@ void func_L04_0040AC30(char *a0, char *a1)
 /* func_L04_0040ACA8 reaches one of its globals absolutely and another off $gp,
    so its body lives in L04_00402D90-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L04_0040ACC8);
 
 INCLUDE_ASM("asm/levels", func_L04_0040AD28);
 
