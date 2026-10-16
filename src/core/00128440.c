@@ -177,4 +177,3 @@ int func_001287A8(int arg0, int arg1, int *arg2, char *arg3) {
     return r;
 }
 
-INCLUDE_ASM("asm/core", func_001286C8);

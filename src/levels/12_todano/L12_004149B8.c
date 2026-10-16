@@ -16,7 +16,6 @@ extern f32 func_002F2950(f32, f32);
 extern void func_002A0F48(void *);
 extern void func_00282F20(f32 *, void *, f32);
 
-INCLUDE_ASM("asm/levels", func_L12_0041BDF8);
 
 extern void func_L12_0041BED8(u8 *);
 

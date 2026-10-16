@@ -222,7 +222,6 @@ void func_0034F7A8(void) {
     func_0034FAF8((int *)(D_001B23CC[0] + 0xD9100));
 }
 
-INCLUDE_ASM("asm/game", func_0034F7D8);
 
 s32 func_0034F898(void) {
     func_001338C8();

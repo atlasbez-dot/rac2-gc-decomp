@@ -122,7 +122,6 @@ INCLUDE_ASM("asm/levels", func_L18_003F5650);
 
 INCLUDE_ASM("asm/levels", func_L18_003F6CA8);
 
-INCLUDE_ASM("asm/levels", func_L18_003F7198);
 
 extern float func_00283248(float a, float b);
 
@@ -134,7 +133,6 @@ void func_L18_003F72D8(BatchA_A18_u8 *a0, BatchA_A18_u8 *a1) {
                       *(float *)(a1 + 0x4) - *(float *)(a0 + 0x14));
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F7320);
 
 extern float func_00308AD0(BatchA_A18_u8 *a0, BatchA_A18_u8 *a1);
 extern BatchA_A18_s32 func_L18_003F8E40(BatchA_A18_u8 *s);
@@ -150,7 +148,6 @@ BatchA_A18_s32 func_L18_003F7358(BatchA_A18_u8 *a0, BatchA_A18_u8 *a1) {
 INCLUDE_ASM("asm/levels", func_L18_003F73B8);
 
 
-INCLUDE_ASM("asm/levels", func_L18_003F7470);
 
 INCLUDE_ASM("asm/levels", func_L18_003F74B8);
 
@@ -330,7 +327,6 @@ void func_L18_00426D98(BatchA_A18_u8 *a0) {
     func_0032D118(a0, 0x80, 0x80, 0x80);
 }
 
-INCLUDE_ASM("asm/levels", func_L18_00426E00);
 
 INCLUDE_ASM("asm/levels", func_L18_00426E48);
 
@@ -428,4 +424,3 @@ INCLUDE_ASM("asm/levels", func_L18_004273F0);
 
 INCLUDE_ASM("asm/levels", func_L18_00427688);
 
-INCLUDE_ASM("asm/levels", func_L18_00427B48);

@@ -189,7 +189,6 @@ extern D00189E20_Overlay D_00189E20;
 
 extern void func_002AA2E8(float *, float, float);
 
-INCLUDE_ASM("asm/levels", func_L00_002B1308);
 
 INCLUDE_ASM("asm/levels", func_L00_002B1350);
 

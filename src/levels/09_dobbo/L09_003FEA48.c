@@ -188,7 +188,6 @@ INCLUDE_ASM("asm/levels", func_L09_004052F8);
 INCLUDE_ASM("asm/levels", func_L09_00405490);
 
 INCLUDE_ASM("asm/levels", func_L09_00405610);
-INCLUDE_ASM("asm/levels", func_L09_00406BF8);
 
 void func_L09_00406C90(char *a0) {
     char *a1 = *(char **)(a0 + 0x68);

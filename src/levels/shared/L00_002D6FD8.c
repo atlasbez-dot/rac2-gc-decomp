@@ -36,7 +36,6 @@ void func_L00_002D6FD8(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002D7060);
 
-INCLUDE_ASM("asm/levels", func_L00_002D7068);
 
 /* Partial 64-byte pool record, measured from the retail loads and stores. */
 typedef struct {

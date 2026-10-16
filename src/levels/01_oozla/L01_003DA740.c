@@ -126,7 +126,6 @@ INCLUDE_ASM("asm/levels", func_L01_00416440);
 INCLUDE_ASM("asm/levels", func_L01_00416A50);
 
 /* Arms the measured primitive block of the given object. */
-INCLUDE_ASM("asm/levels", func_L01_00416B30);
 
 INCLUDE_ASM("asm/levels", func_L01_00416C08);
 

@@ -353,7 +353,6 @@ int func_002B7C80(char *p, int x, int y)
     return v;
 }
 
-INCLUDE_ASM("asm/game", func_002B7CE0);
 
 void func_002B7D88(s32 a0) {
     if (a0 == 1) {

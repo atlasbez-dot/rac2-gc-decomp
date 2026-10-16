@@ -90,7 +90,6 @@ INCLUDE_ASM("asm/game", func_00322138);
 
 INCLUDE_ASM("asm/game", func_00322340);
 
-INCLUDE_ASM("asm/game", func_003225C0);
 
 INCLUDE_ASM("asm/game", func_00322680);
 

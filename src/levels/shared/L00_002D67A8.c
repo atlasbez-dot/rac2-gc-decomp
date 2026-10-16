@@ -123,9 +123,7 @@ u32 func_L00_002D68E8(void) {
 
 INCLUDE_ASM("asm/levels", func_L00_002D68F8);
 
-INCLUDE_ASM("asm/levels", func_L00_002D6900);
 
-INCLUDE_ASM("asm/levels", func_L00_002D6940);
 
 /* tests the byte at the indexed 16-byte table entry */
 s32 func_L00_002D6978(s32 index) {

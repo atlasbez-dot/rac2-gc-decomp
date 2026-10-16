@@ -311,7 +311,6 @@ unsigned long func_L00_00443EF8(unsigned long param_1)
 
 INCLUDE_ASM("asm/levels", func_L00_00444D18);
 
-INCLUDE_ASM("asm/levels", func_L00_004450C0);
 
 INCLUDE_ASM("asm/levels", func_L00_004450E8);
 

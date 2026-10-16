@@ -104,9 +104,7 @@ void func_L12_0041A530(s32 a0) {
         *(u16 *)(a0 + 0x96) = *(u16 *)(a0 + 0x96) + 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L12_0041A578);
 
-INCLUDE_ASM("asm/levels", func_L12_0041A6D0);
 
 void func_L12_0041A730(s32 a0) {
     s16 *p = D_L12_001FB960[a0];
@@ -132,7 +130,6 @@ INCLUDE_ASM("asm/levels", func_L12_00426C08);
 
 INCLUDE_ASM("asm/levels", func_L12_004277F0);
 
-INCLUDE_ASM("asm/levels", func_L12_00427C58);
 
 void func_L12_00427CB0(s32 a0) {
     s32 s1 = a0;

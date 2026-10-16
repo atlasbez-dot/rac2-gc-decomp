@@ -91,7 +91,6 @@ void func_L22_003A2E10(char *a0, unsigned short a1) {
 
 INCLUDE_ASM("asm/levels", func_L22_003A2E50);
 
-INCLUDE_ASM("asm/levels", func_L22_003A3368);
 
 INCLUDE_ASM("asm/levels", func_L22_003A3550);
 

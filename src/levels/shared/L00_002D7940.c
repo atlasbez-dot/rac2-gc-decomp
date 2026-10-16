@@ -59,7 +59,6 @@ void func_L00_002D7940(s32 *object) {
 
 INCLUDE_ASM("asm/levels", func_L00_002D7958);
 
-INCLUDE_ASM("asm/levels", func_L00_002D7D58);
 
 INCLUDE_ASM("asm/levels", func_L00_002D8208);
 

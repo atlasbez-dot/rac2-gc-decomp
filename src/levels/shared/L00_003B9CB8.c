@@ -183,7 +183,6 @@ INCLUDE_ASM("asm/levels", func_L00_003BC998);
 
 INCLUDE_ASM("asm/levels", func_L00_003BCC10);
 
-INCLUDE_ASM("asm/levels", func_L00_003BCDC0);
 
 INCLUDE_ASM("asm/levels", func_L00_003BCE28);
 
@@ -285,7 +284,6 @@ void func_L00_003C2DE8(char *a0, char *a1, float fa, float fb)
     } while (i >= 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003C2F10);
 
 INCLUDE_ASM("asm/levels", func_L00_003C2FC8);
 

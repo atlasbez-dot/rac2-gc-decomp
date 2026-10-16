@@ -155,7 +155,6 @@ extern void func_0029FCC0(u8 *a, s32 b, void *c);
 
 extern void func_L07_003F43E0(u8 *a, u8 *b, void *c, void *d, f32 e);
 
-INCLUDE_ASM("asm/levels", func_L07_003F8BB0);
 
 extern u8 *func_L07_003F6B88(u8 *a);
 

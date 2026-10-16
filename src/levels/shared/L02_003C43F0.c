@@ -156,7 +156,6 @@ INCLUDE_ASM("asm/levels", func_L02_003C4C80);
 
 /* Reads three angles through a helper, converts them, and hands them to the placement call
    together with the object's own angle. */
-INCLUDE_ASM("asm/levels", func_L02_003C4E18);
 
 INCLUDE_ASM("asm/levels", func_L02_003C4ED8);
 

@@ -30,7 +30,6 @@ INCLUDE_ASM("asm/levels", func_L18_00428138);
 INCLUDE_ASM("asm/levels", func_L18_00428338);
 
 /* Maps the class identifier this level tags an object with to its small integer. */
-INCLUDE_ASM("asm/levels", func_L18_004283F0);
 INCLUDE_ASM("asm/levels", func_L18_00428428);
 
 /* Stores the measured halfword control for the one class that carries it, leaving

@@ -194,7 +194,6 @@ INCLUDE_ASM("asm/levels", func_L02_003D0408);
 INCLUDE_ASM("asm/levels", func_L02_003D10F0);
 
 /* Picks the idle variant the actor should play, from its distance and heading. */
-INCLUDE_ASM("asm/levels", func_L02_003D1698);
 
 INCLUDE_ASM("asm/levels", func_L02_003D18D8);
 

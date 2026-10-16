@@ -114,7 +114,6 @@ void func_L17_003C3250(char *a2)
 
 INCLUDE_ASM("asm/levels", func_L17_003C3330);
 
-INCLUDE_ASM("asm/levels", func_L17_003C3A00);
 
 INCLUDE_ASM("asm/levels", func_L17_003C3AF0);
 
@@ -200,7 +199,6 @@ INCLUDE_ASM("asm/levels", func_L17_003C6CE8);
 
 INCLUDE_ASM("asm/levels", func_L17_003C7018);
 
-INCLUDE_ASM("asm/levels", func_L17_003C70E0);
 
 INCLUDE_ASM("asm/levels", func_L17_003C71B0);
 

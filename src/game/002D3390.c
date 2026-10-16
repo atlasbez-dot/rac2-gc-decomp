@@ -68,7 +68,6 @@ int func_002D33C0(void)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002D3400);
 
 extern void func_0029C5A0(void);
 
@@ -144,7 +143,6 @@ int func_002D5038(void) {
 
 INCLUDE_ASM("asm/game", func_002D5048);
 
-INCLUDE_ASM("asm/game", func_002D50F0);
 
 extern char *D_001A8CFC[] __attribute__((sda));
 extern void *func_00341558(void *);

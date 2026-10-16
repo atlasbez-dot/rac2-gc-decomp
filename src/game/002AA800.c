@@ -366,7 +366,6 @@ void func_002AB800(int first, char *object)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002AB8C0);
 
 INCLUDE_ASM("asm/game", func_002ABB10);
 

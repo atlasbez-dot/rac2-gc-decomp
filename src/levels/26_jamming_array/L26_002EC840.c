@@ -56,7 +56,6 @@ INCLUDE_ASM("asm/levels", func_L26_003DB818);
 
 INCLUDE_ASM("asm/levels", func_L26_003DBE18);
 
-INCLUDE_ASM("asm/levels", func_L26_003DC048);
 
 /* func_L26_003DC128 lives in the -g8 sibling file (it reaches a global through $gp). */
 

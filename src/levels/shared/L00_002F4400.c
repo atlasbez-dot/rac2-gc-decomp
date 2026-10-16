@@ -6,7 +6,6 @@ void func_L00_002F4400(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002F4510);
 
-INCLUDE_ASM("asm/levels", func_L00_002F45B8);
 
 INCLUDE_ASM("asm/levels", func_L00_002F46C8);
 

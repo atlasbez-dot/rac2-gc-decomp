@@ -576,7 +576,6 @@ static __inline__ struct dwarf_cie *get_cie(fde *f) {
 extern int func_00115544(const char *, const char *);
 extern unsigned int func_001157AC(const char *);
 
-INCLUDE_ASM("asm/core", func_00123C28);
 
 INCLUDE_ASM("asm/core", func_00123D30);
 

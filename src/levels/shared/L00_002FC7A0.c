@@ -128,7 +128,6 @@ void func_L00_002FD308(unsigned long long argument)
     func_00291640(argument);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002FD400);
 
 INCLUDE_ASM("asm/levels", func_L00_002FD480);
 
@@ -510,7 +509,6 @@ void func_L00_0030D6E8(void)
         func_L00_00433F50(value + 0x3C440);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0030D718);
 
 /* Reads the object base from a shared global and, when it is non-zero, calls the handler at a
  * fixed byte offset in it. */
@@ -604,7 +602,6 @@ void func_L00_0030DAA8(void)
         func_0033D2C0(value + 0x3D5C0);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0030DAD8);
 
 void func_L00_0030DB18(void)
 {

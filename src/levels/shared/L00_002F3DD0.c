@@ -24,4 +24,3 @@ void func_L00_002F4180(void *owner)
     func_002889B8(owner);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002F43D0);

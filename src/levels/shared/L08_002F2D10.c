@@ -130,7 +130,6 @@ void func_L08_00328B80(s32 a0, s32 a1, s32 a2, s32 a3) {
     func_L08_00328AE0(D_L08_001B29DC + (a0 << 8), a1, a2, a3);
 }
 
-INCLUDE_ASM("asm/levels", func_L08_00328BB0);
 
 extern f32 func_00283248(f32, f32);
 extern f32 func_00282E20(void *);
