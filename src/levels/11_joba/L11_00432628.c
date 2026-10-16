@@ -44,7 +44,6 @@ INCLUDE_ASM("asm/levels", func_L11_00436768);
 /* Re-arms the measured stage guard, then clears it. */
 INCLUDE_ASM("asm/levels", func_L11_00436850);
 
-INCLUDE_ASM("asm/levels", func_L11_00436910);
 
 extern void func_L11_00441978(unsigned char *object, int class_id);
 

@@ -111,7 +111,6 @@ INCLUDE_ASM("asm/levels", func_L05_0041C7E8);
 
 /* func_L05_0041D498 is defined in L05_003D33E8-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L05_0041D570);
 
 void func_L05_0041D728(char *object)
 {
@@ -207,7 +206,6 @@ INCLUDE_ASM("asm/levels", func_L05_00425058);
 
 /* func_L05_00425FE0 is defined in L05_003D33E8-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L05_004260B8);
 
 void func_L05_00426270(char *object)
 {
@@ -242,7 +240,6 @@ INCLUDE_ASM("asm/levels", func_L05_00426348);
 
 INCLUDE_ASM("asm/levels", func_L05_00426568);
 
-INCLUDE_ASM("asm/levels", func_L05_00426658);
 
 void func_L05_00426810(char *object)
 {

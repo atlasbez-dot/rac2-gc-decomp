@@ -1,3 +1,15 @@
+src/levels/shared/L00_002A6708.c	-O2 -G0 -fno-sched-interblock -ffunction-sections -fno-builtin
+src/levels/shared/L00_003E0F58.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L00_003E70B8.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L00_003F0B10.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L00_003F1EB8.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L00_004117B8.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L00_002EE050.c	-O1 -G0 -ffast-math -ffunction-sections -fno-builtin
+src/levels/shared/L05_0041D570.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L05_004260B8.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L05_00426658.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/11_joba/L11_00436910.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/11_joba/L11_004600A0.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/core/001330D0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/core/001322B8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/core/00123A00-rc2.c	sdk -O2 -ffunction-sections -fno-builtin

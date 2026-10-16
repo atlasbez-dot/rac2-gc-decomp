@@ -463,7 +463,6 @@ void func_L00_003E0DD8(char *pos, int a1, int a2, char *a3, int t0,
     func_00280B90_1(pkt, m, 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003E0F58);
 
 INCLUDE_ASM("asm/levels", func_L00_003E2180);
 
