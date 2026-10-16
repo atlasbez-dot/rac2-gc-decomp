@@ -41,7 +41,6 @@ extern char *func_31B0D0(char *, int, int, int, float, float, char *, char *, ch
 extern char D_L06_001A8F20[];
 extern void func_L06_004579C8(char *);
 
-INCLUDE_ASM("asm/levels", func_L06_00457920);
 
 INCLUDE_ASM("asm/levels", func_L06_0041FAF8);
 
@@ -214,13 +213,9 @@ INCLUDE_ASM("asm/levels", func_L06_00444168);
 
 INCLUDE_ASM("asm/levels", func_L06_00444300);
 
-INCLUDE_ASM("asm/levels", func_L06_0044B250);
 
-INCLUDE_ASM("asm/levels", func_L06_0044B2D8);
 
-INCLUDE_ASM("asm/levels", func_L06_0044B350);
 
-INCLUDE_ASM("asm/levels", func_L06_004504C8);
 
 INCLUDE_ASM("asm/levels", func_L06_00455BC0);
 
@@ -241,7 +236,6 @@ INCLUDE_ASM("asm/levels", func_L06_00457270);
 
 INCLUDE_ASM("asm/levels", func_L06_004573E8);
 
-INCLUDE_ASM("asm/levels", func_L06_004576C8);
 
 INCLUDE_ASM("asm/levels", func_L06_004577B0);
 

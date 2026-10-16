@@ -33,10 +33,8 @@ void func_L00_0032B2A8(int value)
     ref_L01_00320B20_00 = value;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0032B500);
 
 INCLUDE_ASM("asm/levels", func_L00_0032B9E8);
 
 INCLUDE_ASM("asm/levels", func_L00_0032BBA8);
 
-INCLUDE_ASM("asm/levels", func_L00_0032C5E8);

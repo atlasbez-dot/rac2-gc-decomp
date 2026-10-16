@@ -57,10 +57,8 @@ void func_L00_002D7940(s32 *object) {
     object[0]=0; object[1]=0; object[2]=0; object[3]=0; object[4]=0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002D7958);
 
 
-INCLUDE_ASM("asm/levels", func_L00_002D8208);
 
 typedef struct {
     int key;

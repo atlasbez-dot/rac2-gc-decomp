@@ -208,7 +208,6 @@ extern int func_L09_0033E8B0_1(char *object, int index, void *out, int a, int b,
 extern void func_L09_003E9E60(char *object, void *buf, float f);
 
 /* steps the run's frame index and hands the sample it lands on to the linked stage */
-INCLUDE_ASM("asm/levels", func_L09_003EA058);
 
 INCLUDE_ASM("asm/levels", func_L09_003EA108);
 
@@ -252,7 +251,6 @@ void func_L09_003EA9D0(char *object)
 }
 
 
-INCLUDE_ASM("asm/levels", func_L09_003EAA18);
 
 INCLUDE_ASM("asm/levels", func_L09_003EAB20);
 
@@ -431,7 +429,6 @@ INCLUDE_ASM("asm/levels", func_L09_003F7B28);
 extern int func_L09_0033E690_1(char *object, int index, float value);
 extern int func_L09_00329178_1(char *object, int index, int value, int flag);
 
-INCLUDE_ASM("asm/levels", func_L09_003F7C50);
 
 
 INCLUDE_ASM("asm/levels", func_L09_003F7CE0);
@@ -470,12 +467,10 @@ void func_L09_003F8858(char *object)
     ref_L09_003F8858_00(object, *(int *)(p + 0x308));
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003F8898);
 
 INCLUDE_ASM("asm/levels", func_L09_003F8960);
 
 INCLUDE_ASM("asm/levels", func_L09_003F8AE0);
 
-INCLUDE_ASM("asm/levels", func_L09_003F9040);
 
 INCLUDE_ASM("asm/levels", func_L09_003F9108);

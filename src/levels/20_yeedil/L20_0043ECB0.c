@@ -147,10 +147,8 @@ extern char *D_L20_001B2F9C __attribute__((sda));
 extern int func_L03_003CA138(char *);
 INCLUDE_ASM("asm/levels", func_L20_004499E8);
 
-INCLUDE_ASM("asm/levels", func_L20_00443328);
 INCLUDE_ASM("asm/levels", func_L20_004433B0);
 
-INCLUDE_ASM("asm/levels", func_L20_00443508);
 
 INCLUDE_ASM("asm/levels", func_L20_004435A0);
 
@@ -171,11 +169,9 @@ INCLUDE_ASM("asm/levels", func_L20_00443DF0);
 
 INCLUDE_ASM("asm/levels", func_L20_00444018);
 
-INCLUDE_ASM("asm/levels", func_L20_00444088);
 
 INCLUDE_ASM("asm/levels", func_L20_00444130);
 
-INCLUDE_ASM("asm/levels", func_L20_00444138);
 
 INCLUDE_ASM("asm/levels", func_L20_004441D8);
 

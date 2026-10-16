@@ -64,9 +64,7 @@ void func_L01_003B46C8(char **arg0, int *arg1) {
 
 INCLUDE_ASM("asm/levels", func_L01_003B4700);
 
-INCLUDE_ASM("asm/levels", func_L01_003B49D8);
 
-INCLUDE_ASM("asm/levels", func_L01_003B4AD0);
 
 void func_L01_003B4BD8(u8 *arg0) {
     char *s0 = *(char **)(arg0 + 0x68);
@@ -97,7 +95,6 @@ INCLUDE_ASM("asm/levels", func_L01_003B4C58);
 
 INCLUDE_ASM("asm/levels", func_L01_003B50C8);
 
-INCLUDE_ASM("asm/levels", func_L01_003B5310);
 
 INCLUDE_ASM("asm/levels", func_L01_003B53C8);
 

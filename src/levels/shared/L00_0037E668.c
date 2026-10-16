@@ -9,6 +9,5 @@ float func_L00_0037E668(void)
 
 INCLUDE_ASM("asm/levels", func_L00_0037E670);
 
-INCLUDE_ASM("asm/levels", func_L00_0037E698);
 
 INCLUDE_ASM("asm/levels", func_L00_0037E6A8);
