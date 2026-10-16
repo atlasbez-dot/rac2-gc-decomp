@@ -1,3 +1,6 @@
+src/core/001330D0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/core/001322B8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/core/00123A00-rc2.c	sdk -O2 -ffunction-sections -fno-builtin
 src/core/00131CA8-rc2.c	-O2 -G0 -mastra-sibcall -ffunction-sections -fno-builtin
 src/levels/shared/L00_00427290-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/game/00334710-rc2.c	-O2 -G0 -fno-delayed-branch -ffunction-sections -fno-builtin
