@@ -18,6 +18,11 @@ extern char D_L02_00280A10[];
 
 extern int D_L02_001B33D0;
 
+/* func_L02_003CB090 needs a $gp member and an absolute one; the measured
+   92-of-96-byte candidate is recorded in nonmatching/levels/func_L02_003CB090.c
+   (residue: branch-likely + which register gets the absolute address). */
+
+
 void func_L02_00300738(void) {
     func_002E37B0();
     D_L02_001B33D0 = (int)D_L02_00280A10;

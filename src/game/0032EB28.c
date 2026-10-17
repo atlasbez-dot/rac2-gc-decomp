@@ -222,6 +222,43 @@ INCLUDE_ASM("asm/game", func_00335420);
 
 INCLUDE_ASM("asm/game", func_00335438);
 
+extern char D_001B5200[];
+extern float D_00189EA0[];
+extern void func_002704D0(void);
+extern void func_00283410(void *, void *);
+extern void func_00283678(void *, void *);
+extern void func_00282F20(void *, void *, float);
+extern void func_00282CC0(void *, void *, void *);
+
+void func_003355A8(int mode)
+{
+    struct { float scaled[4]; float negative[4]; float matrix[16]; } work;
+    char *state = D_001B5200;
+    char *camera = *(char **)(state + 0x190);
+    func_002704D0();
+    if (mode == 0) {
+        char *position = camera + 0x30;
+        func_00283410(work.matrix, D_00189EA0 + 4);
+        func_00283678(camera, work.matrix);
+        func_00282F20(work.negative, work.matrix, -1.0f);
+        func_00282F20(work.scaled, work.matrix + 8, 1.2f);
+        func_00282CC0(position, D_00189EA0, work.scaled);
+        func_00282CC0(position, position, work.negative);
+        *(short *)(*(char **)(state + 0x190) + 0x8A) = 1;
+    } else if (mode == 2) {
+        state[0x293] = 0;
+        *(short *)(camera + 0x7E) = 2;
+        *(float *)(state + 0x2B4) = 0.018f;
+        *(float *)(state + 0x2A8) = 0.018f;
+    } else if (mode == 1) {
+        *(short *)(camera + 0x7E) = 3;
+    } else if (mode == 4) {
+        state[0x293] = 0;
+        *(short *)(camera + 0x7E) = 5;
+        *(float *)(state + 0x2B4) = 0.018f;
+        *(float *)(state + 0x2A8) = 0.018f;
+    }
+}
 
 INCLUDE_ASM("asm/game", func_003356E8);
 

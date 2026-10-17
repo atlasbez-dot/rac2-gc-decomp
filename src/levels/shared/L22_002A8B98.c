@@ -44,4 +44,27 @@ INCLUDE_ASM("asm/levels", func_L22_002C8610);
 
 INCLUDE_ASM("asm/levels", func_L22_002C9898);
 
-INCLUDE_ASM("asm/levels", func_L22_002CE468);
+extern unsigned char D_0018C0D4;
+
+extern void func_L22_002C9898(int a0, int a1);
+
+/* plays one of three resident messages, picked by the type byte; the second argument
+   is 1 or 2 depending on the caller's flag */
+void func_L22_002CE468(int a0) {
+    unsigned char type = D_0018C0D4;
+    int mode = 1;
+
+    if (a0 != 0)
+        mode = 2;
+    switch (type) {
+    case 0:
+        func_L22_002C9898(0, mode);
+        break;
+    case 1:
+        func_L22_002C9898(0x3F, mode);
+        break;
+    case 2:
+        func_L22_002C9898(0x56, mode);
+        break;
+    }
+}

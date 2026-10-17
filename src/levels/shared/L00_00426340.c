@@ -248,6 +248,14 @@ void func_L00_00427B40(char *object)
     func_00283678(object, (char *)local);
 }
 
+extern void func_L00_002D7958_1(float *, void *, float);
+
+/* 128-bit copies reach lq/sq only through TImode. */
+typedef int TQ_00427BE8 __attribute__((mode(TI)));
+
+/* func_L00_00427BE8: five spellings give the same 128-byte object, retail is 144 -
+   both quadword destinations stay folded on $s0 here where retail holds each in a
+   register. Deposited in nonmatching/levels/func_L00_00427BE8.c. */
 INCLUDE_ASM("asm/levels", func_L00_00427BE8);
 
 /* resets a sub-object reached through field +112 of its argument: two int zeros through a pointer 176 bytes in, twelve float constants (0.3/0.04/0.07/1.0/0.99) and three int zeros over offsets 40..172, then four calls (sub-object, +80, +144, the argument) and a 16-bit zero at +126 */

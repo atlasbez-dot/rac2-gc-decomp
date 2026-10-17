@@ -84,8 +84,6 @@ s32 func_L11_00448CE0(char *a0)
     return r;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00448D28);
-
 INCLUDE_ASM("asm/levels", func_L11_00448DF8);
 
 INCLUDE_ASM("asm/levels", func_L11_00449098);

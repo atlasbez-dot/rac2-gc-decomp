@@ -472,7 +472,29 @@ void func_L00_003F5658(void)
 {
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F5660);
+extern int func_L00_003F59F0(char *);
+extern int func_L00_003F6168(char *);
+extern int func_L00_003F6A58(int *);
+extern void func_L00_003F56F0(char *);
+extern void ref_L00_003F5660_00(void (*handler)(char *), char *object);
+
+/* Runs the three per-frame passes; when any of them reports work the record is handed to the
+   binder with the shared follow-up pass as its handler, otherwise a record in state 2 is
+   advanced by the shared state call. */
+void func_L00_003F5660(char *a0)
+{
+    int a = func_L00_003F59F0(a0);
+    int b = func_L00_003F6168(a0);
+    int c = func_L00_003F6A58((int *)a0);
+
+    if (a == 0 && b == 0 && c == 0) {
+        if (*(unsigned char *)(a0 + 0x20) == 2) {
+            func_0029F338_1(a0);
+        }
+    } else {
+        ref_L00_003F5660_00(func_L00_003F56F0, a0);
+    }
+}
 
 /* Reads the short at +26 of the object held at +104, calls a callee with (3076, that short), then calls one callee with this when the result is zero or three callees with this when it is non-zero. */
 void func_L00_003F56F0(char *p)

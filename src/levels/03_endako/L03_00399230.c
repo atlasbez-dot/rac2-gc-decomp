@@ -76,6 +76,7 @@ INCLUDE_ASM("asm/levels", func_L03_003C7AC0);
 
 INCLUDE_ASM("asm/levels", func_L03_003C7E20);
 
+/* func_L03_003C85F8 is a near miss: nonmatching/levels/func_L03_003C85F8.c */
 
 INCLUDE_ASM("asm/levels", func_L03_003C8660);
 

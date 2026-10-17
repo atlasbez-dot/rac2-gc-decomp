@@ -1,0 +1,28 @@
+/* Alternative source form for func_L00_002A53B8.
+   Retained from 53b8_c2.c, entry func_L00_002A53B8; declarations preserved.
+   Naming/extraction only: this form has not been recompiled or validated
+   by the cleanup. See the primary near-miss file for the recorded blocker;
+   do not apply another form's verdict to this one. Recheck its file-level
+   flags with tools/check.py, then tools/build.py before promotion. */
+typedef unsigned char u8;
+typedef int s32;
+extern u8 D_L24_0025B710[];
+extern void *func_L00_002A4FE8(short);
+extern void func_0029F9F0(void *, void *);
+extern void func_00282C88(void *);
+
+void func_L00_002A53B8(void) {
+ u8 *p=D_L24_0025B710;
+ u8 *end=p+0x1b80;
+ do {
+  if(p[1]!=0) {
+   void *e=func_L00_002A4FE8(*(short *)(p+0xA2));
+   if(e!=0) func_0029F9F0(e,p);
+  }
+  func_00282C88(p+0x40);
+  func_00282C88(p+0x60);
+  func_00282C88(p+0x90);
+  *(float *)(p+0xAC)=1.0f;
+  p+=0xb0;
+ } while((s32)p<(s32)end);
+}

@@ -40,7 +40,6 @@ src/game/003130F0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections 
 src/game/002C1C88-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00303AC8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/0032ACF0-rc2.c	-O2 -fno-sched-interblock -G0 -ffunction-sections -fno-builtin
-src/game/003355A8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002C1B38-rc2.c	-O2 -G8 -mno-split-addresses -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/game/002ED368-rc2.c	-O2 -fno-strength-reduce -G4 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/game/00343FF8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
@@ -69,10 +68,8 @@ src/levels/shared/L00_002D40A0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_003FE8D0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/shared/L00_002F6B90-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_002F46C8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin -fno-schedule-insns
-src/levels/09_dobbo/L09_004081F0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/03_endako/L03_003C85F8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/03_endako/L03_003F71E0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/08_tabora/L08_00424ED0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/13_boldan/L13_004267B0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/06_notak/L06_0044B2D8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/06_notak/L06_0044B350-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
@@ -83,23 +80,17 @@ src/levels/20_yeedil/L20_00443328-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L09_003F7C50-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/20_yeedil/L20_00443508-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L06_003E4F08-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/09_dobbo/L09_003FEA48-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/11_joba/L11_0030ED58-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/20_yeedil/L20_00444138-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/22_dobbo_orbit/L22_00415A48-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L04_003A0C40-rc2.c	-O2 -G8 -fno-strength-reduce -ffunction-sections -fno-builtin
 src/levels/04_barlow/L04_00407F80-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/14_aranos_prison/L14_00425C08-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/16_snivelak/L16_003F54F8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/20_yeedil/L20_00444088-rc2.c	-O2 -G8 -fno-schedule-insns -ffunction-sections -fno-builtin
 src/levels/06_notak/L06_00457920-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/01_oozla/L01_003D9830-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/05_feltzin_system/L05_004209D8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/shared/L09_003EA058-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/01_oozla/L01_003B5310-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L09_003F8898-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L09_003F9040-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/17_smolg/L17_003C7018-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L22_003FBF00-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/09_dobbo/L09_00408058-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/06_notak/L06_004576C8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
@@ -120,13 +111,7 @@ src/levels/07_siberius/L07_003F8908-rc2.c	-O2 -G8 -ffunction-sections -fno-built
 src/levels/shared/L05_00418508-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L04_0040BED0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L04_0040E248-rc2.c	-fno-builtin -O2 -G0 -fno-schedule-insns -ffunction-sections
-src/levels/shared/L05_0037AFD0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_002D8208-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002B9C58-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_0032C5E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_003A8618-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002D2070-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002D7958-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L05_0037B3A0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L02_003CD1E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L18_003F9EF0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
@@ -135,8 +120,6 @@ src/levels/shared/L18_00428338-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/11_joba/L11_004433D8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/shared/L07_00410B48-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/18_damosel/L18_004412F0-rc2.c	-O2 -G4 -ffunction-sections -fno-builtin
-src/levels/shared/L00_0037E698-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin -fno-schedule-insns
-src/levels/shared/L00_0032B500-rc2.c	-O2 -G8 -fno-schedule-insns -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/shared/L00_0037E5F0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/shared/L18_003FB500-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
 src/levels/shared/L04_0039FC28-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin -fno-schedule-insns
@@ -166,7 +149,6 @@ src/levels/shared/L05_0037BB28-rc2.c	-O2 -G0 -fno-schedule-insns -fno-schedule-i
 src/levels/shared/L12_00427C58-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
 src/game/002A9640-rc2.c	-O2 -fno-gcse -G0 -ffunction-sections -fno-builtin
 src/game/002E3940-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
-src/levels/shared/L00_002C8BA8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00288FB8-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/levels/shared/L04_003A19E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L04_0040ACC8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
@@ -183,7 +165,6 @@ src/game/002FCF18-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/04_barlow/L04_00441100-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00288188-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00288B38-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L08_00328BB0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002D3400-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/07_siberius/L07_003F8BB0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/30_insomniac_museum/L30_004185E0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
@@ -192,10 +173,8 @@ src/levels/shared/L02_00321C30-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002908D0-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
 src/levels/shared/L05_0037CE08-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/game/0034F7D8-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
-src/levels/shared/L05_0037B888-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/game/00304C78-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/05_feltzin_system/L05_00416EC0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L03_0042B930-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/30_insomniac_museum/L30_003848B8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/game/002C1EF0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002CD950-rc2.c	-O2 -fno-schedule-insns -G4 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
@@ -204,7 +183,6 @@ src/core/001286C8-rc2.c	sdk -O2 -G0 -ffunction-sections -fno-builtin
 src/game/002E80B0-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
 src/levels/02_maktar_nebula/L02_003FC0D0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/26_jamming_array/L26_003DC048-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
-src/game/002CF1D0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/10_hrugis_cloud/L10_00418400-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/11_joba/L11_003F2C28-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/levels/17_smolg/L17_003C3A00-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
@@ -225,29 +203,14 @@ src/levels/shared/L10_004191E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002D50F0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/game/003409C8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00297BB0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002F43D0-rc2.c	-O2 -G0 -fno-delayed-branch -ffunction-sections -fno-builtin
 src/levels/shared/L00_0037E640-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
-src/levels/shared/L00_004450C0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002F3DA8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_0037E5C0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L05_00324DB8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002D6940-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L18_003F7320-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002D7068-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002D6900-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_0030D718-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
-src/levels/shared/L00_0030DAD8-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
 src/levels/shared/L00_002D3248-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_002D7D58-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L18_003F7470-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L18_00426E00-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_002B9B38-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L01_00367F78-rc2.c	-O2 -G8 -fno-sched-interblock -ffunction-sections -fno-builtin
 src/levels/shared/L00_003BCDC0-rc2.c	-O2 -G0 -fno-sched-interblock -ffunction-sections -fno-builtin
-src/levels/shared/L00_002FD400-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L01_003246F8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L18_00427B48-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/shared/L01_003165E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/003438E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L18_003F7198-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_002F45B8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
@@ -297,13 +260,8 @@ src/game/00270B58-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002AB8C0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002D2538-rc2.c	-O2 -G8 -fno-expensive-optimizations -ffunction-sections -fno-builtin
 src/game/003320F0-rc2.c	-O2 -G8 -fno-gcse -ffunction-sections -fno-builtin
-src/levels/shared/L00_002B9B88-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L00_0037E0C0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L05_0037AA88-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L01_002F14E8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/shared/L00_003C2F10-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
-src/levels/shared/L01_003377C8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L02_003C4E18-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L01_00310BC0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 # path (a glob)<TAB>flags; "sdk" first: the SDK compiler (tools/compiler/sdk/) instead of the game's
 # The default is "-O2 -G0 -ffunction-sections" (-G8 for a file named *-g8.c).
@@ -452,6 +410,7 @@ src/levels/shared/L00_0037B6F0.c	-O2 -G8 -ffunction-sections
 src/levels/shared/L00_0037E668.c	-O2 -G8 -ffunction-sections
 src/levels/shared/L00_0042C818.c	-O2 -G8 -ffunction-sections
 src/levels/shared/L05_00446E28.c	-O2 -G8 -ffunction-sections
+src/levels/shared/L10_0037D200.c	-O2 -G8 -ffunction-sections
 
 src/game/0027A0F8.c	-O2 -G0 -ffunction-sections -mno-split-addresses
 src/game/002CCED0.c	-O2 -G0 -ffunction-sections -mno-split-addresses

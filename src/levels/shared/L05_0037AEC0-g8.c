@@ -15,6 +15,22 @@ extern int D_L05_001FB220[];
 
 extern char *func_379CA0(char *object);
 
+extern void func_L05_0037AFF8(int entry);
+
+extern void func_L05_0037B108(void);
+
+/* Runs the constructor over every registered entry, then clears the two shared counters. */
+void func_L05_0037B210(void)
+{
+    int i;
+
+    for (i = 0; i < D_L05_001AC4D8; i++)
+        func_L05_0037AFF8(D_L05_00225DD0[i]);
+    D_L05_00221D10[4] = 0;
+    D_L05_00221D10[3] = 0;
+    func_L05_0037B108();
+}
+
 INCLUDE_ASM("asm/levels", func_L05_0037AFF8);
 
 /* Finds the free entry of the level list that belongs to id and spawns it there. */

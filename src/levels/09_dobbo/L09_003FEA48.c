@@ -134,6 +134,7 @@ void func_L09_00404F90(char *a0, s32 a1, s32 a2) {
     }
 }
 
+/* func_L09_003FEA48 is defined in L09_003FEA48-g8.c (this unit has no $gp access for it). */
 
 INCLUDE_ASM("asm/levels", func_L09_003FEAE8);
 
@@ -171,6 +172,8 @@ void func_L09_0040B008(char *a0) {
 
 
 INCLUDE_ASM("asm/levels", func_L09_00403398);
+/* func_L09_00403700: 160 bytes against retail's 152, the guard comes out as `bnel`.
+   Deposited in nonmatching/levels/func_L09_00403700.c. */
 INCLUDE_ASM("asm/levels", func_L09_00403700);
 
 INCLUDE_ASM("asm/levels", func_L09_00403798);
@@ -186,6 +189,8 @@ INCLUDE_ASM("asm/levels", func_L09_004052F8);
 INCLUDE_ASM("asm/levels", func_L09_00405490);
 
 INCLUDE_ASM("asm/levels", func_L09_00405610);
+/* func_L09_00406BF8: 112 bytes against retail's 108, one saved register too many.
+   Deposited in nonmatching/levels/func_L09_00406BF8.c. */
 
 void func_L09_00406C90(char *a0) {
     char *a1 = *(char **)(a0 + 0x68);
@@ -245,6 +250,23 @@ void func_L09_00408138(char *a0, char *a1, s32 a2, s32 a3, s32 a4)
         return;
     }
     func_L09_00408058(a1, a2, a3, a4);
+}
+/* Hands the record's colour key to every entry the index names, negating the
+   three offsets when the caller asks for it. */
+void func_L09_004081F0(char *a0, s32 a1, char *a2, s32 a3) {
+    char *v1 = a2;
+    char *p = D_L09_001B285C + (a1 << 8);
+
+    if (p == 0) {
+        return;
+    }
+    if (a3 != 0) {
+        func_L09_00408138(a0, p, *(s8 *)(v1 + 0xBC), *(s8 *)(v1 + 0xBD),
+                          *(s8 *)(v1 + 0xBF));
+    } else {
+        func_L09_00408138(a0, p, -*(s8 *)(v1 + 0xBC), -*(s8 *)(v1 + 0xBD),
+                          -*(s8 *)(v1 + 0xBF));
+    }
 }
 
 INCLUDE_ASM("asm/levels", func_L09_004082D0);

@@ -309,8 +309,18 @@ unsigned long func_L00_00443EF8(unsigned long param_1)
   return param_1;
 }
 
+/* The fixed resident address func_L00_004450C0 forwards. */
+extern char D_L00_001AEB60[];
+
+extern void func_2A48F0(void *a0, void *a1);
+
 INCLUDE_ASM("asm/levels", func_L00_00444D18);
 
+/* Passes a fixed resident address, and the argument, on to the callee. */
+void func_L00_004450C0(void *arg)
+{
+    func_2A48F0(D_L00_001AEB60, arg);
+}
 
 INCLUDE_ASM("asm/levels", func_L00_004450E8);
 

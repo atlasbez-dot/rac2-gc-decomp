@@ -49,6 +49,16 @@ extern void func_002833F0_2(void *, void *);
 
 extern void func_002E5DA0(int, int, void *, int);
 
+extern void func_0029FCC0(char *, int, void *);
+
+extern int func_801234F0(float);
+
+extern void func_0026FEB8(void *, int, int, int, int);
+
+extern void func_L00_002D40A0(void *, int, float);
+
+extern char D_L02_001AFE38[];
+
 extern void func_002A6C58(void *, int, int);
 
 extern void func_00288CB0(int, int);
@@ -154,8 +164,23 @@ INCLUDE_ASM("asm/levels", func_L02_003C49A0);
 
 INCLUDE_ASM("asm/levels", func_L02_003C4C80);
 
-/* Reads three angles through a helper, converts them, and hands them to the placement call
-   together with the object's own angle. */
+/* Reads three angles through a helper, bends the object's own angle at +0xF8 into the same
+   range, converts all four and hands them to the four-argument report, then applies the
+   same bend to the local angles. */
+void func_L02_003C4E18(char *a0)
+{
+    char *s0 = a0;
+    float v[4];
+    float f20;
+
+    func_0029FCC0(a0, 1, v);
+    /* retail holds 0x40490FD0 here; this spelling is what the rebuilt assembler reads to
+       those bits */
+    f20 = func_00283B98_12(*(float *)(s0 + 0xF8), 3.14159f);
+    func_0026FEB8(D_L02_001AFE38, func_801234F0(v[0]), func_801234F0(v[1]),
+                  func_801234F0(v[2]), func_801234F0(f20));
+    func_L00_002D40A0(v, 0, f20);
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003C4ED8);
 
@@ -227,6 +252,11 @@ void func_L02_003CE908(char *a0) {
 /* Near miss (see work/wave7-20261013/w04/drafts): the loop, both branch-likely tests and the
    duplicated `lh` delay-slot loads are retail's; two register copies are missing because this
    compiler gives the kind byte the other register. 116 bytes against 124. */
+/* Near miss (see work/wave7-20261013/w04/drafts): the loop, both branch-likely tests and the
+   duplicated `lh` delay-slot loads are retail's; two register copies are missing because this
+   compiler gives the kind byte the other register. 116 bytes against 124.
+   wave5-09: same wall from a -G8 unit (needs the .extern for the one-instruction $gp load);
+   candidate 128 bytes, the same two register copies plus a `nop` the retail loop does not have. */
 INCLUDE_ASM("asm/levels", func_L02_003CE9A8);
 
 INCLUDE_ASM("asm/levels", func_L02_003CEA28);
@@ -382,14 +412,17 @@ void func_L02_003D78A8(char *a0) {
     func_002A7750(a0, 3, -1);
 }
 
-/* Near miss (see work/wave7-20261013/w04/drafts): retail sequence and store order reproduced,
-   same register-permutation wall as func_L02_003DBEC8. 152 bytes against 148. */
-INCLUDE_ASM("asm/levels", func_L02_003D7B88);
-
-/* Near miss (see work/wave7-20261013/w04/drafts): the whole body compiles to the retail
-   instruction sequence; only the register permutation differs (the parameter copy and p land in
-   a2/a3 the other way round). 124 bytes against 120. */
+/* Near miss (see work/wave7-20261013/w04/drafts and nonmatching/levels/func_L02_003DBEC8.c):
+   body, store order, table lookup and the lq/sq copy all in the retail sequence; the parameter
+   copy and the context land in $t0/$t1 here against retail's $a2/$a3 (a dead second parameter
+   does not move them), and with the context load written first this cc1 fills the bnez delay
+   slot with it and sinks the epilogue's `ld $ra` instead, so 108 bytes against 120. */
 INCLUDE_ASM("asm/levels", func_L02_003DBEC8);
+
+/* Near miss: nonmatching/levels/func_L02_003D7B88.c - body, store order and both lookups
+   reproduced; the parameter copy lands in $t2 and this cc1 sinks the epilogue's `ld $ra`
+   into the bnez delay slot where retail loads the context (140 bytes against 148). */
+INCLUDE_ASM("asm/levels", func_L02_003D7B88);
 
 void func_L02_003DED08(void) {
     func_L00_0037E5F0(10000.0f);

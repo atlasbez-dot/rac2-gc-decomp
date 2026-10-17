@@ -145,9 +145,48 @@ BatchA_A18_s32 func_L18_003F7358(BatchA_A18_u8 *a0, BatchA_A18_u8 *a1) {
     return r;
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F73B8);
+/* func_L18_003F73B8 */
+extern float func_00282E80(char *, void *);
+extern float func_00283248(float, float);
+extern float func_00283C80(float, float);
+
+/* The 1.5707964 spelling is load-bearing: this assembler under-rounds by an ulp
+   (1.5707964f, 1.57079637f and even 1.5707963705062866f all encode 0x3FC90FDB,
+   retail holds 0x3FC90FDC).  Measured by sweeping spellings, COMPILER-NOTES. */
+int func_L18_003F73B8(char *a0, float *a1)
+{
+    char *s1 = a0;
+    float *s0 = a1;
+    int r = 0;
+
+    if (*(unsigned char *)(s1 + 0x31) != 0) {
+        if (func_00282E80(s1 + 0x10, a1) < 3.2f) {
+            if (func_00283C80(*(float *)(s1 + 0xF8),
+                             func_00283248(s0[0] - *(float *)(s1 + 0x10),
+                                           s0[1] - *(float *)(s1 + 0x14))) < 1.5707965f)
+                r = 1;
+        }
+    }
+    return r;
+}
 
 
+extern BatchA_A18_s32 func_002A77E0(BatchA_A18_s32 a0);
+
+extern BatchA_A18_s32 func_L18_003F75E8(BatchA_A18_s32 a0, BatchA_A18_u8 *a1);
+
+/* runs the 0x1E gate and, when it clears, the record query into a local buffer;
+   answers whether the query found anything */
+BatchA_A18_s32 func_L18_003F7470(BatchA_A18_u8 *a0) {
+    BatchA_A18_u8 buf[16];
+    BatchA_A18_s32 p;
+
+    if (func_002A77E0(0x1E) == 0) {
+        p = *(BatchA_A18_s32 *)(a0 + 0x68);
+        return func_L18_003F75E8(*(BatchA_A18_s32 *)((char *)p + 0x25C), buf) != 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L18_003F74B8);
 
@@ -422,3 +461,8 @@ INCLUDE_ASM("asm/levels", func_L18_004273F0);
 
 INCLUDE_ASM("asm/levels", func_L18_00427688);
 
+extern char *D_L18_001FB320[];
+extern char *D_L18_001B281C;
+
+/* func_L18_00427B48: 144 bytes against retail's 148; the chain pointer and the
+   stored 1 take each other's register. Deposited in nonmatching/levels/. */

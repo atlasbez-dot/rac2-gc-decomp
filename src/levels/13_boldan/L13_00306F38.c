@@ -30,7 +30,8 @@ INCLUDE_ASM("asm/levels", func_L13_003383B8);
 
 INCLUDE_ASM("asm/levels", func_L13_0035E890);
 
-INCLUDE_ASM("asm/levels", func_L13_0038C328);
+/* func_L13_0038C328 is in the -g8 sibling (L13_00306F38-g8.c): it addresses its
+   three globals through $gp. */
 
 void func_L13_0038C470(u8 *a0) {
     s32 *ptr = *(s32 **)(a0 + 0x68);
