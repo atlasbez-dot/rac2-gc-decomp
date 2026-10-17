@@ -374,7 +374,6 @@ extern u8 D_00189E20[];
 
 /* func_L00_00324120 (three-way state test) is a near miss:
    nonmatching/levels/func_L00_00324120.c */
-INCLUDE_ASM("asm/levels", func_L00_00324120);
 
 
 INCLUDE_ASM("asm/levels", func_L00_00324D18);
