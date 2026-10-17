@@ -348,7 +348,6 @@ int func_002C9C20(void)
         *p-- = value;
 }
 
-INCLUDE_ASM("asm/game", func_002C9C60);
 
 INCLUDE_ASM("asm/game", func_002C9C90);
 
@@ -432,7 +431,6 @@ INCLUDE_ASM("asm/game", func_002CB820);
 
 INCLUDE_ASM("asm/game", func_002CB8A0);
 
-INCLUDE_ASM("asm/game", func_002CB950);
 
 extern short D_0018A000[];
 extern void func_0029CE80(void);

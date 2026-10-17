@@ -207,6 +207,28 @@ void func_L01_003128C0(char *p) {
 
 INCLUDE_ASM("asm/levels", func_L01_003161F0);
 
+extern char *D_L01_001FE180[];
+extern int func_311B48(char *a0, void *a1, int a2);
+extern int func_3163C8(char *a0, void *a1);
+extern int func_316558(char *a0, void *a1);
+extern int func_3164A0(char *a0, void *a1);
+
+/* chain of four probes on the same object; the first that reports a hit picks the code */
+int func_L01_003165E8(char *a0, int a1, char *a2, char *a3, char *t0) {
+    if (a1 >= 0) {
+        char *p = D_L01_001FE180[a1];
+        if (func_311B48(a0, p + 0x10, *(int *)p))
+            return 1;
+    }
+    if (func_3163C8(a0, a2))
+        return 2;
+    if (func_316558(a0, a3))
+        return 3;
+    if (func_3164A0(a0, t0))
+        return 4;
+    return 0;
+}
+
 
 
 extern void func_002E3CD8(void *a0, void *a1);
@@ -314,7 +336,7 @@ INCLUDE_ASM("asm/levels", func_L01_00324410);
 INCLUDE_ASM("asm/levels", func_L01_00324550);
 
 
-INCLUDE_ASM("asm/levels", func_L01_003245E0);
+/* func_L01_003245E0 is defined in L01_002A7248-g8.c (this unit has no $gp access for it). */
 
 
 extern char D_00139A28[];
@@ -334,6 +356,27 @@ void func_L01_003246D0(void) {
     func_L01_003246A0(func_003246F8());
 }
 
+extern int D_L01_001A79F0;
+
+extern int D_L01_0028EA50[];
+
+extern int D_L01_001C5D20[];
+
+/* scans the half-open span the counter global picks out of the pair table, looking for
+   the caller's key; the key rides in $a0 without a caller-side argument */
+int func_L01_003246F8(int key) {
+ unsigned n=(unsigned)D_L01_001A79F0;
+ int i;
+ int end;
+ if(n>=0x13) return 0;
+ i=D_L01_0028EA50[n];
+ end=D_L01_0028EA50[n+1];
+ while(i<end) {
+  if(D_L01_001C5D20[i]==key) return i;
+  i++;
+ }
+ return -1;
+}
 
 
 INCLUDE_ASM("asm/levels", func_L01_00326DD8);
@@ -344,6 +387,41 @@ INCLUDE_ASM("asm/levels", func_L01_00331CA0);
 
 INCLUDE_ASM("asm/levels", func_L01_00331E08);
 
+extern void func_002A6CF0(int a0);
+extern float func_002E3618(void *a0, void *a1);
+extern unsigned char D_L01_001AA6F8[];
+
+/* Averages each 16-byte record of the table the argument points at against the record
+   (i + 1) % n, storing the result in the record's own +0xC field and returning the
+   running sum; a null argument reports and answers -1.0f. */
+float func_L01_003377C8(unsigned char *a0) {
+    unsigned char *s2;
+    unsigned char *q;
+    int s0, s1, n;
+    float f20;
+    float f0;
+
+    s2 = a0;
+    f20 = 0.0f;
+    if (s2 == 0) {
+        func_002A6CF0((int)D_L01_001AA6F8);
+        return -1.0f;
+    }
+    n = *(int *)s2;
+    if (n <= 0)
+        return f20;
+    s0 = 0;
+    do {
+        s1 = s0 + 1;
+        f0 = func_002E3618(s2 + 0x10 + (s0 << 4), s2 + 0x10 + ((s1 % n) << 4));
+        q = s2 + (s0 << 4);
+        *(float *)(q + 0x1C) = f0;
+        f20 += f0;
+        s0 = s1;
+        n = *(int *)s2;
+    } while (s0 < n);
+    return f20;
+}
 
 
 INCLUDE_ASM("asm/levels", func_L01_00337888);

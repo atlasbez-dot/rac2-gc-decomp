@@ -53,3 +53,36 @@ void func_L09_004031D8(char *a0) {
     }
 }
 
+
+/* Small-data handles: the resident mode word (-0x7600 -> 0x001A79F0), the resident
+   release word (-0x5FB0 -> 0x001A9040) and the level's record table (0x386C ->
+   0x001B285C), all read with $gp pinned at 0x001AEFF0. */
+extern s32 D_L09_001A79F0 __attribute__((sda));
+extern s32 D_L09_001A9040 __attribute__((sda));
+extern char *D_L09_001B285C __attribute__((sda));
+
+extern s32 func_323340(char *a0, char *a1, s32 a2);
+extern char *func_L09_00326E90(char *a0);
+extern void func_L09_003FE978(char *a0);
+extern void func_326368(char *a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13);
+
+/* Drops the record the sub-object points at, once, when the resident mode word says 9,
+   then rebuilds the sub-object's effect with both blend weights at zero. */
+void func_L09_003FEA48(char *a0) {
+    char *s0 = *(char **)(a0 + 0x68);
+    s16 idx;
+
+    if (func_323340(a0, s0 + 0x160, 0) != 0) {
+        if (D_L09_001A79F0 == 9) {
+            idx = *(s16 *)(s0 + 0x1D0);
+            if (idx != -1) {
+                if (func_L09_00326E90(D_L09_001B285C + (idx << 8)) == 0) {
+                    D_L09_001A9040 = 0;
+                }
+                *(s16 *)(s0 + 0x1D0) = -1;
+            }
+        }
+        func_L09_003FE978(a0);
+    }
+    func_326368(a0, *(s32 *)(s0 + 0x448), 0, 0, 0.0f, 0.0f);
+}

@@ -206,8 +206,25 @@ INCLUDE_ASM("asm/levels", func_L09_003E9E60);
 
 extern int func_L09_0033E8B0_1(char *object, int index, void *out, int a, int b, float f);
 extern void func_L09_003E9E60(char *object, void *buf, float f);
+extern float func_00282E48_2(char *a, int b);
 
 /* steps the run's frame index and hands the sample it lands on to the linked stage */
+void func_L09_003EA058(char *object, int index) {
+    char *frame = *(char **)(object + 0x68);
+    char buf[16];
+    short value = *(short *)(frame + 0x118);
+    int dir = value < *(short *)(frame + 0x11A) ? 1 : -1;
+    float f;
+    int off;
+    unsigned int base;
+
+    *(short *)(frame + 0x118) =
+        func_L09_0033E8B0_1(object, index, buf, value, dir, *(float *)(frame + 0x78) * 10.0f);
+    base = D_L09_001FE6C0[index];
+    off = (*(short *)(frame + 0x11A) << 4) + 0x10;
+    f = func_00282E48_2(object + 0x10, base + off);
+    func_L09_003E9E60(object, buf, f);
+}
 
 INCLUDE_ASM("asm/levels", func_L09_003EA108);
 
@@ -418,10 +435,22 @@ void func_L09_003F77D0(char *object)
 
 INCLUDE_ASM("asm/levels", func_L09_003F7840);
 
-extern float func_00282E80(char *a, char *b);
+extern float func_00282E80(char *a, int b);
 
 /* reports whether the index still names a reachable entry, or whether the frame moved close enough */
-INCLUDE_ASM("asm/levels", func_L09_003F7A88);
+int func_L09_003F7A88(char *object, int index) {
+    char *frame = *(char **)(object + 0x68);
+    int entry = func_L09_00329028(object, index);
+
+    if (entry == 0 && index != -1) {
+        int off = (*(short *)(frame + 0x1CA) << 4) + 0x10;
+
+        if (func_00282E80(object + 0x10, D_L09_001FE6C0[index] + off) <
+            *(float *)(frame + 0x134))
+            entry = 1;
+    }
+    return entry;
+}
 
 INCLUDE_ASM("asm/levels", func_L09_003F7B28);
 
@@ -467,6 +496,7 @@ void func_L09_003F8858(char *object)
     ref_L09_003F8858_00(object, *(int *)(p + 0x308));
 }
 
+/* func_L09_003F8898 lives in the L09_002B7238-g8.c sibling: its four counters are small data. */
 
 INCLUDE_ASM("asm/levels", func_L09_003F8960);
 

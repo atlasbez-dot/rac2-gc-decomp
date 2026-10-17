@@ -67,6 +67,7 @@ void func_L17_003E47E8(s32 a0) {
     func_327E68(a0, s1 + 0x350, 1, 1, 2.5f);
 }
 
+/* func_L17_003E4860 is a near miss: nonmatching/levels/func_L17_003E4860.c */
 INCLUDE_ASM("asm/levels", func_L17_003E4860);
 
 INCLUDE_ASM("asm/levels", func_L17_003E48E0);
@@ -102,7 +103,13 @@ s32 func_L17_003E6F58(s32 a0) {
     return s0;
 }
 
-INCLUDE_ASM("asm/levels", func_L17_003E7010);
+s32 func_L17_003E7010(s32 a0) {
+    s32 s0 = *(s32 *)(a0 + 0x68);
+
+    if (func_2DF570(a0 + 0x10, s0 + 0x240, 0, a0, 0) == 0)
+        return 1;
+    return D_L17_001C0018 == *(s32 *)(s0 + 0x250);
+}
 
 INCLUDE_ASM("asm/levels", func_L17_003E7068);
 

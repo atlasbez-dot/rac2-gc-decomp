@@ -134,7 +134,6 @@ int func_00351938(unsigned char *owner)
 
 INCLUDE_ASM("asm/game", func_00351958);
 
-INCLUDE_ASM("asm/game", func_00351960);
 
 extern int func_0012F9B8(void *);
 

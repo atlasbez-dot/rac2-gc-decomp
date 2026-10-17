@@ -21,7 +21,32 @@ INCLUDE_ASM("asm/levels", func_L22_003A5BD8);
 
 INCLUDE_ASM("asm/levels", func_L22_003A5F90);
 
-INCLUDE_ASM("asm/levels", func_L22_003A6128);
+extern int func_L22_003A48F8(int);
+
+int func_L22_003A6128(f32 f12) {
+    union { f32 f; unsigned int u; } c;
+    int n = 0;
+    int i;
+    int idx = 0;
+
+    c.f = f12;
+    for (i = 0; i < 32; i++) {
+        if (c.u & 1) {
+            n++;
+            if (n >= 2)
+                return 0;
+            idx = i;
+        }
+        c.u >>= 1;
+    }
+    if (n == 0)
+        return 0;
+    if (n == 1) {
+        if (func_L22_003A48F8(idx) == 0)
+            return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L22_003A6230);
 
@@ -74,7 +99,6 @@ INCLUDE_ASM("asm/levels", func_L22_003B8FE8);
 
 INCLUDE_ASM("asm/levels", func_L22_003B9128);
 
-INCLUDE_ASM("asm/levels", func_L22_003B9358);
 
 INCLUDE_ASM("asm/levels", func_L22_003C9880);
 

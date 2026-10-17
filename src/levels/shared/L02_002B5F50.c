@@ -348,7 +348,27 @@ void func_L02_003A6F78(char *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003A6FE8);
+/* Raises the object's flag word, copies a context field in and dispatches on the
+   two-byte kind code. */
+extern int func_00312E20(void *, int);
+
+void func_L02_003A6FE8(char *self) {
+    char *s1;
+    short t;
+
+    *(unsigned short *)(self + 0x34) = (*(unsigned short *)(self + 0x34) & 0xFFBE) | 0x1000;
+    s1 = *(char **)(self + 0x68);
+    *(unsigned int *)(self + 0x98) = *(unsigned int *)(*(unsigned int *)(self + 0x24) + 0x10);
+    self[0x20] = 1;
+    *(unsigned int *)(s1 + 0x100) = 0;
+    t = *(short *)(self + 0xAA);
+    if (t == 0x1F5) {
+        *(unsigned int *)(s1 + 0xFC) = func_00312E20(self, 0);
+    } else if (t == 0x200) {
+        *(unsigned int *)(s1 + 0xFC) = func_00312E20(self, 1);
+    }
+    self[0x7F] = 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003A8770);
 

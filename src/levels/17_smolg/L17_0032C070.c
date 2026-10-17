@@ -197,6 +197,7 @@ INCLUDE_ASM("asm/levels", func_L17_003C69A8);
 
 INCLUDE_ASM("asm/levels", func_L17_003C6CE8);
 
+/* func_L17_003C7018 is defined in L17_0032C070-g8.c (this unit has no $gp access for it). */
 
 
 INCLUDE_ASM("asm/levels", func_L17_003C71B0);

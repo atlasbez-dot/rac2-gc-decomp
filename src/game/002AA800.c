@@ -467,7 +467,6 @@ int func_002ACBC8(void *point, int index)
 
 INCLUDE_ASM("asm/game", func_002ACCA0);
 
-INCLUDE_ASM("asm/game", func_002ACCA8);
 
 INCLUDE_ASM("asm/game", func_002ACD30);
 

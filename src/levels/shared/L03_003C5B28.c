@@ -173,7 +173,38 @@ void func_L03_003E5070(u8 *a0) {
 /* func_L03_003E50E0 lives in the -g8 sibling: its first call reads a float
    constant through $gp at 0x1CB0. */
 
-INCLUDE_ASM("asm/levels", func_L03_003E5170);
+extern void func_003355A8(int);
+
+extern void func_0026FF08(int, int, f32, f32, f32, f32);
+
+extern void func_0029F338(u8 *);
+
+extern s32 g_activeGadgetItem;
+
+extern f32 D_001B9C14;
+
+/* The retail materialises this one's address with `lui $at`, which is gas's expansion of the
+   bare-symbol macro cc1 only emits for an `sda` symbol. */
+extern f32 D_001B2464 __attribute__((sda));
+
+/* Hands the entity's gadget class id to the active-gadget global, clears the entity's
+ * gadget state and releases the resident class it was holding. */
+void func_L03_003E5170(u8 *a0) {
+    u8 *q = *(u8 **)(a0 + 0x68);
+    f32 zero = 0.0f;
+    f32 scale = 1.12434113f;    /* bits 0x3F8FEA69 (0x3F8FEA69 != 1.12434f) */
+
+    func_003355A8(3);
+    D_001B9C14 = scale;
+    func_0026FF08(1, 0, scale, 0.005f, 0.2f, zero);
+    *(f32 *)(q + 0x6C) = zero;
+    g_activeGadgetItem = *(s32 *)(q + 0x64);
+    D_001B2464 = zero;
+    if (*(u8 **)(q + 0x58) != 0) {
+        func_0029F338(*(u8 **)(q + 0x58));
+        *(u32 *)(q + 0x58) = 0;
+    }
+}
 
 void func_L03_003E5218(u8 *a0) {
     *(u32 *)(*(u8 **)(a0 + 0x68) + 0x60) = 1;
@@ -237,7 +268,23 @@ void func_L03_004199F0(u8 *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L03_00419A60);
+/* Hands one record of the pool the level index selects to the shared lookup and then sets or
+   clears the low bit of the record's tenth halfword flag. */
+void func_L03_00419A60(u32 a0, u8 *a1, s32 a2) {
+    u8 *rec = (u8 *)D_L03_001B2A1C + (a0 << 8);
+    u8 *q = *(u8 **)(rec + 0x68);
+    s32 index;
+
+    if (*(u8 *)(rec + 0x20) == 0)
+        func_L03_004199F0(rec);
+    index = -1;
+    if (func_L02_0032EDD8(a1, &q[0x80], ((s32 *)q)[0x120], &index) == 0)
+        return;
+    if (a2 != 0)
+        *(unsigned short *)(q + (index << 5) + 0x8C) &= 0xFFFE;
+    else
+        *(unsigned short *)(q + (index << 5) + 0x8C) |= 1;
+}
 
 extern void func_L02_0032E998(u8 *, u8 *, u8 *, u8 *, s32, u32, u32);
 
@@ -258,7 +305,7 @@ s32 func_L03_00419B58(u32 a0, s32 a1) {
     return -1;
 }
 
-extern void func_L02_0032EDD8(u8 *, u8 *, s32, s32 *);
+extern s32 func_L02_0032EDD8(u8 *, u8 *, s32, s32 *);
 
 void func_L03_00419B90(u32 a0, u8 *a1, u8 *a2) {
     u8 *q = *(u8 **)((u8 *)D_L03_001B2A1C + (a0 << 8) + 0x68);
@@ -295,6 +342,7 @@ void func_L03_0042B908(u8 *a0, u32 a1) {
     }
 }
 
+/* func_L03_0042B930 lives in the -g8 sibling: its first read is a $gp float. */
 
 typedef struct {
     int a;

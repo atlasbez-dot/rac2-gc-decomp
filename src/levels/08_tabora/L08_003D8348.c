@@ -181,6 +181,13 @@ INCLUDE_ASM("asm/levels", func_L08_003F76C0);
 
 INCLUDE_ASM("asm/levels", func_L08_003F77C0);
 
+extern u32 D_L08_001B9E04;
+
+/* 128-bit copies reach lq/sq only through TImode. */
+typedef int TQ_003F79E0 __attribute__((mode(TI)));
+
+/* func_L08_003F79E0: 124 bytes against retail's 104; the four bound constants take
+   different FPRs and the frame grows. Deposited in nonmatching/levels/. */
 INCLUDE_ASM("asm/levels", func_L08_003F79E0);
 
 INCLUDE_ASM("asm/levels", func_L08_003F7A48);

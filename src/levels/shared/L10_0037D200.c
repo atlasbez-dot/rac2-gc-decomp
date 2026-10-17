@@ -40,7 +40,32 @@ void func_L10_0039D728(void *a0) {
 
 INCLUDE_ASM("asm/levels", func_L10_0039D760);
 
-INCLUDE_ASM("asm/levels", func_L10_0039D9C0);
+extern int D_L10_001AEEC0 __attribute__((sda));
+
+extern int func_00282948(void *);
+
+extern void func_0029F338(void *);
+
+extern char D_L10_00234600[];
+
+extern void func_L10_0039DA48(void *, int, int, int, float, float, float, int, int);
+
+/* Ticks the level's spawn counter down to zero, else spends the record through the effect
+   constructor at 0x0039DA48 with the record's own vectors. */
+void func_L10_0039D9C0(void *a0) {
+    char *s0 = *(char **)((char *)a0 + 0x68);
+
+    if (func_00282948(s0 + 0x10) == 0) {
+        func_L10_0039DA48(D_L10_00234600, *(int *)(s0 + 0x1C), *(int *)(s0 + 0x30), 8,
+                          *(float *)(s0 + 0x24), *(float *)(s0 + 0x28),
+                          *(float *)(s0 + 0x20), *(int *)(s0 + 0x14), *(int *)(s0 + 0x18));
+    } else {
+        D_L10_001AEEC0 = D_L10_001AEEC0 - 1;
+        if (D_L10_001AEEC0 < 0)
+            D_L10_001AEEC0 = 0;
+        func_0029F338(a0);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L10_0039DA48);
 

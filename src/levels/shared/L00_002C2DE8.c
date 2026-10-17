@@ -114,8 +114,50 @@ INCLUDE_ASM("asm/levels", func_L00_002C40C0);
 
 INCLUDE_ASM("asm/levels", func_L00_002C42E0);
 
+extern unsigned char D_0018C0D4[];
 
-INCLUDE_ASM("asm/levels", func_L00_002C8C00);
+extern void func_L00_002C42E0(int a0, int a1);
+
+/* Picks the variant of the shared loader the current game state selects. */
+void func_L00_002C8BA8(int a0)
+{
+    int a1 = (a0 != 0) ? 2 : 1;
+
+    switch (D_0018C0D4[0]) {
+    case 0:
+        func_L00_002C42E0(0, a1);
+        break;
+    case 1:
+        func_L00_002C42E0(0x3F, a1);
+        break;
+    }
+}
+
+extern void func_L00_002AF7D0(void);
+
+/* Gates the level transition on the shared block: the state word must be 0, 2 or 3, the byte at
+ * +0x22B8 non-zero, the counter at +0x1D8 below 6 and the timer at +0x24B8 below 0.7. */
+int func_L00_002C8C00(void)
+{
+    char *p = D_00189E20_4;
+    int state = *(int *)(p + 0x2294);
+
+    if (state != 2 && state != 3 && state != 0)
+        return 0;
+    if (*(unsigned char *)(p + 0x22B8) == 0)
+        return 0;
+    if (*(int *)(p + 0x1D8) >= 6)
+        return 0;
+    if (*(float *)(p + 0x24B8) < 0.7f) {
+        if (*(unsigned char *)(p + 0x22BB) != 0)
+            return 0;
+        func_L00_002AF7D0();
+        *(int *)(p + 0xEA4) = 2;
+        func_L00_002C42E0(0x22, 1);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_002C8CB0);
 

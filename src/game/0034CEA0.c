@@ -189,7 +189,6 @@ void func_0034EDB0(void *unused, char *object)
 
 INCLUDE_ASM("asm/game", func_0034EE78);
 
-INCLUDE_ASM("asm/game", func_0034EF58);
 
 INCLUDE_ASM("asm/game", func_0034F048);
 
@@ -205,8 +204,6 @@ int func_0034F3D8(void) {
 }
 
 INCLUDE_ASM("asm/game", func_0034F408);
-
-INCLUDE_ASM("asm/game", func_0034F690);
 
 extern char D_001AE820[];
 extern void func_0026FEB8(void *, int);
