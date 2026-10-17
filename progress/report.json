@@ -1,16 +1,16 @@
 {
  "version": 2,
  "measures": {
-  "fuzzy_match_percent": 7.632756962373173,
-  "total_code": "5531160",
-  "matched_code": "422180",
-  "matched_code_percent": 7.632756962373173,
-  "total_functions": 9085,
-  "matched_functions": 3563,
-  "matched_functions_percent": 39.21849201981288,
+  "fuzzy_match_percent": 7.640161919907475,
+  "total_code": "5533600",
+  "matched_code": "422776",
+  "matched_code_percent": 7.640161919907475,
+  "total_functions": 9100,
+  "matched_functions": 3568,
+  "matched_functions_percent": 39.20879120879121,
   "complete_code": "0",
   "complete_code_percent": 0.0,
-  "total_units": 449,
+  "total_units": 450,
   "complete_units": 280,
   "total_data": "383391",
   "matched_data": "0",
@@ -23,13 +23,13 @@
    "id": "executable",
    "name": "Boot executable",
    "measures": {
-    "fuzzy_match_percent": 21.88526719540335,
-    "total_code": "1047024",
-    "matched_code": "229144",
-    "matched_code_percent": 21.88526719540335,
-    "total_functions": 3375,
-    "matched_functions": 1819,
-    "matched_functions_percent": 53.8962962962963,
+    "fuzzy_match_percent": 21.89117492358004,
+    "total_code": "1049464",
+    "matched_code": "229740",
+    "matched_code_percent": 21.89117492358004,
+    "total_functions": 3390,
+    "matched_functions": 1824,
+    "matched_functions_percent": 53.80530973451327,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "total_data": "383391",
@@ -58,13 +58,13 @@
    "id": "game",
    "name": "Boot game code",
    "measures": {
-    "fuzzy_match_percent": 21.88526719540335,
-    "total_code": "1047024",
-    "matched_code": "229144",
-    "matched_code_percent": 21.88526719540335,
-    "total_functions": 3375,
-    "matched_functions": 1819,
-    "matched_functions_percent": 53.8962962962963,
+    "fuzzy_match_percent": 21.89117492358004,
+    "total_code": "1049464",
+    "matched_code": "229740",
+    "matched_code_percent": 21.89117492358004,
+    "total_functions": 3390,
+    "matched_functions": 1824,
+    "matched_functions_percent": 53.80530973451327,
     "complete_code": "0",
     "complete_code_percent": 0.0
    }
@@ -14893,6 +14893,167 @@
    "metadata": {
     "complete": true,
     "source_path": "src/game/00287FF8-rc2.c",
+    "progress_categories": [
+     "executable",
+     "game"
+    ]
+   }
+  },
+  {
+   "name": "game/002880E0",
+   "measures": {
+    "fuzzy_match_percent": 24.42622950819672,
+    "total_code": "2440",
+    "matched_code": "596",
+    "matched_code_percent": 24.42622950819672,
+    "total_functions": 15,
+    "matched_functions": 5,
+    "matched_functions_percent": 33.333333333333336,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
+    {
+     "name": "func_002880E0",
+     "size": "168",
+     "fuzzy_match_percent": 100.0,
+     "address": "0",
+     "metadata": {
+      "virtual_address": "2654432"
+     }
+    },
+    {
+     "name": "func_00288208",
+     "size": "252",
+     "fuzzy_match_percent": 0.0,
+     "address": "296",
+     "metadata": {
+      "virtual_address": "2654728"
+     }
+    },
+    {
+     "name": "func_00288308",
+     "size": "220",
+     "fuzzy_match_percent": 0.0,
+     "address": "552",
+     "metadata": {
+      "virtual_address": "2654984"
+     }
+    },
+    {
+     "name": "func_002883E8",
+     "size": "196",
+     "fuzzy_match_percent": 0.0,
+     "address": "776",
+     "metadata": {
+      "virtual_address": "2655208"
+     }
+    },
+    {
+     "name": "func_002884B0",
+     "size": "84",
+     "fuzzy_match_percent": 100.0,
+     "address": "976",
+     "metadata": {
+      "virtual_address": "2655408"
+     }
+    },
+    {
+     "name": "func_00288508",
+     "size": "444",
+     "fuzzy_match_percent": 0.0,
+     "address": "1064",
+     "metadata": {
+      "virtual_address": "2655496"
+     }
+    },
+    {
+     "name": "func_002886C8",
+     "size": "156",
+     "fuzzy_match_percent": 0.0,
+     "address": "1512",
+     "metadata": {
+      "virtual_address": "2655944"
+     }
+    },
+    {
+     "name": "func_00288768",
+     "size": "64",
+     "fuzzy_match_percent": 0.0,
+     "address": "1672",
+     "metadata": {
+      "virtual_address": "2656104"
+     }
+    },
+    {
+     "name": "func_002887B0",
+     "size": "188",
+     "fuzzy_match_percent": 0.0,
+     "address": "1744",
+     "metadata": {
+      "virtual_address": "2656176"
+     }
+    },
+    {
+     "name": "func_00288870",
+     "size": "256",
+     "fuzzy_match_percent": 0.0,
+     "address": "1936",
+     "metadata": {
+      "virtual_address": "2656368"
+     }
+    },
+    {
+     "name": "func_00288970",
+     "size": "64",
+     "fuzzy_match_percent": 0.0,
+     "address": "2192",
+     "metadata": {
+      "virtual_address": "2656624"
+     }
+    },
+    {
+     "name": "func_002889B0",
+     "size": "4",
+     "fuzzy_match_percent": 0.0,
+     "address": "2256",
+     "metadata": {
+      "virtual_address": "2656688"
+     }
+    },
+    {
+     "name": "func_002889B8",
+     "size": "72",
+     "fuzzy_match_percent": 100.0,
+     "address": "2264",
+     "metadata": {
+      "virtual_address": "2656696"
+     }
+    },
+    {
+     "name": "func_00288A00",
+     "size": "156",
+     "fuzzy_match_percent": 100.0,
+     "address": "2336",
+     "metadata": {
+      "virtual_address": "2656768"
+     }
+    },
+    {
+     "name": "func_00288AA0",
+     "size": "116",
+     "fuzzy_match_percent": 100.0,
+     "address": "2496",
+     "metadata": {
+      "virtual_address": "2656928"
+     }
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "source_path": "src/game/002880E0.c",
     "progress_categories": [
      "executable",
      "game"

@@ -34,9 +34,9 @@ The levels' data is not measured.
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 1,819 of 3,375 | 229,144 of 1,047,024 bytes |
+| Boot executable | 1,824 of 3,390 | 229,740 of 1,049,464 bytes |
 | Levels | 1,744 of 5,710 | 193,036 of 4,484,136 bytes |
-| **Total** | 3,563 of 9,085 | 422,180 of 5,531,160 bytes (7.63%) |
+| **Total** | 3,568 of 9,100 | 422,776 of 5,533,600 bytes (7.64%) |
 
 The 27 levels hold 106,337 function placements; C covers 44,328 of them.
 251 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
