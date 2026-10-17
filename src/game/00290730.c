@@ -58,4 +58,3 @@ void func_00290758(void)
 }
 
 
-INCLUDE_ASM("asm/game", func_00290978);

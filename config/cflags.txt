@@ -1,3 +1,9 @@
+src/levels/shared/L06_003E3ED0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/levels/shared/L00_00324120-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/levels/shared/L00_00410430-rc2.c	-fno-builtin -O2 -G0 -mno-split-addresses -ffunction-sections
+src/levels/02_maktar_nebula/L02_003D5C20-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/game/00290978-rc2.c	-fno-builtin -O2 -G8 -mno-split-addresses -ffunction-sections
+src/game/00338718-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L00_002A6708.c	-O2 -G0 -fno-sched-interblock -ffunction-sections -fno-builtin
 src/levels/shared/L00_003E0F58.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_003E70B8.c	-O2 -G0 -ffunction-sections -fno-builtin

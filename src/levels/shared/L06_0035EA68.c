@@ -68,7 +68,6 @@ s32 func_L06_003E3CC8(u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L06_003E3CF0);
 
-INCLUDE_ASM("asm/levels", func_L06_003E3ED0);
 
 INCLUDE_ASM("asm/levels", func_L06_003E3F28);
 
