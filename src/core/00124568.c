@@ -265,3 +265,5 @@ int func_00124980(int arg0) {
     r1_D_001313F8 = 0;
     return 1;
 }
+
+INCLUDE_ASM("asm/core", func_00124780);

@@ -106,3 +106,5 @@ s32 func_00288AA0(u8 *a0,s32 a1) {
  *(s32 *)(a0+0x30)=v;
  return 1;
 }
+
+INCLUDE_ASM("asm/game", func_00288970);

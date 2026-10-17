@@ -55,3 +55,5 @@ int func_0028E260(void)
 }
 
 INCLUDE_ASM("asm/game", func_0028E2A8);
+
+INCLUDE_ASM("asm/game", func_0028E138);

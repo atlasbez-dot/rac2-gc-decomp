@@ -638,3 +638,5 @@ void func_00336710(char *s1, int a1, char *a2)
 s32 func_003367B8(u8 *a0) { return *(s32 *)(a0 + 0x34); }
 
 INCLUDE_ASM("asm/game", func_003367C0);
+
+INCLUDE_ASM("asm/game", func_00335DC0);
