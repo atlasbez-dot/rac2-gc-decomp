@@ -38,6 +38,7 @@ INCLUDE_ASM("asm/game", func_0028DF70);
 
 INCLUDE_ASM("asm/game", func_0028DF80);
 
+INCLUDE_ASM("asm/game", func_0028E138);
 
 typedef struct { char reserved00[0x1248]; int selected; char reserved124C[0x1068]; unsigned char blocked; } MapSelection;
 typedef struct { char reserved00[0x88]; unsigned short valid; char reserved8A[0x56]; } MapRecord;
@@ -55,5 +56,3 @@ int func_0028E260(void)
 }
 
 INCLUDE_ASM("asm/game", func_0028E2A8);
-
-INCLUDE_ASM("asm/game", func_0028E138);

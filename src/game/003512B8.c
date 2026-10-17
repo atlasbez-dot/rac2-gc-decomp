@@ -134,6 +134,7 @@ int func_00351938(unsigned char *owner)
 
 INCLUDE_ASM("asm/game", func_00351958);
 
+INCLUDE_ASM("asm/game", func_00351960);
 
 extern int func_0012F9B8(void *);
 
@@ -246,5 +247,3 @@ void func_00351E70(u8 *a0) {
     *(volatile s32 *)(a0+8) = (*(volatile s32 *)(a0+8) + 1) % *(s32 *)(a0+0x10);
     func_0011F628();
 }
-
-INCLUDE_ASM("asm/game", func_00351960);

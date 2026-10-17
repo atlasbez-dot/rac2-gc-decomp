@@ -75,6 +75,7 @@ int func_L22_003A2D58(char *a0, int a1, int a2) {
     return n;
 }
 
+INCLUDE_ASM("asm/levels", func_L22_003A2DF8);
 
 void func_L22_003A2E10(char *a0, unsigned short a1) {
     char *p = *(char **)(a0 + 0x68);
@@ -173,5 +174,3 @@ int func_L22_003A4FF8(void) {
     ref_L22_003A4FF8_00();
     return 1;
 }
-
-INCLUDE_ASM("asm/levels", func_L22_003A2DF8);

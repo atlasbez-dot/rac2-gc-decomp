@@ -467,6 +467,7 @@ int func_002ACBC8(void *point, int index)
 
 INCLUDE_ASM("asm/game", func_002ACCA0);
 
+INCLUDE_ASM("asm/game", func_002ACCA8);
 
 INCLUDE_ASM("asm/game", func_002ACD30);
 
@@ -741,5 +742,3 @@ void func_002AFEB8(char *object, char *out, char *in, char *transform, float z)
     *(float *)(out + 8) = z;
     func_00283098(out, out, object + 0xC0);
 }
-
-INCLUDE_ASM("asm/game", func_002ACCA8);
