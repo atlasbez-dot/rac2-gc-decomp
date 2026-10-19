@@ -1,3 +1,5 @@
+src/levels/17_smolg/L17_003C5E20-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/levels/shared/L00_003DFDC0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L06_003E3ED0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L00_00324120-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L00_00410430-rc2.c	-fno-builtin -O2 -G0 -mno-split-addresses -ffunction-sections
