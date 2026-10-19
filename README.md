@@ -34,13 +34,15 @@ The levels' data is not measured.
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 1,826 of 3,390 | 230,076 of 1,049,464 bytes |
-| Levels | 1,748 of 5,710 | 193,636 of 4,484,136 bytes |
-| **Total** | 3,574 of 9,100 | 423,712 of 5,533,600 bytes (7.66%) |
+| Boot executable | 1,833 of 3,390 | 232,448 of 1,049,464 bytes |
+| Levels | 1,770 of 5,710 | 202,880 of 4,484,136 bytes |
+| **Total** | 3,603 of 9,100 | 435,328 of 5,533,600 bytes (7.87%) |
 
-The 27 levels hold 106,337 function placements; C covers 44,426 of them.
+The 27 levels hold 106,337 function placements; C covers 44,651 of them.
 251 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
 <!-- /progress -->
+
+[Canonical function treemap](assets/progress.svg) (area by code bytes; one entry per function).
 
 
 ## How it works

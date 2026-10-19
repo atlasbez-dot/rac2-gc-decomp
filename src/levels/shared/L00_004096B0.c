@@ -155,7 +155,7 @@ void func_L00_004110D8(Obj_F23626ad8 *p)
 
 
 
-INCLUDE_ASM("asm/levels", func_L00_004115E8);
+/* func_L00_004115E8 is defined in L00_004096B0-g8.c. */
 
 
 INCLUDE_ASM("asm/levels", func_L00_004118A8);

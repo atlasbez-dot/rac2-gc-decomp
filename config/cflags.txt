@@ -1,3 +1,5 @@
+src/levels/17_smolg/L17_003C5E20-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/levels/shared/L00_003DFDC0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L06_003E3ED0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L00_00324120-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L00_00410430-rc2.c	-fno-builtin -O2 -G0 -mno-split-addresses -ffunction-sections
@@ -14,7 +16,6 @@ src/levels/shared/L00_002EE050.c	-O1 -G0 -ffast-math -ffunction-sections -fno-bu
 src/levels/shared/L05_0041D570.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L05_004260B8.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L05_00426658.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/11_joba/L11_00436910.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/11_joba/L11_004600A0.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/core/001330D0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/core/001322B8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin

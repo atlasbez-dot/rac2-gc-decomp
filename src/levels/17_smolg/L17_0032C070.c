@@ -154,7 +154,6 @@ int func_L17_003C5DF0(int a0)
     return *(unsigned char *)(a0 + 0x20) - 2U < 5;
 }
 
-INCLUDE_ASM("asm/levels", func_L17_003C5E20);
 
 /* twin of func_L17_003C3250 on the 0x128 sub-object id and its own table */
 void func_L17_003C5E78(char *a2)

@@ -60,6 +60,59 @@ void func_L18_003F7C70(s32 a0)
     func_3F8C08(a0);
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F7CD8);
+extern void func_002B60B0(u8 *, float, float, float, float);
+extern float func_002A7878(float, float);
+extern int func_002A77E0(int);
+extern int func_L02_0032E508(u8 *, int, u8 *, int);
+extern void func_L18_003F8FA8(u8 *);
+extern void func_002A7750(u8 *, int, int);
+
+void func_L18_003F7CD8(u8 *object) {
+    u8 *state = *(u8 **)(object + 0x68);
+    float rate, spin;
+
+    state[0x70] = 9;
+    *(int *)(state + 0xA8) = 4;
+    *(float *)(state + 0x90) = 0.8f;
+    *(float *)(state + 0x94) = 0.9f;
+    *(float *)(state + 0x9C) = 0.4f;
+    if (*(short *)(state + 0x24) == 0) {
+        *(short *)(state + 0x24) = 16;
+        *(float *)(state + 0x20) = 16;
+    }
+    state[0x28] = 3;
+    *(float *)(state + 0x144) = 0.25f;
+    *(float *)(state + 0x110) = 0.8f;
+    *(float *)(state + 0x13C) = 0.0055555556900799274f;
+    *(float *)(state + 0x114) = 0.5f;
+    *(float *)(state + 0x118) = 0.5f;
+    *(float *)(state + 0x11C) = 2.0f;
+    *(float *)(state + 0x120) = 1.5707964897155762f;
+    func_002B60B0(object, 0.0033333334140479565f, 0.10000000894069672f,
+                  0.0034906589426100254f, 0.20943954586982727f);
+    *(u8 **)(state + 0x158) = state + 0x680;
+    *(u8 **)(state + 0x15C) = state + 0x600;
+    rate = func_002A7878(5.0f, 20.0f);
+    if (func_002A77E0(2) != 0)
+        spin = rate * -0.01745329424738884f;
+    else
+        spin = rate * 0.01745329424738884f;
+    *(float *)(state + 0x720) = spin;
+    *(int *)(state + 0x14C) = *(int *)(state + 0x718);
+    if (*(int *)(state + 0x71C) != -1)
+        *(int *)(state + 0x730) = func_L02_0032E508(object,
+            *(int *)(state + 0x71C), state + 0x200, 0x20);
+    *(short *)(state + 0x76C) = func_002A77E0(2);
+    *(float *)(state + 0x72C) = func_002A7878(5.0f, 7.0f);
+    *(u16 *)(object + 0x7C) |= 1 << func_002A77E0(6);
+    switch (*(short *)(state + 0x764)) {
+    case 1:
+        func_L18_003F8FA8(object);
+        break;
+    case 2:
+        func_002A7750(object, 2, 1);
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L18_003F7EF8);

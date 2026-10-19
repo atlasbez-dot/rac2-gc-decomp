@@ -128,7 +128,33 @@ void func_002AA800 (float *p, int a1, float fx, float fl)
   func_002AA738 (fx, a1, v);
 }
 
-INCLUDE_ASM("asm/game", func_002AA898);
+extern void func_002AA198(float *, float, float, float, float);
+extern float func_00282C48(float);
+
+float func_002AA898(float *position, float *velocity, int direction,
+                   float target, float acceleration, float damping, float limit)
+{
+    float distance;
+    float residual;
+    if (direction == 2) {
+        if ((target > 0.0f && *position < 0.0f) ||
+            (target < 0.0f && *position > 0.0f)) {
+            direction = 1;
+            if (target < 0.0f) direction = -1;
+        } else direction = 0;
+    }
+    distance = func_002AA738(target, direction, *position);
+    func_002AA198(velocity, distance, acceleration, damping, limit);
+    distance = func_00283B98_14(*position, *velocity);
+    *position = distance;
+    residual = func_002AA738(target, direction, distance);
+    if (func_00282C48(residual) < limit * 0.01f) {
+        *position = target;
+        *velocity = 0.0f;
+        return *velocity;
+    }
+    return residual;
+}
 
 INCLUDE_ASM("asm/game", func_002AAA00);
 

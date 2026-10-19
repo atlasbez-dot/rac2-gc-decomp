@@ -191,7 +191,7 @@ void func_L00_003672F8(void) {
     D_00152C26 = 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00367308);
+/* func_L00_00367308 is defined in L00_00358D98-g8.c. */
 
 #define NOT_SDA __attribute__((section(".data")))
 

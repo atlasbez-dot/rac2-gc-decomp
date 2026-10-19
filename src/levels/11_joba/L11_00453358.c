@@ -131,7 +131,74 @@ INCLUDE_ASM("asm/levels", func_L11_00456C20);
 
 INCLUDE_ASM("asm/levels", func_L11_00456EA0);
 
-INCLUDE_ASM("asm/levels", func_L11_00457600);
+extern void func_L04_0040A090(int, void *, void *, void *, void *, void *);
+extern char D_L11_001B1E50[] __attribute__((sda));
+extern char D_L11_001B1E70[] __attribute__((sda));
+extern char D_L11_001B1E80[] __attribute__((sda));
+extern char D_L11_001B1EA0[] __attribute__((sda));
+extern char D_L11_001B1EB0[] __attribute__((sda));
+extern char D_L11_001B1EE0[] __attribute__((sda));
+extern char D_L11_001B1F20[] __attribute__((sda));
+extern char D_L11_001B1F30[] __attribute__((sda));
+extern char D_L11_001B1F50[] __attribute__((sda));
+extern char D_L11_001B1F70[] __attribute__((sda));
+extern char D_L11_001B43F0[] __attribute__((sda));
+extern char D_L11_001B4430[] __attribute__((sda));
+extern char D_L11_001B4450[] __attribute__((sda));
+extern char D_L11_001B4490[] __attribute__((sda));
+extern char D_L11_001B44B0[] __attribute__((sda));
+extern char D_L11_001B44D0[] __attribute__((sda));
+extern char D_L11_001B4510[] __attribute__((sda));
+extern char D_L11_001B4550[] __attribute__((sda));
+extern char D_L11_001B4570[] __attribute__((sda));
+extern char D_L11_001B4580[] __attribute__((sda));
+extern char D_L11_001B4588[] __attribute__((sda));
+extern char D_L11_001B4598[] __attribute__((sda));
+extern char D_L11_001B45A0[] __attribute__((sda));
+extern char D_L11_001B45B8[] __attribute__((sda));
+extern char D_L11_001B45D8[] __attribute__((sda));
+extern char D_L11_001B45E0[] __attribute__((sda));
+extern char D_L11_001B45F0[] __attribute__((sda));
+extern char D_L11_001B4600[] __attribute__((sda));
+extern char D_L11_001B4608[] __attribute__((sda));
+extern char D_L11_001B4618[] __attribute__((sda));
+extern char D_L11_001B4620[] __attribute__((sda));
+extern char D_L11_001B4630[] __attribute__((sda));
+extern char D_L11_001B4638[] __attribute__((sda));
+extern char D_L11_001B4650[] __attribute__((sda));
+extern char D_L11_001B4670[] __attribute__((sda));
+extern char D_L11_001B4678[] __attribute__((sda));
+extern char D_L11_001B4688[] __attribute__((sda));
+extern char D_L11_001B4698[] __attribute__((sda));
+extern char D_L11_001B46A0[] __attribute__((sda));
+extern char D_L11_001B46A4[] __attribute__((sda));
+extern char D_L11_001B46A8[] __attribute__((sda));
+extern char D_L11_001B46AC[] __attribute__((sda));
+extern char D_L11_001B46B0[] __attribute__((sda));
+extern char D_L11_001B46B4[] __attribute__((sda));
+extern char D_L11_001B46B8[] __attribute__((sda));
+extern char D_L11_001B46BC[] __attribute__((sda));
+extern char D_L11_001B46C0[] __attribute__((sda));
+extern char D_L11_001B46C4[] __attribute__((sda));
+extern char D_L11_002626B0[];
+extern char D_L11_00262710[];
+
+void func_L11_00457600(void) {
+    func_L04_0040A090(4, D_L11_001B1E50, D_L11_001B43F0, D_L11_001B4570, D_L11_001B4608, D_L11_001B46A0);
+    func_L04_0040A090(2, D_L11_001B1E70, D_L11_001B4430, D_L11_001B4580, D_L11_001B4618, D_L11_001B46A4);
+    func_L04_0040A090(4, D_L11_001B1E80, D_L11_001B4450, D_L11_001B4588, D_L11_001B4620, D_L11_001B46A8);
+    {
+        char *data = D_L11_001B4490;
+        func_L04_0040A090(2, D_L11_001B1EA0, data, D_L11_001B4598, D_L11_001B4630, D_L11_001B46AC);
+    }
+    func_L04_0040A090(6, D_L11_001B1EB0, D_L11_002626B0, D_L11_001B45A0, D_L11_001B4638, D_L11_001B46B0);
+    func_L04_0040A090(8, D_L11_001B1EE0, D_L11_00262710, D_L11_001B45B8, D_L11_001B4650, D_L11_001B46B4);
+    func_L04_0040A090(2, D_L11_001B1F20, D_L11_001B44B0, D_L11_001B45D8, D_L11_001B4670, D_L11_001B46B8);
+    func_L04_0040A090(4, D_L11_001B1F30, D_L11_001B44D0, D_L11_001B45E0, D_L11_001B4678, D_L11_001B46BC);
+    func_L04_0040A090(4, D_L11_001B1F50, D_L11_001B4510, D_L11_001B45F0, D_L11_001B4688, D_L11_001B46C0);
+    func_L04_0040A090(2, D_L11_001B1F70, D_L11_001B4550, D_L11_001B4600, D_L11_001B4698, D_L11_001B46C4);
+}
+
 
 INCLUDE_ASM("asm/levels", func_L11_004577F8);
 

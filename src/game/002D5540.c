@@ -58,7 +58,7 @@ int func_002D55D8(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002D55E0);
+/* func_002D55E0 uses small data in 002D5540-g8.c. */
 
 extern void func_0029CB20(void);
 

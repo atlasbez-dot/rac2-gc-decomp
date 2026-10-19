@@ -85,7 +85,48 @@ void func_L00_003EAC88(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003EAEF8);
+extern int func_002ACBC8(void *, int);
+extern int func_L00_002E3B38(int);
+extern void func_0026FEB8(void *, int, int);
+extern unsigned char D_00189EA0[];
+extern unsigned char D_0019B2E8[];
+extern int D_001A79F0 __attribute__((sda));
+extern int D_001A7A10 __attribute__((sda));
+extern int D_001A7A14 __attribute__((sda));
+extern int D_L00_001C5480[][3];
+extern int D_L00_001C5540[][3];
+extern char D_L00_001B0700[];
+
+void func_L00_003EAEF8(char *object) {
+    int *state = *(int **)(object + 0x68);
+    int result, index, shift;
+    unsigned char *entry;
+
+    if (!func_002ACBC8(D_00189EA0, state[1]))
+        return;
+    D_00189EA0[0x2246] = *(unsigned char *)(object + 0xB0);
+    if (state[2])
+        return;
+    if ((D_0019B2E8[*(unsigned char *)(object + 0xB0) + D_001A79F0 * 16] >>
+         (*(unsigned char *)(object + 0xB1) * 2)) & 3)
+        return;
+    state[2] = 1;
+    result = func_L00_002E3B38(*(unsigned char *)(object + 0xB0));
+    index = (*(unsigned char *)(object + 0xB0) & 15) + D_001A79F0 * 16;
+    shift = (*(unsigned char *)(object + 0xB1) & 3) * 2;
+    entry = D_0019B2E8 + index;
+    if (!((*entry >> shift) & 3)) {
+        *entry = (*entry & ~(3 << shift)) | (result << shift);
+        D_001A7A10 += D_L00_001C5480[*(unsigned char *)(object + 0xB0) & 15]
+                                   [*(unsigned char *)(object + 0xB1) & 3];
+        D_001A7A14 += D_L00_001C5540[*(unsigned char *)(object + 0xB0) & 15]
+                                   [*(unsigned char *)(object + 0xB1) & 3];
+    }
+    func_0026FEB8(D_L00_001B0700,
+        D_L00_001C5480[*(unsigned char *)(object + 0xB0)][*(unsigned char *)(object + 0xB1)],
+        D_L00_001C5540[*(unsigned char *)(object + 0xB0)][*(unsigned char *)(object + 0xB1)]);
+}
+
 
 INCLUDE_ASM("asm/levels", func_L00_003EB0C0);
 
