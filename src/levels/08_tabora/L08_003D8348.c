@@ -139,7 +139,48 @@ INCLUDE_ASM("asm/levels", func_L08_003D8AB0);
 
 INCLUDE_ASM("asm/levels", func_L08_003D8CA8);
 
-INCLUDE_ASM("asm/levels", func_L08_003D9038);
+extern void func_002B60B0(u8 *, float, float, float, float);
+extern int func_00282948(void *);
+extern float func_002A7878(float, float);
+extern float func_00282E80(void *, void *);
+extern int func_002B4FF0(u8 *, void *, float);
+extern float func_00282DF0(void *);
+extern float func_00282C48(float);
+
+int func_L08_003D9038(u8 *object, float accel, float unused1, float damping,
+                     float speed, float unused4, float turn, float friction) {
+    u8 *state = *(u8 **)(object + 0x68);
+    int result;
+    float amount;
+
+    func_002B60B0(object, speed * 0.00027777778450399637f,
+                  turn * 0.01666666753590107f,
+                  accel * 4.848137450608192e-06f,
+                  damping * 0.0002908882452175021f);
+    *(float *)(state + 0x154) = friction;
+    if (func_00282948(state + 0x474) != 0) {
+        *(float *)(state + 0x46C) = -*(float *)(state + 0x46C);
+        *(float *)(state + 0x470) = *(float *)(state + 0x46C) * 0.01745329424738884f;
+        *(int *)(state + 0x474) = func_002A7878(30.0f, 90.0f);
+    }
+    if (*(int *)(state + 0x48C) != 0 ||
+        (object[0x20] == 8 && object[0x95] != 0) ||
+        func_00282E80(object + 0x10, state + 0x3F0) < 5.0f)
+        *(float *)(state + 0x470) = 0;
+    result = func_002B4FF0(object, state + 0x3F0, *(float *)(state + 0x470));
+    amount = func_00282DF0(state + 0x1C0);
+    amount += func_00282C48(*(float *)(state + 0x1D4));
+    if (result & 15) {
+        func_00282948(state + 0x448);
+        amount = func_00282C48(*(float *)(state + 0x1D4)) + 0.010000000707805157f;
+    }
+    *(float *)(object + 0x48) = amount * 29.999998092651367f;
+    if (*(float *)(object + 0x48) > 1.5f)
+        *(float *)(object + 0x48) = 1.5f;
+    else if (*(float *)(object + 0x48) < 0.0f)
+        *(float *)(object + 0x48) = 0;
+    return result;
+}
 
 /* the countdown runs while the entry is flagged, then the timer field saturates */
 void func_L08_003D9208(Ent *a0)

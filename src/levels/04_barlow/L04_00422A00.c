@@ -62,14 +62,28 @@ extern u8 D_L04_001B347C[] __attribute__((sda));
 extern u8 D_L04_001B3480[] __attribute__((sda));
 extern u8 D_L04_001B3484[] __attribute__((sda));
 extern u8 D_L04_001B3488[] __attribute__((sda));
-extern u8 D_L04_0026D370[] __attribute__((sda));
-extern u8 D_L04_0026D3E0[] __attribute__((sda));
-extern u8 D_L04_0026D490[] __attribute__((sda));
-extern u8 D_L04_0026D4F0[] __attribute__((sda));
-extern u8 D_L04_002CA3E0[] __attribute__((sda));
-extern u8 D_L04_002CA438[] __attribute__((sda));
+extern u8 D_L04_0026D370[];
+extern u8 D_L04_0026D3E0[];
+extern u8 D_L04_0026D490[];
+extern u8 D_L04_0026D4F0[];
+extern u8 D_L04_002CA3E0[];
+extern u8 D_L04_002CA438[];
 
-INCLUDE_ASM("asm/levels", func_L04_0043ABE0);
+extern void func_L04_0040A090(int, void *, void *, void *, void *, void *);
+
+void func_L04_0043ABE0(void) {
+    func_L04_0040A090(7, D_L04_001B12B0, D_L04_0026D370, D_L04_001B3300, D_L04_001B33B8, D_L04_001B3470);
+    func_L04_0040A090(3, D_L04_001B12E8, D_L04_001B3280, D_L04_001B3320, D_L04_001B33D8, D_L04_001B3474);
+    {
+        u8 *data = D_L04_002CA3E0;
+        func_L04_0040A090(11, data, D_L04_0026D3E0, D_L04_001B3330, D_L04_001B33E8, D_L04_001B3478);
+    }
+    func_L04_0040A090(6, D_L04_001B1300, D_L04_0026D490, D_L04_001B3360, D_L04_001B3418, D_L04_001B347C);
+    func_L04_0040A090(9, D_L04_002CA438, D_L04_0026D4F0, D_L04_001B3378, D_L04_001B3430, D_L04_001B3480);
+    func_L04_0040A090(3, D_L04_001B1330, D_L04_001B32B0, D_L04_001B33A0, D_L04_001B3458, D_L04_001B3484);
+    func_L04_0040A090(2, D_L04_001B1348, D_L04_001B32E0, D_L04_001B33B0, D_L04_001B3468, D_L04_001B3488);
+}
+
 
 INCLUDE_ASM("asm/levels", func_L04_0043AD48);
 

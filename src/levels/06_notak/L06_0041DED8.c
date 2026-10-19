@@ -241,6 +241,42 @@ INCLUDE_ASM("asm/levels", func_L06_004577B0);
 
 
 
-INCLUDE_ASM("asm/levels", func_L06_00457C00);
+extern float func_002A7940(void);
+extern float func_002A7878(float, float);
+extern float func_00283180(float);
+extern float func_00283198(float);
+extern void func_00282CC0(void *, void *, void *);
+extern char *func_00273730(char *, int, int, int, char *, char *,
+                           float *, int, float, float);
+
+void func_L06_00457C00(char *object, int mask, void *offset, int color,
+                      float speed_min, float speed_max,
+                      float vertical_min, float vertical_max)
+{
+    float velocity[3];
+    float angle, speed, life, size;
+    char *particle;
+    unsigned char shade = color;
+    int i;
+
+    for (i = 0; i < 15; i++) {
+        if (((mask >> i) ^ 1) & 1)
+            continue;
+        angle = func_002A7940();
+        speed = func_002A7878(speed_min, speed_max) * (1.0f / 60.0f);
+        velocity[0] = func_00283180(angle) * speed;
+        velocity[1] = func_00283198(angle) * speed;
+        velocity[2] = 0.0f;
+        velocity[2] = func_002A7878(vertical_min, vertical_max) * (1.0f / 60.0f);
+        func_00282CC0(velocity, velocity, offset);
+        life = func_002A7878(90.0f, 270.0f);
+        size = func_002A7878(10.0f, 20.0f);
+        particle = func_00273730(object, 2, *(short *)(object + 0xAA), i,
+                                object + 0x10, object + 0xF0, velocity, shade,
+                                life, size);
+        if (particle)
+            *(unsigned short *)(particle + 0x34) |= 0x10;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L06_00457ED0);

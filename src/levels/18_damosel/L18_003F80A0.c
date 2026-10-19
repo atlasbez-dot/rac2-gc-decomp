@@ -199,7 +199,50 @@ void func_L18_00432AD0(u8 *a0) {
     *(u16 *)(s0 + 0x7FA) = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L18_00432B30);
+void func_L18_00432B30(u8 *object, int reason) {
+    u8 *state;
+
+    if (object[0x20] == 2)
+        return;
+    state = *(u8 **)(object + 0x68);
+    *(int *)(state + 0x7EC) = reason;
+    *(u16 *)(object + 0x34) = (*(u16 *)(object + 0x34) & 0xFFBE) | 0x1000;
+    *(int *)(object + 0x98) = *(int *)(*(u8 **)(object + 0x24) + 0x10);
+    *(u16 *)(object + 0x34) &= 0xFFFD;
+    *(float *)(state + 0x7E8) = 0.5f;
+    *(float *)(object + 0x2C) = *(float *)(*(u8 **)(object + 0x24) + 0x24) * 0.5f;
+    if ((*(u8 **)(state + 0x7C0))) {
+        *(u16 *)((*(u8 **)(state + 0x7C0)) + 0x34) &= 0xFFBE;
+        *(u16 *)((*(u8 **)(state + 0x7C0)) + 0x34) |= 0x1000;
+        *(int *)((*(u8 **)(state + 0x7C0)) + 0x98) = *(int *)(*(u8 **)((*(u8 **)(state + 0x7C0)) + 0x24) + 0x10);
+        *(int *)((*(u8 **)(state + 0x7C0)) + 0x98) = 0;
+        *(u16 *)((*(u8 **)(state + 0x7C0)) + 0x34) &= 0xFFFD;
+        *(float *)((*(u8 **)(state + 0x7C0)) + 0x2C) = *(float *)(*(u8 **)((*(u8 **)(state + 0x7C0)) + 0x24) + 0x24) *
+                                 *(float *)(state + 0x7E8);
+    }
+    if ((*(u8 **)(state + 0x7C4))) {
+        *(u16 *)((*(u8 **)(state + 0x7C4)) + 0x34) &= 0xFFBE;
+        *(u16 *)((*(u8 **)(state + 0x7C4)) + 0x34) |= 0x1000;
+        *(int *)((*(u8 **)(state + 0x7C4)) + 0x98) = *(int *)(*(u8 **)((*(u8 **)(state + 0x7C4)) + 0x24) + 0x10);
+        *(int *)((*(u8 **)(state + 0x7C4)) + 0x98) = 0;
+        *(u16 *)((*(u8 **)(state + 0x7C4)) + 0x34) &= 0xFFFD;
+        *(float *)((*(u8 **)(state + 0x7C4)) + 0x2C) = *(float *)(*(u8 **)((*(u8 **)(state + 0x7C4)) + 0x24) + 0x24) *
+                                 *(float *)(state + 0x7E8);
+    }
+    if ((*(u8 **)(state + 0x7C8))) {
+        *(u16 *)((*(u8 **)(state + 0x7C8)) + 0x34) &= 0xFFBE;
+        *(u16 *)((*(u8 **)(state + 0x7C8)) + 0x34) |= 0x1000;
+        *(int *)((*(u8 **)(state + 0x7C8)) + 0x98) = *(int *)(*(u8 **)((*(u8 **)(state + 0x7C8)) + 0x24) + 0x10);
+        *(int *)((*(u8 **)(state + 0x7C8)) + 0x98) = 0;
+        *(u16 *)((*(u8 **)(state + 0x7C8)) + 0x34) &= 0xFFFD;
+        *(float *)((*(u8 **)(state + 0x7C8)) + 0x2C) = *(float *)(*(u8 **)((*(u8 **)(state + 0x7C8)) + 0x24) + 0x24) *
+                                 *(float *)(state + 0x7E8);
+    }
+    func_002A7750(object, 2, 1);
+    *(u16 *)(object + 0x34) &= 0xEFFF;
+    *(short *)(state + 0x7FA) = 0;
+}
+
 
 void func_L18_00432D08(u8 *a0) {
     u8 *s0;
