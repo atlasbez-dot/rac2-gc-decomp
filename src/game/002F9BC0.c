@@ -57,7 +57,6 @@ void func_002FADB0(void)
     D_001A7A20[0] &= ~128;
 }
 
-INCLUDE_ASM("asm/game", func_002FAE68);
 
 extern void func_002B7AD0(void);
 extern int ref_L00_002FB170_00[];

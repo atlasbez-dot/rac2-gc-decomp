@@ -1,3 +1,18 @@
+src/game/00288970-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00292B20-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002CB8A0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/game/002CB950-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/game/002F5E20-rc2.c	-O2 -G8 -fno-schedule-insns -ffunction-sections -fno-builtin
+src/game/002FAE68-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/game/0031E528-rc2.c	-O2 -fno-schedule-insns -G0 -ffunction-sections -fno-builtin
+src/game/00335DC0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/levels/shared/L01_00398A90-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/02_maktar_nebula/L02_003F9AF0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/02_maktar_nebula/L02_003F9B70-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/02_maktar_nebula/L02_003FE1B0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L02_004114A0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/06_notak/L06_0042B868-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/14_aranos_prison/L14_00423B30-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/core/00123A00-rc2.c	sdk -O2 -ffunction-sections -fno-builtin
 src/core/00123C28-rc2.c	sdk -O2 -ffunction-sections -fno-builtin
 src/core/001286C8-rc2.c	sdk -O2 -G0 -ffunction-sections -fno-builtin

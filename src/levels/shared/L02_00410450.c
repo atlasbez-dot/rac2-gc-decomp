@@ -25,7 +25,6 @@ INCLUDE_ASM("asm/levels", func_L02_00410E58);
 INCLUDE_ASM("asm/levels", func_L02_00410F68);
 
 /* Plays one of nine resident messages, chosen by the sub-object's state word. */
-INCLUDE_ASM("asm/levels", func_L02_004114A0);
 
 INCLUDE_ASM("asm/levels", func_L02_00411530);
 
