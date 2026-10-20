@@ -512,7 +512,6 @@ INCLUDE_ASM("asm/levels", func_L00_003F5750);
 
 INCLUDE_ASM("asm/levels", func_L00_003F5870);
 
-INCLUDE_ASM("asm/levels", func_L00_003F59F0);
 
 INCLUDE_ASM("asm/levels", func_L00_003F5B10);
 
@@ -608,4 +607,3 @@ void func_L00_003F89F8(Obj_Fe48725c6 *p)
     v = p->u.b.h6;
     d->b6 = v;
 }
-

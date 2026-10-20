@@ -387,7 +387,6 @@ int func_L11_0043A800(char *p)
     return *(unsigned char *)(p + 0x20) >= 4;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_0043A810);
 
 INCLUDE_ASM("asm/levels", func_L11_0043A9D8);
 
