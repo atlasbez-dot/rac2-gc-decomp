@@ -1,3 +1,13 @@
+src/levels/shared/L04_0039FEA8-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
+src/levels/07_siberius/L07_003EF1E0-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
+src/levels/shared/L00_0031B9F8-rc2.c	-fno-builtin -O2 -G0 -g -ffunction-sections
+src/levels/shared/L07_003F90E8-rc2.c	-O2 -G8 -g -ffunction-sections -fno-builtin
+src/levels/shared/L05_00443C18-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
+src/game/002A88A0-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
+src/game/0026FF08-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
+src/levels/09_dobbo/L09_003F69A0-rc2.c	-O2 -G8 -g -ffunction-sections -fno-builtin
+src/game/002AAA00-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
+src/game/002AB378-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
 src/levels/18_damosel/L18_00437BA8-rc2.c	-fno-builtin -O2 -G8 -mno-split-addresses -ffunction-sections -malign-jumps=4 -g
 src/levels/shared/L00_0038D368-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin -g
 src/levels/shared/L00_003E9930-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin -g

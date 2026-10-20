@@ -350,7 +350,6 @@ int func_002A8860(int *p, int b) {
 
 INCLUDE_ASM("asm/game", func_002A8898);
 
-INCLUDE_ASM("asm/game", func_002A88A0);
 
 INCLUDE_ASM("asm/game", func_002A89A8);
 

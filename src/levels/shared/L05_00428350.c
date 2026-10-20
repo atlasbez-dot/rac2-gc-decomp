@@ -167,7 +167,6 @@ INCLUDE_ASM("asm/levels", func_L05_00443740);
 
 /* Folds the object's two turn rates out of its parent's rotation into the moby, then
    rebuilds the three orientation blocks the driver reads. */
-INCLUDE_ASM("asm/levels", func_L05_00443C18);
 
 INCLUDE_ASM("asm/levels", func_L05_00443D08);
 

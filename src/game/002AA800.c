@@ -156,7 +156,6 @@ float func_002AA898(float *position, float *velocity, int direction,
     return residual;
 }
 
-INCLUDE_ASM("asm/game", func_002AAA00);
 
 INCLUDE_ASM("asm/game", func_002AAC80);
 
@@ -299,7 +298,6 @@ void func_002AB250(void *owner, char *offset, void *filter)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002AB378);
 
 extern void func_00283658(void *, void *);
 extern void func_002AB378(void *, void *);
