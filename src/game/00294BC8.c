@@ -245,7 +245,42 @@ INCLUDE_ASM("asm/game", func_00295F60);
 
 INCLUDE_ASM("asm/game", func_00297218);
 
-INCLUDE_ASM("asm/game", func_00297400);
+extern void func_00297550(u8 *, s32, u8 *, short *);
+
+/* packs a mask of the non-zero nibbles of every 32-nibble group of the
+   4-bit-per-pixel bitmap that func_00297550 leaves at 0x70000000 */
+void func_00297400(u8 *out, u8 *base, short *offsets)
+{
+    int i;
+    int group;
+    int bit;
+    int r;
+    int t;
+    u32 *dst;
+    u8 *src = (u8 *)0x70000000;
+
+    for (i = 0; i < 0x100; i++) {
+        func_00297550((u8 *)0x70000000, i, base, offsets);
+        r = i % 16;
+        t = (i / 16) << 9;
+        dst = (u32 *)(out + ((r + t) << 2));
+        for (group = 0; group < 0x20; group++) {
+            u32 mask = 0;
+            for (bit = 0; bit < 0x20; bit++) {
+                u8 pixel = src[group * 16 + (bit >> 1)];
+                u8 value = (bit & 1) ? (pixel >> 4) : (pixel & 0xF);
+                if (value != 0)
+                    mask |= 1 << bit;
+                if ((bit & 0x1F) == 0x1F) {
+                    *dst = mask;
+                    dst++;
+                    mask = 0;
+                }
+            }
+            dst += 15;
+        }
+    }
+}
 
 void func_00297550(u8 *out,s32 index,u8 *base,short *offsets) {
     s32 pending=0;

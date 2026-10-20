@@ -367,6 +367,7 @@ src/levels/shared/L10_0037D200.c	-O2 -G8 -ffunction-sections
 
 src/game/0027A0F8.c	-O2 -G0 -ffunction-sections -mno-split-addresses
 src/game/002CCED0.c	-O2 -G0 -ffunction-sections -mno-split-addresses
+src/game/00349B20.c	-O2 -G0 -ffunction-sections -ffast-math
 src/core/00120390.c	sdk -O2 -G2 -ffunction-sections
 src/core/00120810.c	sdk -O2 -G2 -ffunction-sections
 src/core/001212C8.c	sdk -O2 -G2 -ffunction-sections
