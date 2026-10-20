@@ -412,7 +412,6 @@ void func_00335D60(void *object, int flags) {
     func_00335870(object, flags);
 }
 
-INCLUDE_ASM("asm/game", func_00335DC0);
 
 int func_00335E08(void) {
     return D_001B23A0;

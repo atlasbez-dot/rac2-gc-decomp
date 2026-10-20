@@ -86,7 +86,6 @@ extern void func_002B50E0(char *object, char *bone, float factor);
 extern void func_002B4FF0(char *object, char *bone, float factor);
 
 /* Dispatches on the owner's animation step and plays the matching bone animation. */
-INCLUDE_ASM("asm/levels", func_L14_00423B30);
 
 extern char D_L14_001B9500[];
 

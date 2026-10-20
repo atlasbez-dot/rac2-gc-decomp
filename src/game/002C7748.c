@@ -427,9 +427,7 @@ int func_002CB7D0(int mode)
 
 INCLUDE_ASM("asm/game", func_002CB820);
 
-INCLUDE_ASM("asm/game", func_002CB8A0);
 
-INCLUDE_ASM("asm/game", func_002CB950);
 
 extern short D_0018A000[];
 extern void func_0029CE80(void);
