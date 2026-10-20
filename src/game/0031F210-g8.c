@@ -91,6 +91,26 @@ void func_00321FE0(char *object)
 extern unsigned short *D_001EE5A0[];
 extern char *D_001B1B5C __attribute__((sda));
 
+/* Walks the moby group list of the object's group id and raises the flag at data + 0x276
+   on every peer of class 0xB0A whose class byte is not negative. */
+void func_00321F60(char *self)
+{
+    if (*(unsigned char *)(self + 0x21) != 0xFF) {
+        unsigned short *list = D_001EE5A0[*(unsigned char *)(self + 0x21)];
+        if (list != 0) {
+            char *base = D_001B1B5C;
+            unsigned short *entry = list;
+            int key;
+            do {
+                char *object = (char *)((unsigned int)base + ((*entry & 0x7FFF) << 8));
+                if (object[0x20] >= 0 && *(short *)(object + 0xAA) == 0xB0A)
+                    *(short *)(*(char **)(object + 0x68) + 0x276) = 1;
+                key = *(short *)entry++;
+            } while (key >= 0);
+        }
+    }
+}
+
 void func_00325320(char *self)
 {
     if (*(unsigned char *)(self + 0x21) != 0xFF) {

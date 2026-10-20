@@ -70,7 +70,28 @@ void func_L00_002D7958(f32 *dst, f32 *src, f32 x) {
 }
 
 
+typedef void (*L00_Dispatch)(void *);
 
+typedef struct {
+    L00_Dispatch entries[5];
+} L00_DispatchRecord;
+
+/* The shared class table: a 0x14-byte record per type index, its entries at +0x8. */
+extern L00_DispatchRecord D_002A3A00[];
+
+/* Calls the object's class entry 2 for the type index in its +0x8C halfword. */
+void func_L00_002D7D58(char *object) {
+    L00_Dispatch callback = D_002A3A00[*(short *)(object + 0x8C)].entries[2];
+    if (callback != 0)
+        callback(object);
+}
+
+/* Calls the object's class entry 4 for the type index in its +0x8C halfword. */
+void func_L00_002D8208(char *object) {
+    L00_Dispatch callback = D_002A3A00[*(short *)(object + 0x8C)].entries[4];
+    if (callback != 0)
+        callback(object);
+}
 
 typedef struct {
     int key;

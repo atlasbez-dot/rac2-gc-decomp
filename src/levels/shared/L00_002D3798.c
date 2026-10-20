@@ -407,6 +407,22 @@ int func_L00_002D4040(int a0)
     return D_L00_00139688[idx];
 }
 
+extern void func_L00_002C42E0(int, int);
+
+void func_L00_002D40A0(V4_F6a70b950 *v, int mode, float t)
+{
+    char *addr = (char *)&D_00189E20_11 + 0x18A0;
+    int x;
+
+    *(V4_F6a70b950 *)addr = *v;
+    /* rebase the copy destination (base + 0x18A0) back to the record base */
+    addr -= 0x18A0;
+    x = *(int *)(addr + 0x2294);
+    *(int *)(addr + 0x18B0) = mode;
+    *(float *)(addr + 0x18AC) = t;
+    if ((unsigned)(x - 98) >= 3)
+        func_L00_002C42E0(98, 2);
+}
 
 extern int D_0018C0B4;
 

@@ -1,25 +1,5 @@
 #include "include_asm.h"
 
-extern void func_L00_002F3478(void);
-
-extern void func_002B49E0(int a, int b, int c, int d, int e);
-
-extern int D_001FFE40[];
-
-extern int D_001A8FDC;
-
-extern int D_00294F98;
-
-INCLUDE_ASM("asm/levels", func_L20_002DEBE0);
-
-INCLUDE_ASM("asm/levels", func_L20_00310E38);
-
-INCLUDE_ASM("asm/levels", func_L20_00330A68);
-
-INCLUDE_ASM("asm/levels", func_L20_0036AE68);
-
-INCLUDE_ASM("asm/levels", func_L20_0036E720);
-
 typedef struct YeedilEffectState {
     char pad00[0x30];
     int mode;
@@ -74,8 +54,86 @@ void func_L20_0039AA98(unsigned char *object)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L20_0039BB18);
+/* func_L20_002DEBE0 is defined in L20_002DEBE0-g8.c (it reaches data through $gp). */
+
+/* func_L20_00310E38 is defined in L20_002DEBE0-g8.c (it reaches data through $gp). */
+
+extern unsigned char D_L20_001DBA60[];
+
+extern void *D_L20_001DB100[];
+
+extern void func_0029F390(void *);
+
+extern void func_002A0F48(void *);
+
+void func_L20_00330A68(void *arg0, int arg1)
+{
+    unsigned char *p;
+    unsigned char *r;
+    unsigned char *s;
+    int q;
+
+    *(short *)(arg0 + 0xAA) = (short)arg1;
+    *(unsigned char *)(arg0 + 0x22) = D_L20_001DBA60[(short)arg1];
+    *(void **)(arg0 + 0x24) = D_L20_001DB100[*(unsigned char *)(arg0 + 0x22)];
+    func_0029F390(arg0);
+    p = *(unsigned char **)(arg0 + 0x24);
+    *(unsigned char *)(arg0 + 0x62) = p[0xE];
+    *(float *)(arg0 + 0x2C) = *(float *)(p + 0x24);
+    *(int *)(arg0 + 0x98) = *(int *)(p + 0x10);
+    *(unsigned char *)(arg0 + 0x61) = 0xFF;
+    if (p) {
+        q = *(int *)(p + 0x40);
+        if (q) {
+            *(unsigned short *)(arg0 + 0x34) |= 0x10;
+            *(int *)(arg0 + 0x78) = *(int *)(p + 0x40);
+        }
+        r = *(unsigned char **)(arg0 + 0x24);
+        if (r[0xF]) {
+            *(unsigned char *)(arg0 + 0x6F) = 0x18;
+            *(unsigned short *)(arg0 + 0x34) |= 0x400;
+            *(int *)(arg0 + 0x70) = 0;
+            *(int *)(arg0 + 0x74) = 0;
+            *(unsigned char *)(arg0 + 0xBD) = 0;
+        }
+        s = *(unsigned char * volatile *)(arg0 + 0x24);
+        if (s[6]) {
+            *(unsigned char *)(arg0 + 0x63) = 0x18;
+        }
+    }
+    func_002A0F48(arg0);
+}
+
+INCLUDE_ASM("asm/levels", func_L20_0036AE68);
+
+extern void func_L00_002F3478(void);
+
+extern void func_002B49E0(int a, int b, int c, int d, int e);
+
+extern int D_L20_001FFE40[];
+
+extern int D_L00_001A8FDC __attribute__((sda));
+
+extern int D_L20_00294F98;
+
+void func_L20_0036E720(void)
+{
+    int *base;
+    int *other;
+
+    func_L00_002F3478();
+    base = D_L20_001FFE40;
+    other = &D_L20_00294F98;
+    *(int *)(base + 0x40) = (int)other;
+    *(int *)(base + 0x41) = 0xB;
+    D_L00_001A8FDC = 1;
+    func_002B49E0(3, 1, 0xB, 0, 0);
+}
+
+/* func_L20_0039BDF0 is a near miss: nonmatching/levels/func_L20_0039BDF0.c */
 
 INCLUDE_ASM("asm/levels", func_L20_0039BDF0);
 
-INCLUDE_ASM("asm/levels", func_L20_0039BEC8);
+/* func_L20_0039BB18 is defined in L20_002DEBE0-g8.c (it reaches data through $gp). */
+
+/* func_L20_0039BEC8 is defined in L20_002DEBE0-g8.c (it reaches data through $gp). */

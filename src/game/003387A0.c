@@ -18,6 +18,7 @@ void func_00338808(void)
 {
 }
 
+/* func_00338810 needs $gp-relative data: it lives in the -g8 sibling file. */
 
 void func_00338A58(void)
 {

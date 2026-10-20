@@ -52,8 +52,6 @@ void func_00321E80(char *object)
     func_002B0990(object, first, 5, 1, 2.5f);
 }
 
-INCLUDE_ASM("asm/game", func_00321F60);
-
 /* func_00321FE0 is in the -G8 sibling. */
 
 void func_003220A8(char *p)

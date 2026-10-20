@@ -165,9 +165,80 @@ INCLUDE_ASM("asm/levels", func_L02_003F1608);
 
 /* func_L02_003F16A8 is defined in L02_003DB310-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L02_003F16F0);
+extern int func_L02_003FC0D0(int, short);
 
-INCLUDE_ASM("asm/levels", func_L02_003F17B0);
+extern int func_002B3BA8(char *, int, float, float, int, int);
+
+void func_L02_003F16F0(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    if (*(unsigned char *)(arg0 + 0x20) < 4) {
+        *(int *)(state + 0x4B0) = 0;
+        goto done;
+    }
+
+    if (*(short *)(state + 0x4EA) == 1) {
+        *(short *)(state + 0x4E8) =
+            func_002B3BA8(arg0, *(int *)(state + 0x4E4), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x4B0) = *(int *)(state + 0x210);
+    } else {
+        if (func_L02_003FC0D0(*(int *)(arg0 + 0xB8), *(short *)(arg0 + 0xAA)) == 0)
+            goto done;
+        *(short *)(state + 0x4EA) = 1;
+        *(short *)(state + 0x4E8) =
+            func_002B3BA8(arg0, *(int *)(state + 0x4E4), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x4B0) = *(int *)(state + 0x210);
+    }
+    return;
+
+done:
+    *(short *)(state + 0x4EA) = 0;
+}
+
+extern void *func_002B60B0(u8 *, float, float, float, float);
+
+extern void func_002A0488(void *, u8, u8, u8);
+
+/* Sets the actor up: re-registers its sub-objects and arms its effects. */
+void func_L02_003F17B0(char *arg0, int arg1) {
+    char *state = *(char **)(arg0 + 0x68);
+    int i;
+
+    *(float *)(state + 0x20) = (float)*(short *)(state + 0x24);
+    *(u16 *)(state + 0x98) = 0;
+    func_002B60B0((u8 *)arg0, 0.004444444552063942f, 0.13333334028720856f,
+                  0.0011635529808700085f, 0.10471977293491364f);
+    func_002A7750(arg0, 3, 0);
+    *(int *)(arg0 + 0x98) = *(int *)(*(char **)(arg0 + 0x24) + 0x10);
+    *(u8 *)(state + 0x7A) = 0;
+    *(u8 *)(arg0 + 0x31) = 1;
+    *(u8 *)(arg0 + 0x7F) = 0;
+    *(u16 *)(arg0 + 0x34) = (*(u16 *)(arg0 + 0x34) | 0x1000) & 0xFFB8;
+    {
+        char **slot = (char **)(state + 0x4C0);
+
+        for (i = 1; i >= 0; i--) {
+            if (*slot != 0) {
+                *(u16 *)(*slot + 0x34) &= 0xFFFE;
+                *(u8 *)(*slot + 0x31) = 1;
+                *(int *)(*slot + 0x98) = *(int *)(*(int *)(*slot + 0x24) + 0x10);
+            }
+            slot++;
+        }
+    }
+    {
+        short flag = *(short *)(state + 0x60);
+
+        *(u16 *)(state + 0x4F0) = arg1;
+        *(u16 *)(state + 0x4EA) = 0;
+        if (flag != 0) {
+            *(short *)(state + 0x60) = 0;
+            func_002A0488(arg0, *(u8 *)(state + 0x64), *(u8 *)(state + 0x65),
+                          *(u8 *)(state + 0x66));
+            *(short *)(state + 0x62) = 1;
+        }
+    }
+}
 
 extern void func_31E3C0(char *, int, int, int);
 

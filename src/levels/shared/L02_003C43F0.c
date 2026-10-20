@@ -91,6 +91,21 @@ extern int D_L02_001A8FF0 __attribute__((sda));
 
 extern void func_002B60B0(void *, float, float, float, float);
 
+extern long long func_0027C878(char *);
+
+extern float func_00282E80(void *, void *);
+
+extern void func_00283410(float *, float *);
+
+extern void func_00280B90(char *, float *, int);
+
+/* The packet reset, which the levels place in two copies: the one this function calls
+   differs from level to level. */
+extern void ref_L02_003FFC48_00(char *);
+
+/* The vector scaler, in two copies as well. */
+extern void ref_L02_003FFC48_01(char *, float);
+
 struct S_001A63A8 {
     char pad0[0x6C];
     short f6C;
@@ -124,6 +139,16 @@ struct Outer {
     char pad[104];
     struct G *g;
 };
+
+/* The aim vector the L02 aiming helpers read, at 0x001BA3C0. */
+typedef struct {
+    char pad_000[0x140];
+    float x_140;
+    float y_144;
+    float z_148;
+} L02AimVector;
+
+extern L02AimVector D_L02_001BA3C0;
 
 typedef int BatchA_A17_s32;
 
@@ -460,7 +485,44 @@ void func_L02_003FF698(void *a0) {
         func_002A7750(a0, 2, -1);
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003FFC48);
+/* Aims a 144-byte packet at the level's aim vector: the quaternion comes from the source
+   point, the matrix's last row from the same point, and the packet is dispatched. */
+void func_L02_003FFC48(char *pos, int a1, int a2, char *a3, int t0, float f12, float f13)
+{
+    char pkt[144];
+    float m[16];
+    float quat[4];
+    long long r;
+
+    ref_L02_003FFC48_00(pkt);
+    r = func_0027C878(a3);
+
+    *(long long *)(pkt + 136) = ((long long)t0 << 2) | 0x8000000040LL;
+    *(long long *)(pkt + 128) = 280993940374112LL;
+    *(int *)(pkt + 76) = a1 + (a2 << 24);
+    *(int *)(pkt + 72) = a1 + (a2 << 24);
+    *(int *)(pkt + 68) = a1 + (a2 << 24);
+    *(int *)(pkt + 64) = a1 + (a2 << 24);
+    *(long long *)(pkt + 112) = 0LL;
+    *(long long *)(pkt + 120) = r;
+
+    quat[3] = 0.0f;
+    quat[2] = func_00283248(D_L02_001BA3C0.x_140 - *(float *)(pos + 0),
+                            D_L02_001BA3C0.y_144 - *(float *)(pos + 4));
+    quat[1] = -func_00283248(func_00282E80(pos, (void *)&D_L02_001BA3C0.x_140),
+                             D_L02_001BA3C0.z_148 - *(float *)(pos + 8));
+    quat[0] = f13;
+
+    func_00283410(m, quat);
+
+    m[12] = *(float *)(pos + 0);
+    m[13] = *(float *)(pos + 4);
+    m[14] = *(float *)(pos + 8);
+    m[15] = 1.0f;
+
+    ref_L02_003FFC48_01(pkt, f12);
+    func_00280B90(pkt, m, 0);
+}
 
 /* Below 6000 in the low half-word, while the high one reads three. */
 void func_L02_004006D8(void) {
@@ -475,7 +537,37 @@ int func_L02_00400B00(unsigned char *a0) {
 
 INCLUDE_ASM("asm/levels", func_L02_00400D08);
 
-INCLUDE_ASM("asm/levels", func_L02_004012A0);
+/* The pointer and the five helpers this calls sit at their own addresses in every level
+   that has the function, so all six are reached under names that carry no address. */
+extern char ref_L02_004012A0_00[] __attribute__((nosda));
+
+extern void ref_L02_004012A0_01(void *, int, int, int, int, int, int, int, int, int, int,
+                                int, float, float);
+extern void ref_L02_004012A0_02(float *, const float *, const float *);
+extern void ref_L02_004012A0_03(void *, void *, float);
+extern void ref_L02_004012A0_04(void *, void *, int, int, int, int, float, float, float);
+extern void ref_L02_004012A0_05(void *, void *, void *, float);
+
+/* The kind at +0xAA decides the work: the second kind reports itself and leaves, every
+   other kind turns the object's own basis, scales it and hands it on. */
+void func_L02_004012A0(char *a0) {
+    char *s1 = a0;
+    char *s2 = *(char **)(a0 + 0x68);
+    float v[4];
+    short kind = *(short *)(a0 + 0xAA);
+
+    switch (kind) {
+    case 0xB1B:
+        break;
+    case 0xB5A:
+        ref_L02_004012A0_01(a0 + 0x10, 0, 0, 0, 0, 20, 45, 1, 1, 0, 0, 0, 0.3f, 20.0f);
+        return;
+    }
+    ref_L02_004012A0_02(v, (const float *)ref_L02_004012A0_00, a0 + 0x10);
+    ref_L02_004012A0_03(v, v, 1.0f);
+    ref_L02_004012A0_04(a0, a0 + 0x10, 0x10001, 0, 1, 0, 0.25f, *(float *)(s2 + 0x6C), 1.0f);
+    ref_L02_004012A0_05(a0, a0 + 0x10, v, 0.0f);
+}
 
 /* func_L02_004013C0 lives in the -g8 sibling: it reads a $gp-relative scalar. */
 

@@ -39,8 +39,6 @@ void func_L17_003C8248(s32 a0)
                                       (func_2EF4E0(ang) + 1.0f) * 0.5f);
 }
 
-INCLUDE_ASM("asm/levels", func_L17_003CC6A8);
-
 INCLUDE_ASM("asm/levels", func_L17_003CC798);
 
 INCLUDE_ASM("asm/levels", func_L17_003CC850);
@@ -118,8 +116,6 @@ INCLUDE_ASM("asm/levels", func_L17_003E8A58);
 INCLUDE_ASM("asm/levels", func_L17_00417DB0);
 
 INCLUDE_ASM("asm/levels", func_L17_00418A68);
-
-INCLUDE_ASM("asm/levels", func_L17_00418D10);
 
 INCLUDE_ASM("asm/levels", func_L17_0041A4C0);
 

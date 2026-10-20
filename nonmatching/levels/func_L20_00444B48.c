@@ -8,7 +8,24 @@
    one set-up is swapped at +0x8C (retail saves `$s1 = $a1` in the bc1f delay slot with
    `mov.s $f23,$f13` four words earlier; this cc1 the other way round). Named numerator and
    denominator locals give 200 bytes and a different schedule; spelling the three helpers as
-   `(f32)` casts lets this cc1 fold them into the guards (104 bytes). */
+   `(f32)` casts lets this cc1 fold them into the guards (104 bytes). 
+   Second wave (20_yeedil, 2026-10-20) re-measured this one and adds three facts.
+   (1) The symbol is D_L20_001B20B0, not D_L20_001B20A0: retail loads it with
+   `lwc1 $f1,0x30B0($gp)` and gp is 0x1AEFF0, so the constant lives at 0x1B20B0 (the
+   unit's -g8.c sibling already declares D_L20_001B20B0 and uses it). (2) That symbol is
+   a FLOAT: declared as `int` the compiler adds a `cvt.s.w` right after the load, and
+   changing the declaration in src/levels/20_yeedil/L20_0043ECB0-g8.c from int to float
+   is what makes the load and the `c.ole.s` compare come out right - it does not disturb
+   func_L20_00444C18, which only takes its address (still 1 of 1 places match).
+   (3) The file has to be built with -G8 (the -g8.c sibling): at -G0 the load comes out
+   `lui $at ; lwc1 $f1,0x0($at)`. The two residues are the same as recorded above: the
+   `nop` retail keeps before the `div.s` (the load-delay nop that belongs to the
+   `lwc1 $f1,0x30B0($gp)`), and the copy of the second argument into $s1 sits in the
+   delay slot of the `bc1f` in retail while this cc1 puts it in the prologue block (and
+   the `mov.s $f23,$f13` takes its place). Tried and not enough: the source spelled with
+   if/else-if, with a result variable, with the three helper calls in named locals, with
+   the numerator in a named local, and with the second comparison written as `>=` or as
+   `!(a > b)` (those change the compare opcode and are wrong).*/
 #include "common.h"
 
 extern f32 D_L20_001B20A0 __attribute__((sda));

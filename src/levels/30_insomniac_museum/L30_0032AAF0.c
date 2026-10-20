@@ -176,7 +176,7 @@ int func_L30_00384980(char *a0) {
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L30_00386300);
+/* func_L30_00386300 lives in the -g8 sibling: it reaches its globals through $gp. */
 
 INCLUDE_ASM("asm/levels", func_L30_0038E7E0);
 

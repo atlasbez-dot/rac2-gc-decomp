@@ -8,7 +8,7 @@ extern char D_L17_00296F80[];
 
 extern char D_L17_00296FF0[];
 
-extern void func_2EF398(void *, void *, void *);
+extern void func_00283098(void *, void *, void *);
 
 extern void func_2EEEB8(void *, void *, void *);
 
@@ -18,7 +18,7 @@ extern int func_2F00C0(float);
 
 extern float func_2EF4E0(float);
 
-extern float func_2EEDF8(float);
+extern float func_00282C48(float);
 
 extern float func_2F00B0(int);
 
@@ -53,7 +53,7 @@ void func_L17_00340EA0(char *s1)
     f20 = func_2F00B0(*(short *)(s0 + 4)) / func_2F00B0(*(short *)(s0 + 6));
     t = func_2EF4E0(f20 * 6.283186f);
     *(int *)(s1 + 4) = (*(int *)(s1 + 4) & 0x00FFFFFF)
-                       + (func_2F00C0(func_2EEDF8(func_2F00B0(*(int *)(s0 + 0xC)) * t)) << 24);
+                       + (func_2F00C0(func_00282C48(func_2F00B0(*(int *)(s0 + 0xC)) * t)) << 24);
 }
 
 INCLUDE_ASM("asm/levels", func_L17_003583F8);
@@ -103,7 +103,7 @@ void func_L17_003C3250(char *a2)
     s2 = D_L17_00296F80;
     s0 = v1 + 0x10;
     for (i = 6; i >= 0; i--) {
-        func_2EF398(s0, s2, s3);
+        func_00283098(s0, s2, s3);
         s2 += 0x10;
         func_2EEEB8(s0, s0, s4);
         s0 += 0x10;
@@ -178,7 +178,7 @@ void func_L17_003C5E78(char *a2)
     s2 = D_L17_00296FF0;
     s0 = v1 + 0x10;
     for (i = 6; i >= 0; i--) {
-        func_2EF398(s0, s2, s3);
+        func_00283098(s0, s2, s3);
         s2 += 0x10;
         func_2EEEB8(s0, s0, s4);
         s0 += 0x10;
@@ -196,7 +196,6 @@ INCLUDE_ASM("asm/levels", func_L17_003C69A8);
 INCLUDE_ASM("asm/levels", func_L17_003C6CE8);
 
 /* func_L17_003C7018 is defined in L17_0032C070-g8.c (this unit has no $gp access for it). */
-
 
 INCLUDE_ASM("asm/levels", func_L17_003C71B0);
 

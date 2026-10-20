@@ -128,7 +128,6 @@ INCLUDE_ASM("asm/game", func_00312EA8);
 
 INCLUDE_ASM("asm/game", func_00312EB0);
 
-
 INCLUDE_ASM("asm/game", func_00313210);
 
 extern char D_L00_0023A670[][16];

@@ -149,7 +149,40 @@ void func_L00_003CD158(void)
 {
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003CEC50);
+extern float func_00282E80(void *dst, void *src);
+
+extern void func_002A7470(void *object, int kind, int value, int extra);
+
+extern int func_002E5CF8(int index, int value, void *object);
+
+extern char D_00189EA0[];
+
+void func_L00_003CEC50(char *object)
+{
+    char *s0 = object;
+
+    if (*(unsigned char *)(s0 + 0x20) == 0) {
+        if (func_00282E80(s0 + 0x10, D_00189EA0) < 6.0f) {
+            *(unsigned char *)(s0 + 0x20) = 1;
+            *(unsigned int *)(s0 + 0x78) = 0x24C102;
+            if (*(unsigned char *)(s0 + 0x43) != 1) {
+                func_002A7470(s0, 1, 0, 0);
+            }
+            func_002E5CF8(0, 0, s0);
+            *(unsigned int *)(s0 + 0x98) = 0;
+        }
+    }
+    if (*(unsigned char *)(s0 + 0x20) == 1) {
+        if (*(unsigned char *)(s0 + 0x60) & 2) {
+            *(unsigned char *)(s0 + 0x20) = 2;
+            *(unsigned int *)(s0 + 0x78) = 0x224C1;
+            if (*(unsigned char *)(s0 + 0x43) != 2) {
+                func_002A7470(s0, 2, 0, 0);
+            }
+            func_002E5CF8(1, 0, s0);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L00_003CED50);
 

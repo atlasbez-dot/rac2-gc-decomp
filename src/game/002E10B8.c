@@ -173,6 +173,37 @@ void func_002E37B0(void)
 
 INCLUDE_ASM("asm/game", func_002E3938);
 
+typedef struct {
+    int field0;
+    int field4;
+} Entry3940;
+
+typedef struct {
+    char pad0[6];
+    short count;
+    char pad1[24];
+    Entry3940 *entries[1];
+} Table3940;
+
+extern Table3940 *D_001B20C0 __attribute__((sda));
+
+extern void func_002E3BD8(void *);
+
+extern void func_002E3998(void *);
+
+void func_002E3940(int index)
+{
+    Table3940 *table = D_001B20C0;
+
+    if (index < table->count) {
+        Entry3940 *entry = table->entries[index];
+
+        if (entry->field4 != 0)
+            func_002E3BD8(entry);
+        else
+            func_002E3998(entry);
+    }
+}
 
 INCLUDE_ASM("asm/game", func_002E3998);
 
@@ -349,7 +380,28 @@ int func_002E5DA0(int index, int value, char *object, int kind)
     return result;
 }
 
-INCLUDE_ASM("asm/game", func_002E5E58);
+extern u8 *D_001B16AC __attribute__((sda));
+
+extern int D_001A8BBC __attribute__((sda));
+
+int func_002E5E58(int index, int value, void *object)
+{
+    u8 *table = D_001B16AC;
+    int result;
+    u8 *row;
+
+    if (table == 0)
+        return -1;
+    if (index >= D_001A8BBC)
+        return -1;
+    result = func_002E5AD0((char *)table + index * 32, value, (char *)object, 0, 0x400);
+    if (result >= 0) {
+        row = D_00188660 + result * 0x70;
+        *(int *)(row + 0x88) = object;
+        *(short *)(row + 0x7E) = index;
+    }
+    return result;
+}
 
 INCLUDE_ASM("asm/game", func_002E5EF0);
 

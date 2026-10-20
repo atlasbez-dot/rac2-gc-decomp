@@ -4,7 +4,7 @@ typedef int TI128 __attribute__((mode(TI)));
 
 extern int D_L20_001B1FD8 __attribute__((sda));
 
-extern int D_L20_001B20B0 __attribute__((sda));
+extern float D_L20_001B20B0 __attribute__((sda));
 
 extern float D_L20_001B2110 __attribute__((sda));
 

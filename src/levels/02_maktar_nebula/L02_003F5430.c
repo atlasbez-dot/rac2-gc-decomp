@@ -83,7 +83,46 @@ INCLUDE_ASM("asm/levels", func_L02_003FB4D8);
 
 INCLUDE_ASM("asm/levels", func_L02_003FB5A0);
 
-INCLUDE_ASM("asm/levels", func_L02_003FB6C0);
+extern int func_L02_003D77B8(char *);
+extern void func_L02_003D7868(char *, char *);
+
+/* Counts the kind of A1 in the state and sets its scale to one. */
+s32 func_L02_003FB6C0(char *a0, char *a1) {
+    char *s0 = *(char **)(a0 + 0x68);
+    char **list = (char **)(s0 + 0xA8);
+    char **slot = list + *(s32 *)(s0 + 0xD8);
+    char *e = *slot;
+
+    if (e != 0) {
+        if (func_L02_003D77B8(e) != 0) {
+            char **cur = list + *(s32 *)(s0 + 0xD8);
+
+            func_L02_003D7868(*cur, a1);
+            switch (*(s16 *)(a1 + 0xAA)) {
+            case 0x9CA:
+                *(s32 *)(s0 + 0x90) += 1;
+                *(float *)(*(char **)(a1 + 0x68) + 0x20) = 1.0f;
+                break;
+            case 0xB22:
+                *(s32 *)(s0 + 0x94) += 1;
+                *(float *)(*(char **)(a1 + 0x68) + 0x20) = 1.0f;
+                break;
+            case 0xC3B:
+                *(s32 *)(s0 + 0x98) += 1;
+                *(float *)(*(char **)(a1 + 0x68) + 0x20) = 1.0f;
+                break;
+            case 0xC3E:
+                *(s32 *)(s0 + 0x9C) += 1;
+                *(float *)(*(char **)(a1 + 0x68) + 0x20) = 1.0f;
+                break;
+            default:
+                return 1;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003FB7E0);
 
@@ -129,7 +168,56 @@ void func_L02_003FBAD0(char *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003FBB90);
+extern char *D_L02_001B359C __attribute__((section(".sdata")));
+extern u32 D_L02_001FC060[];
+extern void func_L02_003D2390(char *);
+extern void func_L02_003D4900(char *);
+extern void func_L02_003DB6D8(char *);
+extern void func_L02_003F18E8(char *);
+extern void func_L02_0040B980(char *);
+extern void func_L02_0040D180(char *);
+
+/* Walks the 16-bit stream the object's table entry points at and calls the handler of the
+   entity type each word names; a negative word ends the stream. */
+void func_L02_003FBB90(char *a0) {
+    char *state = *(char **)(a0 + 0x68);
+    u32 index = *(u32 *)(state + 0x40);
+    u32 entry;
+    short *p;
+    char *rec;
+    s16 type;
+
+    if (index == 0xFF)
+        return;
+    entry = D_L02_001FC060[index];
+    if (entry == 0)
+        return;
+    p = (short *)entry;
+    do {
+        rec = D_L02_001B359C + ((*(u16 *)p & 0x7FFF) << 8);
+        type = *(s16 *)(rec + 0xAA);
+        switch (type) {
+        case 0x9CA:
+            func_L02_003D2390(rec);
+            break;
+        case 0xB22:
+            func_L02_003F18E8(rec);
+            break;
+        case 0xC3B:
+            func_L02_0040B980(rec);
+            break;
+        case 0xC3E:
+            func_L02_0040D180(rec);
+            break;
+        case 0x9F8:
+            func_L02_003D4900(rec);
+            break;
+        case 0xA44:
+            func_L02_003DB6D8(rec);
+            break;
+        }
+    } while (*p++ >= 0);
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003FBCF8);
 
@@ -166,6 +254,43 @@ s32 func_L02_003FC0B8(char *a0) {
     return *(s32 *)(v1 + 0x84);
 }
 
+/* Counts down one of the four timers named by a1; true when it was still running. */
+s32 func_L02_003FC0D0(char *a0, s32 a1) {
+    char *p = *(char **)(a0 + 0x68);
+
+    switch (a1) {
+    case 0x9CA:
+        if (*(s32 *)(p + 0x50) > 0) {
+            *(s32 *)(p + 0x50) -= 1;
+            return 1;
+        }
+        break;
+    case 0xB22:
+        if (*(s32 *)(p + 0x54) > 0) {
+            *(s32 *)(p + 0x54) -= 1;
+            return 1;
+        }
+        break;
+    case 0xC3B:
+        if (*(s32 *)(p + 0x58) > 0) {
+            *(s32 *)(p + 0x58) -= 1;
+            return 1;
+        }
+        break;
+    case 0xC3E:
+        if (*(s32 *)(p + 0x5C) > 0) {
+            *(s32 *)(p + 0x5C) -= 1;
+            return 1;
+        }
+        break;
+    case 0x9F8:
+    case 0xA44:
+        return 0;
+    default:
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003FC1B0);
 

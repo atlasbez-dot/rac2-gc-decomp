@@ -349,7 +349,23 @@ INCLUDE_ASM("asm/game", func_002FFCF8);
 
 INCLUDE_ASM("asm/game", func_002FFD78);
 
+extern short D_001B2346;
 
+extern short ref_L00_002FFFE0_00 __attribute__((sda));
+
+extern short D_001A6480[];
+
+extern void func_002FC560(int, long long);
+
+extern void func_0027DE50(int, int, int, int, int);
+
+void func_002FFFE0(void)
+{
+    short v;
+    func_002FC560(0x42, ((long long)ref_L00_002FFFE0_00 << 32) | 0x44);
+    v = ref_L00_002FFFE0_00;
+    func_0027DE50(0, D_001A6480[0xA9], 0, D_001A6480[0xA8], (v << 24) | 0xFFFFFF);
+}
 
 INCLUDE_ASM("asm/game", func_00300180);
 

@@ -146,6 +146,34 @@ INCLUDE_ASM("asm/levels", func_L02_0032EF10);
 
 INCLUDE_ASM("asm/levels", func_L02_0032F008);
 
+extern void *func_L00_0032C638(char *a0);
+extern int func_002B50E0(void *a0, void *a1, float f12);
+
+/* Set the record's fields for the call, then put the old ones back. */
+int func_L02_00331440(void *a0, void *a1, int a2, float f12, float f13, float f14) {
+    char *rec;
+    int old38;
+    float old28;
+    float old20;
+    int ret;
+
+    rec = (char *)func_L00_0032C638((char *)a0);
+    if (rec == 0)
+        return 8;
+    old38 = *(int *)(rec + 0x38);
+    old28 = *(float *)(rec + 0x28);
+    *(int *)(rec + 0x38) = a2;
+    if (0.0f < f13)
+        *(float *)(rec + 0x28) = f13;
+    old20 = *(float *)(rec + 0x20);
+    if (0.0f < f14)
+        *(float *)(rec + 0x20) = f14;
+    ret = func_002B50E0(a0, a1, f12);
+    *(int *)(rec + 0x38) = old38;
+    *(float *)(rec + 0x28) = old28;
+    *(float *)(rec + 0x20) = old20;
+    return ret;
+}
 
 extern void func_00282CF0(float *out, const float *a, const float *b);
 extern int func_L02_00332668(char *arg0, char *arg1);
@@ -209,7 +237,40 @@ INCLUDE_ASM("asm/levels", func_L02_00332EF0);
 
 INCLUDE_ASM("asm/levels", func_L02_00333218);
 
-INCLUDE_ASM("asm/levels", func_L02_00333300);
+extern void func_002AFFD8(char *a0, char *a1, int a2);
+extern void func_00282CC0(void *a0, void *a1, void *a2);
+extern int func_002761F8(char *a0, char *a1, int mode, char *self, int flag);
+extern float func_002B0360(char *p);
+extern char D_L02_001C0960;
+
+/* Scale the shape's two axes, compare them with the record and copy the
+   result into the second argument. */
+void func_L02_00333300(char *a0, char *a1) {
+    float buf0[4];
+    float buf1[4];
+    float buf2[4];
+    char *obj;
+    char *sub;
+
+    func_002AFFD8(a0 + 0x10, (char *)buf0, 1);
+    func_00282F20(buf1, buf0, *(float *)(a1 + 8) + 0.1f);
+    func_00282F20(buf2, buf0, -*(float *)(a1 + 0xC) - 0.1f);
+    func_00282CC0((char *)buf1, (char *)buf1, a0 + 0x10);
+    func_00282CC0((char *)buf2, (char *)buf2, a0 + 0x10);
+    if (func_002761F8((char *)buf1, (char *)buf2, 0, a0, 0)) {
+        obj = &D_L02_001C0960;
+        *(float *)(a1 + 0x90) = func_002B0360(obj);
+        sub = obj - 0x20;
+        *(int *)(a1 + 0x88) = *(int *)(sub + 0x18);
+        *(int *)(a1 + 0x8C) = *(int *)(sub + 0x1C);
+        func_00282F20((float *)(a1 + 0x50), (float *)(obj + 0x20), 1.0f);
+    } else {
+        *(int *)(a1 + 0x90) = 0;
+        *(int *)(a1 + 0x88) = 0;
+        *(int *)(a1 + 0x8C) = 0;
+        func_00282C88(a1 + 0x50);
+    }
+}
 
 extern void func_L02_00333480(char *arg0, char *arg1, void *arg2);
 
@@ -229,8 +290,51 @@ extern float func_00283CE0(int n);
 extern int func_L00_0031C998(int a0, int a1, float f12);
 extern void func_00282D30(void *a0, void *a1, float f12);
 extern unsigned char *D_L02_002001D8;
+extern int func_001163B0(void);
 
-INCLUDE_ASM("asm/levels", func_L02_003449D8);
+/* Build one enemy record: pick its kind, place it, and aim it. */
+void *func_L02_003449D8(void *a0, void *a1, void *a2, void *a3, int a4) {
+    float buf[4];
+    unsigned char *rec;
+    unsigned char *rec2;
+    short *p;
+    short *q;
+    int *r;
+    float f21;
+    float f20;
+
+    rec = (unsigned char *)func_002B9030(0x56);
+    if (rec != 0) {
+        rec[9] = (unsigned char)(func_00283CF0(0.04f) - 0x60);
+        rec[3] = (a3 != 0) ? 0x48 : 0x44;
+        rec[1] = 0;
+        rec[2] = *D_L02_002001D8;
+        rec[8] = (unsigned char)func_001163B0();
+        f21 = func_002A7878(0.0f, 1.0f);
+
+        p = *(short **)((char *)a2 + 8);
+        f20 = f21 / func_00283CE0(p[1] - p[0]);
+
+        r = *(int **)((char *)a2 + 0);
+        *(int *)(rec + 4) = func_L00_0031C998(r[0], r[1], f20);
+
+        q = *(short **)((char *)a2 + 4);
+        *(float *)(rec + 0xC) = ((float)q[0] + f20 * (float)(q[1] - q[0])) * 1000.0f;
+
+        func_00282D30(buf, a1, f21);
+        func_00282CC0(rec + 0x10, a0, buf);
+
+        *(short *)(rec + 0xA) = (short)(*(int *)((char *)a2 + 0x10) - (f21 > 0.5f));
+
+        rec2 = rec + 0x20;
+        func_00282D30(rec2, a1, f21 * *(float *)((char *)a2 + 0x14));
+        *(int *)(rec2 + 0x18) = a4;
+        *(void **)(rec2 + 0x10) = a2;
+        *(short *)(rec2 + 0x14) = 0;
+    }
+
+    return rec;
+}
 
 INCLUDE_ASM("asm/levels", func_L02_00348420);
 

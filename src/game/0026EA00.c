@@ -381,6 +381,28 @@ void func_00270210(void)
     D_L06_001B21C0 = 0;
 }
 
+extern char D_001B5750[];
+
+/* Finds the record whose halfword at 0x86 equals the argument, in the table of
+   0xA0-byte records that starts at 0x1B5750, and returns it; returns 0 once
+   the table is exhausted.  The end of the table is held in an int so that the
+   comparison is the signed one the retail does (slt, not sltu). */
+char *func_00270280(int a0)
+{
+    char *p = D_001B5750;
+    int limit = (int)p + 0x1E00;
+
+    for (;;) {
+        if (*(short *)(p + 0x86) != a0) {
+            p += 0xA0;
+            if ((int)p >= limit) {
+                return 0;
+            }
+        } else {
+            return p;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/game", func_002702B8);
 
@@ -488,6 +510,67 @@ void func_00270A00(char *object) {
 
 INCLUDE_ASM("asm/game", func_00270A48);
 
+extern void func_00282CF0(float *dst, float *a, float *b);
+extern float func_00282DB0(float *a, float *b);
+extern float func_00282DF0(float *a);
+extern void func_00282F20(float *dst, float *a, float len);
+extern float func_002831B0(float x);
+extern void func_002ACEC0(float *dst, float *vec, float *axis, float angle);
+
+/* The angles of a target seen from a camera: the difference of the two points is
+   split along the axis and across it, the yaw of the first direction around the
+   axis and the pitch of the difference after it, with the length of the
+   difference beside them. A zero length becomes 0.0001 before the arcsine. */
+void func_00270B58(float *out, float *p0, float *p1, float *dir0, float *dir1, float *axis)
+{
+    float diff[4];
+    float proj[4];
+    float perp[4];
+    float unit[4];
+    float rotated[4];
+    float d1, d2, d3, d4, d5;
+    float lenPerp, lenDiff;
+    float angle1, angle2;
+    float yaw, pitch;
+
+    func_00282CF0(diff, p0, p1);
+    d1 = func_00282DB0(diff, axis);
+    func_00282F20(proj, axis, d1);
+    func_00282CF0(perp, diff, proj);
+
+    d2 = func_00282DB0(dir0, perp);
+    lenPerp = func_00282DF0(perp);
+    if (lenPerp == 0.0f) {
+        lenPerp = 0.0001f;
+    }
+    angle1 = func_002831B0(d2 / lenPerp);
+    yaw = 1.57079637f - angle1;
+
+    func_00282F20(unit, perp, 1.0f);
+    d3 = func_00282DB0(dir1, unit);
+    if (d3 < 0.0f) {
+        yaw = -yaw;
+    }
+    out[0] = yaw;
+
+    func_002ACEC0(rotated, dir0, axis, yaw);
+    d4 = func_00282DB0(rotated, diff);
+    lenDiff = func_00282DF0(diff);
+    if (lenDiff == 0.0f) {
+        lenDiff = 0.0001f;
+    }
+    angle2 = func_002831B0(d4 / lenDiff);
+    pitch = -(1.57079637f - angle2);
+
+    func_00282F20(unit, diff, 1.0f);
+    d5 = func_00282DB0(axis, unit);
+    if (d5 < 0.0f) {
+        pitch = 1.57079637f - angle2;
+    }
+    out[1] = pitch;
+
+    out[2] = func_00282DF0(diff);
+}
 
 INCLUDE_ASM("asm/game", func_00270D50);
 

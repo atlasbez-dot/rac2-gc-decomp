@@ -10,7 +10,20 @@
    $a0 and loads the state into $a3. Measured while here: an s32 field stored from
    `(s32)(float)` keeps the value in the FP register and comes out `cvt.w.s` + `swc1`, the
    shape retail has, where a float field with a `(float)(int)` cast round-trips through
-   `mfc1`/`mtc1` (148 bytes). */
+   `mfc1`/`mtc1` (148 bytes). 
+   Second wave (20_yeedil, 2026-10-20) re-measured this one: the file has to be built
+   with -G8 (the unit's -g8.c sibling) because the constant D_L20_001B23E8 is read
+   through $gp (gp + 0x33F8 = 0x1B23E8); at -G0 the load comes out
+   `lui $at ; lwc1 $f1,0x0($at)`. The `cvt.w.s` + `swc1` shape of the 0xA8 store is
+   reproduced by `*(s32 *)(state + 0xA8) = (s32)(D * 60.0f);` - a float field with a
+   `(float)(int)` cast round-trips through mfc1/mtc1 and is 16 bytes over. What is left
+   is the allocation: retail gives $f0 to the loaded constant and $f1 to the 60.0f
+   multiplier, this cc1 the opposite, keeps the state pointer in $a3 where retail
+   loads it into $a3 from arg0 and keeps arg0 in $a0, and materialises the 0.5f early.
+   Tried and not enough: eight source shapes (the union that reinterprets the int as a
+   float, the int store, a float temporary for the constant, the multiplication written
+   60.0f * D, the declaration order of the locals, the 16-byte copy with and without a
+   temporary, the TI128 locals).*/
 #include "common.h"
 
 typedef int TI128 __attribute__((mode(TI)));

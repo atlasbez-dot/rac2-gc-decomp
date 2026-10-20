@@ -36,6 +36,18 @@ extern void func_31E3C0(void *, int, int, int);
 extern void func_316220(void *);
 extern void func_366830(int);
 extern void func_3FC1B0(int, int);
+extern void func_0032C700(void *, int, int, int, int, int, int, int, float, float,
+                          int, int, int, int);
+extern void func_002E5DA0(int, int, void *, int);
+extern void func_002A7A00(void *, float, float);
+extern void func_00282CC0(void *, void *, void *);
+extern void func_002B0A68(void *, int, void *, float, float, float, float, int);
+extern void func_002A7470(void *, int, int, int);
+extern void func_002A05A8(void *);
+extern int func_002E59F8(int);
+extern int func_L02_003FC1B0(void *, int);
+extern int func_L02_003FC0D0(void *, int);
+extern void func_002B3BA8(void *, u32, int, int, float, float);
 
 typedef int TI128 __attribute__((mode(TI)));
 
@@ -93,6 +105,28 @@ void func_L02_0040B868(u8 *a0, int a1) {
     }
 }
 
+/* arms the actor: its two effect tracks, then the shared state resets */
+void func_L02_0040B980(u8 *a0) {
+    u8 *s1 = *(u8 **)(a0 + 0x68);
+    float buf[3];
+
+    *(u16 *)(s1 + 0x2E2) = 0;
+    *(u32 *)(s1 + 0x2D4) = 0;
+    if (a0[0x31]) {
+        func_0032C700(a0 + 0x10, 0, 5, 5, 0x19, 0x14, 0xA, 1, 0.5f, 0.0f,
+                      1, 0, 0, 0);
+        func_002E5DA0(0, 0, a0, 0xC3E);
+        func_002A7A00(buf, 0.083333335816860199f, 0.11666667461395264f);
+        func_00282CC0(buf, buf, s1 + 0xD0);
+        func_002B0A68(a0, 0xFF, buf, 3.0f, 6.0f, 3.0f, 6.0f, 0xFF);
+    }
+    func_002A7470(a0, 0, 0, 3);
+    func_002A05A8(a0);
+    func_002A7750(a0, 1, 0);
+    *(u8 *)(a0 + 0x31) = 0;
+    *(u32 *)(a0 + 0x98) = 0;
+    *(u16 *)(a0 + 0x34) = (*(u16 *)(a0 + 0x34) & 0xEFFF) | 0x47;
+}
 
 /* sweeps the two effect tracks of the actor relative to a head position */
 INCLUDE_ASM("asm/levels", func_L02_0040BAB8);
@@ -157,6 +191,9 @@ void func_L02_0040D080(u8 *a0, int a1) {
         *(u16 *)(s0 + 0x52) = 1;
     }
 }
+
+/* re-arms the actor: checks the slot it holds, then the shared state resets */
+extern void func_L02_0040D180(u8 *a0);
 
 INCLUDE_ASM("asm/levels", func_L02_0040D180);
 

@@ -55,7 +55,7 @@ void func_L14_003DF100(char *arg0, int arg1) {
 
 extern void func_321F58();
 extern void func_3DFA10();
-extern int func_332310();
+extern int func_002B38B8();
 extern int func_3322A0();
 extern void func_369AD0();
 extern void func_2F5C10();
@@ -83,7 +83,7 @@ void func_L14_003DF7F8(char *arg0) {
         }
         break;
     case 1:
-        if (func_332310(arg0) != 0) {
+        if (func_002B38B8(arg0) != 0) {
             if (*(int *)(v + 0x0) != -1) {
                 func_3DFA10(arg0, 1);
             }

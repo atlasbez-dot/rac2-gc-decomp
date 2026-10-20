@@ -15,7 +15,7 @@ extern void func_002AF1D0(char *, char *, int, int);
 
 extern void func_002B0990(char *, char *, float, int, int);
 
-extern void func_002A8C28(char *, char *, int, float, float, float, int, int, int);
+extern int func_002A8C28(char *, void *, int, float, float, float, int, int, int);
 
 typedef int TI128 __attribute__((mode(TI)));
 
@@ -72,6 +72,18 @@ extern void func_332710(float, float, float, float);
 extern void func_316150(char *, int, int, int);
 
 extern void func_316180(char *, int *, int *, int *);
+
+extern float func_0029F530(char *);
+
+extern void func_0029FCC0(char *, int, void *);
+
+extern void func_L00_0031BDC0(void *, void *, void *, void *);
+
+extern void func_00282CF0(void *, void *, void *);
+
+extern float func_00282DF0(void *);
+
+extern int func_002E5CF8(int, int, char *);
 
 /* Stores the quadword the caller passes into the record at +0xF0. */
 INCLUDE_ASM("asm/levels", func_L02_003CADA8);
@@ -187,8 +199,6 @@ INCLUDE_ASM("asm/levels", func_L02_003CFAC8);
 
 INCLUDE_ASM("asm/levels", func_L02_003D0238);
 
-INCLUDE_ASM("asm/levels", func_L02_003D02F0);
-
 INCLUDE_ASM("asm/levels", func_L02_003D0408);
 
 INCLUDE_ASM("asm/levels", func_L02_003D10F0);
@@ -199,7 +209,36 @@ INCLUDE_ASM("asm/levels", func_L02_003D18D8);
 
 INCLUDE_ASM("asm/levels", func_L02_003D1998);
 
-INCLUDE_ASM("asm/levels", func_L02_003D1C38);
+/* Chooses the variant the actor plays from how far along the path it has come. */
+void func_L02_003D1C38(char *object) {
+    float start[4], end[4], closest[4], remaining[4], span[4];
+    char *state;
+    float time, fraction;
+
+    time = func_0029F530(object);
+    state = *(char **)(object + 0x68);
+    if (19.0f <= time && time <= 31.0f) {
+        func_0029FCC0(object, 0, start);
+        func_0029FCC0(object, 1, end);
+        func_L00_0031BDC0(closest, start, end, *(char **)(state + 0x2E0) + 0x10);
+        func_00282CF0(remaining, closest, end);
+        func_00282CF0(span, start, end);
+        fraction = func_00282DF0(remaining);
+        fraction /= func_00282DF0(span);
+        if (fraction < 0.0f)
+            fraction = 0.0f;
+        if (fraction > 1.0f)
+            fraction = 1.0f;
+        if (func_002A8C28(object, closest, 0x10001, fraction * 0.35f + 0.15f,
+                          (float)*(unsigned char *)(state + 0x34), 1.0f, 0, 1, 0) &&
+            *(short *)(state + 0x2F8) == 0) {
+            func_002E5CF8(5, 0, object);
+            *(short *)(state + 0x2F8) = 1;
+        }
+        func_002A8C28(object, end, 0x10001, 0.5f,
+                      (float)*(unsigned char *)(state + 0x34), 1.0f, 0, 1, 0);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003D1ED0);
 

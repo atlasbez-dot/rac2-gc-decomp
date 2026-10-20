@@ -20,7 +20,7 @@ extern BatchA_A18_u8 D_0018C0D4;
 
 INCLUDE_ASM("asm/levels", func_L18_002C4000);
 
-INCLUDE_ASM("asm/levels", func_L18_002C41F0);
+/* func_L18_002C41F0 is defined in L18_002C4000-g8.c (this unit has $gp access for it). */
 
 INCLUDE_ASM("asm/levels", func_L18_002CFD68);
 
@@ -122,6 +122,40 @@ INCLUDE_ASM("asm/levels", func_L18_003F5650);
 
 INCLUDE_ASM("asm/levels", func_L18_003F6CA8);
 
+extern float func_00282E48(char *, void *);
+extern void func_002A93B0(void *);
+extern void func_L18_003F74B8(void *a0, void *a1);
+extern void func_002B0990(char *a0, char *a1, BatchA_A18_s32 a2, BatchA_A18_s32 a3, float f12);
+extern char D_L18_001B97C0[];
+
+/* Advances the object's step counter, refreshes the emitter and asks the particle
+   system for the new position; the distance test only runs when the flag is set. */
+void func_L18_003F7198(void *a0) {
+    BatchA_A18_u8 *s0 = (BatchA_A18_u8 *)a0;
+    void *s1;
+    unsigned short v1;
+
+    v1 = *(unsigned short *)((char *)s0 + 0x96);
+    if (v1 <= 0xFFFE) {
+        s1 = *(void **)((char *)s0 + 0x68);
+        *(unsigned short *)((char *)s0 + 0x96) = v1 + 1;
+    } else {
+        s1 = *(void **)((char *)s0 + 0x68);
+    }
+    *(unsigned short *)((char *)s1 + 0x290) = 0;
+    if (s0[0x31] != 0) {
+        if (func_00282E48((char *)s0 + 0x10, D_L18_001B97C0) < 24.0f) {
+            func_002A93B0(s0);
+            s0[0x6F] = 0x16;
+        }
+    }
+    if (*(float *)((char *)s0 + 0x10) < 5.0f || *(float *)((char *)s0 + 0x10) > 1018.0f ||
+        *(float *)((char *)s0 + 0x14) < 5.0f || *(float *)((char *)s0 + 0x14) > 1018.0f ||
+        *(float *)((char *)s0 + 0x18) < 5.0f || *(float *)((char *)s0 + 0x18) > 1018.0f) {
+        func_L18_003F74B8(s0, 0);
+    }
+    func_002B0990((char *)s0, (char *)s1 + 0x2B0, 2, 1, 1.8f);
+}
 
 extern float func_00283248(float a, float b);
 
@@ -208,7 +242,47 @@ INCLUDE_ASM("asm/levels", func_L18_003F75E8);
 
 INCLUDE_ASM("asm/levels", func_L18_003F76F0);
 
-INCLUDE_ASM("asm/levels", func_L18_003F7818);
+extern void func_00282F20(void *a0, void *a1, float f12);
+extern void func_00282CC0(void *a0, void *a1, void *a2);
+
+/* the object's state flags and aim angle are set, then the target is handed
+   over to the object's controller */
+void func_L18_003F7818(BatchA_A18_u8 *s2, BatchA_A18_u8 *s3, BatchA_A18_s32 s7) {
+    float local[4];
+    BatchA_A18_u8 *s4;
+    BatchA_A18_s32 *p;
+    BatchA_A18_s32 v1;
+    BatchA_A18_u8 state;
+
+    s4 = *(BatchA_A18_u8 **)(s2 + 0x68);
+    state = s2[0x20];
+    if (state == 1) {
+        p = *(BatchA_A18_s32 **)(s2 + 0x24);
+        *(unsigned short *)(s2 + 0x34) =
+            (unsigned short)((*(unsigned short *)(s2 + 0x34) & 0xFFBE) | 0x1000);
+        v1 = p[4];
+        *(unsigned short *)(s2 + 0x34) =
+            (unsigned short)(*(unsigned short *)(s2 + 0x34) & 0xFFFD);
+        *(BatchA_A18_s32 *)(s2 + 0x98) = v1;
+        s4[0x2E] = state;
+        s2[0x7F] = 0;
+        *(float *)(s4 + 0x20) = (float)*(short *)(s4 + 0x24);
+        func_00282F20(local, s3 + 0xC0, -0.5f);
+        func_00282CC0(s2 + 0x10, s3 + 0x10, local);
+        if (s7 != 0) {
+            func_00282F20(local, s3 + 0xD0, 0.5f);
+        } else {
+            func_00282F20(local, s3 + 0xD0, -0.5f);
+        }
+        func_00282CC0(s2 + 0x10, s3 + 0x10, local);
+        *(float *)(s2 + 0xF8) =
+            func_00283248(*(float *)(s3 + 0x10) - *(float *)(s2 + 0x10),
+                          *(float *)(s3 + 0x14) - *(float *)(s2 + 0x14));
+    }
+    *(BatchA_A18_s32 *)(s4 + 0x258) = (BatchA_A18_s32)s3;
+    func_002A7750(s2, 0xB, 2);
+    func_L18_003F8E30((BatchA_A18_u8 *)*(BatchA_A18_s32 *)(s4 + 0x258));
+}
 
 INCLUDE_ASM("asm/levels", func_L18_003F7988);
 
@@ -238,7 +312,45 @@ void func_L18_003F7A88(BatchA_A18_u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L18_003F7AB8);
 
-INCLUDE_ASM("asm/levels", func_L18_003F8D28);
+extern void func_L18_003FB5E8(void *a0, void *a1);
+extern void func_00282F20(void *a0, void *a1, float f12);
+extern void func_00282CC0(void *a0, void *a1, void *a2);
+extern float func_002A89A8(void *a0, BatchA_A18_s32 a1, float f12);
+extern void func_002833F0(char *a, char *b);
+
+/* Moves the object's state word, refreshes the two transform matrices through the
+   shared helpers and writes the measured distance back into the object. */
+void func_L18_003F8D28(void *a0, void *a1, void *a2) {
+    char scratch[16];
+    char mat[16];
+    unsigned short v1;
+    void *p;
+    void *s4;
+    void *v;
+    float f;
+
+    v1 = *(unsigned short *)((char *)a0 + 0x34);
+    p = *(void **)((char *)a0 + 0x24);
+    v1 = (unsigned short)((v1 & 0xFFBE) | 0x1000);
+    *(unsigned short *)((char *)a0 + 0x34) = v1;
+    v = *(void **)((char *)p + 0x10);
+    *(void **)((char *)a0 + 0x98) = v;
+    func_002A7750((BatchA_A18_u8 *)a0, 5, 2);
+    s4 = *(void **)((char *)a0 + 0x68);
+    *(void **)((char *)s4 + 0x74C) = a2;
+    if (a1 != 0) {
+        func_L18_003FB5E8(a1, mat);
+        func_00282F20(scratch, (char *)a1 + 0xD0, -0.3f);
+        func_00282CC0((char *)a0 + 0x10, mat, scratch);
+        *(float *)((char *)a0 + 0x18) = func_002A89A8((char *)a0 + 0x10, 0, 0.5f);
+        f = func_00283248(*(float *)mat - *(float *)((char *)a0 + 0x10),
+                           *(float *)(mat + 4) - *(float *)((char *)a0 + 0x14));
+        *(float *)((char *)a0 + 0xF8) = f;
+        func_002833F0((char *)a0 + 0xC0, (char *)a0 + 0xF0);
+        *(void **)((char *)s4 + 0x750) = a1;
+        *(BatchA_A18_u8 *)((char *)a0 + 0x7F) = 0;
+    }
+}
 
 /* A18-void-store-16 freshly exact-verified under family reservation */
 void func_L18_003F8E30(BatchA_A18_u8 *s) {
