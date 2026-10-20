@@ -351,7 +351,6 @@ void func_0026FEB8(const char *format,...) {
 
 INCLUDE_ASM("asm/game", func_0026FEF0);
 
-INCLUDE_ASM("asm/game", func_0026FF08);
 
 INCLUDE_ASM("asm/game", func_00270018);
 

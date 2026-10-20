@@ -398,7 +398,76 @@ void func_00300300(Rac2Native_74a5d71aacb394c6_ExtraIndexState48 *state, int ind
     }
 }
 
-INCLUDE_ASM("asm/game", func_00300330);
+/* The 64-entry table of the family above: two rows of 64 words, eight more words, and
+   three counters.  (The same table is indexed as words by func_00300280: 0x88 -> 0x220,
+   0x89 -> 0x224.) */
+typedef struct {
+    int row0[64];
+    int row1[64];
+    int row2[8];
+    int count;
+    int flag;
+    int limit;
+} State00300330;
+
+extern float func_00282EB0(char *origin, char *point);
+
+/* The origin the distance helper is given.  The retail materialises it as
+   `lui $s5,0x19` + `addiu $a0,$s5,-0x6160`, so it is the word at 0x190000 taken 0x6160
+   lower; the helper's point is the row word plus 0x10. */
+extern char D_00190000[];
+
+void func_00300330(void *a0) {
+    State00300330 *state = (State00300330 *)a0;
+    float distances[64];
+    int i;
+    int k;
+    int calls;
+    int score;
+    int best;
+    float bestdistance;
+
+    if (state->flag == 0) {
+        return;
+    }
+    calls = 0;
+    for (i = 0; i < 64; i++) {
+        if (state->row0[i] != 0) {
+            state->row1[i] = 0;
+            distances[i] = func_00282EB0((char *)D_00190000 - 0x6160, (char *)(state->row0[i] + 0x10));
+            calls++;
+        }
+        if (calls == state->count) {
+            break;
+        }
+    }
+    i = 0;
+    if (state->limit <= 0) {
+        return;
+    }
+    if (state->count <= 0) {
+        return;
+    }
+    for (; i < state->limit && i < state->count; i++) {
+        bestdistance = 9999.0f;      /* the retail's 0x461C3C00 */
+        best = -1;
+        score = 0;
+        for (k = 0; score < 64; k++) {
+            float d = distances[k];
+            if (d < bestdistance) {
+                if (state->row1[k] == 0) {
+                    if (state->row0[k] != 0) {
+                        bestdistance = d;
+                        best = score;
+                    }
+                }
+            }
+            score++;
+        }
+        state->row2[i] = state->row0[best];
+        state->row1[best] = 1;
+    }
+}
 
 INCLUDE_ASM("asm/game", func_003004A8);
 

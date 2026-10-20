@@ -417,8 +417,6 @@ void func_002BB928(char *a0)
     *(unsigned char *)(s0 + 2) = D_001F2560[((*(int *)(s1 + 0x18) - *(short *)(s0 + 0xA)) * 10) / *(int *)(s1 + 0x18)];
 }
 
-INCLUDE_ASM("asm/game", func_002BBA38);
-
 /* decays a float field by 0.04 with a saturating early-out that consults a helper and returns; otherwise adds 12000 to a second field, nudges a third by 0.0484 while it stays below 0.225, merges two 255-scaled byte lanes into a header word, hands a sub-object to two helpers and decrements a byte counter */
 void func_002BBB70(char *p)
 {

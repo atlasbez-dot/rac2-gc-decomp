@@ -242,7 +242,45 @@ float func_002E46C0(char *self, char *p)
     return F391de845_FUN_002E45C8(q, v, q[0], q[1]);
 }
 
-INCLUDE_ASM("asm/game", func_002E4708);
+extern float D_L00_001B8DC0[];
+
+extern void func_00282CF0(void *dst, void *src, void *arg);
+extern float func_00283248(float a, float b);
+extern float func_00283B98(float a, float b);
+extern float func_00282E20(void *p);
+extern float func_00283BE0(float a, float b);
+extern int func_00283CF0(float a);
+
+void func_002E4708(void *self, void *other)
+{
+    struct AngleState { char reserved[0x40]; float angle; };
+    struct AngleState *state = (struct AngleState *)self;
+    float buf[4];
+    float w;
+    float r;
+
+    func_00282CF0(buf, other, D_L00_001B8DC0);
+    w = -func_00283248(buf[0], buf[1]);
+    w = func_00283B98(w, D_L00_001B8DC0[6]);
+    if (w < 0.0f)
+        w += 6.283185307179586f;
+    if (func_00282E20(buf) < 2.0f) {
+        if (state->angle >= 0.0f) {
+            r = func_00283BE0(w, state->angle);
+            if (r > 0.2f) {
+                w = func_00283B98(state->angle, 0.2f);
+            } else if (r < -0.2f) {
+                w = func_00283BE0(state->angle, 0.2f);
+            }
+            state->angle = w;
+        } else {
+            state->angle = w;
+        }
+    } else {
+        state->angle = -1.0f;
+    }
+    func_00283CF0(w * 57.2957763671875f);
+}
 
 void func_002E4860(void)
 {

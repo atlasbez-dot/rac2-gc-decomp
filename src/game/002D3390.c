@@ -170,7 +170,7 @@ int func_002D4E10(void)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002D4E48);
+/* func_002D4E48 is in the -G8 sibling. */
 
 
 extern int D_0025BA80;
