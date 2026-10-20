@@ -17,6 +17,19 @@
    changing the declaration in src/levels/20_yeedil/L20_0043ECB0-g8.c from int to float
    is what makes the load and the `c.ole.s` compare come out right - it does not disturb
    func_L20_00444C18, which only takes its address (still 1 of 1 places match).
+    Third wave (20_yeedil, 2026-10-20, worker 04) re-measured this one in the -G8 sibling
+    (the unit L20_0043ECB0-g8.c, built with -mno-split-addresses) and the picture is the
+    same, 204 bytes against 208. Two facts worth keeping: the two `nop`s the retail keeps
+    after the `mtc1` and after the `c.le.s` ARE emitted - they come from the assembler's
+    mtc1 hazard rule, not from cc1 - so the only missing word is the `nop` before the
+    `div.s` (the division floor of docs/COMPILER-NOTES.md: the assembler pads a division
+    only when a code label precedes it, and no source shape puts one within two slots of
+    the `div.s`; the division here is 15 slots after the block label). The other residue is
+    the swap: retail keeps `$s1 = $a1` in the delay slot of the `bc1f` and `mov.s $f23,$f13`
+    four words earlier, this cc1 has `mov.s $f23,$f13` in the delay slot and the copy in
+    the prologue. Tried and not enough: the two guards with named locals for f12 and f13,
+    an explicit copy of a1, both together, and the blend with the quotient in a named local
+    (which gives 200 bytes and a different schedule).
    (3) The file has to be built with -G8 (the -g8.c sibling): at -G0 the load comes out
    `lui $at ; lwc1 $f1,0x0($at)`. The two residues are the same as recorded above: the
    `nop` retail keeps before the `div.s` (the load-delay nop that belongs to the

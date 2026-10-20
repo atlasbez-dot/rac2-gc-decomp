@@ -131,3 +131,61 @@ void func_L03_003C4A10(unsigned char *a0, void *a1) {
     *(float *)(s2 + 0x328) = f20;
 }
 
+/* The group count is read through $gp here; the group table is absolute and the entity base is
+   the bare `lui`/`lw` pair (`sda` sized over 8 bytes in a -G8 unit). */
+extern int D_L03_001B2A38 __attribute__((sda));
+
+extern unsigned char *D_L03_001B2A1C[3] __attribute__((sda));
+
+extern unsigned short *D_L03_001FB5A0[];
+
+extern void func_00282C88(void *);
+
+extern void func_00283410(void *, void *);
+
+/* Walks the entities of the object's group (the others of its team at +0x95, not in state 0xFE or
+   0xFD), puts each one's offset from the object into the frame that faces the point a1, and
+   counts -1 when its y is then positive, +1 otherwise; returns the sum clamped to -5..5. */
+int func_L03_003C58F0(unsigned char *a0, float *a1) {
+    float v[4];
+    float t[4];
+    float m[16];
+    int n;
+    unsigned short *q;
+    unsigned char *e;
+
+    if (a0[0x21] == 0xFF)
+        return 0;
+    func_00282C88(v);
+    n = 0;
+    v[2] = func_00283248(a1[0] - *(float *)(a0 + 0x10), a1[1] - *(float *)(a0 + 0x14));
+    func_00283410(m, v);
+    func_00283698(m, m);
+    for (q = D_L03_001FB5A0[a0[0x21]];
+         a0[0x21] != 0xFF && a0[0x21] <= D_L03_001B2A38 && q != 0 &&
+         ((q != 0 && (short)q[-1] >= 0) || q == D_L03_001FB5A0[a0[0x21]]);
+         q++) {
+        e = D_L03_001B2A1C[0] + ((*q & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (e[0x20] == 0xFE)
+            continue;
+        if (e[0x20] == 0xFD)
+            continue;
+        if (e == a0)
+            continue;
+        if (e[0x95] != a0[0x95])
+            continue;
+        func_00282CF0(t, e + 0x10, a0 + 0x10);
+        func_00283098(t, t, m);
+        if (t[1] > 0.0f)
+            n--;
+        else
+            n++;
+    }
+    if (n >= 6)
+        n = 5;
+    else if (n <= -6)
+        n = -5;
+    return n;
+}

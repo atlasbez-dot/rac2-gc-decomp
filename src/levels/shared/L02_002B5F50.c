@@ -370,13 +370,13 @@ void func_L02_0038D978(char *arg0) {
 }
 
 
-extern void func_L02_0038DA60(void *arg0);
+extern void func_L02_0038DA60(unsigned char *arg0);
 extern void func_L02_0038DC68(unsigned char *arg0);
 extern void func_L02_0038DE58(unsigned char *arg0);
-extern void func_L02_0038E048(void *arg0);
+extern void func_L02_0038E048(unsigned char *arg0);
 extern void func_L02_0038E250(unsigned char *arg0);
 extern void func_L02_0038E430(unsigned char *arg0);
-extern void func_L02_0038E610(void *arg0);
+extern void func_L02_0038E610(unsigned char *arg0);
 extern void func_L02_0038E838(unsigned char *arg0);
 
 void func_L02_0038DA00(void *arg0) {
@@ -390,8 +390,6 @@ void func_L02_0038DA00(void *arg0) {
     func_L02_0038E838(arg0);
 }
 
-INCLUDE_ASM("asm/levels", func_L02_0038DA60);
-
 extern void func_00282D60(void *buf, void *value, float scale);
 extern int func_00283DB8(void *buf, float value);
 extern void func_L00_002ECFE8(void *a0, void *a1, int a2, unsigned int a3,
@@ -400,19 +398,304 @@ extern int D_L02_001B35B8 __attribute__((sda));
 extern char *D_L02_001FBFC0[];
 extern int func_L02_002F1658(void);
 
-INCLUDE_ASM("asm/levels", func_L02_0038DC68);
+/* Walks the object's group id list: every entity of kind 0x9B0 in state 1 that passes the
+   visibility test gets its phase at +0x1C advanced (while the flag word is clear) and one effect
+   call. */
+void func_L02_0038DA60(unsigned char *arg0) {
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+    float buf[4];
+    int flag;
 
-INCLUDE_ASM("asm/levels", func_L02_0038DE58);
+    if (arg0[0x21] == 0xFF)
+        return;
+    flag = func_L02_002F1658();
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                (*(unsigned short *)(e + 0x34) & 1) == 0 && *(short *)(e + 0xAA) == 0x9B0 &&
+                e[0x20] == 1) {
+                if (flag != 0) {
+                    *(float *)(o + 0x1C) -= 0.1f;
+                    if (*(float *)(o + 0x1C) <= -8.0f)
+                        *(float *)(o + 0x1C) += 8.0f;
+                }
+                func_L00_002ECFE8(e, o + 0xA0, 3, 0x60804040, *(float *)(o + 0x78) * 0.8f,
+                                  *(float *)(o + 0x78) * 5.0f, *(float *)(o + 0x1C), 0x204090, 0x17);
+            }
+        }
+        q++;
+    }
+}
 
-INCLUDE_ASM("asm/levels", func_L02_0038E048);
+/* Walk the object's group list: every entity of kind 0x9B7 in state 1 that is in view gets one
+   effect call. While the resident flag word is clear, its object's phase (+0x1C) first steps
+   down by 0.1, and up by 8 once it reaches -8. */
+void func_L02_0038DC68(unsigned char *arg0) {
+    float buf[4];
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+    int flag;
 
-INCLUDE_ASM("asm/levels", func_L02_0038E250);
+    if (arg0[0x21] == 0xFF)
+        return;
+    flag = func_L02_002F1658();
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                !(*(unsigned short *)(e + 0x34) & 1) && *(short *)(e + 0xAA) == 0x9B7 &&
+                e[0x20] == 1) {
+                if (flag != 0) {
+                    *(float *)(o + 0x1C) -= 0.1f;
+                    if (*(float *)(o + 0x1C) <= -8.0f)
+                        *(float *)(o + 0x1C) += 8.0f;
+                }
+                func_L00_002ECFE8(e, o + 0xA0, 2, 0x605696FF, *(float *)(o + 0x78),
+                                  *(float *)(o + 0x78) * 7.0f, *(float *)(o + 0x1C), 0xC0, 0x17);
+            }
+        }
+        q++;
+    }
+}
 
-INCLUDE_ASM("asm/levels", func_L02_0038E430);
+/* The same walk as func_L02_0038DC68, for the entities of kind 0xB15. */
+void func_L02_0038DE58(unsigned char *arg0) {
+    float buf[4];
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+    int flag;
 
-INCLUDE_ASM("asm/levels", func_L02_0038E610);
+    if (arg0[0x21] == 0xFF)
+        return;
+    flag = func_L02_002F1658();
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                !(*(unsigned short *)(e + 0x34) & 1) && *(short *)(e + 0xAA) == 0xB15 &&
+                e[0x20] == 1) {
+                if (flag != 0) {
+                    *(float *)(o + 0x1C) -= 0.1f;
+                    if (*(float *)(o + 0x1C) <= -8.0f)
+                        *(float *)(o + 0x1C) += 8.0f;
+                }
+                func_L00_002ECFE8(e, o + 0xA0, 2, 0x605696FF, *(float *)(o + 0x78),
+                                  *(float *)(o + 0x78) * 7.0f, *(float *)(o + 0x1C), 0xC0, 0x17);
+            }
+        }
+        q++;
+    }
+}
 
-INCLUDE_ASM("asm/levels", func_L02_0038E838);
+/* Like func_L02_0038DA60 for kind 0x134B: one effect call, with the scale 2.1000001f
+   (0x40066667, one above 2.1f). */
+void func_L02_0038E048(unsigned char *arg0) {
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+    float buf[4];
+    int flag;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    flag = func_L02_002F1658();
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                (*(unsigned short *)(e + 0x34) & 1) == 0 && *(short *)(e + 0xAA) == 0x134B &&
+                e[0x20] == 1) {
+                if (flag != 0) {
+                    *(float *)(o + 0x1C) -= 0.1f;
+                    if (*(float *)(o + 0x1C) <= -8.0f)
+                        *(float *)(o + 0x1C) += 8.0f;
+                }
+                func_L00_002ECFE8(e, o + 0xA0, 2, 0x60804040, *(float *)(o + 0x78) * 0.3f,
+                                  *(float *)(o + 0x78) * 2.1000001f, *(float *)(o + 0x1C), 0x204090, 0x17);
+            }
+        }
+        q++;
+    }
+}
+
+/* Walk the object's group list: every entity of kind 0x127D in state 1 that is in view has its
+   object's phase (+0x1C) stepped down by 0.1 (and up by 8 once it reaches -8), and gets one
+   effect call. */
+void func_L02_0038E250(unsigned char *arg0) {
+    float buf[4];
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                !(*(unsigned short *)(e + 0x34) & 1) && *(short *)(e + 0xAA) == 0x127D &&
+                e[0x20] == 1) {
+                *(float *)(o + 0x1C) -= 0.1f;
+                if (*(float *)(o + 0x1C) <= -8.0f)
+                    *(float *)(o + 0x1C) += 8.0f;
+                func_L00_002ECFE8(e, o + 0xA0, 2, 0x605696FF, *(float *)(o + 0x78) * 0.4f,
+                                  *(float *)(o + 0x78) * 4.0f, *(float *)(o + 0x1C), 0xC0, 0x17);
+            }
+        }
+        q++;
+    }
+}
+
+/* The same walk as func_L02_0038E250, for the entities of kind 0x128B (the effect's second
+   scale is 3 times the object's +0x78 instead of 4 times). */
+void func_L02_0038E430(unsigned char *arg0) {
+    float buf[4];
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                !(*(unsigned short *)(e + 0x34) & 1) && *(short *)(e + 0xAA) == 0x128B &&
+                e[0x20] == 1) {
+                *(float *)(o + 0x1C) -= 0.1f;
+                if (*(float *)(o + 0x1C) <= -8.0f)
+                    *(float *)(o + 0x1C) += 8.0f;
+                func_L00_002ECFE8(e, o + 0xA0, 2, 0x605696FF, *(float *)(o + 0x78) * 0.4f,
+                                  *(float *)(o + 0x78) * 3.0f, *(float *)(o + 0x1C), 0xC0, 0x17);
+            }
+        }
+        q++;
+    }
+}
+
+/* Like func_L02_0038DA60 for kind 0x1290, without the flag word: the phase always advances
+   and two effect calls follow, the second one at +0xC0 with both scales times 1.5. */
+void func_L02_0038E610(unsigned char *arg0) {
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+    float buf[4];
+    float a;
+    float b;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                (*(unsigned short *)(e + 0x34) & 1) == 0 && *(short *)(e + 0xAA) == 0x1290 &&
+                e[0x20] == 1) {
+                *(float *)(o + 0x1C) -= 0.1f;
+                if (*(float *)(o + 0x1C) <= -8.0f)
+                    *(float *)(o + 0x1C) += 8.0f;
+                a = *(float *)(o + 0x78) * 0.4f;
+                b = *(float *)(o + 0x78) * 3.0f;
+                func_L00_002ECFE8(e, o + 0xA0, 2, 0x60804020, a, b, *(float *)(o + 0x1C), 0xC00000, 0x17);
+                func_L00_002ECFE8(e, o + 0xC0, 1, 0x60804020, a * 1.5f, b * 1.5f, *(float *)(o + 0x1C), 0xC00000,
+                                  0x17);
+            }
+        }
+        q++;
+    }
+}
+
+/* Like func_L02_0038DA60 for kind 0x1340: one effect call whose first scale is the +0x78
+   field itself and the second is seven times it. */
+void func_L02_0038E838(unsigned char *arg0) {
+    unsigned short *q;
+    unsigned char *e;
+    char *o;
+    float buf[4];
+    int flag;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    flag = func_L02_002F1658();
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        if (e[0x31] != 0) {
+            func_00282D60(buf, e, 0.0009765625f);
+            buf[3] *= 1.1f;
+            if (func_00283DB8(buf, (float)*(int *)(o + 0x98)) != -1 &&
+                (*(unsigned short *)(e + 0x34) & 1) == 0 && *(short *)(e + 0xAA) == 0x1340 &&
+                e[0x20] == 1) {
+                if (flag != 0) {
+                    *(float *)(o + 0x1C) -= 0.1f;
+                    if (*(float *)(o + 0x1C) <= -8.0f)
+                        *(float *)(o + 0x1C) += 8.0f;
+                }
+                func_L00_002ECFE8(e, o + 0xA0, 2, 0x605696FF, *(float *)(o + 0x78), *(float *)(o + 0x78) * 7.0f,
+                                  *(float *)(o + 0x1C), 0xC0, 0x17);
+            }
+        }
+        q++;
+    }
+}
 
 /* Raise the byte field to eight when it is below. */
 void func_L02_00392C70(unsigned char *a0) {

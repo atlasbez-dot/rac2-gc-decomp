@@ -185,17 +185,136 @@ INCLUDE_ASM("asm/levels", func_L03_003C4800);
 
 INCLUDE_ASM("asm/levels", func_L03_003C4D40);
 
-INCLUDE_ASM("asm/levels", func_L03_003C4F58);
+/* The level's entity table base, the group count and the table of group id lists (in the
+   resident image: the list of group g ends after its first entry with bit 15 set). */
+extern unsigned char *D_L03_001B2A1C __attribute__((sda));
 
-INCLUDE_ASM("asm/levels", func_L03_003C5128);
+extern int D_L03_001B2A38[] __attribute__((sda));
 
-INCLUDE_ASM("asm/levels", func_L03_003C52D0);
+extern unsigned short *D_L03_001FB5A0[];
+
+/* The part of the object's private state (at +0x68) that these walks read: eight group ids at
+   +0x200 and the id of an entity at +0x220. */
+typedef struct {
+    unsigned char pad0[0x200];
+    int ids[8];
+    unsigned int ref220;
+} L03GroupState;
+
+extern unsigned int func_L03_004197A8(unsigned char *);
+
+extern int func_L03_00419BD8(unsigned int, void *, void *);
+
+extern float func_00282E80(void *, void *);
+
+/* Returns the entity of class 0xEF9 nearest to the object, within 15.0, among its eight groups
+   (func_L03_004197A8 and func_L03_00419BD8 must both accept it), or 0. */
+unsigned char *func_L03_003C4F58(unsigned char *a0) {
+    L03GroupState *o = *(L03GroupState **)(a0 + 0x68);
+    unsigned short *q;
+    unsigned char *e;
+    unsigned char *best = 0;
+    float bestd = 15.0f;
+    float d;
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        for (q = D_L03_001FB5A0[o->ids[i]];
+             (o->ids[i] & 0xFF) != 0xFF && o->ids[i] <= D_L03_001B2A38[0] && q != 0 &&
+             ((short)q[-1] >= 0 || q == D_L03_001FB5A0[o->ids[i]]);
+             q++) {
+            e = D_L03_001B2A1C + ((*q & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (*(short *)(e + 0xAA) == 0xEF9) {
+                if (func_L03_004197A8(e)) {
+                    if (func_L03_00419BD8(o->ref220, a0 + 0x10, e + 0x10)) {
+                        d = func_00282E80(a0 + 0x10, e + 0x10);
+                        if (d < bestd) {
+                            bestd = d;
+                            best = e;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return best;
+}
+
+extern unsigned int func_L03_003CAAC8(unsigned char *, unsigned char *);
+
+/* Returns the first entity of class 0x97A, in the object's eight groups, that
+   func_L03_003CAAC8 finds near the object or near the player, or 0. The group table is reached
+   through a local pointer: with its address computed once outside the loops, the walk's other
+   constants (0x97A, 0xFF, the player's address) all fit loop.c's budget for moving invariants
+   out of the walk, as in retail. */
+unsigned char *func_L03_003C5128(unsigned char *a0) {
+    L03GroupState *o = *(L03GroupState **)(a0 + 0x68);
+    unsigned short **tbl = D_L03_001FB5A0;
+    unsigned short *q;
+    unsigned char *e;
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        for (q = tbl[o->ids[i]];
+             (o->ids[i] & 0xFF) != 0xFF && o->ids[i] <= D_L03_001B2A38[0] && q != 0 &&
+             ((short)q[-1] >= 0 || q == tbl[o->ids[i]]);
+             q++) {
+            e = D_L03_001B2A1C + ((*q & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (*(short *)(e + 0xAA) == 0x97A) {
+                if (func_L03_003CAAC8(e, a0 + 0x10))
+                    return e;
+                if (func_L03_003CAAC8(e, D_L03_00189E20 + 0x80))
+                    return e;
+            }
+        }
+    }
+    return 0;
+}
+
+extern int func_L03_003CA138(unsigned char *);
+
+/* Returns the entity of class 0xE87 or 0xE88 in state 1 nearest to the object, within 14.0,
+   among its eight groups, or 0. */
+unsigned char *func_L03_003C52D0(unsigned char *a0) {
+    L03GroupState *o = *(L03GroupState **)(a0 + 0x68);
+    unsigned short *q;
+    unsigned char *e;
+    unsigned char *best = 0;
+    float bestd = 14.0f;
+    float d;
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        for (q = D_L03_001FB5A0[o->ids[i]];
+             (o->ids[i] & 0xFF) != 0xFF && o->ids[i] <= D_L03_001B2A38[0] && q != 0 &&
+             ((short)q[-1] >= 0 || q == D_L03_001FB5A0[o->ids[i]]);
+             q++) {
+            e = D_L03_001B2A1C + ((*q & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (*(unsigned short *)(e + 0xAA) == 0xE87 || *(unsigned short *)(e + 0xAA) == 0xE88) {
+                if (func_L03_003CA138(e)) {
+                    d = func_00282E80(a0 + 0x10, e + 0x10);
+                    if (d < bestd) {
+                        bestd = d;
+                        best = e;
+                    }
+                }
+            }
+        }
+    }
+    return best;
+}
 
 INCLUDE_ASM("asm/levels", func_L03_003C5488);
 
 INCLUDE_ASM("asm/levels", func_L03_003C5668);
 
-INCLUDE_ASM("asm/levels", func_L03_003C58F0);
+/* func_L03_003C58F0 is defined in L03_002AB5C8-g8.c (it reads the group count through $gp). */
 
 float func_L03_003C5AB8(unsigned char *a0) {
     unsigned char *p = *(unsigned char **)(a0 + 0x68);

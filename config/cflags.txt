@@ -74,6 +74,7 @@ src/levels/22_dobbo_orbit/L22_0040DD20-rc2.c	-O2 -G0 -fno-schedule-insns2 -ffunc
 # path (a glob)<TAB>flags; "sdk" first: the SDK compiler (tools/compiler/sdk/) instead of the game's
 # The default is "-O2 -G0 -ffunction-sections" (-G8 for a file named *-g8.c).
 src/core/00115228.c	-O2 -G2 -ffunction-sections -mastra-quad-saves
+src/core/00115E90.c	-O2 -G2 -ffunction-sections -mastra-quad-saves
 src/core/00115E68.c	-O2 -G2 -ffunction-sections -mastra-quad-saves
 src/core/00115C90.c	-O2 -G2 -ffunction-sections -mastra-quad-saves
 src/core/00115F28.c	-O2 -G2 -ffunction-sections -mastra-quad-saves
@@ -274,6 +275,8 @@ src/core/00121B20.c	sdk -O2 -G2 -ffunction-sections
 src/core/001220F0.c	sdk -O2 -G2 -ffunction-sections
 src/levels/shared/L00_00444D18.c	-O2 -G0 -ffunction-sections -mno-split-addresses
 src/levels/shared/L00_003EA7D0.c	-O2 -G0 -ffunction-sections -mno-split-addresses
+src/levels/20_yeedil/L20_00444088-g8.c	-O2 -G8 -ffunction-sections -fno-schedule-insns
+src/levels/20_yeedil/L20_0043ECB0-g8.c	-O2 -G8 -ffunction-sections -mno-split-addresses
 src/levels/shared/L07_003F90E8-rc2.c	-O2 -G8 -g -ffunction-sections -fno-builtin
 src/game/002A88A0-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
 src/game/0026FF08-rc2.c	-O2 -G0 -g -ffunction-sections -fno-builtin
@@ -332,7 +335,6 @@ src/levels/22_dobbo_orbit/L22_00415A48-rc2.c	-O2 -G0 -ffunction-sections -fno-bu
 src/levels/shared/L04_003A0C40-rc2.c	-O2 -G8 -fno-strength-reduce -ffunction-sections -fno-builtin
 src/levels/04_barlow/L04_00407F80-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/14_aranos_prison/L14_00425C08-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/20_yeedil/L20_00444088-rc2.c	-O2 -G8 -fno-schedule-insns -ffunction-sections -fno-builtin
 src/levels/06_notak/L06_00457920-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/01_oozla/L01_003D9830-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L09_003F9040-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin

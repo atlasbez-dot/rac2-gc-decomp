@@ -1386,3 +1386,141 @@ above still hold; these are the additions.
   `D_00214F90[39 + i]` keeps retail's address arithmetic where a walking pointer does not. A
   counter set after the guard, in `while (1) { ...; i++; offset += 80; if (i >= 512) break; }`,
   counts up as retail does where a `for` counts down (`func_002ED368`).
+
+## Habits measured on the yeedil level (20 October 2026)
+
+A wave of seventeen workers over `src/levels/20_yeedil/` (level 20, 120 open functions) added
+two matches and pinned three walls. The level's own assembly listing is at
+`build/20_yeedil/asm/5B0B0.s`; the word field in it is **byte-swapped** (it prints the four file
+bytes as a big-endian number, so the retail's `2D28A003` is the instruction
+`daddu $a1,$sp,$zero`), which is a trap for any differ that compares words.
+
+- **The 128-bit copy wall, in full.** The address of a TI access is
+  `(mem:TI (plus:SI (reg) (const_int off)) 0)`. Two passes fold the constant into the
+  `lq`/`sq`: the reload pass accepts `plus(reg, const_int)` for TImode while the offset is in
+  `[-32768, 32752]` (`GO_IF_LEGITIMATE_ADDRESS`), and the CSE replaces the register with the
+  plus because `mips_address_cost` gives register-plus-small-constant the cost 1, the same as a
+  plain register, so the tie goes to the plus. The reload would have materialised the pseudo -
+  the retail's `addiu` - but the CSE removes it first. **The one escape: an offset outside
+  `[-32768, 32752]` is not a legal TImode displacement, so the reload materialises the address**
+  (`*(TI128 *)(arg0 + 32753)` gives `addu $4,$4,32753 ; sq $5,0($4)`, the retail's shape with the
+  wrong immediate). A second escape reaches the retail's zero-displacement `sq` at the price of a
+  stack round trip: a **volatile pointer object** (`TI128 *volatile d = ...; *d = ...;`) gives
+  `sw ; lq ; lw ; sq $v0,0($reg)`. A pointer loaded from memory, or carried by a loop and
+  incremented at the end of the body, keeps the zero displacement too
+  (`func_L08_004356A0`, `func_002E5FE0`).
+- **The retail's shape is systematic**: it materialises a 128-bit address when the address is
+  used more than once, and folds it into the instruction when it is used once. In level 20,
+  1,349 of 6,840 `lq`/`sq` are folded and 5,491 go through a register.
+- **The 128-bit zero store**: the retail writes `por $v0,$zero,$zero ; sq $v0,0x20($sp)`, and the
+  chain's `rac2_fold_zero_ti_store` gives `sq $zero` whenever the zero register is dead after
+  the store - which it is, because the following `lq` rewrites the register. The `por` survives
+  only when the zero feeds **two or more** stores. 3,865 retail places have a `por` feeding
+  exactly one `sq`.
+- **The branch-likely recipe**: the retail's loop often ends in **two separate tests** that jump
+  back into the body (`bgezl`/`beql`). Spelling them as two `if (...) goto body;` instead of one
+  `&&` chain is what makes this cc1 emit the branch-LIKELY form; with the `&&` spelling it emits
+  a plain `bgez`/`beq` and the body is two instructions off. The condition is that the check
+  block ends in an unconditional jump to the body.
+- **The level's own jump table IS reachable from C.** A table the *compiler* generates cannot be
+  placed (a C `switch` puts it in the object's `.rdata`, which `tools/build.py` discards - the
+  wall that keeps `func_00118CC8` and `func_00123C28` in `nonmatching/`). But a table that is
+  **already in the level's data** can be named: `extern void *D_L20_002B27E0[149];` plus
+  `goto *D_L20_002B27E0[sel];` gives the retail's ten dispatch instructions exactly, and the
+  build resolves the name from the retail's `lui %hi`/`addiu %lo` pair. A `static void *volatile`
+  array of `&&label`s keeps the case bodies alive at no cost (it lands in the discarded `.data`).
+- **The split 64-bit "la"**: the retail keeps the address of a global twice - `$s0` = the 32-bit
+  address and `$s5` = the 64-bit `%hi` (`daddu $s5,$v1,$zero`) - and every field access then costs
+  two instructions (`addiu $v1,$s5,%lo(D)` ; `lh $v0,0x1454($v1)`). No spelling measured
+  reproduces it: a pointer cast to `unsigned long long`, a 64-bit pointer, an `unsigned long long`
+  local, a pointer kept across a call, a volatile pointer, `-mno-split-addresses`, `-mabi=64`,
+  `-mips3` and `-mcpu=r5900` all give `lui; addiu; dsll; dsrl` or the `la` pseudo. Written as
+  direct symbol references, cc1 anchors the symbol in `$fp` instead - the retail never does.
+- **Two per-file flags carry real matches**, each in a unit of its own because the flag changes
+  the other bodies of a shared unit: `-fno-schedule-insns` fixes a swapped argument-set-up pair
+  (`func_L20_00444088`, in `L20_00444088-g8.c`) and `-mno-split-addresses` gives retail's
+  base == dest absolute load (`func_L20_0043F460`, in `L20_0043ECB0-g8.c`). The second costs the
+  separated address pseudo, so a body that needs both cannot be matched with one flag set.
+- **A delay slot runs before its call**, so a store in a delay slot writes the *previous* call's
+  result. And the retail's integer branch-likelys execute the delay slot when the branch is
+  **taken**, while `bc1tl` annuls it when taken.
+- **`sltu` in cc1's output is `sltiu` in the object**: gas expands `sltu` with an immediate into
+  `sltiu` (`gas/config/tc-mips.c`). Compare objects, not `.s` text.
+
+### The yeedil level, second wave (21 October 2026)
+
+A second wave of workers over the same level settled the two walls the first wave could
+only describe, and found the source spellings for two game-wide idioms.
+
+- **The 128-bit copy wall is a cost tie in the CSE, and the tie is the whole of it.** The
+  front end builds the address of a TI access as the pointer's **pseudo**; the CSE's
+  `find_best_addr` (gcc/cse.c) then substitutes the class member `plus(reg, const_int)`
+  because `ADDRESS_COST` is 1 for a register and `mips_address_cost` (gcc/config/mips/mips.c)
+  is also 1 for a register plus a small constant - the tie is broken on the rtx cost, which
+  favours the plus. The reload then finds `plus(reg, const)` legitimate for TImode while the
+  offset is in `[-32768, 32752]` (`GO_IF_LEGITIMATE_ADDRESS`) and prints the offset as the
+  displacement. **The retail's shape (`addiu` plus a zero-displacement `lq`/`sq`) is exactly
+  what the reload produces when the address is still the pseudo; only the tie takes it
+  away.** A tie that went to the register would give the retail's bytes for every 16-byte
+  copy in the game - 5,491 of level 20's 6,840 go through a register. What survives the
+  CSE, all measured: a **symbol base** (`plus(symbol, const)` costs 3), a pointer carried by
+  a loop and incremented at the end of the body, a pointer given **different values in two
+  branches** (unknown at the join), a **volatile pointer object** (which materialises the
+  address at the price of a stack store and a reload), and an **offset outside
+  `[-32768, 32752]`** (which the reload materialises, with the wrong immediate).
+- **The zero guard is `x & ~x`.** The retail materialises `$t0 = 0` and still tests it
+  (`daddu $t0,$zero,$zero` ; `bnez $t0`), and no spelling of a zero-valued local survives:
+  `0`, `x - x`, `x ^ x`, `x & 0`, and every type and every `volatile`. The front end does
+  **not** fold `x & ~x` - `fold()` in fold-const.c has no case for `BIT_AND` with a
+  non-constant operand, and only `combine` folds it, and `combine` runs **after** `gcse`
+  (toplev.c: cse, gcse, loop, cse2, flow, combine_instructions). `gcse`'s `cprop` is what
+  would otherwise propagate the constant 0 into the loop and delete the branch. The test
+  has to be in **another block** than the assignment - in the same block the plain CSE folds
+  it again. This idiom occurs in `func_L20_0039E0A0`, `func_L20_0039DBC8`,
+  `func_L20_00440398` and `func_L20_0044AC38`.
+- **The split address is the compiler's own, not a wall.** A global's address used through
+  **one** C name is materialised once (`lui %hi` + `addiu %lo`); the **same** global's
+  address used through a **second** C name is materialised in the split form - the `%hi`
+  half lives in a callee-saved register (the compiler copies it with `daddu $sN,$vN,$zero`,
+  which is gas's `move`) and the `%lo` half is added again at every use
+  (`addiu $vN,$sN,%lo(SYM)`), the field offset riding along as the 16-bit displacement.
+  The matched `src/levels/shared/L00_002C2DE8.c` is the witness. This is gcc 2.x's
+  `mips_check_split` / the `movsi` expand (config/mips/mips.md).
+- **The 128-bit zero store needs a second use.** The retail writes `por $v0,$zero,$zero`
+  before the `sq`; `movti_internal` prints a constant-zero source as `sq $zero` and a
+  register source as `por rd,$zero,rs` + `sq`, and this cc1 only puts a TImode constant in
+  a register when the constant has **two or more** uses. The chain's
+  `rac2_fold_zero_ti_store` is a second gate, and it has a distance condition: it folds
+  only when the store is the register's last use **and** the materialisation is within
+  **twelve instructions** above it in the same block - a call, a jump or a label between
+  them stops the scan.
+- **The level's own jump tables are reachable from C.** A table the *compiler* generates
+  cannot be placed (a C `switch` puts it in the object's `.rdata`, which
+  `tools/build.py` discards - the wall that keeps `func_00118CC8` and `func_00123C28` in
+  `nonmatching/`). But a table that is **already in the level's data** can be named and
+  used with a computed goto, and the build resolves the name from the retail's `lui %hi` /
+  `addiu %lo` pair. **The name matters**: the level's data blob and its
+  `config/undefined_syms_auto.txt` carry `jtbl_002B27E0`, `jtbl_002B5980`,
+  `jtbl_002B5960`, `jtbl_002B4CA0` and `jtbl_002B5340` under those names, and a `D_L20_`
+  spelling does not resolve. The declaration needs a size, and the case bodies are kept
+  alive by a `static void * volatile` array of `&&label`s (no code; it lands in the
+  discarded `.data`).
+- **A load in a delay slot can only be the `$gp` form.** Outside a delay slot, `l.s $f,SYM`
+  expands (macro mode) to `lui $at,%hi(SYM)` + `lwc1 %lo(SYM)($at)`; inside one (nomacro
+  mode) the same instruction expands to the one-instruction `lwc1 %lo(SYM)($gp)`.
+- **`nosda` is not a no-op in a `-G8` unit.** It makes cc1 materialise the address in a
+  register of its own (`lui $v0,%hi(S)` + `lw $v1,%lo(S)($v0)`) where the retail has the
+  one-register form (`lui $v1,%hi(S)` + `lw $v1,%lo(S)($v1)`), and it makes the compiler
+  hoist the global's *address* into a callee-saved register. In a `-G8` file the plain
+  declaration is often the absolute form the retail wants.
+- **The R5900's `c.lt.s` has a different bit pattern from the general MIPS one**
+  (opcodes/mips-opc.c), so `c.lt.s` assembles as the word the general MIPS calls
+  `c.olt.s` - the two are the SAME instruction here, and a differ that compares the
+  mnemonic will report a difference that is not one. Compare the words.
+- **The compiler is C89**: a declaration after a statement is a parse error, so a block's
+  locals have to be declared at the top of that block.
+- **`-mastra-keep-frame-order`** (game compiler flag, patch 0021) keeps the
+  frame-related instructions in emission order; it is the flag that moves the prologue
+  saves of a body into the retail's order.
+- **gas turns the compiler's `addu rd,rs,imm` into the retail's `addiu`**, and `move rd,rs`
+  into `daddu rd,rs,$zero` - a candidate differing only in those is not a difference.

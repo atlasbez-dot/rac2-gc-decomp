@@ -1,3 +1,11 @@
+/* 2026-10-20, Opus retry: no natural loop construct was found. An EMPTY `do { } while (0);`
+   anywhere between the main loop and the return also gives 1 of 1 (its loop note brings the
+   alignment nop before the shared return label); it is held back, since an empty loop exists
+   only to steer the compiler. Wrapping the last (timestamp) store instead also matches, but
+   the neighbour func_L02_003FB120 stores the same timestamp with its load moved above earlier
+   stores, which a loop note there would block, so that spelling is unlikely to be the
+   original's either. */
+
 /* func_L02_003FB000 (288 bytes, level 2, src/levels/02_maktar_nebula/L02_003F5430.c; two $gp
  * accesses, so it belongs in the -g8 sibling).
  *

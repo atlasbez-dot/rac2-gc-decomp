@@ -118,15 +118,11 @@ INCLUDE_ASM("asm/levels", func_L02_003EA4E0);
 
 INCLUDE_ASM("asm/levels", func_L02_003EAA68);
 
-INCLUDE_ASM("asm/levels", func_L02_003EAD38);
-
 INCLUDE_ASM("asm/levels", func_L02_003EAE10);
 
-INCLUDE_ASM("asm/levels", func_L02_003EAFC8);
+/* func_L02_003EB098 is defined in L02_003DB310-g8.c (it reads D_L02_001B35B8 through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L02_003EB098);
-
-INCLUDE_ASM("asm/levels", func_L02_003EB138);
+/* func_L02_003EB138 is defined in L02_003DB310-g8.c (it reads D_L02_001B35B8 through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L02_003EB258);
 

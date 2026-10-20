@@ -14,6 +14,19 @@
  * never saves an FPR (frame 0x20); (3) the register names of the two products follow from
  * (2).  The function has to live in the -g8 sibling: it reads four constants through $gp
  * (0x3138..0x3148 -> 0x1B2128..0x1B2138).
+ *
+ * Fourth wave (20_yeedil, 2026-10-20, worker w20-01) measured the second residue more
+ * closely, and it is a compiler-model difference, not a source shape: the retail keeps the
+ * product `D_L20_001B2138 * 0.000277777785f` in the CALLER-SAVED $f0 across the
+ * `jal f_00330C60` and stores it to state[0xE0] after that call, while this cc1 keeps the
+ * value in the callee-saved $f20 (and saves it, so the frame is 0x30 instead of 0x20).
+ * The callee really does clobber $f0 (f_00330C60 = func_002A89A8 writes $f0 twice), so the
+ * retail's second store keeps whatever the callee left in $f0 - the retail body is what it
+ * is, and this cc1 will not reproduce it from C: any source that has the value live across
+ * the call puts it in $f20 here, and a source that re-reads the value from state[0x7C]
+ * after the call (so that it is not live across it) emits a reload the retail does not
+ * have.  The first residue (this cc1 hoists the `lwc1` of D_L20_001B2130 above the frame
+ * setup) was not re-measured; the note above stands.
  */
 typedef int TI128 __attribute__((mode(TI)));
 

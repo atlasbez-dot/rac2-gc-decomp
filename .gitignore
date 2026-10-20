@@ -43,3 +43,7 @@ toolchain/sn-prodg-2.0/
 toolchain/local/
 
 .DS_Store
+
+# The worktree symlinks into the main checkout (a worker tool, never tracked).
+/baserom
+/toolchain/toolchain
