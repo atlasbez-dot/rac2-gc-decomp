@@ -1,5 +1,33 @@
 #include "include_asm.h"
 
+#define RAC2_T_VEC16_FC936841D
+
+typedef struct {
+    char pad_000[0x140];
+    float x_140;
+    float y_144;
+    float z_148;
+} BootAimVector;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float w;
+} Vec16_Fc936841d;
+
+typedef unsigned char u8;
+
+typedef int s32;
+
+typedef struct {
+    u8 field00[0x14];
+    void *field14;
+    u8 field18[8];
+} NativeObjectSearchRecord32;
+
+extern BootAimVector D_001B5200;
+
 extern void F2c74c194_FUN_00282D30(char *dst, char *src, float scale);
 
 extern void F8411efa9_FUN_00328CA8(char *pkt);
@@ -36,28 +64,42 @@ extern void Fc936841d_FUN_00282CF0(char *local, char *first, char *second);
 
 extern void Fc936841d_FUN_00282CC0(char *target, char *first, char *local);
 
+extern NativeObjectSearchRecord32 D_L00_002533B0[];
+
+extern unsigned char *D_001BAF98[];
+
+extern char D_001A63A8[];
+
+extern char D_001B01F0[];
+
+extern int func_002B6D28(void);
+
+extern void func_002A8598(int, int);
+
+extern void func_0026FEB8(const char *, ...);
+
+extern float func_002A7878(float, float);
+
+extern void func_00282F20(float *, float *, float);
+
+extern char D_0022B0A0[];
+
+extern void func_00283098(void *, void *, void *);
+
+extern char D_L00_00252C40[][16];
+
+extern char D_L00_00189F00[];
+
+extern float func_002A7878(float, float);
+
+extern void func_002AF000(void *, float, float, float);
+
+extern void func_00282CC0(void *, void *, void *);
+
 #ifndef RAC2_T_VEC16_FC936841D
-#define RAC2_T_VEC16_FC936841D
-typedef struct {
-    float x;
-    float y;
-    float z;
-    float w;
-} Vec16_Fc936841d;
 #endif
 
-typedef unsigned char u8;
-
-typedef int s32;
-
 /* Finds the first matching object in the thirty resident records. */
-typedef struct {
-    u8 field00[0x14];
-    void *field14;
-    u8 field18[8];
-} NativeObjectSearchRecord32;
-
-extern NativeObjectSearchRecord32 D_L00_002533B0[];
 
 INCLUDE_ASM("asm/game", func_00327038);
 
@@ -80,13 +122,6 @@ INCLUDE_ASM("asm/game", func_003281F0);
 INCLUDE_ASM("asm/game", func_003285C0);
 
 INCLUDE_ASM("asm/game", func_003286D0);
-
-extern unsigned char *D_001BAF98[];
-extern char D_001A63A8[];
-extern char D_001B01F0[];
-extern int func_002B6D28(void);
-extern void func_002A8598(int, int);
-extern void func_0026FEB8(const char *, ...);
 
 void func_00328758(char *self)
 {
@@ -120,10 +155,6 @@ void func_00328758(char *self)
     }
 }
 
-extern float func_002A7878(float, float);
-extern void func_00282F20(float *, float *, float);
-extern char D_0022B0A0[];
-
 void func_00328848(char *a0)
 {
     char *rec = D_0022B0A0;
@@ -145,8 +176,6 @@ void func_00328848(char *a0)
         break;
     }
 }
-
-extern void func_00283098(void *, void *, void *);
 
 void func_00328918(char *owner)
 {
@@ -296,12 +325,6 @@ INCLUDE_ASM("asm/game", func_00329F40);
 INCLUDE_ASM("asm/game", func_0032A130);
 
 INCLUDE_ASM("asm/game", func_0032A140);
-
-extern char D_L00_00252C40[][16];
-extern char D_L00_00189F00[];
-extern float func_002A7878(float, float);
-extern void func_002AF000(void *, float, float, float);
-extern void func_00282CC0(void *, void *, void *);
 
 void func_0032A978(void)
 {

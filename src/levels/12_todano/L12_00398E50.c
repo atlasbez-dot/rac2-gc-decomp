@@ -126,6 +126,7 @@ INCLUDE_ASM("asm/levels", func_L12_00402B48);
 
 INCLUDE_ASM("asm/levels", func_L12_00402DF8);
 
+/* func_L12_00404778 is defined in L12_00398E50-g8.c (it reads a pointer through $gp). */
 
 
 INCLUDE_ASM("asm/levels", func_L12_00412548);

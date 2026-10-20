@@ -11,6 +11,18 @@ extern float D_L02_001B17E0 __attribute__((sda));
 
 extern float D_L02_001B17EC __attribute__((sda));
 
+extern char *D_L02_001B1190[1] __attribute__((sda));
+
+extern float func_00283CE0(int);
+
+extern int func_00283CF0(float);
+
+extern int func_L02_003F9B70(int);
+
+extern int func_00288D58(void);
+
+extern unsigned char D_001395B8[0x100];
+
 /* Runs the kind's placement helper with the kind's own angles. */
 void func_L02_00402440(char *a0) {
     if (*(unsigned char *)(a0 + 0x20) == 3)
@@ -29,19 +41,9 @@ INCLUDE_ASM("asm/levels", func_L02_003D28E0);
    this compiler drops them (172 bytes against 188). */
 INCLUDE_ASM("asm/levels", func_L02_004013C0);
 
-extern char *D_L02_001B1190[1] __attribute__((sda));
-
-extern float func_00283CE0(int);
-
-extern int func_00283CF0(float);
-
 /* The kind's table gives a count; the kind's own helper gives the kind's id. */
-extern int func_L02_003F9B70(int);
-
-extern int func_00288D58(void);
 
 /* The byte table the count is read from, at its address in the boot's resident memory. */
-extern unsigned char D_001395B8[0x100];
 
 /* Scales the kind's own angle at +0xC down by 0.3 once per count the kind's byte table
    gives, keeps it inside the kind's own range, scales it by ten when the global flag is
@@ -69,4 +71,22 @@ int func_L02_003FCDF8(int a0) {
 }
 
 /* Near miss: same body with the other entry parameter (draft beside this one). */
-INCLUDE_ASM("asm/levels", func_L02_003FCF08);
+int func_L02_003FCF08(int a0) {
+    float f20;
+    int i = 0;
+
+    f20 = func_00283CE0(*(int *)(D_L02_001B1190[a0] + 0x10));
+    while (i < D_001395B8[func_L02_003F9B70(a0)]) {
+        f20 *= 0.33333f;
+        i++;
+    }
+    {
+        float f0 = (float)*(int *)(D_L02_001B1190[a0] + 0x10);
+
+        if (f0 < f20)
+            f20 = f0;
+        else if (f20 < 5.0f)
+            f20 = 5.0f;
+    }
+    return func_00283CF0(f20) << 5;
+}

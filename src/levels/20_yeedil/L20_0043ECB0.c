@@ -4,7 +4,7 @@ INCLUDE_ASM("asm/levels", func_L20_0043ECB0);
 
 INCLUDE_ASM("asm/levels", func_L20_0043F318);
 
-INCLUDE_ASM("asm/levels", func_L20_0043F460);
+/* func_L20_0043F460 is defined in L20_0043ECB0-g8.c (it reaches a global through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L20_0043F570);
 
@@ -142,6 +142,8 @@ void func_L20_00442F30(char *arg0) {
 INCLUDE_ASM("asm/levels", func_L20_00442F80);
 
 INCLUDE_ASM("asm/levels", func_L20_004431E0);
+/* func_L20_004431E0 reads a global through $gp: its near miss is in
+   nonmatching/levels/func_L20_004431E0.c and belongs in the -G8 sibling. */
 
 extern unsigned int D_L20_001B2F9C __attribute__((sda));
 extern int func_L03_003CA138(char *);
@@ -217,9 +219,13 @@ INCLUDE_ASM("asm/levels", func_L20_00443DF0);
 
 INCLUDE_ASM("asm/levels", func_L20_00444018);
 
+/* func_L20_00444088 is defined in L20_00444088-g8.c (it reaches a global through
+   $gp and needs its own -fno-schedule-insns). */
 
 INCLUDE_ASM("asm/levels", func_L20_00444130);
 
+/* func_L20_00444138 reads a global through $gp: its near miss is in
+   nonmatching/levels/func_L20_00444138.c and belongs in the -G8 sibling. */
 
 INCLUDE_ASM("asm/levels", func_L20_004441D8);
 
@@ -263,7 +269,67 @@ INCLUDE_ASM("asm/levels", func_L20_00445738);
 
 INCLUDE_ASM("asm/levels", func_L20_00445890);
 
-INCLUDE_ASM("asm/levels", func_L20_00446E70);
+/* The level's own jump table (the label of the data blob at 0x002B5980). */
+extern void *jtbl_002B5980[];
+
+extern int func_002B3868(char *);
+
+extern int func_002B38B8(char *);
+
+extern void func_002AA548(char *, char *, float, float, float, float);
+
+extern unsigned char D_0019B2E8[];
+
+/* The five behaviours the object's state byte selects; the table in the level's data
+   holds the address of each. */
+void func_L20_00446E70(char *arg0) {
+    static void * volatile tab[] = { &&c0, &&c1, &&c2, &&c3, &&c4 };
+    char *state;
+    unsigned char sel;
+
+    sel = *(unsigned char *)(arg0 + 0x20);
+    state = *(char **)(arg0 + 0x68);
+    if (sel >= 5) {
+        goto end;
+    }
+    goto *jtbl_002B5980[sel];
+c0:
+    *(float *)(state + 0x10) = *(float *)(arg0 + 0x10);
+    func_002A7750(arg0, 1, -1);
+    goto out;
+c1:
+    if ((D_0019B2E8[((unsigned char *)arg0)[0xB0] + *(int *)0x001A79F0 * 16] & 0x80) == 0) {
+        goto end;
+    }
+    func_002A7750(arg0, 2, -1);
+    goto out;
+c2:
+    if (func_002B3868(arg0) != 0) {
+        *(int *)(state + 0x14) = 0;
+    }
+    func_002AA548(arg0 + 0x10, state + 0x14,
+                  *(float *)(state + 0x10) - *(float *)(state + 0x0),
+                  *(float *)(state + 0x8), *(float *)(state + 0x8),
+                  *(float *)(state + 0xC));
+    goto out;
+c3:
+    if (func_002B38B8(arg0) == 0) {
+        goto end;
+    }
+    func_002A7750(arg0, 4, -1);
+    goto out;
+c4:
+    if (func_002B3868(arg0) != 0) {
+        *(int *)(state + 0x14) = 0;
+    }
+    func_002AA548(arg0 + 0x10, state + 0x14, *(float *)(state + 0x10),
+                  *(float *)(state + 0x8), *(float *)(state + 0x8),
+                  *(float *)(state + 0xC));
+    goto out;
+end:
+out:
+    return;
+}
 
 INCLUDE_ASM("asm/levels", func_L20_00446FA8);
 
@@ -286,3 +352,5 @@ INCLUDE_ASM("asm/levels", func_L20_00447930);
 INCLUDE_ASM("asm/levels", func_L20_00448858);
 
 INCLUDE_ASM("asm/levels", func_L20_00448A18);
+/* func_L20_00448A18 reaches four globals through $gp: its near miss is in
+   nonmatching/levels/func_L20_00448A18.c and belongs in the -G8 sibling. */

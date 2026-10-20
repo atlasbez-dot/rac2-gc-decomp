@@ -238,7 +238,29 @@ INCLUDE_ASM("asm/levels", func_L02_003CD4A8);
 
 INCLUDE_ASM("asm/levels", func_L02_003CD758);
 
-INCLUDE_ASM("asm/levels", func_L02_003CD8C0);
+extern int D_L02_001B35B8 __attribute__((sda));
+
+/* Sets every entity of the object's group to state 1 with a 0xB4 timer. */
+void func_L02_003CD8C0(unsigned char *arg0) {
+    unsigned short *q;
+    char *e;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+        char *o;
+
+        e = D_L02_001B359C + ((*q & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        o = *(char **)(e + 0x68);
+        *(unsigned short *)(o + 0x382) = 1;
+        *(unsigned short *)(o + 0x386) = 0xB4;
+        q++;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003CD970);
 

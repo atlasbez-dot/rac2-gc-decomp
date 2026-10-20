@@ -112,7 +112,7 @@ float func_L18_0035D5A8(BatchA_A18_s32 a0, BatchA_A18_s32 a1, BatchA_A18_s32 a2,
 
 INCLUDE_ASM("asm/levels", func_L18_0035D5F8);
 
-INCLUDE_ASM("asm/levels", func_L18_003F50D8);
+/* func_L18_003F50D8 is matched in L18_003F50D8.c (built with -mno-split-addresses). */
 
 INCLUDE_ASM("asm/levels", func_L18_003F5198);
 
@@ -238,7 +238,40 @@ void func_L18_003F7590(BatchA_A18_u8 *a0) {
         (unsigned short)(*(unsigned short *)(a0 + 0x34) & 0xEFFF);
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F75E8);
+/* The group id lists, the entity bank base and the resident group count. The two scalars are
+   `sda` arrays of unknown size: cc1 emits the one-instruction load, which the assembler
+   expands absolute (`lui`/`lw`) as retail has it in this -G0 unit. */
+extern unsigned short *D_L18_001FB320[];
+extern char *D_L18_001B281C[] __attribute__((sda));
+extern int D_L18_001B2838[] __attribute__((sda));
+
+/* Counts the entities of kind 0xB69 in state 1 that the group's id list names, stores the count
+   through a1 and returns the last of them (0 when there is none). Retail compares the state with
+   0xFE and 0xFD before testing it for 1. */
+BatchA_A18_s32 func_L18_003F75E8(BatchA_A18_s32 a0, BatchA_A18_u8 *a1) {
+    unsigned short *q;
+    unsigned char *e;
+    unsigned char *r;
+    BatchA_A18_s32 *cnt = (BatchA_A18_s32 *)a1;
+
+    *cnt = 0;
+    if (a0 == -1)
+        return 0;
+    r = 0;
+    for (q = D_L18_001FB320[a0];
+         (a0 & 0xFF) != 0xFF && a0 <= D_L18_001B2838[0] && q != 0 &&
+         ((short)q[-1] >= 0 || q == D_L18_001FB320[a0]);
+         q++) {
+        e = (unsigned char *)(D_L18_001B281C[0] + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        if (*(short *)(e + 0xAA) == 0xB69 && e[0x20] != 0xFE && e[0x20] != 0xFD && e[0x20] == 1) {
+            (*cnt)++;
+            r = e;
+        }
+    }
+    return (BatchA_A18_s32)r;
+}
 
 INCLUDE_ASM("asm/levels", func_L18_003F76F0);
 
@@ -310,7 +343,7 @@ void func_L18_003F7A88(BatchA_A18_u8 *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F7AB8);
+/* func_L18_003F7AB8 is defined in L18_002C4000-g8.c (this unit has $gp access for it). */
 
 extern void func_L18_003FB5E8(void *a0, void *a1);
 extern void func_00282F20(void *a0, void *a1, float f12);
@@ -396,7 +429,46 @@ INCLUDE_ASM("asm/levels", func_L18_003F9DA0);
 INCLUDE_ASM("asm/levels", func_L18_003F9E50);
 
 
-INCLUDE_ASM("asm/levels", func_L18_003F9FB0);
+extern void func_L18_003FC9B8(unsigned char *a0);
+extern void func_L18_003F7988(unsigned char *a0);
+
+/* Slot i of the object's eight group ids (the words at +0x60). Retail rebuilds the slot address
+   at every test of the walk, which is what an inline helper expanded in place does. */
+static __inline__ int L18_GroupId(unsigned char *p, int i) {
+    int off = i << 2;
+    int *ids = (int *)(p + 0x60);
+    return *(int *)((char *)ids + off);
+}
+
+/* Walks the id list of each of the object's eight groups and, for every entity in it, calls the
+   handler of its kind (0xD5C, 0x11CC, 0xD9B, 0x11CF or 0xB69), clears the entity's word at +0x98
+   and sets bits 0 and 1 of its flags at +0x34; then stores -1 at +0x88 of the object. */
+void func_L18_003F9FB0(unsigned char *a0) {
+    unsigned char *p = *(unsigned char **)(a0 + 0x68);
+    unsigned short *q;
+    unsigned char *e;
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        for (q = D_L18_001FB320[L18_GroupId(p, i)];
+             (L18_GroupId(p, i) & 0xFF) != 0xFF && L18_GroupId(p, i) <= D_L18_001B2838[0] &&
+             q != 0 && ((short)q[-1] >= 0 || q == D_L18_001FB320[L18_GroupId(p, i)]);
+             q++) {
+            e = (unsigned char *)(D_L18_001B281C[0] + ((*q & 0x7FFF) << 8));
+            if (e == 0)
+                break;
+            if (*(short *)(e + 0xAA) == 0xD5C || *(short *)(e + 0xAA) == 0x11CC ||
+                *(short *)(e + 0xAA) == 0xD9B || *(short *)(e + 0xAA) == 0x11CF) {
+                func_L18_003FC9B8(e);
+            } else if (*(short *)(e + 0xAA) == 0xB69) {
+                func_L18_003F7988(e);
+            }
+            *(int *)(e + 0x98) = 0;
+            *(unsigned short *)(e + 0x34) |= 3;
+        }
+    }
+    *(int *)(p + 0x88) = -1;
+}
 
 INCLUDE_ASM("asm/levels", func_L18_003FA180);
 
@@ -572,9 +644,6 @@ INCLUDE_ASM("asm/levels", func_L18_00427208);
 INCLUDE_ASM("asm/levels", func_L18_004273F0);
 
 INCLUDE_ASM("asm/levels", func_L18_00427688);
-
-extern char *D_L18_001FB320[];
-extern char *D_L18_001B281C;
 
 /* func_L18_00427B48: 144 bytes against retail's 148; the chain pointer and the
    stored 1 take each other's register. Deposited in nonmatching/levels/. */

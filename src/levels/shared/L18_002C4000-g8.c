@@ -110,3 +110,31 @@ void func_L18_002C41F0(void)
     hero = D_00189E20;
     func_002A677C(*(int *)(hero + 0x2290));
 }
+
+/* The group id lists and the entity bank base are read absolutely, the resident group count
+   through $gp. */
+extern unsigned int D_L18_001FB320[];
+extern char *D_L18_001B281C;
+extern int D_L18_001B2838 __attribute__((sda));
+extern void func_L18_003F7A88(unsigned char *a0);
+
+/* Walks the id list of the object's group and hands every entity it names to
+   func_L18_003F7A88. Retail's loop is not rotated (the test sits below the body); the second
+   `q != 0` in the condition keeps the test from being copied in front of the loop. */
+void func_L18_003F7AB8(unsigned char *arg0)
+{
+    unsigned short *q;
+    unsigned char *e;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    q = (unsigned short *)D_L18_001FB320[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L18_001B2838 && q != 0 &&
+           ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L18_001FB320[arg0[0x21]])) {
+        e = (unsigned char *)(D_L18_001B281C + ((*q & 0x7FFF) << 8));
+        if (e == 0)
+            break;
+        func_L18_003F7A88(e);
+        q++;
+    }
+}

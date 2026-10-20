@@ -20,10 +20,46 @@
    is the allocation: retail gives $f0 to the loaded constant and $f1 to the 60.0f
    multiplier, this cc1 the opposite, keeps the state pointer in $a3 where retail
    loads it into $a3 from arg0 and keeps arg0 in $a0, and materialises the 0.5f early.
+    Third wave (20_yeedil, 2026-10-20, worker 04) adds the one escape of the 128-bit
+    wall that is not in the list above: a VOLATILE POINTER OBJECT reaches a plain-register
+    address. `TI128 *volatile d = (TI128 *)(arg0 + 0x10); *d = *(TI128 *)arg2;` compiles to
+    `sw $4,0($sp) ; lq $3,0($5) ; lw $2,0($sp) ; sq $3,0($2)` - the `sq` has a zero
+    displacement, exactly the retail's `sq $v0,0x0($t0)`, because the pointer comes back
+    from memory and the CSE has nothing to fold. The price is the stack store and the
+    reload: two instructions where the retail pays one (`addiu $t0,$a0,0x10`), so the body
+    is eight bytes over per destination. Measured and NOT enough: `volatile` on the
+    pointee (`*(volatile TI128 *)(arg0 + 0x10)`), a union with a 16 byte member, a
+    struct member at 0x10, two C names for one pointer, an integer cast, a 64-bit address
+    (that one gives `daddu` + the `dsll`/`dsra` pair + `sq $v0,0($reg)`) and
+    __builtin_memcpy - all of them fold the constant offset into the `sq` again.
    Tried and not enough: eight source shapes (the union that reinterprets the int as a
    float, the int store, a float temporary for the constant, the multiplication written
    60.0f * D, the declaration order of the locals, the 16-byte copy with and without a
    temporary, the TI128 locals).*/
+   Fourth wave (20_yeedil, 2026-10-20, worker 01): the TI128 wall is still the
+   whole difference, and the allocation difference is a consequence of it, not a
+   second problem.  The retail never sign-extends arg0: it uses $a0 as the base of
+   every access (`lw $a3,0x68($a0)`, `lhu $v0,0x34($a0)`, `lwc1 $f0,0x18($a0)`) and
+   materialises the two 128-bit destinations itself (`addiu $t0,$a0,0x10` and
+   `addiu $a3,$a3,0x50`, each followed by a zero-displacement `sq`).  As soon as the
+   128-bit store needs a 64-bit address, this cc1 sign-extends arg0 into $a3
+   (`daddu $a3,$a0,$zero`) and every access then uses that copy - so the allocation
+   difference goes away together with the address difference.
+   Measured and rejected (all give `sq $v0,0x10($a3)`, the folded form): the
+   destination as `(int)arg0 + 0x10`, `(unsigned int)arg0 + 0x10`, `(long)arg0 +
+   0x10`, `(unsigned long)arg0 + 0x10` and `(short)arg0 + 0x10`; the parameter as
+   `int`, `unsigned int` and `long`; every access written with an `(int)` cast;
+   the destination through an `unsigned int` variable; a TI128 local instead of a
+   pointer; the copy as `((TI128 *)arg0)[1]`; a `volatile TI128` temporary; the
+   TI128 type declared `aligned(16)` and `may_alias`; the source as a 16-byte
+   struct (that one copies with ldl/ldr/sdl/sdr, 8 instructions).  The volatile
+   POINTER object is still the only spelling that reaches a zero-displacement
+   `sq`, at the price of the stack store and reload the third wave measured.
+   The unit has to be built with -G8 because the global D_L20_001B23E8 is read
+   through $gp (gp+0x33F8 = 0x1B23E8); that global is 6.0f (0x40C00000) and the
+   multiplier the retail materialises next to it is 60.0f (0x42700000), so the
+   0xA8 field is (int)(6.0f * 60.0f) = 360.
+
 #include "common.h"
 
 typedef int TI128 __attribute__((mode(TI)));

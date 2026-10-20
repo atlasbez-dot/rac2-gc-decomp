@@ -1,15 +1,48 @@
 #include "include_asm.h"
 
+typedef struct { char prefix[0x14]; char *source; int value; char gap[0x118]; int fallback; } SelectionCallback;
+
+typedef struct { char reserved[0x1C4]; int flags; } CallbackMenuState;
+
 extern char *D_001A8CFC;
+
 extern volatile unsigned char D_001A7A0A;
+
 extern int ref_L00_002D1CB0_01;
+
 extern int ref_L00_002D1CB0_02;
+
 extern int ref_L00_002D1CB0_03 __attribute__((sda));
+
 extern int ref_L00_002D1CB0_04;
+
 extern int ref_L00_002D1CB0_05 __attribute__((sda));
+
 extern int ref_L00_002D1CB0_06;
+
 extern int ref_L00_002D1CB0_07 __attribute__((sda));
+
 extern int ref_L00_002D1CB0_08 __attribute__((sda));
+
+extern int D_00138344[];
+
+extern int D_001ABA68 __attribute__((sda));
+
+extern SelectionCallback D_001F2840;
+
+extern int D_0025CCE8[];
+
+extern int func_002E5E58(int, unsigned int, void *);
+
+extern CallbackMenuState D_00138180;
+
+extern int func_0029C560(int);
+
+extern int func_0029C4F0(int);
+
+extern char *func_003415B8(void *);
+
+extern void func_002D5E98(int);
 
 int func_002D1CB0(void)
 {
@@ -27,13 +60,6 @@ int func_002D1CB0(void)
     }
     return 0;
 }
-
-extern int D_00138344[];
-extern int D_001ABA68 __attribute__((sda));
-typedef struct { char prefix[0x14]; char *source; int value; char gap[0x118]; int fallback; } SelectionCallback;
-extern SelectionCallback D_001F2840;
-extern int D_0025CCE8[];
-extern int func_002E5E58(int, unsigned int, void *);
 
 int func_002D23F8(void)
 {
@@ -75,13 +101,6 @@ finish:
     D_0025CCE8[0] = D_001ABA68;
     return result;
 }
-
-typedef struct { char reserved[0x1C4]; int flags; } CallbackMenuState;
-extern CallbackMenuState D_00138180;
-extern int func_0029C560(int);
-extern int func_0029C4F0(int);
-extern char *func_003415B8(void *);
-extern void func_002D5E98(int);
 
 int func_002CD950(void)
 {

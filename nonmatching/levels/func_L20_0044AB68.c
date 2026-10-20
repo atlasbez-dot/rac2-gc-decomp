@@ -23,7 +23,34 @@
    zero feeds two stores (measured: two stores of the same zero keep
    `por $2,$0,$0` and two `sq $2`), and the retail has one store.  The same
    wall is recorded for func_L00_002A75D8, func_L00_003ACC88,
-   func_L13_0040A2C8 and func_L04_00422D40. */
+   func_L13_0040A2C8 and func_L04_00422D40.
+
+   Measured further this wave (2026-10-20, worker 10 of the level 20 wave):
+   the fold is not the only mechanism - the shape of the store itself is
+   decided before the pass.  The RTL of the store is
+       (set (mem/s:TI (plus:SI (reg:SI 1 at) (const_int 32)) 0) (const_int 0))
+   (the RTL dump, cc1 -dall, file x.i.regmove), i.e. the source is a
+   TImode CONSTANT zero, and the movti_internal pattern of
+   gcc/config/mips/mips.md has no alternative for a constant zero but a
+   register: the reload then gives it register 0 and the pattern prints
+   `sq $0,32($sp)`.  With two uses of the same constant the reload has to
+   keep it in one register and the pattern's "d" alternative prints
+   `por $2,$0,$0` (por rd,$zero,rs) followed by the two `sq $2`.  So the
+   register form needs the value to be in a register, and this cc1 only
+   puts a TImode constant there when the value has two or more uses.
+   Further spellings measured, all of them `sq $0`: the union as a local, in
+   a global, in a struct, in an array, the store through a pointer, through
+   a volatile pointer, `*(TI128 *)&v = 0`, a TI128 local (`TI128 z = 0;`),
+   a union with a float array, a TI128 value returned by a call, and the
+   same store with the union at a non-zero stack offset.  A function that
+   RETURNS a TI128 does keep the por (`por $2,$0,$0`, the return value in
+   $v0/$v1), which is the only way measured to get the materialised zero
+   into a register with one use.
+
+   The wall is therefore the same for every body of this shape, and no
+   matched function in the repository has a `por` + `sq` zero store (checked
+   over every level's retail assembly against the matched functions in
+   src/). */
 
 #include "include_asm.h"
 
@@ -55,3 +82,25 @@ void func_L20_0044AB68(char *arg0) {
         *(int *)(state + 0x1B8) = -1;
     }
 }
+
+   ------------------------------------------------------------------
+   Third attempt (wave w21, worker 10): the same wall, measured again
+   from the compiler side, with one addition.  The RTL of the store
+   after reload is
+       (insn:TI ... (set (mem:TI (reg:SI 4 a0) 0) (reg:TI 0 $0)))
+   (cc1 -dR, file x.i.sched2), i.e. the source of the store is the ZERO
+   REGISTER, not a pseudo: `rac2_fold_zero_ti_store` never fires on this
+   body (its guard sees register 0 referenced by the next instruction,
+   `daddu $s0,$a0,$zero`, so the register reads as live), and the
+   `sq $zero` comes from `movti_internal`'s store alternative itself
+   (gcc/config/mips/mips.md: alternative 4, `sq %1,%0`, with %1 the zero
+   register).  The retail's `por $v0,$zero,$zero` + `sq $v0,0x20($sp)` is
+   alternative 0 (`por %0,$0,%1`), which needs the source of the store to
+   be a real register - and this cc1 only puts a TImode constant in a
+   register when the constant has two or more uses.  Measured again: one
+   store folds to `sq $0`; two stores of the same constant keep
+   `por $2,$0,$0` and two `sq $2` (one store too many for this body).
+   A `volatile` store, a `volatile` pointer, a TI128 local, a union, a
+   struct member and a store through a pointer were re-measured: all
+   `sq $0`.  The wall stands; the body needs a compiler change, not a
+   different spelling.

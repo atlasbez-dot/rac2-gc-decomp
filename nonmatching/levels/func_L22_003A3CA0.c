@@ -1,3 +1,11 @@
+/* 2026-10-20, with func_L23_0041CCC0's recipe (now C in PR #221): taking the row pointer
+   after the count store (`D_001B2AB8[i] = 0; row = D_0023B530[i]; for (j = 0x31; j >= 0; j--)
+   row[j] = 0;`) and declaring D_001B2AC4 and D_001B2AB8 `sda` gives retail's whole loop,
+   counter in place. What is left is D_001B2AB4: retail loads it after the loop as
+   `lui $v1,0x1B ; lw $v1,0x2AB4($v1)` (one register). A plain extern hoists the `lui` above
+   the loop (one word early, which also removes the loop label's alignment `nop`); `sda`,
+   as a pointer or as an array of unknown size, hoists the whole load. */
+
 /* func_L22_003A3CA0 (176 bytes, 2 places, default profile -O2 -G0)
    -- measured 0 of 2: best candidate is 180 bytes, one instruction over.
 

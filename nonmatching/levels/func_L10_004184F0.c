@@ -6,7 +6,16 @@
    $a1 = 1 then $a0 = 0xFF and stores 0x20, 0x30, 0x32, 0x34 in ascending order; this cc1
    always assigns $a0 = 1 / $a1 = 0xFF and schedules the 0x34 read-modify-write before the two
    byte stores.  Four source orders (0x20 first, 0x30 first, flag word as one s32, RMW first)
-   all give the same six words. */
+   all give the same six words.
+
+   Measured since: the register assignment is reachable.  Reading the two half words through a
+   `u16 *` alias of the object and writing the 0x30 byte before the 0x20 one gives the retail's
+   registers - $a0 carries the 0xFF and $a1 the 1 - and the same $v1 for the 0x1FF and $v0
+   for the loaded word.  What is left is the schedule: this cc1 still materialises the 0xFF
+   before the 1 and still puts the 0x34 store right after the `ori`, where retail materialises
+   the 1 first and stores 0x20, 0x30, 0x32, 0x34 in ascending order.  The 0x34 store stayed
+   second for every spelling tried: `|=` on the u16, a separate load and store, a `u16 *`
+   alias, and the four orders of the other stores. */
 
 #include "include_asm.h"
 
@@ -21,14 +30,15 @@ extern void func_37CCB0(char *a0, int a1);
 void func_L10_004184F0(char *a0)
 {
     char *s1 = *(char **)(a0 + 0x68);
+    u16 *p = (u16 *)a0;
 
     *(s32 *)(func_37BA88(a0) + 0x148) = 2;
     func_37CCB0(a0, 1);
     *(s32 *)(s1 + 0x268) = -1;
     *(f32 *)(s1 + 0x180) = 2.0f;
     *(f32 *)(a0 + 0x2C) = 0.16f;
-    *(u8 *)(a0 + 0x20) = 1;
     *(u8 *)(a0 + 0x30) = 0xFF;
-    *(u16 *)(a0 + 0x32) = 0x1FF;
-    *(u16 *)(a0 + 0x34) |= 0x100;
+    *(u8 *)(a0 + 0x20) = 1;
+    p[0x19] = 0x1FF;
+    p[0x1A] = p[0x1A] | 0x100;
 }

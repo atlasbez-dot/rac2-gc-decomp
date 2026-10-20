@@ -111,6 +111,7 @@ void func_L22_0040DC40(s32 a0, s32 a1, s32 a2, f32 f12) {
     func_3300E8(a0, buf);
 }
 
+/* The existing implementation is in L22_0040DD20-rc2.c. */
 
 INCLUDE_ASM("asm/levels", func_L22_0040DE00);
 

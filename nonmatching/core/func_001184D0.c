@@ -52,6 +52,17 @@
  *    registers swapped. In the 9-word body everything from the `blez` to the
  *    `jr $ra` is already right; in the 8-word one only the `beqz` slot and the
  *    loop entry differ.
+ *
+ * Wave 5 adds twenty more bodies, all measured on the same 120-byte shape:
+ * the swap written in the three orders (`c = arg0[i]` first, `c = arg0[len]`
+ * first, the two stores first), `unsigned char` for the temporary, the swap
+ * through `char *p`/`char *q`, `*arg0` and `*(arg0 + ++len)` for the length
+ * scan, the counter initialised in the entry, the counter's scope moved into
+ * the block, and the declaration order permuted. None of them moves the
+ * base pointer out of $t0 while keeping retail's delay-slot layout: the
+ * bodies that put the base in $t1 (the counter live in the entry block) shift
+ * the body by one instruction, and the bodies that keep retail's layout
+ * leave the base in $t0. The tie stands.
  */
 char *func_001184D0(char *arg0) {
     int len = 0;

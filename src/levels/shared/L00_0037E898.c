@@ -295,7 +295,7 @@ INCLUDE_ASM("asm/levels", func_L00_00384248);
 
 INCLUDE_ASM("asm/levels", func_L00_00384678);
 
-INCLUDE_ASM("asm/levels", func_L00_00384C20);
+/* func_L00_00384C20 is matched in L00_00384C20.c (built with -fno-strength-reduce). */
 
 INCLUDE_ASM("asm/levels", func_L00_00384CA8);
 

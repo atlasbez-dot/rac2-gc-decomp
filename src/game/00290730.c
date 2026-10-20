@@ -56,5 +56,3 @@ void func_00290758(void)
         func_002AD7B8(D_001A79F0 % 28);
     D_001A9A50 = 0;
 }
-
-

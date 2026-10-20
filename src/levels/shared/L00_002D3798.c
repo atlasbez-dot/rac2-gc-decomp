@@ -544,7 +544,29 @@ INCLUDE_ASM("asm/levels", func_L00_002D5158);
 
 INCLUDE_ASM("asm/levels", func_L00_002D5940);
 
-INCLUDE_ASM("asm/levels", func_L00_002D5E30);
+extern short D_L00_00262260[];
+
+extern int D_001A7A0C __attribute__((sda));
+
+/* Walks the halfword pairs of the table at D_L00_00262260 (a negative first half ends it, and
+   so do 77 pairs): the first half of each pair is added to a running sum while the sum stays
+   within D_001A7A0C / 32, and each pair that passes adds its second half to *a2 and stores the
+   sum to *a0. *a1 gets the final sum. The retail unit returns int without setting it: $v0 is
+   live at the exit, which keeps the load of D_001A7A0C out of the exit branch's delay slot
+   (a void function gives that slot to the load, as a $gp access). */
+int func_L00_002D5E30(int *a0, int *a1, int *a2) {
+    int sum = 0;
+    int i = 0;
+    short *second = &D_L00_00262260[1];
+    short *first = second - 1;
+
+    for (; i < 77 && *first >= 0 && (sum += *first) <= (D_001A7A0C >> 5);
+         i++, second += 2, first += 2) {
+        *a2 += *second;
+        *a0 = sum;
+    }
+    *a1 = sum;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_002D5EB8);
 

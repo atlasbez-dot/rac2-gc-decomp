@@ -10,7 +10,9 @@ The retail code was built with GNU EE-GCC 2.9-ee-991111b. `build.sh` rebuilds it
   retail saves registers in 8-byte slots.
 - `transformers/`: the source edits measured for this game, each a script carrying its exact
   replacement text, in the order `build.sh` runs them. `u3_frame_order_on.py` and
-  `u4_mtc1_helper.py` are two earlier steps the later ones build on.
+  `u4_mtc1_helper.py` are two earlier steps the later ones build on. The last,
+  `r5900_mfc1_interlock.py`, drops gas's coprocessor-load `nop` after `mfc1` on the R5900,
+  which interlocks it (docs/COMPILER-NOTES.md).
 
 Patch `0057` adds the opt-in `-mastra-split-trunc-slot` switch. It splits the
 two-word `truncdisi2` pattern after reload, before delay-slot scheduling, so

@@ -104,6 +104,16 @@ void func_L20_00330A68(void *arg0, int arg1)
     func_002A0F48(arg0);
 }
 
+/* Catalogue defect: the row's first two words (0x0036AE68 `sw $t3,0x40($v1)` /
+   `nop`) sit after the previous function's `jr $ra` (0x0036AE5C) and are
+   unreachable; the next eight words (0x0036AE70 `addiu $sp,$sp,0x20` /
+   `nop`) have the shape of the four-byte stub rows this level's splitter
+   cuts out of a function (131 of them, e.g. func_L00_002B2C50 at
+   0x00308688), so the real body starts at 0x0036AE78 and is 272 bytes: a
+   leaf function with no frame, no saved register and `jr $ra` at 0x0036AF80.
+   It reaches data through $gp twice (0x0036AF0C and 0x0036AF58, both
+   `lw $a0,-0x4800($gp)` -> 0x001AA7F0), so it belongs in the -G8 unit once
+   the row is split. */
 INCLUDE_ASM("asm/levels", func_L20_0036AE68);
 
 extern void func_L00_002F3478(void);

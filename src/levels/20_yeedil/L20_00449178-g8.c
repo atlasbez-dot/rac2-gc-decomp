@@ -113,3 +113,15 @@ INCLUDE_ASM("asm/levels", func_L20_00449BB0);
 INCLUDE_ASM("asm/levels", func_L20_00449FD0);
 
 INCLUDE_ASM("asm/levels", func_L20_0044B100);
+
+/* func_L20_0044A658 is a near miss: nonmatching/levels/func_L20_0044A658.c */
+
+INCLUDE_ASM("asm/levels", func_L20_0044A658);
+
+/* func_L20_0044A8F0 is a near miss: nonmatching/levels/func_L20_0044A8F0.c */
+
+INCLUDE_ASM("asm/levels", func_L20_0044A8F0);
+
+/* func_L20_00449338 is a near miss: nonmatching/levels/func_L20_00449338.c */
+
+INCLUDE_ASM("asm/levels", func_L20_00449338);

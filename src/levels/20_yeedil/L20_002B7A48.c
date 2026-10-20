@@ -14,13 +14,13 @@ INCLUDE_ASM("asm/levels", func_L20_002B7A48);
 
 /*W23E*/
 
-INCLUDE_ASM("asm/levels", func_L20_002B93E0);
+/* func_L20_002B93E0 is defined in L20_002B7A48-g8.c (it reaches data through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L20_002C57D0);
 
 INCLUDE_ASM("asm/levels", func_L20_002C5A48);
 
-INCLUDE_ASM("asm/levels", func_L20_002C5D00);
+/* func_L20_002C5D00 is defined in L20_002B7A48-g8.c (it reaches data through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L20_002C63F0);
 
