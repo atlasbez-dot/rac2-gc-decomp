@@ -1,3 +1,27 @@
+src/levels/shared/L00_0035F640-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/17_smolg/L17_003C5B68-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_003DC1C0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_003F59F0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_00433070-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_004336E8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_004338E0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_002D3290-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/02_maktar_nebula/L02_003FF9A0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/02_maktar_nebula/L02_00400B10-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/levels/shared/L01_003EE6F0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L04_004027B0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/11_joba/L11_00447360-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/levels/20_yeedil/L20_003C02D0-rc2.c	-fno-builtin -O2 -G8 -ffunction-sections
+src/levels/shared/L02_00331440-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/levels/shared/L00_00382BF0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_00421B50-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L00_003ECB38-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L00_003CC030-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/levels/shared/L00_003FE310-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/levels/11_joba/L11_0043A810-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
+src/levels/shared/L00_004270C0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L04_002D9780-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/03_endako/L03_0041DFA8-rc2.c	-fno-builtin -O2 -G8 -ffunction-sections
 src/levels/17_smolg/L17_003C5E20-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L00_003DFDC0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/levels/shared/L06_003E3ED0-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections

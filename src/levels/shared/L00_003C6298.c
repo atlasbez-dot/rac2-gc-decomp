@@ -135,7 +135,6 @@ void func_L00_003CBE28(char *p, float scale)
     func_00282D30_2(p + 48, p + 48, scale);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003CC030);
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L00_003CC6D8(Vec16_Fc936841d *object, int index)

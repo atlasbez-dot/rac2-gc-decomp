@@ -154,7 +154,6 @@ INCLUDE_ASM("asm/levels", func_L20_003BFEB8);
 
 INCLUDE_ASM("asm/levels", func_L20_003C0048);
 
-INCLUDE_ASM("asm/levels", func_L20_003C02D0);
 
 extern char *D_L20_001FBB20[];
 

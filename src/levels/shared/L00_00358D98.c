@@ -99,7 +99,6 @@ int func_L00_0035F5A0(int index, int a1, int a2)
     return r;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0035F640);
 
 /* Builds a slot index out of three weight/kind arguments and fills the same 112-byte record as
  * above; the record's value word comes from the fifth argument, the helper's from the sixth. */
