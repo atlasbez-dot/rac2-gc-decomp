@@ -1,3 +1,4 @@
+src/game/00272198-rc2.c	-O2 -ffunction-sections -fno-builtin -g -G0
 src/game/00288970-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00292B20-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/002CB8A0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
