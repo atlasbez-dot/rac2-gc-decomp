@@ -740,7 +740,6 @@ void func_L00_0038BE70(char *object)
 
 INCLUDE_ASM("asm/levels", func_L00_0038BF18);
 
-INCLUDE_ASM("asm/levels", func_L00_0038D368);
 
 /* Dispatches on a byte mode at object+32: mode 0 updates two float angles from a linked node and runs a follow-up call; mode 1 refreshes a 16-byte block and a node copy then calls a final update. */
 void func_L00_0038D468(char *object)
