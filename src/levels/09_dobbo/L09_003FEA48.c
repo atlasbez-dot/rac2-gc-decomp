@@ -1,20 +1,43 @@
 #include "common.h"
 
 extern void func_L08_00328BB0();
+
 extern void func_L01_00321178();
+
 extern void func_002B4FF0(f32 a);
+
 extern char *D_L09_001B285C __attribute__((sda));
+
 extern char *D_L09_001FFFB560[];
+
 extern void func_2EA110(char *p);
+
 extern void func_31F500(char *a0, char *a1, s32 a2, f32 f12, f32 f13);
+
 extern void func_322578(char *a0, char *a1, s32 a2, s32 a3, f32 f12);
+
 extern void func_L09_004081F0(char *a0, s32 a1, char *a2, s32 a3);
+
 extern void func_L09_00408138(char *a0, char *a1, s32 a2, s32 a3, s32 a4);
+
 extern s32 func_325E78(char *a0, s32 a1);
+
 extern void func_318450(char *a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5,
                         f32 f12, f32 f13, f32 f14);
+
 extern char D_L09_00189EA0[];
+
 extern void func_L09_00406BA0(s32 a0, u8 a1);
+
+extern char D_L09_001B9C30[];
+
+extern f32 func_2EA578(char *a0, char *a1);
+
+extern f32 func_2EA3E0(f32 x);
+
+extern void func_2EACD0(char *a0, char *a1);
+
+extern void func_L09_00408058(char *a0, s32 a1, s32 a2, s32 a3);
 
 /* Level 09 helpers. */
 void func_L09_00403080(char *a0) {
@@ -146,11 +169,6 @@ INCLUDE_ASM("asm/levels", func_L09_00402D50);
 
 INCLUDE_ASM("asm/levels", func_L09_00403100);
 
-extern char D_L09_001B9C30[];
-extern f32 func_2EA578(char *a0, char *a1);
-extern f32 func_2EA3E0(f32 x);
-extern void func_2EACD0(char *a0, char *a1);
-
 void func_L09_0040B008(char *a0) {
     char *s1 = a0;
     char *s2 = s1 + 0xC0;
@@ -200,14 +218,11 @@ void func_L09_00406C90(char *a0) {
     *(s32 *)(a1 + 0x5C) = -1;
 }
 
-
 INCLUDE_ASM("asm/levels", func_L09_00406CC0);
 
 INCLUDE_ASM("asm/levels", func_L09_00406E78);
 
 INCLUDE_ASM("asm/levels", func_L09_00406FC8);
-
-extern void func_L09_00408058(char *a0, s32 a1, s32 a2, s32 a3);
 
 /* Sets an entity's colour key, or hands an off-kind entity to the shared body. */
 void func_L09_00408138(char *a0, char *a1, s32 a2, s32 a3, s32 a4)

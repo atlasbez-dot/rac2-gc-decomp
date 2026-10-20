@@ -117,7 +117,19 @@ void func_L02_003D4980(char *arg0, int arg1) {
     *(int *)(*(char **)(arg0 + 0x68) + 0x310) = arg1;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003D4990);
+/* Advances the actor's step counter until the float at +0x20 no longer lies below the share
+   (3 - step) / 3 of the count at +0x24, then latches the done flag; once only. */
+void func_L02_003D4990(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    if (*(short *)(state + 0x318) != 0)
+        return;
+    (*(short *)(state + 0x31A))++;
+    while (*(float *)(state + 0x20) <
+           (float)*(short *)(state + 0x24) * (3.0f - (float)*(short *)(state + 0x31A)) * 0.33333334f)
+        (*(short *)(state + 0x31A))++;
+    *(short *)(state + 0x318) = 1;
+}
 
 void func_L02_003D4A48(char *arg0) {
     char *state = *(char **)(arg0 + 0x68);

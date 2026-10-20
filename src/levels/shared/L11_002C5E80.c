@@ -1,5 +1,26 @@
 #include "include_asm.h"
 
+typedef struct {
+    float b0[4];
+    float b1[4];
+    float b2[4];
+    float b3[4];
+    int k0, k1, k2, k3;
+    int z80, z84, z88;
+    float f92, f96;
+    int z100;
+    float f104, f108;
+    long long v112;
+    long long v120;
+    long long v128;
+    long long v136;
+    float m00, m01, m02, m03;
+    float m10, m11, m12, m13;
+    float m20, m21, m22, m23;
+    float v192, v196, v200, v204;
+    float v208, f212, f216, v220;
+} LOC_L11_458DF0;
+
 extern void func_00282D30_2(char *dst, char *src, float scale);
 
 extern void func_L02_00333480(char *a, char *b, char *c);
@@ -7,6 +28,35 @@ extern void func_L02_00333480(char *a, char *b, char *c);
 extern float func_00282C10(float a);
 
 extern void func_00283CF0(float a);
+
+extern int func_002A7820(int lo, int hi);
+
+extern float func_002A7940(void);
+
+extern void func_L11_004507B0(void *a0, unsigned int color, float f, int rand, float a, int a3,
+                              int a4, float one, void *a5);
+
+extern void ref_L11_00458DF0_00(char *p);
+
+extern void ref_L11_00458DF0_01(char *p, float scale);
+
+extern long long func_0027C878(int id);
+
+extern float func_00283248(float x, float y);
+
+extern float func_00282E80(char *a0, float *a1);
+
+extern void func_00283410(void *dst, void *src);
+
+extern void func_00280B90(void *dst, void *src, int flag);
+
+extern float D_L11_001BA780[];
+
+extern int func_002ACBC8(void *a, int b);
+
+extern void func_002829D8(void *a);
+
+extern unsigned char D_L11_00189EA0[];
 
 INCLUDE_ASM("asm/levels", func_L11_002C5E80);
 
@@ -44,13 +94,6 @@ void func_L11_00439D78(float a, float b, float c, float d)
 }
 
 INCLUDE_ASM("asm/levels", func_L11_0044FFA0);
-
-extern int func_002A7820(int lo, int hi);
-
-extern float func_002A7940(void);
-
-extern void func_L11_004507B0(void *a0, unsigned int color, float f, int rand, float a, int a3,
-                              int a4, float one, void *a5);
 
 /* Draws the record's two markers, the scaled radius and the two colours, for each of the
    two record kinds the byte at 0x20 selects. */
@@ -137,45 +180,11 @@ void func_L11_00458D00(char *p)
 }
 
 /* The 224-byte local record the level's camera update fills in. */
-typedef struct {
-    float b0[4];
-    float b1[4];
-    float b2[4];
-    float b3[4];
-    int k0, k1, k2, k3;
-    int z80, z84, z88;
-    float f92, f96;
-    int z100;
-    float f104, f108;
-    long long v112;
-    long long v120;
-    long long v128;
-    long long v136;
-    float m00, m01, m02, m03;
-    float m10, m11, m12, m13;
-    float m20, m21, m22, m23;
-    float v192, v196, v200, v204;
-    float v208, f212, f216, v220;
-} LOC_L11_458DF0;
 
 /* The record's reset and its four-vector scaler: a different function in every
  * level that holds them, so each place resolves its own target. */
-extern void ref_L11_00458DF0_00(char *p);
-
-extern void ref_L11_00458DF0_01(char *p, float scale);
-
-extern long long func_0027C878(int id);
-
-extern float func_00283248(float x, float y);
-
-extern float func_00282E80(char *a0, float *a1);
-
-extern void func_00283410(void *dst, void *src);
-
-extern void func_00280B90(void *dst, void *src, int flag);
 
 /* The level's table of floats. */
-extern float D_L11_001BA780[];
 
 /* Fills a local record: the level's handle, the four blocks it scales, and the
  * two vectors the level's own table gives against the object's position. */
@@ -250,8 +259,6 @@ INCLUDE_ASM("asm/levels", func_L11_0046BC08);
 
 INCLUDE_ASM("asm/levels", func_L11_0046BD18);
 
-
-
 INCLUDE_ASM("asm/levels", func_L11_0046C1E0);
 
 /* resets a state record: zero words, plus/minus one float flags and two 64-bit fields in the retail store order */
@@ -286,12 +293,6 @@ void func_L11_00472008(char *p)
 }
 
 INCLUDE_ASM("asm/levels", func_L11_00472090);
-
-extern int func_002ACBC8(void *a, int b);
-
-extern void func_002829D8(void *a);
-
-extern unsigned char D_L11_00189EA0[];
 
 void func_L11_00474888(char *a0)
 {

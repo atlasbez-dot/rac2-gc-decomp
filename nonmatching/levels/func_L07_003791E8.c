@@ -14,7 +14,16 @@
    0x00379208. The real body is 28 bytes at 0x003791F0 (the previous function,
    func_L07_00379180, ends at 0x003791E4 with its own epilogue delay slot).
    Needs the catalogue entry moved to 0x003791F0 with size 0x1C before any C can
-   be placed; the body itself is a one-call wrapper (plain C, not yet built). */
+   be placed; the body itself is a one-call wrapper (plain C, not yet built).
+
+   Measured: a census of the whole level catalogue finds 6043 placements of 106337
+   that open with `addiu $sp,$sp,+N ; nop`, and not one of them has a C definition
+   anywhere in src/: none of these rows is placeable. The same shape is already
+   recorded for func_L01_002E1670, func_L07_00323350 and func_L00_00341798.
+
+   The wrapper below compiles to the retail's 28 bytes at 0x003791F0 instruction for
+   instruction, except that this cc1 puts the `ld $ra,0x0($sp)` in the jal delay slot
+   where retail leaves a nop there. */
 
 #include "include_asm.h"
 

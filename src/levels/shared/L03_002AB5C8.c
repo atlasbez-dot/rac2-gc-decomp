@@ -1,16 +1,46 @@
 #include "include_asm.h"
 
+#define MACRO_ADDR __attribute__((section(".sdata")))
+
 typedef int TI128 __attribute__((mode(TI)));
 
 extern int func_2B3760(int);
+
+extern unsigned char D_L03_00189E20[];
+
+extern int r1_D_L02_0015F04C MACRO_ADDR;
+
+extern int r1_D_L02_00169670[];
+
+extern int func_2EEC20(void *);
+
+extern void func_331270(void *);
+
+extern TI128 D_001A8F20;
+
+extern void func_2EEFB0(void *, void *, void *);
+
+extern void func_2EF020(void *, float);
+
+extern void func_2ECA50(unsigned char *, int, int, int);
+
+extern int D_001AEF60 __attribute__((sda));
+
+extern float func_2EF158(void *, void *);
+
+extern void func_2B8300(int, int, void *);
+
+extern int func_419B10(void *, void *, int, void *, void *, void *, float, float);
+
+extern void func_32D0F0(void *, int, float);
+
+extern float func_2EF670(float, float);
 
 INCLUDE_ASM("asm/levels", func_L03_002AB5C8);
 
 INCLUDE_ASM("asm/levels", func_L03_002AD540);
 
 INCLUDE_ASM("asm/levels", func_L03_002ADC00);
-
-extern unsigned char D_L03_00189E20[];
 
 void func_L03_002ADCA0(void) {
     unsigned char *g = D_L03_00189E20;
@@ -24,12 +54,6 @@ INCLUDE_ASM("asm/levels", func_L03_002B0958);
 INCLUDE_ASM("asm/levels", func_L03_002B8D10);
 
 INCLUDE_ASM("asm/levels", func_L03_002BC430);
-
-#define MACRO_ADDR __attribute__((section(".sdata")))
-
-extern int r1_D_L02_0015F04C MACRO_ADDR;
-
-extern int r1_D_L02_00169670[];
 
 /* rac1-decomp src/overlays/shared/camera_001FC308.c: func_L02_001FC308 */
 /* Adapted from Lombyte (MIT) for PAL by OpenRAC's tools/port.py: src/overlays/shared/gameplay/camera/001fc008.c, FUN_L02_001fc008. */
@@ -66,9 +90,6 @@ INCLUDE_ASM("asm/levels", func_L03_0032AB20);
 
 INCLUDE_ASM("asm/levels", func_L03_00339128);
 
-extern int func_2EEC20(void *);
-extern void func_331270(void *);
-
 void func_L03_00339268(unsigned char *a0) {
     if (*(short *)(a0 + 0xA) == -1)
         return;
@@ -85,13 +106,7 @@ INCLUDE_ASM("asm/levels", func_L03_0038AB30);
 
 /* func_L03_0038B238 is defined in L03_002AB5C8-g8.c (this unit has no $gp access for it). */
 
-extern TI128 D_001A8F20;
-extern void func_2EEFB0(void *, void *, void *);
-extern void func_2EF020(void *, float);
-
 INCLUDE_ASM("asm/levels", func_L03_0038B2E8);
-
-extern void func_2ECA50(unsigned char *, int, int, int);
 
 void func_L03_0038B390(unsigned char *a0, int a1, int a2, int a3) {
     unsigned char *p = a0;
@@ -115,8 +130,6 @@ void func_L03_0038B390(unsigned char *a0, int a1, int a2, int a3) {
 
 INCLUDE_ASM("asm/levels", func_L03_0038B408);
 
-extern int D_001AEF60 __attribute__((sda));
-
 INCLUDE_ASM("asm/levels", func_L03_0038B4E8);
 
 INCLUDE_ASM("asm/levels", func_L03_0038B5A8);
@@ -124,9 +137,6 @@ INCLUDE_ASM("asm/levels", func_L03_0038B5A8);
 INCLUDE_ASM("asm/levels", func_L03_0038B5D8);
 
 INCLUDE_ASM("asm/levels", func_L03_0038BCC0);
-
-extern float func_2EF158(void *, void *);
-extern void func_2B8300(int, int, void *);
 
 void func_L03_00393228(unsigned char *a0) {
     unsigned char *g = D_L03_00189E20;
@@ -144,8 +154,6 @@ INCLUDE_ASM("asm/levels", func_L03_003C1BF0);
 
 INCLUDE_ASM("asm/levels", func_L03_003C3220);
 
-extern int func_419B10(void *, void *, int, void *, void *, void *, float, float);
-extern void func_32D0F0(void *, int, float);
 float func_L03_003C5AB8(unsigned char *);
 
 int func_L03_003C41B8(unsigned char *a0, int a1, int a2) {
@@ -188,8 +196,6 @@ INCLUDE_ASM("asm/levels", func_L03_003C5488);
 INCLUDE_ASM("asm/levels", func_L03_003C5668);
 
 INCLUDE_ASM("asm/levels", func_L03_003C58F0);
-
-extern float func_2EF670(float, float);
 
 float func_L03_003C5AB8(unsigned char *a0) {
     unsigned char *p = *(unsigned char **)(a0 + 0x68);

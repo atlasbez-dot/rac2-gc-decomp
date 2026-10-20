@@ -1,13 +1,76 @@
 #include "include_asm.h"
 
 typedef unsigned char u8;
+
 typedef unsigned short u16;
+
 typedef unsigned int u32;
+
 typedef short s16;
+
 typedef int s32;
 
 extern char *D_L02_001B3AF8 __attribute__((sda));
+
 extern s32 func_002F3220(char *, float);
+
+extern int D_L02_002A5520[];
+
+extern int D_L02_002A5560[];
+
+extern int func_00282948(void *);
+
+extern void func_L00_002E6EF8(char *, char *);
+
+extern void func_L00_0030CF60(void);
+
+extern char D_L02_004004D8[];
+
+extern void func_002A7750(char *, s32, s32);
+
+extern int func_L02_003D77B8(char *);
+
+extern void func_L02_003D7868(char *, char *);
+
+extern s32 func_003D77F8(char *);
+
+extern void func_003D78A8(char *);
+
+extern s32 func_L02_003D7830(char *);
+
+extern char *D_L02_001B359C __attribute__((sda));
+
+extern u32 D_L02_001FC060[];
+
+extern void func_L02_003D2390(char *);
+
+extern void func_L02_003D4900(char *);
+
+extern void func_L02_003DB6D8(char *);
+
+extern void func_L02_003F18E8(char *);
+
+extern void func_L02_0040B980(char *);
+
+extern void func_L02_0040D180(char *);
+
+extern s32 func_L02_00400650(char *, s32);
+
+extern char D_L02_001BA3C0[];
+
+extern char *D_L02_001B368C __attribute__((sda));
+
+extern void func_0029FCC0(char *, s32, char *);
+
+extern float func_00282E80(char *, char *);
+
+extern char D_00189EA0[];
+
+extern int D_L02_002A5600[];
+
+extern char D_001A63A8[];
+
+extern int D_0017A80;
 
 void func_L02_003F5430(char *a0) {
     char *s0 = *(char **)(a0 + 0x68);
@@ -27,20 +90,11 @@ INCLUDE_ASM("asm/levels", func_L02_003F54D8);
 
 INCLUDE_ASM("asm/levels", func_L02_003F5710);
 
-extern int D_L02_002A5520[];
-
 INCLUDE_ASM("asm/levels", func_L02_003F9AF0);
-
-extern int D_L02_002A5560[];
 
 INCLUDE_ASM("asm/levels", func_L02_003F9B70);
 
 INCLUDE_ASM("asm/levels", func_L02_003F9C10);
-
-extern int func_00282948(void *);
-extern void func_L00_002E6EF8(char *, char *);
-extern void func_L00_0030CF60(void);
-extern char D_L02_004004D8[];
 
 void func_L02_003FAF28(char *a0) {
     char *s0 = a0;
@@ -54,8 +108,6 @@ void func_L02_003FAF28(char *a0) {
         func_L00_002E6EF8(D_L02_004004D8, s0);
     func_L00_0030CF60();
 }
-
-extern void func_002A7750(char *, s32, s32);
 
 void func_L02_003FAF90(char *a0) {
     char *s0 = *(char **)(a0 + 0x68);
@@ -81,10 +133,46 @@ INCLUDE_ASM("asm/levels", func_L02_003FB120);
 
 INCLUDE_ASM("asm/levels", func_L02_003FB4D8);
 
-INCLUDE_ASM("asm/levels", func_L02_003FB5A0);
+extern char *D_L02_001B359C __attribute__((sda));
+extern u32 D_L02_001FC060[];
+extern void func_L02_003D47B0(char *, s32);
+extern void func_L02_003DB310(char *, s32);
 
-extern int func_L02_003D77B8(char *);
-extern void func_L02_003D7868(char *, char *);
+/* Looks through the entity list the object's state names for one of kind A1 whose byte at +0x20
+   is 1; for the kinds 0x9F8 and 0xA44 it records A0 as that entity's owner, runs the kind's start
+   function, counts it in the state and returns it. */
+char *func_L02_003FB5A0(char *a0, s32 a1, s32 a2) {
+    char *state = *(char **)(a0 + 0x68);
+    u32 index = *(u32 *)(state + 0x40);
+    u32 entry;
+    u16 *p;
+    char *rec;
+
+    if (index == 0xFF)
+        return 0;
+    entry = D_L02_001FC060[index];
+    if (entry == 0)
+        return 0;
+    p = (u16 *)entry;
+    do {
+        rec = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+        if (rec != 0 && *(u8 *)(rec + 0x20) != 0xFE && *(u8 *)(rec + 0x20) != 0xFD
+            && *(s16 *)(rec + 0xAA) == a1 && *(u8 *)(rec + 0x20) == 1) {
+            *(char **)(rec + 0xB8) = a0;
+            switch (a1) {
+            case 0x9F8:
+                func_L02_003D47B0(rec, *(s16 *)(state + 0x120) == 0xC);
+                *(s32 *)(state + 0xA0) += 1;
+                return rec;
+            case 0xA44:
+                func_L02_003DB310(rec, a2);
+                *(s32 *)(state + 0xA4) += 1;
+                return rec;
+            }
+        }
+    } while ((s16)*p++ >= 0);
+    return 0;
+}
 
 /* Counts the kind of A1 in the state and sets its scale to one. */
 s32 func_L02_003FB6C0(char *a0, char *a1) {
@@ -126,9 +214,6 @@ s32 func_L02_003FB6C0(char *a0, char *a1) {
 
 INCLUDE_ASM("asm/levels", func_L02_003FB7E0);
 
-extern s32 func_003D77F8(char *);
-extern void func_003D78A8(char *);
-
 void func_L02_003FBA58(char *a0) {
     char **p;
     char *s1 = *(char **)(a0 + 0x68);
@@ -141,8 +226,6 @@ void func_L02_003FBA58(char *a0) {
         }
     }
 }
-
-extern s32 func_L02_003D7830(char *);
 
 /* True when every occupied slot of the list at +0xA8 has content; then the list is cleared. */
 void func_L02_003FBAD0(char *a0) {
@@ -168,7 +251,7 @@ void func_L02_003FBAD0(char *a0) {
     }
 }
 
-extern char *D_L02_001B359C __attribute__((section(".sdata")));
+extern char *D_L02_001B359C __attribute__((sda));
 extern u32 D_L02_001FC060[];
 extern void func_L02_003D2390(char *);
 extern void func_L02_003D4900(char *);
@@ -221,9 +304,6 @@ void func_L02_003FBB90(char *a0) {
 
 INCLUDE_ASM("asm/levels", func_L02_003FBCF8);
 
-extern s32 func_L02_00400650(char *, s32);
-extern char D_L02_001BA3C0[];
-
 void func_L02_003FC020(char *a0, char *a1) {
     char *a3 = *(char **)(a0 + 0x68);
     char *g = D_L02_001BA3C0;
@@ -241,8 +321,6 @@ void func_L02_003FC020(char *a0, char *a1) {
     else if (t == 0xA44)
         func_L02_00400650(a0, 0x15);
 }
-
-extern char *D_L02_001B368C __attribute__((sda));
 
 char *func_L02_003FC098(char *a0) {
     char *a1 = *(char **)(a0 + 0x68);
@@ -308,10 +386,6 @@ INCLUDE_ASM("asm/levels", func_L02_003FCA80);
 
 INCLUDE_ASM("asm/levels", func_L02_003FCCA0);
 
-extern void func_0029FCC0(char *, s32, char *);
-extern float func_00282E80(char *, char *);
-extern char D_00189EA0[];
-
 s32 func_L02_003FD000(char *a0) {
     char buf[16];
     s32 r = 0;
@@ -327,13 +401,11 @@ INCLUDE_ASM("asm/levels", func_L02_003FD070);
 
 INCLUDE_ASM("asm/levels", func_L02_003FD228);
 
-INCLUDE_ASM("asm/levels", func_L02_003FD7C8);
+/* func_L02_003FD7C8 is defined in L02_003F5430-g8.c ($gp accesses). */
 
 INCLUDE_ASM("asm/levels", func_L02_003FD8B8);
 
 INCLUDE_ASM("asm/levels", func_L02_003FDDE8);
-
-extern int D_L02_002A5600[];
 
 INCLUDE_ASM("asm/levels", func_L02_003FE1B0);
 
@@ -349,8 +421,6 @@ INCLUDE_ASM("asm/levels", func_L02_003FFDB0);
 INCLUDE_ASM("asm/levels", func_L02_004002E0);
 
 INCLUDE_ASM("asm/levels", func_L02_004004D0);
-
-extern char D_001A63A8[];
 
 /* Timer for one of the thirty-nine messages, refused while one is running. */
 s32 func_L02_00400650(char *a0, s32 a1) {
@@ -391,8 +461,6 @@ INCLUDE_ASM("asm/levels", func_L02_00400720);
 
 INCLUDE_ASM("asm/levels", func_L02_00400948);
 
-
-extern int D_0017A80;
 
 /* True when the field at +0xAA is 0xB59, the global at D_0017A80 is 1 and bit 3 of the
    byte at +0x20 is clear. */

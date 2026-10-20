@@ -1,8 +1,19 @@
-/* from src/game/002CD620.c: 344 bytes against retail's 340, not matched.
- * Everything up to the second call matches, including the flag tests with the fallback
- * branch. Retail puts the high half of the 0x26 struct base into $s2 in the delay slot of
- * the second call and reuses the $v0 copy of it at the join; this cc1 places the lui after
- * the following branch and materialises it again at the join (+4 bytes). */
+/* from src/game/002CD620.c: 340 bytes, retail's size; 69 of 85 words equal (tools/check.py: 0 of 28).
+ * Everything matches except the order of the two arms of the flag update: this spelling lays out
+ * the `|= 4` arm first and the `&= ~4` arm after it, retail the other way round.
+ *
+ * The cause is where GCSE (the block LCM, -fno-edge-lcm) puts the high half of D_0025E2B8, which
+ * lives in $s2 across the third call. Retail computes it once before the compare that follows the
+ * second call (it lands in that jal's delay slot). With the arms in retail's order (`if (result1 ==
+ * result2 && ...) &= ~4; else |= 4;`, the previous draft: 344 bytes), the `|= 4` arm is reached
+ * only by jumps, so compute_preds_succs (flow.c, Cygnus edge splitting) splits the critical edge
+ * from the call's block into it, LCM inserts the high half on that edge and at the end of the
+ * D_001A63AC test instead, and the arm keeps a lui retail moves into every branch's delay slot.
+ * With the `|= 4` arm as the fall-through (this file) the edge is not split and the placement is
+ * retail's. Tried without a match: the arms in retail's order with &&, with !(...||...), with the
+ * inner test negated, with gotos, with the early return turned into an if block, with a flag
+ * variable, with a local pointer to D_0025E2B8 (it keeps the full address in $s0); duplicated
+ * `|= 4` arms (356 bytes); -fedge-lcm (348) and the usual single extra flags. */
 typedef struct {
     char reserved00[0x14];
     char *source;
@@ -35,7 +46,6 @@ int func_002CD720(void)
     int result = 0;
     int result1;
     int result2;
-    int result3;
     int flags;
     int value;
 
@@ -59,16 +69,14 @@ after_first:
     if (D_001A8CFC[0] == 0)
         return result;
     result2 = func_00336EF0();
-    if (result1 == result2 && D_001A63AC == 0 &&
-        ((D_0025E2B8.f50 == result1 && D_0025E2B8.f44 == 2) ||
-         (D_0025E2B8.f54 == result1 && D_0025E2B8.f44 == 4))) {
-        *(int *)(D_0025E284 + 0x10) &= -5;
-    } else {
+    if (result1 != result2 || D_001A63AC != 0 ||
+        ((D_0025E2B8.f50 != result1 || D_0025E2B8.f44 != 2) &&
+         (D_0025E2B8.f54 != result1 || D_0025E2B8.f44 != 4)))
         *(int *)(D_0025E284 + 0x10) |= 4;
-    }
+    else
+        *(int *)(D_0025E284 + 0x10) &= ~4;
     if (result2 != result1)
         D_0025E464 = -0x22C;
-    result3 = func_00336EF0();
-    D_0025E2B8.f58 = result3;
+    D_0025E2B8.f58 = func_00336EF0();
     return result;
 }

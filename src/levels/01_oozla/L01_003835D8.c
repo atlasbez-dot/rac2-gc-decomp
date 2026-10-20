@@ -130,6 +130,7 @@ extern float func_00283180(float);
 extern float func_00283198(float);
 extern void func_00282CC0(void *, void *, void *);
 extern void func_L01_0032EF38(void *, int, int, float, float, int);
+extern void func_002B0990(u8 *, u8 *, s32, s32, f32);
 
 void func_L01_003B50C8(char *object, int count, float height)
 {
@@ -161,6 +162,27 @@ void func_L01_003B50C8(char *object, int count, float height)
     }
 }
 
+/* Clears the measured 0x350 word when it is set, then draws the new duration
+   if the old one is still short. */
+void func_L01_003B5310(u8 *a0) {
+    u8 *p = *(u8 **)(a0 + 0x68);
+    u16 flags;
+
+    if (*(u32 *)(p + 0x350) != 0) {
+        *(u32 *)(p + 0x350) = 0;
+        if (*(s32 *)(p + 0x330) < 200) {
+            *(u32 *)(p + 0x330) = func_002A7820(300, 360);
+        }
+    }
+    if (*(u32 *)(p + 0x244) != 1)
+        func_00282948(p + 0x330);
+    flags = *(u16 *)(a0 + 0x96);
+    if (flags < 65534)
+        *(u16 *)(a0 + 0x96) = flags + 1;
+    func_00282948(p + 0x32C);
+    func_00282948(p + 0x334);
+    func_002B0990(a0, p + 0x250, 6, 1, 4.0f);
+}
 
 INCLUDE_ASM("asm/levels", func_L01_003B53C8);
 

@@ -52,6 +52,29 @@ extern int D_L11_001B30C8;
 extern void func_L11_00458DF0(char *a0, void *a1, void *a2, int a3, int t0, float f12,
                               float f13);
 
+/* The vector the aim helpers read, at 0x001BA780 in joba. */
+typedef struct {
+    char pad_000[0x140];
+    float x_140;
+    float y_144;
+    float z_148;
+} L11AimVector;
+
+extern L11AimVector D_L11_001BA780;
+
+extern void func_L11_0045FFB0(char *pkt);
+
+extern long long func_0027C878(char *p);
+
+extern float func_00282E80(char *p, float *v);
+
+extern void func_00283410(float *matrix, float *quat);
+
+extern void func_00282CF0(float *out, float *a, float *b);
+
+extern void func_00282F20(float *dst, float *src, float scale);
+
+extern void func_00280B90(char *pkt, float *matrix, int mode);
 extern void func_002E59F8(int index);
 
 extern void func_002E5DA0(int index, int value, char *object, int kind);
@@ -380,5 +403,48 @@ void func_L11_00460038(char *p, float scale)
     func_00282D30_2(p + 48, p + 48, scale);
 }
 
+/* Builds a 144-byte packet, aims a quaternion at the level's vector from pos through three
+   float helpers, derives an offset basis by a fourth, writes the last matrix row from pos
+   plus that offset, then dispatches the packet. */
+void func_L11_004600A0(char *pos, int a1, int a2, char *a3, int t0,
+                       float fA, float fB, float fC)
+{
+    char pkt[144];
+    float m[16];
+    float quat[4];
+    float off[4];
+    long long r;
+
+    func_L11_0045FFB0(pkt);
+    r = func_0027C878(a3);
+
+    *(long long *)(pkt + 136) = ((long long)t0 << 2) | 0x8000000040LL;
+    *(long long *)(pkt + 128) = 280993940374112LL;
+    *(int *)(pkt + 76) = a1 + (a2 << 24);
+    *(int *)(pkt + 72) = a1 + (a2 << 24);
+    *(int *)(pkt + 68) = a1 + (a2 << 24);
+    *(int *)(pkt + 64) = a1 + (a2 << 24);
+    *(long long *)(pkt + 112) = 0LL;
+    *(long long *)(pkt + 120) = r;
+
+    quat[3] = 0.0f;
+    quat[2] = func_00283248(D_L11_001BA780.x_140 - *(float *)(pos + 0),
+                           D_L11_001BA780.y_144 - *(float *)(pos + 4));
+    quat[1] = -func_00283248(func_00282E80(pos, &D_L11_001BA780.x_140),
+                             D_L11_001BA780.z_148 - *(float *)(pos + 8));
+    quat[0] = fB;
+
+    func_00283410(m, quat);
+    func_00282CF0(off, &D_L11_001BA780.x_140, pos);
+    func_00282F20(off, off, fC);
+
+    m[12] = *(float *)(pos + 0) + off[0];
+    m[13] = *(float *)(pos + 4) + off[1];
+    m[14] = *(float *)(pos + 8) + off[2];
+    m[15] = 1.0f;
+
+    func_L11_00460038(pkt, fA);
+    func_00280B90(pkt, m, 0);
+}
 
 INCLUDE_ASM("asm/levels", func_L11_00461308);

@@ -8,7 +8,16 @@
    spelling, pointer spelling and a re-ordered pointer spelling all reach the same
    `+0x24` divergence (this cc1 emits the four `lui`s first and swaps t2/t3), so
    the pointer bases and the loop counter land in each other's registers.
-   Blocker: that allocation, not the shape. */
+   Blocker: that allocation, not the shape.
+   Wave 9 (p1) re-measured it with the pointer spelling and six orders of the six
+   locals: the declaration order does NOT decide the allocation (two different orders
+   give the same two allocations), and the two allocations differ only in which of
+   $v1/$a0/$t2/$t3 the slot, tag, pair and counter pointers get.  With
+   `int *slot`, `int *tag`, `int i`, `char *name`, `int *pair` declared in that order
+   the slot pointer lands in $a0 as retail has it, but the tag lands in $t2 where
+   retail has $v1, and the pair in $v1 where retail has $t3.  Note the addresses
+   above are 0x260E30 / 0x260EB0 / 0x260F30 (lui 0x26 + addiu 0xE30 etc.).  A `char`
+   third argument costs a sign-extension pair, so it must be an int. */
 typedef char *ptr;
 typedef unsigned char u8;
 typedef int s32;

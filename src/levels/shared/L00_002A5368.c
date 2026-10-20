@@ -38,7 +38,7 @@ void func_L00_002A5368(void) {
 
 /* walks the 0x1b80-byte array in 0xb0-byte steps: a per-element callback, three
    sub-object walks and a 1.0f stamp (near miss: nonmatching/levels/func_L00_002A53B8.c) */
-INCLUDE_ASM("asm/levels", func_L00_002A53B8);
+/* func_L00_002A53B8 is matched in L00_002A53B8.c (built with -fno-schedule-insns). */
 
 /* func_L00_002A5480 (one-shot delay timer, needs a -G8 unit for its $gp read) is a
    near miss: nonmatching/levels/func_L00_002A5480.c */

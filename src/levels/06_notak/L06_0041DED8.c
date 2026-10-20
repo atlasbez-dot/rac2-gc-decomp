@@ -10,9 +10,25 @@ extern void func_3BFBB8(char *, int);
 
 extern char D_L06_00189EA0[];
 extern char D_L06_001B13B0[];
+extern char D_L06_001B13F0[];
+extern char D_L06_001B1330[];
+extern char D_L06_001B1370[];
 extern char D_L06_001395CE;
+extern char D_L06_001395CF;
+extern char D_L06_001395D0;
+
+/* The two flags the re-arm sets, at 0x001395B8. */
+typedef struct {
+    char pad_000[0x13];
+    char flag_013;
+    char flag_014;
+} L06ArmFlags;
+
+extern L06ArmFlags D_L06_001395B8;
+
+extern int func_333898(void);
 extern void func_2E3EF0(char *);
-extern int func_360F58(char *);
+extern int func_360F58(char *, int);
 extern void func_35A550(char *, int, int);
 extern void func_35B810(int, int);
 extern int func_35CBA0(char *, int, int);
@@ -281,9 +297,76 @@ INCLUDE_ASM("asm/levels", func_L06_00444168);
 
 INCLUDE_ASM("asm/levels", func_L06_00444300);
 
+/* The same re-arm, with two probe addresses and two flags. */
+void func_L06_0044B250(char *arg0)
+{
+    int h;
 
+    if (*(unsigned char *)(arg0 + 0x20) != 0)
+        return;
+    h = *(int *)(*(int *)(arg0 + 0x68));
+    if (h == -1)
+        return;
+    if (func_360F58(D_L06_00189EA0, h) == 0)
+        return;
+    func_2E3EF0(D_L06_001B1330);
+    func_2E3EF0(D_L06_001B1370);
+    D_L06_001395B8.flag_013 = 1;
+    D_L06_001395B8.flag_014 = 1;
+    func_35A550(arg0, 1, -1);
+}
 
+/* Re-arms the object when the shared probe accepts its live handle. */
+void func_L06_0044B2D8(char *arg0)
+{
+    int h;
 
+    if (*(unsigned char *)(arg0 + 0x20) != 0)
+        return;
+    h = *(int *)(*(int *)(arg0 + 0x68));
+    if (h == -1)
+        return;
+    if (func_360F58(D_L06_00189EA0, h) == 0)
+        return;
+    func_2E3EF0(D_L06_001B13B0);
+    D_L06_001395CE = 1;
+    func_35A550(arg0, 1, -1);
+}
+
+/* The same re-arm, with the level's second probe address. */
+void func_L06_0044B350(char *arg0)
+{
+    int h;
+
+    if (*(unsigned char *)(arg0 + 0x20) != 0)
+        return;
+    h = *(int *)(*(int *)(arg0 + 0x68));
+    if (h == -1)
+        return;
+    if (func_360F58(D_L06_00189EA0, h) == 0)
+        return;
+    func_2E3EF0(D_L06_001B13F0);
+    D_L06_001395CF = 1;
+    func_35A550(arg0, 1, -1);
+}
+
+/* The same re-arm, gated on the shared live-object probe. */
+void func_L06_004504C8(char *arg0)
+{
+    int h;
+
+    if (*(unsigned char *)(arg0 + 0x20) != 0)
+        return;
+    h = *(int *)(*(int *)(arg0 + 0x68));
+    if (h == -1)
+        return;
+    if (func_360F58(D_L06_00189EA0, h) == 0)
+        return;
+    if (func_333898() == 0)
+        return;
+    D_L06_001395D0 = 1;
+    func_35A550(arg0, 1, -1);
+}
 
 INCLUDE_ASM("asm/levels", func_L06_00455BC0);
 

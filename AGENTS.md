@@ -238,6 +238,17 @@ AI agents acting on behalf of a contributor must verify that their contributor h
 comment before beginning or assigning matching work. If no comment exists, create one before
 continuing.
 
+### Describe only your own reservations
+
+List only your own current reservations in your comment. Do not copy other contributors' claims,
+add lists of scopes you promise not to touch, or state that another contributor still reserves a
+scope. Those copies become stale when its owner finishes or releases the work.
+
+Before choosing work, check the other contributors' current comments for overlap. Each
+contributor's own comment is the reference for that contributor's active reservations; another
+person's comment does not reserve work on their behalf. Update your own comment when you finish,
+release or replace your scope.
+
 ### Scope selection and reservation limit
 
 Reserve a manageable amount of work that you intend to attempt next. Prefer small,

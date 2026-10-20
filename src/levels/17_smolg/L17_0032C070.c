@@ -153,6 +153,24 @@ int func_L17_003C5DF0(int a0)
     return *(unsigned char *)(a0 + 0x20) - 2U < 5;
 }
 
+/* true when the level's shared record names the given sub-state; the shared word at
+   0x34E closes the answer when the record is not the level's own */
+int func_L17_003C5E20(int a0)
+{
+    char *base = D_00189E20;
+
+    if (*(int *)(base + 0x229C) == 3 || *(int *)(base + 0x2294) == 0x1B) {
+        if (*(int *)(base + 0x588) != a0)
+            goto zero;
+        return 1;
+    }
+    if (*(short *)(base + 0x34E) != 0)
+        goto zero;
+    if (*(int *)(base + 0x33C) == a0)
+        return 1;
+zero:
+    return 0;
+}
 
 /* twin of func_L17_003C3250 on the 0x128 sub-object id and its own table */
 void func_L17_003C5E78(char *a2)
@@ -197,7 +215,7 @@ INCLUDE_ASM("asm/levels", func_L17_003C6CE8);
 
 /* func_L17_003C7018 is defined in L17_0032C070-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L17_003C71B0);
+/* func_L17_003C71B0 is matched in L17_003C71B0.c (built with -mno-split-addresses). */
 
 /* Stores the second argument in the object's sub-record at 0xA4. */
 void func_L17_003C7250(char *a0, int a1)

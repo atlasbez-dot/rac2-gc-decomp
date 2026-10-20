@@ -77,3 +77,29 @@ void func_L02_003D02F0(char *arg0) {
         }
     }
 }
+
+extern unsigned short *D_L02_001FC060[];
+
+extern unsigned char *D_L02_001B359C;
+
+/* Answers 1 when the object's group holds an armed 0x9CA entity (class byte 6, state word
+   +0x2F6 == 1) that is not being freed (state byte 0xFE or 0xFD). */
+int func_L02_003D18D8(unsigned char *a0) {
+    unsigned short *q;
+    unsigned short *p;
+    unsigned char *e;
+
+    if (a0[0x21] == 0xFF)
+        return 0;
+    q = D_L02_001FC060[a0[0x21]];
+    if (q == 0)
+        return 0;
+    p = q;
+    do {
+        e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+        if (e != 0 && e[0x20] != 0xFE && e[0x20] != 0xFD && *(short *)(e + 0xAA) == 0x9CA &&
+            e[0x95] == 6 && *(short *)(*(unsigned char **)(e + 0x68) + 0x2F6) == 1)
+            return 1;
+    } while (*(short *)p++ >= 0);
+    return 0;
+}

@@ -1,5 +1,80 @@
 #include "include_asm.h"
 
+typedef struct {
+    char reserved00[0x14];
+    char *source;
+    int value;
+    char reserved1c[0x118];
+    int fallback;
+} CallbackState;
+
+typedef struct {
+    char reserved00[0x14F8];
+    int first;
+    int reserved14fc;
+    int second;
+} CallbackToggleState;
+
+extern void func_0027C540(long);
+
+extern void func_0027C660(void);
+
+extern void func_0029C450(void);
+
+extern void func_0027C540(long arg0);
+
+extern void func_0027C540(long param_1);
+
+extern int F750245c6_D_001A7340 __attribute__((sda));
+
+extern void F750245c6_FUN_0028FC48(int a, int b, int c, int d, char *e, int f);
+
+extern char *D_001A8CFC[] __attribute__((sda));
+
+extern void func_00341550(void *, int);
+
+extern void func_00341540(char *, char *, char *, char *);
+
+extern void func_00341610(char *, int);
+
+extern char D_002615F8[];
+
+extern char D_00261698[];
+
+extern char D_00261750[];
+
+extern int D_001AB9B0 __attribute__((sda));
+
+extern char *D_001A8CFC[] __attribute__((sda));
+
+extern void *func_00341558(void *);
+
+extern char *D_001A8CFC[] __attribute__((sda));
+
+extern int D_0025CADC;
+
+extern CallbackState D_001F2840;
+
+extern int D_00138344;
+
+extern int D_001A7908 __attribute__((sda));
+
+extern CallbackToggleState D_00189E20;
+
+extern float D_0018B300[];
+
+extern int func_002E5E58(int, unsigned int, void *);
+
+extern void func_00282F20(void *, void *, float);
+
+extern int D_00138344;
+
+extern void func_0029C640(int);
+
+extern void func_0029C610(void);
+
+extern void func_0029C6B0(int);
+
 /*
  * Disassembled at 0x002cd220
  * Signature: int FUN_002cd220(void)
@@ -11,11 +86,6 @@
  *   - Restores RA from stack
  *   - Returns 0
  */
-extern void func_0027C540(long);
-
-extern void func_0027C660(void);
-
-extern void func_0029C450(void);
 
 void func_0027C540(long);
 
@@ -39,14 +109,7 @@ void func_0027C660(void);
  * - All external function addresses come from the assigned externals list.
  */
 
-extern void func_0027C540(long arg0);
-
 /* External functions declared with exact aliases from task.externals */
-extern void func_0027C540(long param_1);
-
-extern int F750245c6_D_001A7340 __attribute__((sda));
-
-extern void F750245c6_FUN_0028FC48(int a, int b, int c, int d, char *e, int f);
 
 long long func_002CD8C0(void)
 {
@@ -56,17 +119,9 @@ long long func_002CD8C0(void)
     return 0LL;
 }
 
-extern char *D_001A8CFC[] __attribute__((sda));
-extern void func_00341550(void *, int);
 int func_002CD8F0(void *object) { char *root=D_001A8CFC[0]; if (root != 0) { func_00341550(root+0x3BE08,1); *(void **)((char *)object+0x34)=func_00341558(D_001A8CFC[0]+0x3BE08); } return 0; }
 
 INCLUDE_ASM("asm/game", func_002CDA20);
-
-extern void func_00341540(char *, char *, char *, char *);
-extern void func_00341610(char *, int);
-extern char D_002615F8[];
-extern char D_00261698[];
-extern char D_00261750[];
 
 int func_002CDAB0(void)
 {
@@ -81,8 +136,6 @@ int func_002CDAB0(void)
 INCLUDE_ASM("asm/game", func_002CDB30);
 
 INCLUDE_ASM("asm/game", func_002CDD88);
-
-extern int D_001AB9B0 __attribute__((sda));
 
 int func_002CE5B8(void) {
     D_001AB9B0 = 1;
@@ -110,16 +163,11 @@ void func_002CF0A0(int a0, char *a1)
     F750245c6_FUN_0028FC48(p + 2, 313, p + 4, 334, a1, 0);
 }
 
-extern char *D_001A8CFC[] __attribute__((sda));
-extern void *func_00341558(void *);
-
 int func_002CF188(char *object) {
     if (D_001A8CFC[0] != 0)
         *(void **)(object + 0x34) = func_00341558(D_001A8CFC[0] + 0x3BE08);
     return 0;
 }
-
-
 
 INCLUDE_ASM("asm/game", func_002CF2B8);
 
@@ -176,9 +224,6 @@ INCLUDE_ASM("asm/game", func_002D2018);
 
 INCLUDE_ASM("asm/game", func_002D2188);
 
-extern char *D_001A8CFC[] __attribute__((sda));
-extern int D_0025CADC;
-
 int func_002D23D8(void) {
     if (D_001A8CFC[0] != 0) D_0025CADC = -300;
     return 0;
@@ -190,27 +235,6 @@ int func_002D23D8(void) {
 int func_002D2830(void) {
     return 0;
 }
-
-typedef struct {
-    char reserved00[0x14];
-    char *source;
-    int value;
-    char reserved1c[0x118];
-    int fallback;
-} CallbackState;
-extern CallbackState D_001F2840;
-extern int D_00138344;
-extern int D_001A7908 __attribute__((sda));
-typedef struct {
-    char reserved00[0x14F8];
-    int first;
-    int reserved14fc;
-    int second;
-} CallbackToggleState;
-extern CallbackToggleState D_00189E20;
-extern float D_0018B300[];
-extern int func_002E5E58(int, unsigned int, void *);
-extern void func_00282F20(void *, void *, float);
 
 int func_002D2838(void)
 {
@@ -249,15 +273,10 @@ return_value:
 
 INCLUDE_ASM("asm/game", func_002D2918);
 
-extern int D_00138344;
-extern void func_0029C640(int);
-
 int func_002D2BD8(void) {
     func_0029C640(D_00138344);
     return 0;
 }
-
-extern void func_0029C610(void);
 
 int func_002D2C00(void) {
     func_0027C540(0);
@@ -265,8 +284,6 @@ int func_002D2C00(void) {
     func_0027C660();
     return 0;
 }
-
-extern void func_0029C6B0(int);
 
 int func_002D2C30(void) {
     int result = 0;

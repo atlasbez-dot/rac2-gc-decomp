@@ -1325,16 +1325,18 @@ the additions, including two corrections.
 Fifteen workers on 66 `src/game/` functions, most of them placed in all 28 programs. The habits
 above still hold; these are the additions.
 
-- **`mfc1` is interlocked in retail, not here.** In the boot's `.text`, 88 `mfc1` are directly
-  followed by an instruction that reads their target register, in 47 functions (`func_0028D1E8`
-  has 13), and only one has a `nop` in between. This assembler inserts that `nop` (gas's
-  `cop_interlocks` names the 4300 and the 5400, not the R5900), so none of those 47 functions can
-  match from C. The lever would be the assembler; it changes the instrument for every unit, so it
-  is a maintainer's decision, not a source shape. Measured in a scratch build of that assembler:
-  adding `&& mips_cpu != 5900` to the `INSN_LOAD_COPROC_DELAY && ! cop_interlocks` test in
-  `append_insn` (`gas/config/tc-mips.c`) removes the `nop` after `mfc1`, keeps the one after
-  `mtc1`, leaves the object of every one of the 636 files in `src/` unchanged, and makes
-  `func_002ED4B8` and `func_00290680` exact.
+- **`mfc1` is interlocked on the R5900.** In the boot's `.text`, 88 `mfc1` are directly followed
+  by an instruction that reads their target register, in 47 functions (`func_0028D1E8` has 13).
+  The only `mfc1` with a `nop` before such a reader is in a hand-written VU0 routine
+  (`func_00283248`, which loads with `ldc2`). gas gave every `mfc1` the MIPS I coprocessor-load
+  delay (its `cop_interlocks` names the 4300 and the 5400, not the R5900), so none of those
+  functions could match from C. `transformers/r5900_mfc1_interlock.py` now exempts `mfc1` on the
+  R5900 from that delay in `append_insn`. It covers `mfc1` only: `cfc2`, the other move measured,
+  keeps the `nop` in retail (4 of 6 readers), and `mips_emit_delays`, which pads at a label, is
+  unchanged. Measured on 20 October: of the 661 files in `src/`, 660 compile to the same object
+  with the old and the new assembler, and the last (`src/game/002B5EF8.c`, built with `-g`)
+  differs only in `.mdebug`; `func_002ED4B8` and `func_00290680` match at their 28 places with
+  it.
 - **The temporary in the destination register**: retail's `lui $r,%hi(X)` / `lw $r,%lo(X)($r)`
   is a bare-symbol load the assembler expanded. In a `-G0` unit, `extern T X
   __attribute__((sda));` gives it (and stores through `$at`): `func_00343260`. In a `-G8` unit the

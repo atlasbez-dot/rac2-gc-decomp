@@ -334,4 +334,3 @@ void func_0028BCA0(int arg) {
 INCLUDE_ASM("asm/game", func_0028BCD0);
 
 INCLUDE_ASM("asm/game", func_0028BCE8);
-

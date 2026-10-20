@@ -2,6 +2,46 @@
 
 typedef int TI128 __attribute__((mode(TI)));
 
+typedef struct L01_003BDF28_BUF {
+    float x;
+    float y;
+    int z;
+} L01_003BDF28_BUF;
+
+typedef struct L01_003BC490_OBJ {
+    char pad[0x10];
+    TI128 f10;
+} L01_003BC490_OBJ;
+
+typedef struct L01_003BDBB0_OWNED {
+    char pad0[0x250];
+    void *f250;
+    int f254;
+} L01_003BDBB0_OWNED;
+
+typedef struct L01_003BDBB0_OBJ {
+    char pad0[0x68];
+    L01_003BDBB0_OWNED *f68;
+} L01_003BDBB0_OBJ;
+
+typedef struct L01_003BE488_OWNED {
+    char pad0[0x202];
+    short f202;
+    int f204;
+} L01_003BE488_OWNED;
+
+typedef struct L01_003BE488_OBJ {
+    char pad0[0x68];
+    L01_003BE488_OWNED *f68;
+} L01_003BE488_OBJ;
+
+typedef struct L01_003BFDC8_OBJ {
+    char pad0[0x43];
+    unsigned char f43;
+    char pad1[0x48 - 0x44];
+    float f48;
+} L01_003BFDC8_OBJ;
+
 extern int func_00282948(void *);
 
 extern void func_00291450(int);
@@ -32,11 +72,7 @@ extern int func_002A7820(int, int);
 
 extern void func_L01_0032EF38(void *, int, int, float, float, int);
 
-typedef struct L01_003BDF28_BUF {
-    float x;
-    float y;
-    int z;
-} L01_003BDF28_BUF;
+extern void func_002A7470();
 
 void func_L01_003BDF28(char *a0)
 {
@@ -58,14 +94,6 @@ void func_L01_003BDF28(char *a0)
     }
     func_L01_003BDBE8(s2);
 }
-
-typedef struct L01_003BC490_OBJ {
-    char pad[0x10];
-    TI128 f10;
-} L01_003BC490_OBJ;
-
-
-extern void func_002A7470();
 
 INCLUDE_ASM("asm/levels", func_L01_003BB9D0);
 
@@ -114,16 +142,6 @@ INCLUDE_ASM("asm/levels", func_L01_003BD6B0);
 INCLUDE_ASM("asm/levels", func_L01_003BDB28);
 
 /* func_L01_003BDBB0 */
-typedef struct L01_003BDBB0_OWNED {
-    char pad0[0x250];
-    void *f250;
-    int f254;
-} L01_003BDBB0_OWNED;
-
-typedef struct L01_003BDBB0_OBJ {
-    char pad0[0x68];
-    L01_003BDBB0_OWNED *f68;
-} L01_003BDBB0_OBJ;
 
 void func_L01_003BDBB0(L01_003BDBB0_OBJ *a0)
 {
@@ -140,16 +158,6 @@ INCLUDE_ASM("asm/levels", func_L01_003BDBE8);
 INCLUDE_ASM("asm/levels", func_L01_003BE058);
 
 /* func_L01_003BE488 */
-typedef struct L01_003BE488_OWNED {
-    char pad0[0x202];
-    short f202;
-    int f204;
-} L01_003BE488_OWNED;
-
-typedef struct L01_003BE488_OBJ {
-    char pad0[0x68];
-    L01_003BE488_OWNED *f68;
-} L01_003BE488_OBJ;
 
 void func_L01_003BE488(L01_003BE488_OBJ *a0)
 {
@@ -169,12 +177,6 @@ INCLUDE_ASM("asm/levels", func_L01_003BE628);
 INCLUDE_ASM("asm/levels", func_L01_003BEA08);
 
 /* func_L01_003BFDC8 */
-typedef struct L01_003BFDC8_OBJ {
-    char pad0[0x43];
-    unsigned char f43;
-    char pad1[0x48 - 0x44];
-    float f48;
-} L01_003BFDC8_OBJ;
 
 void func_L01_003BFDC8(L01_003BFDC8_OBJ *a0, int a1, int a2, int a3)
 {
@@ -193,13 +195,11 @@ void func_L01_003BFDC8(L01_003BFDC8_OBJ *a0, int a1, int a2, int a3)
 
 INCLUDE_ASM("asm/levels", func_L01_003BFE48);
 
-
 INCLUDE_ASM("asm/levels", func_L01_003C01C0);
 
 INCLUDE_ASM("asm/levels", func_L01_003C0408);
 
 INCLUDE_ASM("asm/levels", func_L01_003C08A0);
-
 
 INCLUDE_ASM("asm/levels", func_L01_003C09C0);
 

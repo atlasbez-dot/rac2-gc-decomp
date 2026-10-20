@@ -47,7 +47,7 @@ extern void func_002A05A8(void *);
 extern int func_002E59F8(int);
 extern int func_L02_003FC1B0(void *, int);
 extern int func_L02_003FC0D0(void *, int);
-extern void func_002B3BA8(void *, u32, int, int, float, float);
+extern int func_002B3BA8(void *, u32, float, float, int, int);
 
 typedef int TI128 __attribute__((mode(TI)));
 
@@ -164,7 +164,37 @@ void func_L02_0040CEE8(u8 *a0) {
         *(u16 *)(a0 + 0x96) = *(u16 *)(a0 + 0x96) + 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_0040CF68);
+/* Updates the actor's halfword at +0x1B8: below kind 4 it only clears it and the word at +0x184;
+   while it is 1, or when the flag at +0x31 is set and func_L02_003FC0D0 agrees, it keeps it at 1
+   and calls func_002B3BA8 on the slot at +0x1B0; otherwise it clears it and, for kinds 8 and 0xB,
+   picks one of two states by the word at +0x180. */
+void func_L02_0040CF68(u8 *a0) {
+    u8 *s1 = *(u8 **)(a0 + 0x68);
+
+    if (a0[0x20] < 4) {
+        *(u16 *)(s1 + 0x1B8) = 0;
+        *(s32 *)(s1 + 0x184) = 0;
+    } else {
+        if (*(s16 *)(s1 + 0x1B8) == 1) {
+            *(s16 *)(s1 + 0x1B6) = func_002B3BA8(a0, *(u32 *)(s1 + 0x1B0), 100.0f, 100.0f, 0, 0);
+            *(s32 *)(s1 + 0x184) = *(s32 *)(s1 + 0x160);
+        } else {
+            if (a0[0x31] != 0 && func_L02_003FC0D0(*(void **)(a0 + 0xB8), *(s16 *)(a0 + 0xAA)) != 0) {
+                *(u16 *)(s1 + 0x1B8) = 1;
+                *(s16 *)(s1 + 0x1B6) = func_002B3BA8(a0, *(u32 *)(s1 + 0x1B0), 100.0f, 100.0f, 0, 0);
+                *(s32 *)(s1 + 0x184) = *(s32 *)(s1 + 0x160);
+            } else {
+                *(u16 *)(s1 + 0x1B8) = 0;
+                if (a0[0x20] == 0xB || a0[0x20] == 8) {
+                    if (*(s32 *)(s1 + 0x180) != -1)
+                        func_002A7750(a0, 7, 3);
+                    else
+                        func_002A7750(a0, 5, 2);
+                }
+            }
+        }
+    }
+}
 
 /* resets the actor's aim: three records and the two shared limits */
 void func_L02_0040D080(u8 *a0, int a1) {

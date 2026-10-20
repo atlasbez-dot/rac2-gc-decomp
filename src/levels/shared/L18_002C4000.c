@@ -112,7 +112,7 @@ float func_L18_0035D5A8(BatchA_A18_s32 a0, BatchA_A18_s32 a1, BatchA_A18_s32 a2,
 
 INCLUDE_ASM("asm/levels", func_L18_0035D5F8);
 
-INCLUDE_ASM("asm/levels", func_L18_003F50D8);
+/* func_L18_003F50D8 is matched in L18_003F50D8.c (built with -mno-split-addresses). */
 
 INCLUDE_ASM("asm/levels", func_L18_003F5198);
 

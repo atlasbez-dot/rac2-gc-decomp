@@ -1,5 +1,7 @@
 #include "include_asm.h"
 
+#define MACRO_ADDR __attribute__((section(".sdata")))
+
 typedef struct { char *p[6]; } Sep6;
 
 extern Sep6 D_L01_001AA550;
@@ -20,23 +22,126 @@ extern int D_L01_001A8F40;
 
 extern char D_L01_00189E20_sda[] __attribute__((sda));
 
-INCLUDE_ASM("asm/levels", func_L01_002A7248);
-
 extern void func_002C7CA8(void);
+
 extern void func_002B4070(void);
+
 extern void func_002ADDC8(void);
+
 extern void func_002C37C8(void);
+
 extern void func_002AEB80(void);
+
 extern void func_002B9878(void);
+
 extern void func_002A7740(void);
+
 extern void func_002AB1C8(void);
+
 extern void func_002A9520(void);
+
 extern void func_002A9310(void);
+
 extern void func_002FDB00(void *a0);
+
 extern void func_002AB328(void);
+
 extern void func_0030F444(int a0);
 
 extern char D_L01_00189E20[];
+
+extern void func_002A8EE0(int a0, int a1);
+
+extern char D_L01_00139568[];
+
+extern unsigned char D_0018C0D4[];
+
+extern void func_002BEB90(unsigned long, unsigned long);
+
+extern void *D_0018C0B0;
+
+extern float D_L01_00189F90;
+
+extern unsigned short *D_L01_001FB020[];
+
+extern unsigned short *r1_D_L01_001ABFC0[];
+
+extern char *r1_D_L01_00160058 MACRO_ADDR;
+
+extern int r1_D_L01_00160058_m __asm__("r1_D_L01_00160058") MACRO_ADDR;
+
+extern char *D_L01_001FE180[];
+
+extern int func_311B48(char *a0, void *a1, int a2);
+
+extern int func_3163C8(char *a0, void *a1);
+
+extern int func_316558(char *a0, void *a1);
+
+extern int func_3164A0(char *a0, void *a1);
+
+extern void func_002E3CD8(void *a0, void *a1);
+
+extern void func_002E3F60(void *a0, void *a1);
+
+extern void func_002E34A0(void *a0, void *a1, void *a2);
+
+extern void func_L01_002E3940(void *a0, void *a1, void *a2);
+
+extern void func_002E3470(void *a0, void *a1, void *a2);
+
+extern void func_002E3918(void *a0, void *a1, void *a2);
+
+extern void func_002E3470(void *a0, void *a1, void *a2);
+
+extern float func_002E3A60(int a0, int a1);
+
+extern void func_002E4600(int a0, int a1, float f12);
+
+extern float func_00283B98(float f12, float f13);
+
+extern float func_00283198(float f12);
+
+extern int func_00283D38(int a0, int a1, float f12);
+
+extern float func_002A7878(float f12, float f13);
+
+extern void func_002AEC18(void *a0, int a1);
+
+extern float func_002E3B10(float f12, float f13);
+
+extern void func_003212C0(char *a0, char *a1, float f12);
+
+extern char *func_00321F08(int a0);
+
+extern void func_003140B0(char *a0, char *a1, int a2, float f12, float f13,
+                          float f14, float f15);
+
+extern char D_00139A28[];
+
+extern int func_003246F8(void);
+
+extern int D_L01_001A79F0;
+
+extern int D_L01_0028EA50[];
+
+extern int D_L01_001C5D20[];
+
+extern void func_002A6CF0(int a0);
+
+extern float func_002E3618(void *a0, void *a1);
+
+extern unsigned char D_L01_001AA6F8[];
+
+extern char D_00188660[];
+
+extern int func_003711D8(int a0);
+
+extern unsigned char D_L01_001395B8[];
+
+extern void func_003907B8(int a0, int a1, int a2);
+
+INCLUDE_ASM("asm/levels", func_L01_002A7248);
 
 void func_L01_002A84D8(void) {
     char *p;
@@ -62,10 +167,6 @@ void func_L01_002A84D8(void) {
 }
 
 INCLUDE_ASM("asm/levels", func_L01_002A8C48);
-
-
-extern void func_002A8EE0(int a0, int a1);
-extern char D_L01_00139568[];
 
 void func_L01_002A9298(void) {
     char *b = D_L01_00189E20;
@@ -100,7 +201,6 @@ INCLUDE_ASM("asm/levels", func_L01_002B3D28);
 
 INCLUDE_ASM("asm/levels", func_L01_002B46A0);
 
-
 INCLUDE_ASM("asm/levels", func_L01_002B4DA0);
 
 INCLUDE_ASM("asm/levels", func_L01_002B5EA0);
@@ -108,10 +208,6 @@ INCLUDE_ASM("asm/levels", func_L01_002B5EA0);
 INCLUDE_ASM("asm/levels", func_L01_002B6948);
 
 INCLUDE_ASM("asm/levels", func_L01_002BE0E0);
-
-extern unsigned char D_0018C0D4[];
-
-extern void func_002BEB90(unsigned long, unsigned long);
 
 void func_L01_002C1988(unsigned long x) {
     unsigned long mode = 1;
@@ -125,8 +221,6 @@ INCLUDE_ASM("asm/levels", func_L01_002C2CF0);
 
 INCLUDE_ASM("asm/levels", func_L01_002C81D0);
 
-extern void *D_0018C0B0;
-
 void func_L01_002C8990(void) {
     *(unsigned short *)((char *)D_0018C0B0 + 0x34) |= 1;
 }
@@ -134,8 +228,6 @@ void func_L01_002C8990(void) {
 void func_L01_002C89A8(void) {
     *(unsigned short *)((char *)D_0018C0B0 + 0x34) &= 0xFFFE;
 }
-
-extern float D_L01_00189F90;
 
 void func_L01_002C98B8(void) {
     if (D_L01_00189F90 < 0.045f)
@@ -152,7 +244,6 @@ INCLUDE_ASM("asm/levels", func_L01_002E1670);
 
 INCLUDE_ASM("asm/levels", func_L01_002E1680);
 
-
 INCLUDE_ASM("asm/levels", func_L01_002E2608);
 
 INCLUDE_ASM("asm/levels", func_L01_002EABA8);
@@ -168,16 +259,6 @@ INCLUDE_ASM("asm/levels", func_L01_002F1FD0);
 
 INCLUDE_ASM("asm/levels", func_L01_00304270);
 
-
-extern unsigned short *D_L01_001FB020[];
-
-#define MACRO_ADDR __attribute__((section(".sdata")))
-
-extern unsigned short *r1_D_L01_001ABFC0[];
-
-extern char *r1_D_L01_00160058 MACRO_ADDR;
-
-extern int r1_D_L01_00160058_m __asm__("r1_D_L01_00160058") MACRO_ADDR;
 
 /* rac1-decomp src/overlays/shared/mobyutil_0026E8E0.c: func_L01_0026F090 */
 // Walks a list of moby indices and sets the state byte of each one that is non-negative.
@@ -207,12 +288,6 @@ void func_L01_003128C0(char *p) {
 
 INCLUDE_ASM("asm/levels", func_L01_003161F0);
 
-extern char *D_L01_001FE180[];
-extern int func_311B48(char *a0, void *a1, int a2);
-extern int func_3163C8(char *a0, void *a1);
-extern int func_316558(char *a0, void *a1);
-extern int func_3164A0(char *a0, void *a1);
-
 /* chain of four probes on the same object; the first that reports a hit picks the code */
 int func_L01_003165E8(char *a0, int a1, char *a2, char *a3, char *t0) {
     if (a1 >= 0) {
@@ -228,14 +303,6 @@ int func_L01_003165E8(char *a0, int a1, char *a2, char *a3, char *t0) {
         return 4;
     return 0;
 }
-
-
-
-extern void func_002E3CD8(void *a0, void *a1);
-extern void func_002E3F60(void *a0, void *a1);
-extern void func_002E34A0(void *a0, void *a1, void *a2);
-extern void func_L01_002E3940(void *a0, void *a1, void *a2);
-extern void func_002E3470(void *a0, void *a1, void *a2);
 
 void func_L01_00316C48(void *a0, void *a1, void *a2, void *a3, void *t0) {
     float p[0x10];
@@ -253,9 +320,6 @@ void func_L01_00316C48(void *a0, void *a1, void *a2, void *a3, void *t0) {
 
 INCLUDE_ASM("asm/levels", func_L01_00318638);
 
-extern void func_002E3918(void *a0, void *a1, void *a2);
-extern void func_002E3470(void *a0, void *a1, void *a2);
-
 void func_L01_0031A278(char *a0, float *a1, float f12, float f13, float f14) {
     a1[0] = f12;
     a1[1] = f13;
@@ -268,9 +332,6 @@ INCLUDE_ASM("asm/levels", func_L01_0031AB20);
 
 INCLUDE_ASM("asm/levels", func_L01_0031B300);
 
-extern float func_002E3A60(int a0, int a1);
-extern void func_002E4600(int a0, int a1, float f12);
-
 void func_L01_0031BC68(int a0, int a1) {
     float v = func_002E3A60(a0, a1);
     func_002E4600(a0, a1, v * 0.5f + 0.5f);
@@ -281,12 +342,6 @@ INCLUDE_ASM("asm/levels", func_L01_0031EF98);
 INCLUDE_ASM("asm/levels", func_L01_0031F080);
 
 INCLUDE_ASM("asm/levels", func_L01_003200C8);
-
-extern float func_00283B98(float f12, float f13);
-extern float func_00283198(float f12);
-extern int func_00283D38(int a0, int a1, float f12);
-extern float func_002A7878(float f12, float f13);
-extern void func_002AEC18(void *a0, int a1);
 
 void func_L01_003208D0(void *a0, float *a1, int a2) {
     unsigned char *p = (unsigned char *)a0;
@@ -319,19 +374,11 @@ void func_L01_003208D0(void *a0, float *a1, int a2) {
 
 INCLUDE_ASM("asm/levels", func_L01_003209F8);
 
-
-extern float func_002E3B10(float f12, float f13);
-extern void func_003212C0(char *a0, char *a1, float f12);
-
 void func_L01_00321178(char *a0, char *a1) {
     float v = func_002E3B10(*(float *)(a1 + 0) - *(float *)(a0 + 0x10),
                             *(float *)(a1 + 4) - *(float *)(a0 + 0x14));
     func_003212C0(a0, a1, v);
 }
-
-extern char *func_00321F08(int a0);
-extern void func_003140B0(char *a0, char *a1, int a2, float f12, float f13,
-                          float f14, float f15);
 
 int func_L01_00322288(int a0, float f12) {
     char *p = func_00321F08(a0);
@@ -369,11 +416,7 @@ INCLUDE_ASM("asm/levels", func_L01_00324410);
 
 INCLUDE_ASM("asm/levels", func_L01_00324550);
 
-
 /* func_L01_003245E0 is defined in L01_002A7248-g8.c (this unit has no $gp access for it). */
-
-
-extern char D_00139A28[];
 
 void func_L01_003246A0(int a) {
     char *base = D_00139A28;
@@ -384,17 +427,9 @@ void func_L01_003246A0(int a) {
         *(int *)p = 1;
 }
 
-extern int func_003246F8(void);
-
 void func_L01_003246D0(void) {
     func_L01_003246A0(func_003246F8());
 }
-
-extern int D_L01_001A79F0;
-
-extern int D_L01_0028EA50[];
-
-extern int D_L01_001C5D20[];
 
 /* scans the half-open span the counter global picks out of the pair table, looking for
    the caller's key; the key rides in $a0 without a caller-side argument */
@@ -412,7 +447,6 @@ int func_L01_003246F8(int key) {
  return -1;
 }
 
-
 INCLUDE_ASM("asm/levels", func_L01_00326DD8);
 
 INCLUDE_ASM("asm/levels", func_L01_0032EF38);
@@ -420,10 +454,6 @@ INCLUDE_ASM("asm/levels", func_L01_0032EF38);
 INCLUDE_ASM("asm/levels", func_L01_00331CA0);
 
 INCLUDE_ASM("asm/levels", func_L01_00331E08);
-
-extern void func_002A6CF0(int a0);
-extern float func_002E3618(void *a0, void *a1);
-extern unsigned char D_L01_001AA6F8[];
 
 /* Averages each 16-byte record of the table the argument points at against the record
    (i + 1) % n, storing the result in the record's own +0xC field and returning the
@@ -457,7 +487,6 @@ float func_L01_003377C8(unsigned char *a0) {
     return f20;
 }
 
-
 INCLUDE_ASM("asm/levels", func_L01_00337888);
 
 INCLUDE_ASM("asm/levels", func_L01_00337A60);
@@ -466,17 +495,12 @@ INCLUDE_ASM("asm/levels", func_L01_00337B80);
 
 INCLUDE_ASM("asm/levels", func_L01_0034EA48);
 
-extern char D_00188660[];
-
 int func_L01_00355BA0(int index, int value) {
     char *p = D_00188660 + index * 0x70;
     *(unsigned short *)(p + 0x80) = value;
     return 1;
 }
 
-
-extern int func_003711D8(int a0);
-extern unsigned char D_L01_001395B8[];
 
 void func_L01_00371228(int a0, int a1) {
     int i = func_003711D8(a0);
@@ -491,8 +515,6 @@ INCLUDE_ASM("asm/levels", func_L01_003808C0);
 INCLUDE_ASM("asm/levels", func_L01_0038EF40);
 
 INCLUDE_ASM("asm/levels", func_L01_003907B8);
-
-extern void func_003907B8(int a0, int a1, int a2);
 
 void func_L01_003909E0(int a0, int a1, int a2, int a3) {
     unsigned short *p = D_L01_001FB020[a2];

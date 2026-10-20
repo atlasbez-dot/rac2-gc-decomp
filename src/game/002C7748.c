@@ -344,7 +344,7 @@ int func_002C9C20(void)
         *p-- = value;
 }
 
-INCLUDE_ASM("asm/game", func_002C9C60);
+/* func_002C9C60 is matched in 002C9C60.c (built with -g). */
 
 INCLUDE_ASM("asm/game", func_002C9C90);
 
