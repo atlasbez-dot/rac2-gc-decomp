@@ -66,6 +66,10 @@ void func_L22_003A6470(u8 *a0, int a1) {
     *(int *)(p + 1248) |= bit;
 }
 
+extern int func_002A77E0(int a0);
+
+extern void func_L22_003A64E8(u8 *a0, int a1, int a2);
+
 INCLUDE_ASM("asm/levels", func_L22_003A64E8);
 
 /* A three-label switch, the third one sharing the default's body: with only two cases cc1
@@ -106,7 +110,47 @@ INCLUDE_ASM("asm/levels", func_L22_003C9B60);
 
 INCLUDE_ASM("asm/levels", func_L22_003C9D48);
 
-INCLUDE_ASM("asm/levels", func_L22_003D4320);
+extern void *func_002A9640(void *a0, int a1, int a2);
+
+extern int func_002A77E0(int a0);
+
+extern int func_002E5DA0(int index, int value, char *object, int kind);
+
+extern void func_002AC728(void *a0, void *a1, int a2, float f12, float f13);
+
+extern int func_002E5CF8(int index, int a1, char *a2);
+
+extern void func_00282F20(float *a0, void *a1, float f12);
+
+extern void func_002B0A68(void *a0, int a1, void *a2, unsigned char a3,
+                           float f12, float f13, float f14, float f15);
+
+extern void func_0029F338(void *object);
+
+void func_L22_003D4320(u8 *a0, int a1, int a2) {
+    u8 *s0 = a0;
+    void *s3;
+    int s2;
+    int s1;
+    float buf[4];
+
+    s3 = func_002A9640(a0, -1, 0);
+    if (s3 == 0)
+        return;
+    if (*(short *)(s0 + 0xAA) == 0x1213) {
+        s2 = 0xB;
+        s1 = 0xF7F;
+    } else {
+        s2 = 0xC;
+        s1 = 0xE0B;
+    }
+    func_002E5DA0(s2 + func_002A77E0(3), 0, s0, s1);
+    func_002AC728(s0, s0 + 0x10, -1, 2.0f, 13.0f);
+    func_002E5CF8(0, 0, s0);
+    func_00282F20(buf, s3 + 0x10, 0.23333335f);
+    func_002B0A68(s0, 3, buf, 0xFF, 3.0f, 6.0f, 3.0f, 6.0f);
+    func_0029F338(s0);
+}
 
 extern void func_L22_003D4320(u8 *a0, int a1, int a2);
 

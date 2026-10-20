@@ -55,7 +55,7 @@ float func_002B38C8(char *object, char *target)
     return distance;
 }
 
-INCLUDE_ASM("asm/game", func_002B39A0);
+/* func_002B39A0 is matched in 002B39A0-g8.c. */
 
 /* Calls a callee on (second pointer, first pointer + 16); if the result is not below the first float argument it returns 0, otherwise it evaluates a second callee on (a float at second+8 minus a float at first+24) and returns 1 when that is below the second float argument, else 0. */
 int func_002B3B20(char *p, char *q, float f12, float f13)
@@ -143,9 +143,9 @@ int func_002B49C8(int value) {
     return D_001A8BB8 == value;
 }
 
-INCLUDE_ASM("asm/game", func_002B49E0);
+/* func_002B49E0 is matched in 002B49E0-g8.c. */
 
-INCLUDE_ASM("asm/game", func_002B4B70);
+/* func_002B4B70 is matched in 002B4B70-g8.c. */
 
 
 

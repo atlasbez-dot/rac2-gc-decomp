@@ -388,9 +388,49 @@ int func_L11_0043A800(char *p)
 }
 
 
-INCLUDE_ASM("asm/levels", func_L11_0043A9D8);
+extern void func_002A7A00(float *out, float a, float b);
+extern float func_002A7878(float a, float b);
+extern void func_002B0A68(char *self, int mask, float *arg2, unsigned char arg3,
+                           float f0, float f1, float f2, float f3);
+extern int func_002E5CF8(int index, int a1, char *a2);
+extern void func_0029F9F0(char *list, char *node);
 
-INCLUDE_ASM("asm/levels", func_L11_0043AB28);
+/* Spawns the object's random effect while its flag byte is set, then retires the state. */
+void func_L11_0043AB28(char *obj)
+{
+    char *state;
+    unsigned short flags;
+    float v[3];
+
+    if (*(unsigned char *)(obj + 0x20) == 0)
+        return;
+
+    if (*(unsigned char *)(obj + 0x31) != 0) {
+        float s = 1.0f / 6.0f;
+
+        func_002A7A00(v, s, 1.0f / 3.0f);
+        v[2] = func_002A7878(1.0f / 12.0f, s);
+        func_002B0A68(obj, 3, v, 0xFF, 3.0f, 6.0f, 3.0f, 6.0f);
+        func_002E5CF8(1, 0, obj);
+        func_0032C700(obj + 0x10, 1, 0x19, 0xA, 0xA, 5, 0, 1, 1.0f, 20.0f, 0, 0, 0, 0);
+        func_002E5DA0(0, 0, obj, 0xDF7);
+    }
+
+    func_002A7750(obj, 1, 0);
+    func_002A7470(obj, 0, 0, 3);
+    func_002A05A8(obj);
+
+    state = *(char **)(obj + 0x68);
+    flags = *(unsigned short *)(obj + 0x34);
+    *(unsigned char *)(obj + 0x31) = 0;
+    *(int *)(obj + 0x98) = 0;
+    *(unsigned short *)(obj + 0x34) = (flags & 0xEFFF) | 0x47;
+
+    if (*(unsigned char *)(state + 0x221))
+        func_0029F9F0(obj, state + 0x220);
+    if (*(unsigned char *)(state + 0x261))
+        func_0029F9F0(obj, state + 0x260);
+}
 
 INCLUDE_ASM("asm/levels", func_L11_0043ACB0);
 

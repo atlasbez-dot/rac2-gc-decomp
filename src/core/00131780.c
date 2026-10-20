@@ -180,6 +180,15 @@ void func_00131A98(unsigned char *clock) {
 
 ASM_FUNC("asm/core", func_00131AE8);
 
+/* The exit thunk of symbol_addrs: eight bytes that jump to exit with $4
+   forced to 0 in the delay slot, so the status the caller passes is discarded
+   and the program always exits with 0. The call is a tail call, and the
+   compiler puts the argument in the jump's delay slot. */
+extern void func_0011FA20(int);
+
+void func_00131CA8(void) {
+    func_0011FA20(0);
+}
 
 INCLUDE_ASM("asm/core", func_00131CB0);
 

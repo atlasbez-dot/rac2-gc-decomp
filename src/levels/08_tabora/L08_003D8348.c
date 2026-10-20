@@ -243,7 +243,35 @@ INCLUDE_ASM("asm/levels", func_L08_0041D808);
 
 INCLUDE_ASM("asm/levels", func_L08_00422190);
 
-INCLUDE_ASM("asm/levels", func_L08_00422428);
+extern f32 func_002A7940(void);
+extern s32 func_002A7820(s32, s32);
+extern f32 func_00283180(f32);
+extern f32 func_00283198(f32);
+extern void func_00282CC0(void *, void *, void *);
+extern void func_L01_0032EF38(void *, int, int, float, float, int);
+
+/* five rounds: each picks a direction, two spreads and a life time */
+void func_L08_00422428(Ent *a0)
+{
+    Moby *s3 = a0->f68;
+    f32 position[4];
+    f32 angle, radius, first, second;
+    int life, i;
+
+    for (i = 4; i >= 0; i--) {
+        angle = func_002A7940();
+        radius = func_002A7878(0.0f, 0.8f);
+        first = func_002A7878(0.0f, 1.5f);
+        second = func_002A7878(1.5f, 5.7f);
+        life = func_002A7820(100, 180);
+        position[0] = func_00283180(angle) * radius;
+        position[1] = func_00283198(angle) * radius;
+        position[2] = 0.0f;
+        func_00282CC0(position, position, (char *)a0 + 0x10);
+        position[2] = s3->f1B0 + 0.025f;
+        func_L01_0032EF38(position, 0x38002028, 0x2020, first, second, life);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L08_00422578);
 

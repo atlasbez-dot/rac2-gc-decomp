@@ -143,12 +143,61 @@ INCLUDE_ASM("asm/levels", func_L20_00442F80);
 
 INCLUDE_ASM("asm/levels", func_L20_004431E0);
 
-extern char *D_L20_001B2F9C __attribute__((sda));
+extern unsigned int D_L20_001B2F9C __attribute__((sda));
 extern int func_L03_003CA138(char *);
 INCLUDE_ASM("asm/levels", func_L20_004499E8);
+extern int func_L20_00449AC8(char *);
 
+extern void func_0039BDF0(char *, char *, int, int);
+
+char *func_L20_00443328(char *arg0, char *arg1) {
+    char *state = *(char **)(arg0 + 0x68);
+    unsigned int p = D_L20_001B2F9C + (*(int *)(state + 0x238) << 8);
+
+    if (func_L20_00449AC8((char *)p) != 0) {
+        func_L20_004499E8((char *)p, arg0, arg1);
+        func_0039BDF0((char *)p, (char *)(p + 0x10), 0x168, 0);
+        return (char *)p;
+    }
+    return 0;
+}
 INCLUDE_ASM("asm/levels", func_L20_004433B0);
 
+extern int func_0033E808(char *, int);
+
+extern int func_003BA3F8(char *);
+
+extern int func_L20_00449AD8(char *);
+
+int func_L20_00443508(char *arg0, char *arg1) {
+    char *state = *(char **)(arg0 + 0x68);
+    short v;
+
+    if (func_0033E808(arg1 + 0x10, *(int *)(state + 0x220)) == 0) {
+        goto ret0;
+    }
+    v = *(short *)(arg1 + 0xAA);
+    if (v < 0x1FF) {
+        goto ret0;
+    }
+    if (v < 0x201) {
+        goto other;
+    }
+    if (v != 0x12D3) {
+        goto ret0;
+    }
+    if (func_L20_00449AC8(arg1) != 0) {
+        goto ret0;
+    }
+    if (func_L20_00449AD8(arg1) != 0) {
+        goto ret0;
+    }
+    return 1;
+other:
+    return func_003BA3F8(arg1) == 0;
+ret0:
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L20_004435A0);
 
@@ -161,7 +210,6 @@ INCLUDE_ASM("asm/levels", func_L20_00443A10);
 INCLUDE_ASM("asm/levels", func_L20_00443B60);
 
 INCLUDE_ASM("asm/levels", func_L20_00443CF0);
-
 
 INCLUDE_ASM("asm/levels", func_L20_00443D58);
 

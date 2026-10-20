@@ -14,13 +14,48 @@ extern float func_3099E8(float, float);
 extern float func_308860(float);
 extern void func_34B1D0(s32);
 
+extern char *func_002B9030(s32);
+extern s32 func_001163B0(void);
+extern s32 func_00283CF0(float);
+extern float func_00283180(float);
+extern float func_00283198(float);
+extern u8 *D_L18_001FF4D4;
+
 INCLUDE_ASM("asm/levels", func_L18_002E68B0);
 
 INCLUDE_ASM("asm/levels", func_L18_003170F8);
 
 INCLUDE_ASM("asm/levels", func_L18_0033D768);
 
-INCLUDE_ASM("asm/levels", func_L18_0035B6B8);
+/* Fills the record with the requested fields and derived coordinates. */
+char *func_L18_0035B6B8(char *p0, s16 p1, char *p2, s32 p3, char *p4, float f0, float f1,
+                         float f2, float f3, float f4)
+{
+    char *s0 = func_002B9030(0x65);
+    char *s1 = s0 + 0x20;
+
+    if (s0 != 0) {
+        *(u8 *)(s0 + 3) = (p4 != 0) ? 0x48 : 0x44;
+        *(u8 *)(s0 + 1) = 0;
+        *(u8 *)(s0 + 2) = D_L18_001FF4D4[p3];
+        *(u8 *)(s0 + 8) = func_001163B0();
+        *(u8 *)(s0 + 9) = func_00283CF0(1.0f) + 0x40;
+        *(u32 *)(s0 + 4) = p2;
+        *(float *)(s0 + 0xC) = f3 * 210000.0f;
+        *(u32 *)(s1 + 0) = p0;
+        *(float *)(s1 + 4) = f0;
+        *(float *)(s1 + 8) = f1;
+        *(float *)(s1 + 0xC) = f2;
+        *(u16 *)(s1 + 0x14) = p1;
+        *(float *)(s1 + 0x10) = f4 * 210000.0f;
+        *(float *)(s0 + 0x10) = *(float *)(*(char **)(s1 + 0)) +
+                                *(float *)(s1 + 4) * func_00283180(f1);
+        *(float *)(s0 + 0x18) = *(float *)(*(char **)(s1 + 0) + 8) +
+                                *(float *)(s1 + 4) * func_00283198(*(float *)(s1 + 8));
+        *(float *)(s0 + 0x14) = *(float *)(*(char **)(s1 + 0) + 4);
+    }
+    return s0;
+}
 
 void func_L18_0035B838(char *a0)
 {

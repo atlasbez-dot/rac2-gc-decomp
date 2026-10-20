@@ -2,7 +2,32 @@
    Reaches retail's exact 0x60 frame and its `swc1 $f20,0x50($sp)` save once the helper
    output is re-read into a second float local (`g`) after the 0x443B60 call.
    0x2c: retail sets `$a3 = $sp+0x20` before `$a2 = $s2` for the 0x443B60 call, this cc1
-   the other way round; every other word matches. */
+   the other way round; every other word matches. 
+   Third wave (20_yeedil, 2026-10-20) re-measured it again with a word-level differ that
+   byte-swaps the retail's words (the disassembly file prints them big-endian): the attempt
+   is 38 of 38 words and exactly TWO differ, the pair at +0x2C/+0x34.  Retail sets
+   `$a3 = $sp+0x20` before the store and `$a2 = $s2` after it; this cc1 sets `$a2 = $s2`
+   before the store and `$a3 = $sp+0x20` after it.  Everything else - the 0x60 frame, the
+   `swc1 $f20,0x50($sp)` save, the constant's `lui/ori/mtc1` at the top, the `lwc1 $f20,
+   0x20($sp)` re-read, the second call's five arguments with the `cvt.s.w` and its `nop` -
+   matches.  Measured and not enough: the declaration order of the locals; `f32 f = 1.0471977f`
+   as a declaration; the store written through a cast or through a pointer; `volatile` on f
+   (41 words); the g re-read before the random call or merged into the second call (35
+   words - the `g = f` has to sit directly after the first call); the argument types of the
+   0x443B60 prototype permuted (f32*/TI128*, void*/f32*, all void*); the `&f` argument
+   written as `(&f)`; and a named `TI128 *p1 = &v1` for the third argument - that one is
+   worse (5 words): with a pointer variable this cc1 passes the two TI128* arguments in
+   $a1/$a2 the other way round ($a1 = &v1, $a2 = &v0), and it does put the `$a3 = $sp+0x20`
+   set-up first as the retail does.  Wall: one scheduling pair, the store of f between the
+   two argument set-ups.
+   Second wave (20_yeedil, 2026-10-20) re-measured this one with the `g = f` spelling
+   recorded above: it does reach retail's exact 0x60 frame and its `swc1 $f20,0x50($sp)`
+   save, and the only residue left is the pair at +0x2C - retail sets `$a3 = $sp+0x20`
+   before `$a2 = $s2` for the 0x443B60 call, this cc1 the other way round (the store
+   `swc1 $f0,0x20($sp)` sits between them in both). Tried and not enough: `float f =
+   1.0471977f` as a declaration instead of an assignment; a `float *pf = &f` temporary
+   (much worse, 34 words differ); the declaration order of the locals. Wall: one
+   scheduling pair.*/
 #include "common.h"
 
 typedef int TI128 __attribute__((mode(TI)));

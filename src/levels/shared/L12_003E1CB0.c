@@ -26,7 +26,67 @@ extern void func_L12_002F15C8(s32);
 extern void func_L12_00326948(s32, s32, s32, f32, f32);
 extern void func_L12_003296A8(s32, s32, s32, s32, f32);
 
-INCLUDE_ASM("asm/levels", func_L12_003E1CB0);
+extern float func_00282E80(void *, void *);
+extern int func_002761F8(void *, void *, int, int, int);
+extern float func_L02_002F21C0(void *, void *);
+
+void func_L12_003E1CB0(s32 a0) {
+    u8 *state = *(u8 **)(a0 + 0x68);
+    u8 *list = *(u8 **)(D_L12_001FEAC0 + (*(s32 *)(state + 0x158) << 2));
+    s32 i;
+    s32 bestIdx;
+    f32 best;
+    f32 d;
+
+    best = func_00282E80(a0 + 0x10, list + 0x10 + (*(s32 *)(state + 0x264) << 4));
+    if (best < 0.5f) {
+        *(s32 *)(state + 0x16C) = 0;
+        return;
+    }
+    if (best < 5.0f) {
+        if (func_002761F8(a0 + 0x10, list + 0x10 + (*(s32 *)(state + 0x264) << 4), 2, 0, 0) == 0) {
+            *(s32 *)(state + 0x16C) = 1;
+            return;
+        }
+    }
+    bestIdx = -1;
+    best = 1000.0f;
+    for (i = 0; i < *(s32 *)list; i++) {
+        d = func_L02_002F21C0(a0 + 0x10, list + 0x10 + i * 16);
+        if (d < best) {
+            best = d;
+            bestIdx = i;
+        }
+    }
+    if (best < 0.5f) {
+        *(s32 *)(state + 0x264) = bestIdx;
+        *(s32 *)(state + 0x16C) = 0;
+        return;
+    }
+    if (func_002761F8(a0 + 0x10, list + 0x10 + i * 16, 2, 0, 0) == 0) {
+        *(s32 *)(state + 0x264) = bestIdx;
+        *(s32 *)(state + 0x16C) = 1;
+        return;
+    }
+    bestIdx = -1;
+    best = 1000.0f;
+    for (i = 0; i < *(s32 *)list; i++) {
+        if (func_002761F8(a0 + 0x10, list + 0x10 + i * 16, 2, 0, 0) != 0)
+            continue;
+        d = func_L02_002F21C0(a0 + 0x10, list + 0x10 + i * 16);
+        if (d < best) {
+            best = d;
+            bestIdx = i;
+        }
+    }
+    if (bestIdx == -1) {
+        *(s32 *)(state + 0x290) = *(s32 *)(state + 0x290) + 1;
+        *(s32 *)(state + 0x16C) = 0;
+    } else {
+        *(s32 *)(state + 0x264) = bestIdx;
+        *(s32 *)(state + 0x16C) = 1;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L12_003E1EE8);
 

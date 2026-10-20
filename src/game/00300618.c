@@ -258,6 +258,60 @@ void func_00304C18(void *object) {
         *((unsigned char *)object + 0x20) = 8;
 }
 
+typedef struct {
+    float x;
+    float y;
+    float z;
+    int w;
+} MotionVector;
+
+typedef struct {
+    unsigned char pad00[0x70];
+    void *motion;
+    float field74;
+    float field78;
+    float field7C;
+} MotionChild;
+
+typedef struct {
+    unsigned char pad00[0x10];
+    float field10;
+    float field14;
+    float field18;
+    unsigned char pad1C[8];
+    void *field24;
+    unsigned char pad28[0x40];
+    void *field68;
+} MotionState;
+
+extern void func_00282CF0(void *out, void *a, void *b);
+extern void func_00282CC0(void *out, void *a, void *b);
+
+/* Takes the position of the owner's child, and lets the child's motion take it over
+   once the motion is of the right kind and is not busy. */
+void func_00304C78(void *object)
+{
+    MotionVector local;
+    float tmp[4];
+    MotionChild *child;
+    MotionState *motion;
+
+    local.w = 0;
+    child = *(MotionChild **)((char *)object + 0x68);
+    local.x = child->field74;
+    local.y = child->field78;
+    local.z = child->field7C;
+    func_00282CF0(tmp, (char *)child->motion + 0x10, &local);
+    func_00282CC0((char *)object + 0x10, tmp, (char *)object + 0x10);
+    motion = child->motion;
+    child->field74 = motion->field10;
+    child->field78 = motion->field14;
+    child->field7C = motion->field18;
+    if (*(short *)((char *)motion->field24 + 0x46) == 0x12) {
+        if (*(u8 *)((char *)motion->field68 + 0x14) == 0)
+            *(u8 *)((char *)object + 0x20) = 7;
+    }
+}
 
 INCLUDE_ASM("asm/game", func_00304D38);
 
@@ -301,7 +355,35 @@ INCLUDE_ASM("asm/game", func_00305438);
 
 INCLUDE_ASM("asm/game", func_003054E8);
 
-INCLUDE_ASM("asm/game", func_00305798);
+typedef struct {
+    unsigned char pad00[0x24];
+    void *owner;
+    unsigned char pad28[8];
+} MotionEntry;
+
+/* The table of hundred objects and the three helpers it uses sit at another
+   address in every program, so they have no address of their own. */
+extern char ref_00305798_00[];
+extern void ref_00305798_01(void *out, void *in, float scale);
+extern void ref_00305798_02(void *out, void *a, void *b);
+extern void ref_00305798_03(void *owner, void *entry, void *out);
+
+/* Walks the table of objects and lets every entry the owner owns move it. */
+void func_00305798(void *owner)
+{
+    s32 i;
+    char *base = ref_00305798_00;
+    float local[4];
+
+    for (i = 0; i < 100; i++) {
+        MotionEntry *entry = (MotionEntry *)(base + i * 0x30);
+        if (entry->owner == owner) {
+            ref_00305798_01(local, base + i * 0x30 + 0x10, 2.1f);
+            ref_00305798_02(local, entry, local);
+            ref_00305798_03(owner, entry, local);
+        }
+    }
+}
 
 void func_00305838(char *p)
 {
@@ -382,6 +464,30 @@ void func_003073E0(void *owner)
         *((unsigned char *)owner + 0x20) = 8;
 }
 
+/* The same as func_00304C78: the retail holds the two copies byte for byte the same. */
+void func_00307440(void *object)
+{
+    MotionVector local;
+    float tmp[4];
+    MotionChild *child;
+    MotionState *motion;
+
+    local.w = 0;
+    child = *(MotionChild **)((char *)object + 0x68);
+    local.x = child->field74;
+    local.y = child->field78;
+    local.z = child->field7C;
+    func_00282CF0(tmp, (char *)child->motion + 0x10, &local);
+    func_00282CC0((char *)object + 0x10, tmp, (char *)object + 0x10);
+    motion = child->motion;
+    child->field74 = motion->field10;
+    child->field78 = motion->field14;
+    child->field7C = motion->field18;
+    if (*(short *)((char *)motion->field24 + 0x46) == 0x12) {
+        if (*(u8 *)((char *)motion->field68 + 0x14) == 0)
+            *(u8 *)((char *)object + 0x20) = 7;
+    }
+}
 
 INCLUDE_ASM("asm/game", func_00307500);
 

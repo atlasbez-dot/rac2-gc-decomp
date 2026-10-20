@@ -19,7 +19,7 @@ void func_L07_0040FC50(void)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L07_003F4970);
+/* func_L07_003F4970 is defined in L07_003F4578-g8.c (this unit has no $gp access for it). */
 
 INCLUDE_ASM("asm/levels", func_L07_003F4B08);
 

@@ -114,6 +114,30 @@ INCLUDE_ASM("asm/levels", func_L03_003D09D0);
 
 INCLUDE_ASM("asm/levels", func_L03_003D0AE0);
 
+extern f32 func_002A7878(f32, f32);
+
+extern s32 func_002A77E0(s32);
+
+extern f32 func_002A7A00(f32 *, f32, f32);
+
+extern void func_00282CC0(void *, void *, void *);
+
+extern void func_002C2210(void *, u32, u32, u32, s32, s32, s32, f32, f32, f32);
+
+void func_L03_003D0FC8(u8 *a0, s32 a1, s32 a2) {
+    f32 buf[3];
+    f32 f20, f21;
+    s32 s1, s2;
+
+    s2 = a2;
+    f20 = func_002A7878(0.25f, 1.0f);
+    s1 = func_002A77E0(2);
+    f21 = func_002A7878(3.0f, 7.0f) * (1.0f / 3600.0f);
+    func_002A7A00(buf, 0.0f, 0.1f);
+    func_00282CC0(buf, buf, a1);
+    func_002C2210(buf, 0x28, 0x7F800000, 0, s1, s2, 0, f20 * 0.2f, f20, f21);
+    func_002C2210(buf, 0x3C, 0x7F7F7F7F, 1, -s1, s2, 0, f20 * 0.14f, f20 * 0.7f, f21);
+}
 
 INCLUDE_ASM("asm/levels", func_L03_003D9578);
 
@@ -327,10 +351,80 @@ INCLUDE_ASM("asm/levels", func_L03_0041B848);
 
 INCLUDE_ASM("asm/levels", func_L03_00424C40);
 
+extern s32 func_002A77E0(s32);
+
+void func_L03_00425030(u8 *a0) {
+    u8 *rec = *(u8 **)(a0 + 0x68);
+    f32 *p = (f32 *)(rec + 0x10);
+    s32 i;
+
+    for (i = 3; i >= 0; i--) {
+        *p++ = (f32)func_002A77E0(0xFF);
+    }
+    *(f32 *)(rec + 0x20) = -1.0f;
+    *(f32 *)(rec + 0x24) = -2.25f;
+    *(f32 *)(rec + 0x28) = 1.25f;
+    *(f32 *)(rec + 0x2C) = 2.5f;
+    {
+        s32 j = 3;
+        u32 *q = (u32 *)(rec + 0x3C);
+        u32 v = 0xFF;
+
+        for (; j >= 0; j--) {
+            *q = v;
+            q--;
+            v -= 0x40;
+        }
+    }
+    *(f32 *)(rec + 0x40) = 2.0f;
+    *(f32 *)(rec + 0x44) = 2.46f;
+    *(f32 *)(rec + 0x4C) = 2.0f;
+    *(f32 *)(rec + 0x48) = 2.46f;
+}
 
 INCLUDE_ASM("asm/levels", func_L03_00425108);
 
-INCLUDE_ASM("asm/levels", func_L03_0042B6F8);
+/* The resident word at 0x001A79F0, below the level base, so its value is the same in every
+   program.  The retail reads it absolutely in ordinary flow and through $gp in a delay slot,
+   which is what the `sda` declaration's bare-symbol model gives in this unit. */
+extern int D_001A79F0 __attribute__((sda));
+
+extern void func_L03_0042B868(u8 *, void *, void *);
+
+extern void func_L03_0042B908(u8 *, u32);
+
+/* Allocates the object's record, copies the two source fields into it, hands the record to
+   the two setup helpers, and writes into the resident block the size the word at 0x001A79F0
+   selects. */
+u8 *func_L03_0042B6F8(void *a0, void *a1, u32 a2, u8 *a3, u32 a4, u32 a5) {
+    u8 *s0 = func_0029EFD0(0x13BA);
+    u8 *s1;
+
+    if (s0 != 0) {
+        *(unsigned short *)(s0 + 0x34) |= 0x100;
+        s1 = *(u8 **)(s0 + 0x68);
+        *(u8 *)(s0 + 0x30) = (a3 != 0) ? *(u8 *)(a3 + 0x30) : 0x96;
+        *(unsigned short *)(s0 + 0x32) = (a3 != 0) ? *(unsigned short *)(a3 + 0x32) : 0x96;
+        *(u8 *)(s0 + 0x20) = 0;
+        *(u32 *)(s1 + 0x20) = a4;
+        *(u32 *)(s1 + 0x44) = (u32)a3;
+        func_L03_0042B868(s0, a0, a1);
+        func_L03_0042B908(s0, a2);
+        if (a5 == 0)
+            *(u32 *)(s1 + 0x3C) = 0;
+        if (D_001A79F0 == 0)
+            *(u32 *)(s1 + 0x48) = 0x48;
+        if (D_001A79F0 == 3)
+            *(u32 *)(s1 + 0x48) = 0x3F;
+        if (D_001A79F0 == 6)
+            *(u32 *)(s1 + 0x48) = 0x44;
+        if (D_001A79F0 == 9)
+            *(u32 *)(s1 + 0x48) = 0x48;
+        if (D_001A79F0 == 0x12)
+            *(u32 *)(s1 + 0x48) = 0x43;
+    }
+    return s0;
+}
 
 INCLUDE_ASM("asm/levels", func_L03_0042B868);
 

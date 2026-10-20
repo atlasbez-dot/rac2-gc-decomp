@@ -37,8 +37,6 @@ void func_00344848(char *self)
             D_L04_001AE55C + (*(struct pos54dfe946 **)(self + 1072))->y, zero, zero);
 }
 
-INCLUDE_ASM("asm/game", func_00344938);
-
 INCLUDE_ASM("asm/game", func_00344F98);
 
 INCLUDE_ASM("asm/game", func_00345088);

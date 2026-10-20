@@ -157,7 +157,44 @@ INCLUDE_ASM("asm/levels", func_L00_003E6030);
 
 INCLUDE_ASM("asm/levels", func_L00_003E64F8);
 
-INCLUDE_ASM("asm/levels", func_L00_003E6628);
+extern int func_00282948(void *p);
+
+extern int func_001163B0(void);
+
+extern void func_L00_003E6778(char *rec, int a, float b, float c, int d);
+
+extern void func_L00_003E6C10(char *rec);
+
+/* Walks the shared table of 0x50-byte records and, for the one owned by OBJECT, either
+   releases the owner when the record is busy, or (half of the time) runs the effect helper
+   twice with a zero amount; the record is then closed. The amount is converted from an int
+   so that the compiler keeps it in a saved register across the calls, as the retail code
+   does. */
+void func_L00_003E6628(char *object)
+{
+    char *rec;
+    int zero = 0;
+    float amount = (float)zero;
+    int offset = 0;
+    int i = 0;
+
+    do {
+        i--;
+        rec = (char *)(offset + (int)D_L00_001B2B50_1);
+        if (*(int *)(rec + 0x30) == (int)object) {
+            if (func_00282948(rec + 0x34) != 0) {
+                if (*(int *)(rec + 0x38) == 0) {
+                    *(int *)(rec + 0x30) = 0;
+                }
+            } else if ((func_001163B0() & 1) == 0) {
+                func_L00_003E6778(rec, 0, amount, amount, 0);
+                func_L00_003E6778(rec, 0, amount, amount, 0);
+            }
+            func_L00_003E6C10(rec);
+        }
+        offset += 0x50;
+    } while (i >= 0);
+}
 
 extern void func_L00_003E6F48(char *object);
 

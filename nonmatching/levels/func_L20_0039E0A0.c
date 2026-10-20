@@ -70,3 +70,55 @@ int func_L20_0039E0A0(unsigned int a0)
     }
     return count;
 }
+
+/* ---- second attempt (level-20 wave, 2026-10-20) ---------------------------------------
+ * The same list walk, with the three guards the earlier attempt spelled as separate
+ * `if (...) break;` statements inside the loop body and the element pointer computed
+ * from the `u16` word of the current record.  Measured: still short -- the retail
+ * materialises `$t0 = 0` and still tests it, and this compiler folds all three
+ * provably-dead guards away.  Kept as the starting point; not linked, not counted.
+ */
+
+extern int D_L20_001B2FB8;
+
+int func_L20_0039E0A0(int index)
+{
+    u16 *rec = (u16 *)D_L20_001FBB20[index];
+    int count = 0;
+    int x = index & 0xFF;
+    int t = 0;
+    u16 w;
+
+    if (x == 0xFF) {
+        return 0;
+    }
+    if (D_L20_001B2FB8 < index) {
+        return 0;
+    }
+    if (rec == 0) {
+        return 0;
+    }
+    w = *rec;
+    do {
+        char *p = D_L20_001B2F9C + ((w & 0x7FFF) << 8);
+
+        if (p == 0) {
+            break;
+        }
+        if (x == 0xFF) {
+            break;
+        }
+        if (t != 0) {
+            break;
+        }
+        if (*(u8 *)(p + 0x20) ^ 6) {
+            count++;
+        }
+        rec++;
+        if (rec == 0) {
+            break;
+        }
+        w = *rec;
+    } while (*(s16 *)(rec - 1) >= 0 || rec == (u16 *)D_L20_001FBB20[index]);
+    return count;
+}

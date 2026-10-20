@@ -170,7 +170,73 @@ void func_L09_003AEE80(char *object)
 
 INCLUDE_ASM("asm/levels", func_L09_003AF060);
 
-INCLUDE_ASM("asm/levels", func_L09_003AF508);
+extern void func_L00_003C1D30(void *p);
+extern long long func_0027C878(int id);
+extern int func_002A7820(int lo, int hi);
+extern float func_00283248(float x, float y);
+extern float func_00282E80_1(char *a, char *b);
+extern float func_002A7940(void);
+extern void func_00283410(void *dst, void *src);
+extern float func_002A7878(float lo, float hi);
+extern void func_00280B90(void *dst, void *src, int flag);
+extern char D_L09_001BF98C0[];
+
+/* the effect's record: four blocks, four colour words, a matrix and a vector */
+typedef struct {
+    char b0[16];
+    char b1[16];
+    char b2[16];
+    char b3[16];
+    int k0, k1, k2, k3;
+    int z80, z84, z88;
+    float f92, f96;
+    int z100;
+    float f104, f108;
+    long long v112, v120, v128, v136;
+    float m00, m01, m02, m03;
+    float m10, m11, m12, m13;
+    float m20, m21, m22, m23;
+    float v192, v196, v200, v204;
+    float v208, f212, f216, v220;
+} LOC_L09_003AF508;
+
+/* measures the object against the level's target point and hands the effect to the stage */
+void func_L09_003AF508(char *object)
+{
+    LOC_L09_003AF508 local;
+    char *frame;
+    char *data;
+    float len;
+    float scale;
+    int color;
+
+    frame = *(char **)(object + 0x68);
+    func_L00_003C1D30(&local);
+    local.v120 = func_0027C878(11);
+    local.v128 = 0xFF9000000260LL;
+    local.v136 = 0x0000008000000048LL;
+    local.v112 = 0;
+    color = (func_002A7820(0x20, 0x30) << 24) + 0x103080;
+    local.k0 = local.k1 = local.k2 = local.k3 = color;
+    data = D_L09_001BF98C0;
+    local.v220 = 0.0f;
+    local.f216 = func_00283248(*(float *)(data + 0x140) - *(float *)(object + 0x10),
+                               *(float *)(data + 0x144) - *(float *)(object + 0x14));
+    len = func_00282E80_1(object + 0x10, data + 0x140);
+    local.f212 = -func_00283248(len, *(float *)(data + 0x148) - *(float *)(object + 0x18));
+    local.v208 = func_002A7940();
+    func_00283410(&local.m00, &local.v208);
+    local.v192 = *(float *)(object + 0x10);
+    local.v196 = *(float *)(object + 0x14);
+    local.v200 = *(float *)(object + 0x18);
+    local.v204 = 1.0f;
+    scale = func_002A7878(0.35f, 0.45f) * *(float *)(frame + 0x50);
+    func_00282D30((char *)&local.b0, (char *)&local.b0, scale);
+    func_00282D30((char *)&local.b1, (char *)&local.b1, scale);
+    func_00282D30((char *)&local.b2, (char *)&local.b2, scale);
+    func_00282D30((char *)&local.b3, (char *)&local.b3, scale);
+    func_00280B90(&local, &local.m00, 0);
+}
 
 extern void func_003AEFD0(void *out);
 extern float func_00316AC0(float lo, float hi);
@@ -266,7 +332,6 @@ void func_L09_003EA9D0(char *object)
     func_00282978(p + 0x36A);
     func_002829A8(p + 0x368);
 }
-
 
 
 INCLUDE_ASM("asm/levels", func_L09_003EAB20);

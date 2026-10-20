@@ -232,7 +232,8 @@ INCLUDE_ASM("asm/levels", func_L08_003C6AB0);
 
 INCLUDE_ASM("asm/levels", func_L08_003CC4B8);
 
-INCLUDE_ASM("asm/levels", func_L08_003CD488);
+/* func_L08_003CD488 lives in the -g8 sibling file (it reads the level's scalars
+   through $gp). */
 
 extern u8 *D_0018C0B0;
 extern void func_002A0F48();

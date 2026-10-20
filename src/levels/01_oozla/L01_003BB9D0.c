@@ -30,7 +30,7 @@ extern float func_002A7940(void);
 
 extern int func_002A7820(int, int);
 
-extern void func_L01_0032EF38(void *, int, int, int, float, float);
+extern void func_L01_0032EF38(void *, int, int, float, float, int);
 
 typedef struct L01_003BDF28_BUF {
     float x;
@@ -81,7 +81,29 @@ INCLUDE_ASM("asm/levels", func_L01_003BCEC8);
 
 INCLUDE_ASM("asm/levels", func_L01_003BD150);
 
-INCLUDE_ASM("asm/levels", func_L01_003BD410);
+/* func_L01_003BD410 */
+void func_L01_003BD410(char *object)
+{
+    float position[4];
+    float angle, radius, first, second;
+    char *state;
+    int life, i;
+
+    state = *(char **)(object + 0x68);
+    for (i = 0; i < 5; i++) {
+        angle = func_002A7940();
+        radius = func_002A7878(0.0f, 0.8f);
+        first = func_002A7878(0.0f, 1.5f);
+        second = func_002A7878(1.5f, 5.7f);
+        life = func_002A7820(100, 180);
+        position[0] = func_00283180(angle) * radius;
+        position[1] = func_00283198(angle) * radius;
+        position[2] = 0.0f;
+        func_00282CC0(position, position, object + 0x10);
+        position[2] = *(float *)(state + 0x224) + 0.025f;
+        func_L01_0032EF38(position, 0x38002028, 0x2020, first, second, life);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L01_003BD560);
 

@@ -50,7 +50,7 @@ void func_002FC410(Rac2Native_4e44694cc39e7084_u32 data_address, Rac2Native_4e44
 
 INCLUDE_ASM("asm/game", func_002FC460);
 
-INCLUDE_ASM("asm/game", func_002FC468);
+/* func_002FC468 is matched in 002FC468.c (-G0: D_001B22A8 is loaded absolutely). */
 
 INCLUDE_ASM("asm/game", func_002FC510);
 

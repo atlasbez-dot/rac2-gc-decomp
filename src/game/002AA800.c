@@ -493,7 +493,27 @@ int func_002ACBC8(void *point, int index)
 
 INCLUDE_ASM("asm/game", func_002ACCA0);
 
-INCLUDE_ASM("asm/game", func_002ACCA8);
+extern char *D_001B1C54 __attribute__((sda));
+
+/* Transforms a point by the record of its index and returns whether the result lies inside the unit sphere. */
+int func_002ACCA8(void *point, int index)
+{
+    float local[4];
+    float transformed[4];
+    char *record;
+
+    if (index < 0) {
+        return 0;
+    } else {
+        record = D_001B1C54 + (index << 7);
+        func_00282CF0(local, point, record + 0x30);
+        local[3] = 0.0f;
+        func_00283098((char *)transformed, (char *)local, record + 0x40);
+        if (func_00282DF0(transformed) < 1.0f)
+            return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/game", func_002ACD30);
 

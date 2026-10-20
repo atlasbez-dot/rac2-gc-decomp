@@ -12,7 +12,30 @@ extern void func_L15_00438238(void);
 extern void func_L15_00438260(void);
 extern void func_L15_00438518(void);
 
-INCLUDE_ASM("asm/levels", func_L15_004328E8);
+extern void func_002FC560(int, int);
+extern void func_0027DE50(int, int, int, int, long);
+extern int func_00282948(void *);
+extern void func_L15_00432A60(void *, int, int, float, float, float, int, int, int);
+extern short D_001A6480[];
+extern char D_L15_00269FE0[];
+
+/* Sets the level's four effect blocks up: the screen context first, then, when
+   the level's own record says the object is idle, the four blocks of the
+   effect data, each with its own size and colour. */
+void func_L15_004328E8(void *a0) {
+    char *s0 = *(char **)(a0 + 0x68);
+
+    func_002FC560(0x42, 0x48);
+    func_0027DE50(0, D_001A6480[0xA9], 0, D_001A6480[0xA8], 0x40404040);
+    if (func_00282948(s0 + 0x50) == 0) {
+        char *q = D_L15_00269FE0;
+
+        func_L15_00432A60(q, 0x46, 0x46, 3.2f, 6.35f, 0.2f, 0x0A, 0x007F7F7F, 0x00FF1010);
+        func_L15_00432A60(q + 0xA0, 0x20, 0x20, 3.1f, 6.19f, 0.2f, 0x0A, 0x007F7F7F, 0x00FF1040);
+        func_L15_00432A60(q + 0x140, 0x20, 0x20, 3.1f, 6.19f, 0.2f, 0x0A, 0x007F7F7F, 0x00FF1040);
+        func_L15_00432A60(q + 0x1E0, 0x20, 0x20, 3.1f, 6.19f, 0.2f, 0x0A, 0x007F7F7F, 0x00FF1040);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L15_00432A60);
 
@@ -96,6 +119,42 @@ void func_L15_00436090(char *a0) {
 
 INCLUDE_ASM("asm/levels", func_L15_004360D8);
 
+extern int func_002E5CF8(int, int, void *);
+extern void func_L05_00379FA0(void *, int, int, float, int, float, float, float,
+                              int, int, int);
+
+/* The mover's own state decides whether the shot happens: the level's record
+   must exist and be ready, and the mover's own counter must be idle.  The two
+   shots take the slots after the counter, and the counter wraps at three. */
+void func_L15_00436298(char *a0) {
+    char *s1 = a0;
+    char *s0;
+    char *v0;
+    int v1;
+
+    s0 = *(char **)(s1 + 0x68);
+    v0 = (char *)func_002ED688(a0);
+    if (v0 == 0) {
+        return;
+    }
+    if (*(int *)(v0 + 0x120) == 0) {
+        return;
+    }
+    if (*(int *)(s0 + 0x450) != 0) {
+        return;
+    }
+    func_002E5CF8(2, 0, s1);
+    func_L05_00379FA0(s1, 0x600000CF, 1, 1.0f, 0, 2.0f, 1.5f, 1.5f, 0x1E,
+                     *(int *)(s0 + 0x454) * 2 + 4, 0);
+    func_L05_00379FA0(s1, 0x600000CF, 1, 1.0f, 0, 2.0f, 1.5f, 1.5f, 0x1E,
+                     *(int *)(s0 + 0x454) * 2 + 5, 0);
+    *(int *)(s0 + 0x450) = func_002A7820(0x14, 0x3C);
+    v1 = *(int *)(s0 + 0x454) + 1;
+    *(int *)(s0 + 0x454) = v1;
+    if (v1 >= 3) {
+        *(int *)(s0 + 0x454) = 0;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L15_004363C8);
 
