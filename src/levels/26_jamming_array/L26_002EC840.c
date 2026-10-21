@@ -49,7 +49,7 @@ INCLUDE_ASM("asm/levels", func_L26_003D4590);
 
 INCLUDE_ASM("asm/levels", func_L26_003D4930);
 
-INCLUDE_ASM("asm/levels", func_L26_003D4AE8);
+/* func_L26_003D4AE8 is defined in L26_002EC840-g8.c (it reads the group count and a word through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L26_003DB818);
 

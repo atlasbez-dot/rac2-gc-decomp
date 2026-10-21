@@ -32,6 +32,10 @@ void func_L20_004095D0(char *arg0) {
 
 INCLUDE_ASM("asm/levels", func_L20_0039D680);
 
+/* func_L20_0039E368 dispatches through the level's own jump table
+   jtbl_002B4CA0 and reads D_L20_001AED04 and D_L20_001AED08 through
+   $gp; its near miss is in nonmatching/levels/func_L20_0039E368.c
+   and belongs in this -G8 unit. */
 INCLUDE_ASM("asm/levels", func_L20_0039E368);
 
 INCLUDE_ASM("asm/levels", func_L20_0039E5F0);
@@ -104,10 +108,19 @@ end:
 
 INCLUDE_ASM("asm/levels", func_L20_0039E9F8);
 
+/* func_L20_0039ED78 reads D_L20_001AEDA8 and D_L20_001AED90 through
+   $gp; its near miss is in nonmatching/levels/func_L20_0039ED78.c
+   and belongs in this -G8 unit. */
 INCLUDE_ASM("asm/levels", func_L20_0039ED78);
 
+/* func_L20_003A0320 reads D_L20_001B2F9C and D_L20_001B2ECC through
+   $gp; its near miss is in nonmatching/levels/func_L20_003A0320.c
+   and belongs in this -G8 unit. */
 INCLUDE_ASM("asm/levels", func_L20_003A0320);
 
+/* func_L20_003BFEB8 reads -0x7600($gp); its near miss is in
+   nonmatching/levels/func_L20_003BFEB8.c and belongs in a -G8 unit
+   of its own, built with -fno-schedule-insns2. */
 INCLUDE_ASM("asm/levels", func_L20_003BFEB8);
 
 INCLUDE_ASM("asm/levels", func_L20_003C0048);

@@ -7,7 +7,15 @@
    object in $a0 and the word in $a1 (the copy is gone), so the whole body shifts:
    the same 80 bytes with two registers swapped. Two spellings (a local copy, and
    re-reading the object for the store) give the same. Blocker: that argument
-   copy - nothing in the body keeps the object live across the `lui $a0`. */
+   copy - nothing in the body keeps the object live across the `lui $a0`.
+
+   Wave 24 (worker 13) measured it again: the shape is right (the state load in the
+   delay slot of the second branch needs the load to sit between the two tests in the
+   source), and the only difference left is the copy of the parameter that opens the
+   retail body (`daddu $a1,$a0,$zero`) - the same blocker the earlier note names, and
+   this body is 76 bytes against retail's 80.  Naming a local copy of the parameter
+   does not survive (the compiler folds it back into $a0).
+*/
 typedef unsigned char u8;
 typedef int s32;
 

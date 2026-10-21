@@ -205,13 +205,13 @@ out:
 
 extern int D_L20_001B2FB8;
 
-INCLUDE_ASM("asm/levels", func_L20_0039E0A0);
+/* func_L20_0039E0A0 is defined in L20_0039E0A0-g8.c (it needs the -G8 profile). */
 
 extern void func_002B3BA8(char *, int, float, float, int, int);
 
 extern char *func_L20_004448A8(char *, char *);
 
-INCLUDE_ASM("asm/levels", func_L20_0039E158);
+/* func_L20_0039E158 is in L20_0039E158.c with its grouped-copy profile. */
 
 INCLUDE_ASM("asm/levels", func_L20_0039E1E8);
 
@@ -230,7 +230,7 @@ INCLUDE_ASM("asm/levels", func_L20_0039EBB8);
 
 INCLUDE_ASM("asm/levels", func_L20_0039EEC8);
 
-INCLUDE_ASM("asm/levels", func_L20_0039F210);
+/* func_L20_0039F210 is in L20_0039F210.c with its grouped-copy scheduling profile. */
 
 extern void func_L20_0039F268(char *);
 
@@ -321,7 +321,7 @@ INCLUDE_ASM("asm/levels", func_L20_003E6FA0);
 
 /* func_L20_00408D98 is defined in L20_0039C448-g8.c (it reaches a global through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L20_00409480);
+/* func_L20_00409480 is defined in L20_00409480-g8.c (it needs the -G8 profile). */
 
 /* func_L20_004095D0 is defined in L20_0039C448-g8.c (this unit has no $gp access for it). */
 

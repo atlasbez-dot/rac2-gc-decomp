@@ -63,8 +63,22 @@ void func_L08_00425448(char *a0) {
     *(u8 *)(a0 + 0xBC) = 1;
 }
 
-/* Near miss: nonmatching/levels/func_L08_004254D0.c - the table load and the shift land in
-   $v0/$v1 the other way round from retail, and `a0 = 0` is not sunk into the beqz slot. */
+s32 func_L08_004254D0(s32 a0) {
+    s32 v1;
+    s32 v0;
+    s32 v2;
+    v1 = D_L08_001B29DC;
+    if (a0 != -1) {
+        v0 = a0 << 8;
+        v2 = v1 + v0;
+        a0 = 0;
+        if (v2 == 0 || *(u8 *)(v2 + 0x20) == 0xFE || *(u8 *)(v2 + 0x20) == 0xFD) {
+            a0 = 1;
+        }
+        return a0;
+    }
+    return 1;
+}
 
 s32 func_L08_00425518(s32 a0) {
     s32 v1;
@@ -90,7 +104,59 @@ INCLUDE_ASM("asm/levels", func_L08_00425628);
 
 INCLUDE_ASM("asm/levels", func_L08_004257A0);
 
-INCLUDE_ASM("asm/levels", func_L08_004258D0);
+extern void func_00282CF0(void *, void *, void *);
+extern void func_00282CC0(void *, void *, void *);
+extern void func_00282DD8(void *, void *, void *);
+extern f32 func_00282DF0(void *);
+extern void func_00282F20(void *, void *, f32);
+extern void func_L01_00337A60(void *, void *, void *, s32);
+extern int *D_L08_001FE7C0[];
+
+/* The actor's per-frame world transform: the record's own position goes through the
+   model's matrix, is scaled, and is folded into the model; when the actor names a part,
+   the part's table entry replaces it, and the model's own length ends up in the radius. */
+void func_L08_004258D0(char *a0) {
+    f32 v0[4];
+    f32 v1[4];
+    f32 v2[4];
+    f32 v3[4];
+    char *s1 = a0;
+    char *s4 = *(char **)(a0 + 0x68);
+    s32 idx;
+
+    idx = *(s32 *)(s4 + 0x1E8);
+    if (idx == -1) {
+        func_00282CF0(v0, s1 + 0x10, s4 + 0x120);
+        func_00282F20(v0, v0, 15.0f);
+        v0[2] = 0.0f;
+        func_00282CC0(s4 + 0x180, v0, s4 + 0x120);
+    } else {
+        s32 base = D_L08_001B29DC + (idx << 8);
+
+        func_00282CF0(v0, (char *)base + 0x10, s4 + 0x120);
+        v0[2] = 0.0f;
+        if (func_00282DF0(v0) < 9.0f) {
+            func_00282CF0(v1, s1 + 0x10, s4 + 0x120);
+            v1[2] = 0.0f;
+            func_00282F20(v1, v1, 15.0f);
+            func_00282CC0(s4 + 0x180, v1, s4 + 0x120);
+            func_00282DD8(v2, v0, v1);
+            func_00282DD8(v3, v0, v2);
+            func_00282F20(v3, v3, 1.0f);
+            func_00282CC0(s4 + 0x180, s4 + 0x180, v3);
+        } else {
+            func_00282F20(v0, v0, 15.0f);
+            func_00282CC0(s4 + 0x180, v0, s4 + 0x120);
+        }
+    }
+    idx = *(s32 *)(s4 + 0x1E4);
+    if (idx != -1) {
+        int *list = D_L08_001FE7C0[idx];
+
+        func_L01_00337A60(s4 + 0x180, s4 + 0x180, (char *)list + 0x10, *list);
+    }
+    *(f32 *)(s4 + 0x188) = *(f32 *)(s4 + 0x1C8);
+}
 
 INCLUDE_ASM("asm/levels", func_L08_00425AA8);
 

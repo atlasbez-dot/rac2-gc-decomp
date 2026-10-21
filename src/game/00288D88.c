@@ -105,7 +105,6 @@ void func_00288EA0(void)
 INCLUDE_ASM("asm/game", func_00288F48);
 
 
-INCLUDE_ASM("asm/game", func_00289018);
 
 INCLUDE_ASM("asm/game", func_00289020);
 
@@ -286,7 +285,46 @@ int func_0028B740(HudElem *rec, int *x, int *y) {
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_0028B7A8);
+extern float ref_L00_002F6FB8_00[];
+extern float ref_L00_002F6FB8_01[];
+extern float func_00283CE0(int);
+extern int func_00283CF0(float);
+
+void func_0028B7A8(HudElem *t1, int *x, int *y, int index, int delta)
+{
+    float scale;
+    int flags;
+    int dx = 0;
+    int dy = 0;
+
+    if (t1->unk7C != 0)
+        index -= delta;
+    else
+        index += delta;
+
+    if (index < 0)
+        index = 0;
+    if (index > 23)
+        index = 23;
+
+    if (t1->unk7C != 0)
+        scale = ref_L00_002F6FB8_00[index];
+    else
+        scale = ref_L00_002F6FB8_01[index];
+
+    flags = t1->flags;
+    if (flags & 1)
+        dy = -func_00283CF0(scale * (func_00283CE0(t1->h) + 52.0f) + 0.5f);
+    else if (flags & 2)
+        dy = func_00283CF0(scale * (func_00283CE0(t1->h) + 52.0f) + 0.5f);
+    else if (flags & 4)
+        dx = -func_00283CF0(scale * (func_00283CE0(t1->w) + 20.0f) + 0.5f);
+    else if (flags & 8)
+        dx = func_00283CF0(scale * (func_00283CE0(t1->w) + 20.0f) + 0.5f);
+
+    *x += dx;
+    *y += dy;
+}
 
 void func_0028B950(u8 *a0) {
     s32 *value=*(s32 **)(a0+0xc);

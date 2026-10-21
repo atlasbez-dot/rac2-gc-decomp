@@ -172,3 +172,41 @@ void func_L20_003A0320(char *arg0) {
         break;
     }
 }
+
+/* ------------------------------------------------------------------
+   Wave 5, worker 08.  Two things the earlier attempt has wrong, and
+   the shape of the body that is left.
+
+   - THE PROTOTYPE OF func_0033B2F8 NEEDS FOUR FLOATS.  The retail
+     calls it twice (at 0x3A04F0 and 0x3A0528) with four float
+     arguments in $f12-$f15 and four int arguments in $a0-$a3:
+
+        func_0033B2F8(3.0f, 6.0f, 3.0f, 6.0f, s0, 1, D_001A8F20, 0xFF)
+
+     The earlier attempt declared it with three floats and called it
+     with eight arguments, which does not compile.
+
+   - func_0032F5B0 MUST NOT BE DECLARED TWICE IN THE UNIT: the file
+     already declares it (as `void func_0032F5B0(void *, int, int)')
+     for func_L20_0039E890, and a second declaration with a
+     `char *' first argument is a conflicting type.
+
+   - THE REGISTERS: the retail keeps the object in $s0 (the copy
+     `daddu $s0,$a0,$zero'), the state in $s1 (the load
+     `lw $s1,0x68($s0)') and the constant 1 in $s2, and its frame is
+     0x50 with the four-float buffer at sp+0x20.  The attempt gives
+     $s0 to the state and $s1 to the object: the copy of the
+     argument has far more references than the load of the state and
+     should win the quantity allocator's priority
+     (floor_log2(n_refs) * n_refs / live_length), and it does not -
+     the same wall as in func_L20_003BFEB8, where the retail also
+     gives the lower callee-saved register to the copy and the higher
+     one to the load.
+
+   - The dispatch is a chain of compares and not a jump table, and the
+     attempt has it right: `beq $v1,$s2' for the value 1, then
+     `slti $v0,$v1,0x2' and a `beql' for the values 0 and 2, then
+     `beq $v1,$v0' for the value 3.
+
+   The attempt belongs in the -G8 unit.
+*/

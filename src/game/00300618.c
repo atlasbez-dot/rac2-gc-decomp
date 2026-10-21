@@ -205,7 +205,61 @@ NativeCompactHeader *func_00300618(NativeCompactHeader *header) {
     return header;
 }
 
-INCLUDE_ASM("asm/game", func_00300748);
+typedef struct {
+    char pad00[4];
+    short field04;
+    char pad06[2];
+    short field08;
+    short field0A;
+    char pad0C[0x14];
+    u32 field20;
+} NativeSpawnHeader;
+
+typedef struct {
+    char pad00[0x16];
+    short field16;
+} NativeSpawnRow;
+
+void func_00300748(NativeSpawnHeader *header, char *base, float f)
+{
+    extern void func_00283AF0(void *a, void *b);
+    extern float func_00283CB8(float value);
+    extern void func_00283B48(void *a, void *b, void *c, float d);
+    extern void func_00283A58(void *a, void *b, void *c, void *d);
+    extern void func_00283788(void *a, void *b, void *c);
+
+    int count = (int)f;
+    int i;
+    int j;
+    char local[0x30];
+    char *row;
+    NativeSpawnRow *record;
+    float value;
+
+    row = (char *)header->field20 + count * header->field0A;
+    for (i = 0; i < header->field04; i++)
+        func_00283AF0(row + i * 0x18, base + i * 0x40);
+
+    value = func_00283CB8(f);
+    if (value > 0.001f) {
+        int index = count + 1;
+        int pick = (index < header->field08) ? index : 0;
+        for (row = (char *)header->field20 + pick * header->field0A, i = 0;
+                i < header->field04; i++, row += 0x18) {
+            func_00283AF0(row, local);
+            func_00283B48(base + i * 0x40, base + i * 0x40, local, value);
+        }
+    }
+
+    for (record = (NativeSpawnRow *)((char *)header->field20 + (int)f * header->field0A),
+            j = 0; j < header->field04; j++, record++) {
+        func_00283A58(base + j * 0x40, base + j * 0x40 + 0x10, base + j * 0x40 + 0x20,
+                base + j * 0x40);
+        if (record->field16 >= 0)
+            func_00283788(base + j * 0x40, base + (record->field16 << 6), base + j * 0x40);
+    }
+}
+
 
 /* scales a float argument by a field of the object into a stack buffer, then calls a second routine with the object, its flags, the buffer and three float arguments */
 void func_00300968 (char *object, int flags, float a, float b, float c, float d)

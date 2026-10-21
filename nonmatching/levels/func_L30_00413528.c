@@ -44,3 +44,25 @@ void func_L30_00413528(char *a0, s32 a1, s32 a2, s32 a3, s32 a5, s32 a6)
         }
     }
 }
+
+/* Wave 24 (worker 09) -- the allocation blocker above survives, and the shape
+   is reachable: with the pointer spelling above the body is 120 bytes, the
+   retail's size, and the bnel at the top of the body with the increment of
+   the index in its delay slot is instruction-exact.  What differs is the
+   register allocation: retail keeps the tag pointer in $v1, the slot pointer
+   in $a0, the pair pointer in $t3, the counter in $t2, the byte table in $t5
+   and the count pointer in $t4, this C puts the tag in $t2 and the pair in
+   $v1.  The %hi/%lo form of the tag and slot addresses also differs: retail
+   has the %hi and the %lo of each in the same register (lui $v1, 0x26 ;
+   addiu $v1, $v1, 0xEB0) where this cc1 splits them (the %hi in $t2, the
+   %lo added at every use) - the file needs -mno-split-addresses for that, but
+   that flag was measured here and moves the allocation somewhere else again
+   (128 bytes, the pair pointer in $t5 and the counter in $t3).
+
+   A `for(;;)' with the test inside the body is rotated by this cc1 (the test
+   moves to the bottom, the body is peeled) and comes out as beql; a `while'
+   loop keeps the branch-likely form but is rotated as well, so the pointer
+   spelling above is the one that reproduces retail's shape.
+
+   Checked with: python3 tools/check.py func_L30_00413528 --diff
+   Last line: func_L30_00413528: 0 of 1 places match (src/levels/30_insomniac_museum/L30_0040E660.c) */

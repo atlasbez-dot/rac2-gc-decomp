@@ -138,7 +138,29 @@ INCLUDE_ASM("asm/levels", func_L01_003BD5E8);
 
 INCLUDE_ASM("asm/levels", func_L01_003BD6B0);
 
-INCLUDE_ASM("asm/levels", func_L01_003BDB28);
+typedef struct {
+    char pad0[0x280];
+    int f280;
+    int f284;
+} L01_003BDB28_STATE;
+
+extern void func_002A8598(int, int);
+
+void func_L01_003BDB28(char *obj)
+{
+    L01_003BDB28_STATE *s0 = *(L01_003BDB28_STATE **)(obj + 0x68);
+
+    if (*(unsigned char *)(obj + 0x21) != 0xFF) {
+        func_002A8598(*(unsigned char *)(obj + 0x21), 1);
+    }
+    if (s0->f280 != -1) {
+        func_002A8598(s0->f280, 1);
+    }
+    if (s0->f284 != -1) {
+        func_002A8598(s0->f280, 1);
+    }
+    *(unsigned char *)(obj + 0xBC) = 1;
+}
 
 /* func_L01_003BDBB0 */
 

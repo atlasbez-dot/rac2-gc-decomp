@@ -37,3 +37,45 @@ void func_L13_004267B0(u8 *a0) {
         func_31A718(a0);
     }
 }
+
+/* --- worker 08, wave 24: the same wall, measured from the other side. ---
+ *
+ * The retail's second block, in full (the listing decodes it):
+ *
+ *   004267E8  beqz $v0, .L00426810
+ *   004267EC    lw   $a1, 0x68($s0)      <- the delay slot: the owner block
+ *   004267F0    lw   $a0, 0x0($a1)       <- the index
+ *   004267F4    lui  $v0, %hi(D_1B291C)
+ *   004267F8    lw   $v0, %lo(D_1B291C)($v0)
+ *   004267FC    sll  $a0, $a0, 8
+ *   00426800    jal  f_0031A718
+ *   00426804      addu $a0, $v0, $a0
+ *
+ * The delay slot holds the owner-block load, and it is in $a1 while the
+ * branch tests $v0.  This build puts the owner-block load in $v0 - the
+ * register the branch tests - so reorg.c's delay-slot filler may not take it
+ * (it would clobber the condition) and takes the base's `lui` instead; the
+ * base's `lw` then follows the owner-block load.  That is the whole
+ * difference: the schedule is the same, the delay slot is not.
+ *
+ * The base's spelling decides what can go into the delay slot, and both
+ * spellings lose:
+ *
+ *   - with `sda` (D_L13_001B291C[0]) the load is one instruction, so it is
+ *     what lands in the delay slot, and gas then has to emit it as one
+ *     gp-relative word: 108 bytes instead of 112;
+ *   - without `sda` (D_L13_001B291C_2) the address is a lui/lw pair, the
+ *     pair is split by the scheduler and the `lui` lands in the delay slot:
+ *     112 bytes, but the bytes differ.
+ *
+ * Six more spellings were measured for this note and all give the second
+ * block above: the base in a local, the base read inline, the index in a
+ * local, the index inline, and the base as a `u32 *` and as a `u8 *`.  The
+ * owner-block load lands in $v0 in all of them.
+ *
+ * What would unblock it: a spelling in which the owner-block load is not
+ * allocated the branch's condition register, or a delay-slot filler that
+ * accepts a load which clobbers the condition (the R5900 reads the
+ * condition before the delay slot runs).  That is a compiler question, not a
+ * source question.
+ */

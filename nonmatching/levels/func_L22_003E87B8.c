@@ -25,3 +25,14 @@ void func_L22_003E87B8(s32 a0, s32 a1, s32 a2) {
     func_325308(a0, a0 + 0x10, -1, 2.0f, 13.0f);
     func_3159F0(a0);
 }
+
+Second attempt (wave 24, worker 15): the same candidate, re-measured.
+   check.py (22_dobbo_orbit): "0 of 1 places match"; the only difference is
+   still at +0x2c, where retail materialises the fourth argument's
+   `addiu $a3,$zero,0xE0B` before the call's `addiu $a0,$v0,0xC` and this cc1
+   does it the other way round.  Tried again and identical: the argument
+   order in the source (the font pointer first, the constant last), the
+   constant in a named local, the font pointer in a local, the call split
+   into two statements, and the unit at -G0 and at -G8.  The retail's own
+   order is the reverse of the source order, so the argument setup here has
+   to be inverted somewhere in the expansion.

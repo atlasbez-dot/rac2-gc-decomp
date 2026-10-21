@@ -328,4 +328,4 @@ void func_L09_003FE918(unsigned char *a0) {
     func_00282978((unsigned short *)(s0 + 0x426));
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003FE978);
+/* func_L09_003FE978 is defined in L09_002F8BA0-g8.c (it reads the group count through $gp). */

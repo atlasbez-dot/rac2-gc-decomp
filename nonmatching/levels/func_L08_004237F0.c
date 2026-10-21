@@ -45,3 +45,13 @@ void func_L08_004237F0(char *a0) {
         func_329EC0((Ent *)s1, *(f32 *)(s0 + 0x1B0));
     }
 }
+
+/* Measured again (wave 24, worker 10): the allocator wall stands.  The only
+   difference is still the register of the last guard: retail loads the kind
+   byte and compares it in $v1 (lbu $v1,0x20($s1) ; sltiu $v1,$v1,0x2) where
+   this cc1 uses $v0.  The loop-head lever that fixed func_00122760 (writing a
+   block as a `while` so the label that follows it is aligned to 8 bytes) was
+   tried here too - the first guard written as a `while` does give the block
+   the 8-byte-aligned label, but the guard's register does not move: it is
+   still $v0.  So the wall is the register allocation itself, not the
+   alignment. */

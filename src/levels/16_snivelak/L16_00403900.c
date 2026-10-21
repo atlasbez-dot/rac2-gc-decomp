@@ -103,7 +103,35 @@ INCLUDE_ASM("asm/levels", func_L16_0040CD88);
 
 INCLUDE_ASM("asm/levels", func_L16_0040CF98);
 
-INCLUDE_ASM("asm/levels", func_L16_0040D188);
+extern u16 *D_L16_001FB660[];
+
+/* `sda` on an array of unknown size: cc1 emits the one-instruction load, which the assembler
+   expands absolute (`lui $r` / `lw $r,%lo($r)`), as retail has it in this -G0 unit. */
+extern u8 *D_L16_001B2B1C[] __attribute__((sda));
+extern s32 D_L16_001B2B38[] __attribute__((sda));
+
+/* Sets a flag word in the state record (+0x68) of every entity of the object's group, stopping
+   at the first id with no entity: +0x244 for class 0xF35, +0x24C for class 0xEA3. */
+void func_L16_0040D188(u8 *arg0)
+{
+    u16 *p;
+    u8 *e;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    p = D_L16_001FB660[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L16_001B2B38[0] && p != 0 &&
+           ((p != 0 && (s16)p[-1] >= 0) || p == D_L16_001FB660[arg0[0x21]])) {
+        e = D_L16_001B2B1C[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (*(s16 *)(e + 0xAA) == 0xF35)
+            *(s32 *)(*(u8 **)(e + 0x68) + 0x244) = 1;
+        else if (*(s16 *)(e + 0xAA) == 0xEA3)
+            *(s32 *)(*(u8 **)(e + 0x68) + 0x24C) = 1;
+        p++;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L16_0040D258);
 

@@ -96,7 +96,80 @@ INCLUDE_ASM("asm/levels", func_L05_00418288);
 
 /* func_L05_00418440 is matched in L05_00418440.c (built with -mno-split-addresses). */
 
+extern void func_L05_0041C7E8(char *, int);
 
+extern void func_L05_00432158(char *, int);
+
+extern void func_002A10E8(int);
+
+/* Walks the state's fifteen id fields: a live one is handed to the level's own
+    helper together with the object, then to the shared one. */
+void func_L05_00418508(char *a0)
+{
+    char *s0;
+
+    s0 = *(char **)(a0 + 0x68);
+    if (*(int *)(s0 + 0x40) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x40));
+        func_002A10E8(*(int *)(s0 + 0x40));
+    }
+    if (*(int *)(s0 + 0x44) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x44));
+        func_002A10E8(*(int *)(s0 + 0x44));
+    }
+    if (*(int *)(s0 + 0x48) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x48));
+        func_002A10E8(*(int *)(s0 + 0x48));
+    }
+    if (*(int *)(s0 + 0x4C) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x4C));
+        func_002A10E8(*(int *)(s0 + 0x4C));
+    }
+    if (*(int *)(s0 + 0x50) != 0) {
+        func_L05_00432158(a0, *(int *)(s0 + 0x50));
+        func_002A10E8(*(int *)(s0 + 0x50));
+    }
+    if (*(int *)(s0 + 0xAC) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0xAC));
+        func_002A10E8(*(int *)(s0 + 0xAC));
+    }
+    if (*(int *)(s0 + 0x1F0) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x1F0));
+        func_002A10E8(*(int *)(s0 + 0x1F0));
+    }
+    if (*(int *)(s0 + 0x1F4) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x1F4));
+        func_002A10E8(*(int *)(s0 + 0x1F4));
+    }
+    if (*(int *)(s0 + 0x1F8) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x1F8));
+        func_002A10E8(*(int *)(s0 + 0x1F8));
+    }
+    if (*(int *)(s0 + 0x1FC) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x1FC));
+        func_002A10E8(*(int *)(s0 + 0x1FC));
+    }
+    if (*(int *)(s0 + 0x200) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x200));
+        func_002A10E8(*(int *)(s0 + 0x200));
+    }
+    if (*(int *)(s0 + 0x204) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x204));
+        func_002A10E8(*(int *)(s0 + 0x204));
+    }
+    if (*(int *)(s0 + 0x208) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x208));
+        func_002A10E8(*(int *)(s0 + 0x208));
+    }
+    if (*(int *)(s0 + 0x274) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x274));
+        func_002A10E8(*(int *)(s0 + 0x274));
+    }
+    if (*(int *)(s0 + 0x278) != 0) {
+        func_L05_0041C7E8(a0, *(int *)(s0 + 0x278));
+        func_002A10E8(*(int *)(s0 + 0x278));
+    }
+}
 INCLUDE_ASM("asm/levels", func_L05_004186D8);
 
 INCLUDE_ASM("asm/levels", func_L05_00418D68);
@@ -160,6 +233,7 @@ INCLUDE_ASM("asm/levels", func_L05_0041C7E8);
 
 /* func_L05_0041D498 is defined in L05_003D33E8-g8.c (this unit has no $gp access for it). */
 
+/* func_L05_0041D570 is defined in L05_003D33E8-g8.c (it reaches D_L05_001B1348 through $gp). */
 
 void func_L05_0041D728(char *object)
 {
@@ -278,6 +352,7 @@ INCLUDE_ASM("asm/levels", func_L05_00426348);
 
 INCLUDE_ASM("asm/levels", func_L05_00426568);
 
+/* func_L05_00426658 is defined in L05_003D33E8-g8.c (it reaches D_L05_001B1500 through $gp). */
 
 void func_L05_00426810(char *object)
 {
@@ -312,7 +387,7 @@ INCLUDE_ASM("asm/levels", func_L05_004268E8);
 
 /* func_L05_00426B08 is defined in L05_003D33E8-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L05_00426BE0);
+/* func_L05_00426BE0 is defined in L05_003D33E8-g8.c (it reaches D_L05_001B1504 through $gp). */
 
 void func_L05_00426D98(char *object)
 {

@@ -11,7 +11,46 @@
    $s0 from the entry.  The lq/sq pair sits at offset 0 on both sides, so the wave-6 sq
    folding wall does not apply here and the body is otherwise retail's.  Three frame spellings
    (a 0x30-byte object with its zero at +0x20, a separately zeroed TI128, in-place mutation)
-   all stay at 204 bytes. */
+   all stay at 204 bytes.
+
+   Wave 24 (worker 06) got the frame and the size right - 200 bytes, the retail's
+   size, with retail's frame layout - by making the two 16-byte objects ONE
+   array of four 128-bit values, the first of which is a union with a float[4]:
+
+       typedef int TI __attribute__((mode(TI)));
+       typedef union { TI t; float f[4]; } TIU;
+       ...
+       TIU buf[4];                      /* buf[0] at 0x00, buf[1] at 0x10 */
+       s32 obj;                        /* the func_002AAA00 object at 0x40 */
+       ...
+       buf[0].t = *a2;
+       v = func_002B04E0(a0, &buf[0].t, a3);
+       obj = 0;
+       func_002AAA00(&obj, s2 + 0xB4, 0, v, *(f32 *)(s2 + 0x14), *(f32 *)(s2 + 0x18),
+                     3.14159265358979f);
+       buf[0].t = 0;
+       f0 = *(f32 *)(s2 + 0xB4);
+       buf[0].f[2] = f0;                /* the +8 slot of the local */
+       func_002833F0(&buf[1].t, &buf[0].t);
+       func_00283738(a0 + 0xC0, a0 + 0xC0, &buf[1].t);
+       v = func_00282C48(v);
+       f0 = func_00282C48(*(f32 *)(s2 + 0xB4));
+       return v - f0;
+
+   - the two objects have to be one array: as two separate locals this cc1
+     puts the 48-byte one at 0x00 and the 16-byte one at 0x30, the frame stays
+     0x80 but every offset moves (retail: the local at 0x00, the VU0 destination
+     at 0x10, the object at 0x40).  The declaration order does not change it.
+   - the float that lands in the +8 slot of the local has to be written through
+     the union member and read into a float first: written as a plain
+     `*(f32 *)(buf1 + 8) = ...` the store is dead (nothing reads it back) and
+     disappears; the retail has `lwc1 $f0,0xB4($s2)` and `swc1 $f0,0x8($sp)`.
+   - what is left is the ORDER of about ten instructions: the prologue (retail
+     interleaves the register saves with the argument moves, this cc1 groups
+     them), the two float loads around the `mov.s $f20,$f0`, the argument setup
+     of the func_002AAA00 call, and the places of the `sq $zero` and the
+     `lwc1 $f0`.  With -fno-schedule-insns the float loads land in the retail's
+     order but the prologue does not. */
 
 #include "include_asm.h"
 #include "common.h"

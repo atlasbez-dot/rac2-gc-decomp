@@ -50,3 +50,12 @@ f32 func_L08_00425328(char *a0, f32 f12, f32 f13, f32 f14) {
     }
     return f14;
 }
+
+Wave 24 (worker 01): the max.s wall stands - cc1 has no one-instruction float max, so
+`max.s $f0,$f20,$f0` (0x4600A028) cannot be produced from C text.  One compiler fact
+measured here that the next worker may find useful: this cc1 DOES rewrite a pair of
+equality tests on the same value into a range test when both tests end up in ONE basic
+block (`state == 0xFE || state == 0xFD` becomes `(state + 3) & 0xFF < 2`, and the
+else-if spelling becomes `state ^ 0xFD` + `sltiu`).  The rewrite does not happen when the
+two tests stay in separate blocks, which is why the retail's two `beq`/`bne` on 0xFE and
+0xFD are reachable at all.

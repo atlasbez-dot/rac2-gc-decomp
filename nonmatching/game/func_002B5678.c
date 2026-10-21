@@ -1,17 +1,28 @@
-/* func_002B5678 (432 bytes, boot + 20 levels): plain C compiles to 424 bytes against retail's 432; 94 of retail's 108 words align
-   with this output (the 14 that do not are among the first 23: prologue saves, the first call's setup, the quadword accesses).
-   Cause, diagnosed: the three 16-byte accesses in retail are register-operand inline asm in the original source, which plain C
-   cannot reproduce. Retail keeps the position pointer in $s0 across the first call (`addiu $s0,$s2,0x10 ; ... ; lq $v0,0($s0) ;
-   sq $v0,0($sp)`) and clears the block through a materialised pointer (`addiu $v0,$s1,0x60 ; sq $zero,0($v0)`). This cc1 folds the
-   constant offset into every mode(TI) access (`lq $v0,0x10($s2)`, `sq $zero,0x60($s1)`), exactly as it does for scalar loads, so no
-   pointer lives across the call: two `addiu` disappear and the register saves and the first call's argument setup rotate.
-   Measured (scratch only, never in src/): with the copy written as an asm statement whose template is `lq $2,0(%1) ; sq $2,0(%0)`
-   (operands `&saved` and `position` in registers, $2 clobbered, "memory") and the clear as `sq $0,0(%0)` (operand `q60` in a
-   register), this same body is 432 bytes with 0 differing words. In plain C the following were measured and none keeps the
-   pointer: mode(TI) pointers and struct members, a TI local, volatile, an inline helper, a second pointer variable, memcpy/memset
-   (unaligned ldl/ldr or a call). What would unblock it: a maintainer decision on a register-operand quad-copy macro; it is not a
-   register-allocation tie. Same cause as func_002B5828. */
+/* func_002B5678 (432 bytes, boot + 20 levels): near miss. Built alone (src/game/002B5678.c) with
+   `-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-zero-ti-barrier` this C is retail's 432 bytes and 6 of its 108 words
+   differ, at every place (qcopy alone: 8 words; zero-ti-barrier alone: 18). The previous C, with a plain TI local
+   `saved`, grouped nothing and folded `lq $v0,0x10($s2)`; the lever that made the copy apply is `saved` as a UNION with
+   a TI member (`Vec4Q_002B5678`): a TI scalar local is expanded as a register load plus a store to an `addressof` slot,
+   so cse folds the load's address (+0x10) before combine can group the pair, while a union is memory from the start
+   and the copy is one mem-to-mem move. With it `position` (= self + 0x10) stays in $s0 across the first call
+   (`addiu $s0,$s2,0x10 / daddu $a0,$s0 / daddu $a1,$s0 / jal / lq $v0,0($s0) / sq $v0,0($sp)`), as retail, and the rest
+   of the function (the loop, the float tests, the last call) is exact.
+   What is left:
+     (a) the 16-byte clear (2 words). Retail: addiu $v0,$s1,0x60 / sq $zero,0($v0). Here: por $v0,$zero,$zero /
+         sq $v0,0x60($s1). Spelled as the member (`ctl->q60 = 0`), through `(Quad *)((char *)ctl + 0x60)`, through a
+         `Quad *` or a `char *` variable, or relative to another member (`out70 - 1`), the output is the same: cse folds the
+         +0x60 into the store and the zero fold keeps the `por` for a displaced address (it needs a plain register address, so
+         that `sq $zero` and the barrier of `-frac2-zero-ti-barrier` appear).
+     (b) 4 words of the prologue order: retail `sd $s2 / sd $s0 / daddu $s2,$a0 / sd $s1 / addiu $s0,$s2,0x10 ... daddu $a0,$s0 /
+         sd $ra / daddu $a1,$s0 / jal`; here `daddu $s2,$a0` before `sd $s0`, and `sd $ra` after `daddu $a1,$s0`. These follow from (a):
+         with the clear written as `asm volatile ("sq $0,0(%0)" : : "r" ((char *)ctl + 0x60) : "memory")` (scratch only, never
+         for src/) the prologue is exact, and only 3 words of the delay-slot order of `sw $zero,0x84($s1)` against the
+         address add are left.
+   What would unblock it: a way to keep the clear's address in a register (`addiu $v0,$s1,0x60` first) so that the clear
+   is `sq $zero,0($v0)`: the same cse tie that folded the copies, which the grouped pattern removes for copies only.
+*/
 typedef int Quad_002B5678 __attribute__((mode(TI)));
+typedef union { Quad_002B5678 q; float f[4]; } Vec4Q_002B5678;
 
 typedef struct {
     char pad0[0x10];
@@ -44,13 +55,13 @@ extern int func_002B5E48(void *, void *);
 
 void func_002B5678(Self_002B5678 *self, Ctl_002B5678 *ctl, float *target)
 {
-    Quad_002B5678 saved;
+    Vec4Q_002B5678 saved;
     Quad_002B5678 *position = (Quad_002B5678 *)self->pos;
     int changed, i, r;
     float len;
 
     func_00282CC0(position, position, ctl->vel);
-    saved = *position;
+    saved.q = *position;
     ctl->w84 = 0;
     ctl->q60 = 0;
     changed = 0;

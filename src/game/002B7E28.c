@@ -303,7 +303,7 @@ void func_002B9000(void) {
 
 INCLUDE_ASM("asm/game", func_002B9030);
 
-INCLUDE_ASM("asm/game", func_002B9038);
+ASM_FUNC("asm/game", func_002B9038);
 
 INCLUDE_ASM("asm/game", func_002B9180);
 
@@ -313,7 +313,7 @@ INCLUDE_ASM("asm/game", func_002B9380);
 
 INCLUDE_ASM("asm/game", func_002B9390);
 
-INCLUDE_ASM("asm/game", func_002B9420);
+ASM_FUNC("asm/game", func_002B9420);
 
 INCLUDE_ASM("asm/game", func_002BA048);
 
@@ -338,7 +338,8 @@ void func_002BA978(char *self)
 
 INCLUDE_ASM("asm/game", func_002BAA28);
 
-INCLUDE_ASM("asm/game", func_002BABE8);
+/* func_002BABE8 is in 002B7E28-g8.c (its global read uses the retail's one-register
+   `lui`/`lw` pair, which only a -G8 unit emits). */
 
 void func_002BAE48(void) {
 }

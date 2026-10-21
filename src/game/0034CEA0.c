@@ -300,7 +300,7 @@ void func_0034FB20(u8 *a0, s32 a1, s32 a2, s32 a3) {
 
 INCLUDE_ASM("asm/game", func_0034FBC8);
 
-INCLUDE_ASM("asm/game", func_0034FE18);
+/* func_0034FE18 is in 0034CEA0-g8.c. */
 
 INCLUDE_ASM("asm/game", func_0034FFC0);
 

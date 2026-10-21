@@ -289,6 +289,22 @@ def is_epilogue_residue(body: bytes, previous: bytes) -> bool:
     if p[-2] >> 26 != 0 or p[-2] & 0x3F != 0x08:      # not a jr
         return False
     return True
+
+
+# Measured residual instruction extents in USA v1.01, not callable entries.
+# Each follows a completed return across alignment padding, with no direct
+# branch/call or aligned pointer into the extent in any of its programs.
+# Unlike is_padding, these include stores/float arithmetic; do not generalise
+# their removal to arbitrary code without a return. See docs/LEVELS.md.
+BOOT_RESIDUES = {
+    0x00289018: 4,    # an isolated store using an uninitialised $v0
+    0x002A77C0: 28,   # orphan float operations using live-in $f0/$f1
+    0x002FDB40: 148,  # stack restores and an orphan store; also in 22 levels
+    0x002FED78: 12,   # return-value assignment and an unmatched stack restore
+    0x002FF0B0: 36,   # unmatched stack restores and an orphan GP store
+}
+
+
 def boot_image() -> tuple[bytes, list[tuple[int, int, int]]]:
     """The boot executable and its loadable segments (vaddr, file offset, file size)."""
     elf = BOOT.read_bytes()
@@ -358,10 +374,16 @@ def catalogue() -> None:
     else:
         boot = read_boot_functions()
     boot_by_fp = {}
+    # Compute from the pinned retail input even after the rows have been removed,
+    # so catalogue regeneration is repeatable. Size and normalised bytes both
+    # have to agree; a similar-looking or merely return-less function is kept.
+    residue_keys = {(fingerprint(boot_bytes(a, n), a), n) for a, n in BOOT_RESIDUES.items()}
     corrected_boot = []
     last_end, last_body = None, b""
     for name, a, n in sorted(boot, key=lambda r: r[1]):
         body = boot_bytes(a, n)
+        if (fingerprint(body, a), n) in residue_keys:
+            continue
         if is_padding(body):
             continue                    # the linker's filler, not a function
         if len(words(body)) == 1 and last_end == a and is_epilogue_residue(body, last_body):
@@ -387,6 +409,8 @@ def catalogue() -> None:
         for a, n in sorted(extents[number]):
             a, n = level_extent(number, a, n)
             body = data[a - base:a - base + n]
+            if (fingerprint(body, a), n) in residue_keys:
+                continue
             if not trim(body) or is_padding(body):
                 continue
             if len(words(body)) == 1 and last_end == a and is_epilogue_residue(body, last_body):

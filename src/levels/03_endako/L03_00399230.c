@@ -77,7 +77,20 @@ INCLUDE_ASM("asm/levels", func_L03_003C7AC0);
 
 INCLUDE_ASM("asm/levels", func_L03_003C7E20);
 
-/* func_L03_003C85F8 is a near miss: nonmatching/levels/func_L03_003C85F8.c */
+/* Builds the object's mode record: the private block gets the mode at +0xA0,
+   the mode record is made from the caller's +0x10 and the object is released.
+   The mode is kept in $v0 across the call, so the store lands in the call's
+   delay slot. */
+void func_L03_003C85F8(char *a0, s32 a1)
+{
+    char buf[0x10];
+    char *s1 = *(char **)(a0 + 0x68);
+
+    *(s32 *)(s1 + 0xA0) = a1;
+    func_312898(a1, 2, buf);
+    func_2EEFE0(s1 + 0x90, a0 + 0x10, buf);
+    func_31B920(a0, 2, -1);
+}
 
 INCLUDE_ASM("asm/levels", func_L03_003C8660);
 
@@ -122,7 +135,7 @@ void func_L03_003CBD70(char *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L03_003CBE58);
+/* func_L03_003CBE58 lives in the -G8 sibling L03_00399230-g8.c (it reads $gp-relative floats). */
 
 INCLUDE_ASM("asm/levels", func_L03_003CF0C0);
 

@@ -31,11 +31,11 @@ extern f32 D_L04_001B1C88 __attribute__((sda));
    of the bare-symbol macro cc1 emits only for an `sda` symbol. */
 extern u8 *D_L03_001B2A1C __attribute__((sda));
 
-INCLUDE_ASM("asm/levels", func_L03_003C5B28);
+/* func_L03_003C5B28 is defined in L03_003C5B28-g8.c (it reads the group count through $gp). */
 
 /* func_L03_003C5CE8 is defined in L03_003C5B28-g8.c (it reads the group count through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L03_003C5DC8);
+/* func_L03_003C5DC8 is defined in L03_003C5B28-g8.c (it reads the group count through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L03_003C5EE8);
 

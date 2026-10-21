@@ -129,7 +129,7 @@ INCLUDE_ASM("asm/levels", func_L06_00401820);
 
 INCLUDE_ASM("asm/levels", func_L06_00402230);
 
-INCLUDE_ASM("asm/levels", func_L06_00403F60);
+/* func_L06_00403F60 is matched in L06_0033BDC0-g8.c (it reaches a global through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L06_0040C270);
 

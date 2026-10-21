@@ -23,7 +23,18 @@
 
    The wrapper below compiles to the retail's 28 bytes at 0x003791F0 instruction for
    instruction, except that this cc1 puts the `ld $ra,0x0($sp)` in the jal delay slot
-   where retail leaves a nop there. */
+   where retail leaves a nop there.
+
+   Wave 24 (worker 06) re-measured the body: the wrapper below now compiles to
+   the retail's 28 bytes word for word (jal, nop in the delay slot, ld, jr,
+   addiu) at -O2 -G0 -ffunction-sections, so only the catalogue's entry is in
+   the way.  The census above also holds row by row: 1465 catalogue rows (not
+   placements) open with the `addiu $sp,$sp,+N ; nop` pair, and not one of them
+   has a C definition anywhere in src/.  No C can be placed on such a row: the
+   pair is dead code after the previous function's `jr $ra`, and a C function
+   cannot start with a bare `addiu $sp,$sp,+N` (the stack would not balance).
+   The fix is in tools/levels.py: the extent has to start at 0x003791F0 with
+   28 bytes (the LEVEL_ENTRY_OFFSETS table is there for such a measured skip). */
 
 #include "include_asm.h"
 

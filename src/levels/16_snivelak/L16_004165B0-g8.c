@@ -151,3 +151,52 @@ void func_L16_00418218(char *p) {
     *(float *)(p + 52) = d;
     *(float *)(p + 60) = 1.0f;
 }
+
+/* The id-list walk below reads D_L16_001B2B1C as a bare symbol (a second name for the 4-byte
+   `sda` pointer above, declared as a 12-byte array so the assembler keeps its loads absolute),
+   while D_L16_001B2B38 is a plain int: its `.extern` comes last in the file, which leaves a load
+   in a branch delay slot on $gp and every other load on `lui`/`lw`. */
+extern unsigned char *D_L16_001B2B1C_base[3] __asm__("D_L16_001B2B1C") __attribute__((sda));
+extern s32 D_L16_001B2B38;
+extern unsigned short *D_L16_001FB660[];
+extern s32 D_L16_001B1FE0 __attribute__((sda));
+extern void func_00283098(char *, char *, char *);
+extern void func_00282CC0(char *, char *, char *);
+extern void func_00282CF0(char *, char *, char *);
+extern void func_002AFDD8(char *, char *, char *, s32);
+extern void func_002833F0(char *, char *);
+
+/* Builds a transform in buf0 from the object's +0xC0 and +0x10 blocks, then, for every entity of
+   the object's group (byte 0x21): derives buf1 from buf0 and the entity's position, has
+   func_002AFDD8 fill buf2, stores the argument at +0xF4 (negated for class 0x125D) and rewrites
+   the entity's +0x10 block from its +0xC0 frame and the two buffers. */
+void func_L16_0041ECF8(char *self, f32 spin) {
+    char buf0[0x10];
+    char buf1[0x10];
+    char buf2[0x10];
+    char buf3[0x10];
+    unsigned short *p;
+    char *e;
+    f32 v;
+
+    func_00283098(buf0, (char *)&D_L16_001B1FE0, self + 0xC0);
+    func_00282CC0(buf0, buf0, self + 0x10);
+    for (p = D_L16_001FB660[*(u8 *)(self + 0x21)];
+         *(u8 *)(self + 0x21) != 0xFF && *(u8 *)(self + 0x21) <= D_L16_001B2B38 && p != 0 &&
+         ((p != 0 && (short)p[-1] >= 0) || p == D_L16_001FB660[*(u8 *)(self + 0x21)]);
+         p++) {
+        e = (char *)D_L16_001B2B1C_base[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        func_00282CF0(buf1, buf0, e + 0x10);
+        func_002AFDD8(e, buf2, buf1, 0);
+        v = spin;
+        if (*(short *)(e + 0xAA) == 0x125D)
+            v = -v;
+        *(f32 *)(e + 0xF4) = v;
+        func_002833F0(e + 0xC0, e + 0xF0);
+        func_00283098(buf2, buf2, e + 0xC0);
+        func_00282CF0(buf3, buf2, buf1);
+        func_00282CF0(e + 0x10, e + 0x10, buf3);
+    }
+}

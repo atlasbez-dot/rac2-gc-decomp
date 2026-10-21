@@ -116,7 +116,67 @@ void func_002FC990(int a0, int a1, int a2)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002FCB00);
+extern int func_00282A18(int);
+
+long long func_002FCB00(int data, int destination, int width, int height)
+{
+    int block = width << 7;
+    int offset = 0;
+    int logwidth = func_00282A18(width);
+    int logheight = func_00282A18(height);
+    int width_mask = width & (width - 1);
+    int height_mask = height & (height - 1);
+    int remaining = width * (height << 2);
+
+    if (width_mask)
+        logwidth++;
+    if (height_mask)
+        logheight++;
+    {
+        int rounded = remaining - 1;
+        rounded += block;
+        remaining = rounded & -block;
+    }
+    if (remaining > 0) {
+        int buffer_width = (width >> 6) << 16;
+        int image_width = width << 16;
+        int dma_tag = (block >> 4) | 0x30000000;
+        int vif_tag = (block >> 4) | 0x50000000;
+
+        do {
+            int *next;
+            int *cursor;
+            int source;
+            *(int *)((char *)D_L02_001B3D08_5 + 0) = 0x10000006;
+            *(int *)((char *)D_L02_001B3D08_5 + 4) = 0;
+            *(int *)((char *)D_L02_001B3D08_5 + 8) = 0;
+            *(int *)((char *)D_L02_001B3D08_5 + 12) = 0x50000006;
+            next = D_L02_001B3D08_5 + 4;
+            D_L02_001B3D08_5 = next;
+            remaining -= block;
+            D_00126288(next, (short)((destination + offset) >> 8), buffer_width >> 16,
+                       0, 0, 0, image_width >> 16, 32);
+            cursor = D_L02_001B3D08_5;
+            source = data + offset;
+            offset += block;
+            D_L02_001B3D08_5 = cursor + 24;
+            *(int *)((char *)cursor + 96) = dma_tag;
+            *(int *)((char *)D_L02_001B3D08_5 + 4) = source;
+            *(int *)((char *)D_L02_001B3D08_5 + 8) = 0;
+            *(int *)((char *)D_L02_001B3D08_5 + 12) = vif_tag;
+            D_L02_001B3D08_5 = (int *)((char *)D_L02_001B3D08_5 + 16);
+        } while (remaining > 0);
+    }
+    {
+        long long result = destination >> 8;
+        result |= (long long)(width >> 6) << 14;
+        result |= (long long)logwidth << 26;
+        result |= (long long)logheight << 30;
+        result |= 0x400000000LL;
+        return result;
+    }
+}
+
 
 /* The guard reads the cell at 0x001B22C0/0x001B22C4: the read view is volatile (every use is a
    fresh load), and the write of the initialiser's result is an ordinary store, which is what
@@ -199,14 +259,13 @@ void func_002FCF90(int arg0) {
     p->w[3] = 0;
 }
 
-INCLUDE_ASM("asm/game", func_002FCFC8);
+/* func_002FCFC8 is in 002FC8D0-g8.c. */
 
 
 INCLUDE_ASM("asm/game", func_002FD1B8);
 
 INCLUDE_ASM("asm/game", func_002FD828);
 
-INCLUDE_ASM("asm/game", func_002FDB40);
 
 INCLUDE_ASM("asm/game", func_002FDBD8);
 
@@ -281,7 +340,6 @@ int func_002FEC78(unsigned char *object, unsigned int flags)
 extern void func_0029F9F0(char *, char *);
 void func_002FED28(unsigned int index) { if (index < 64u) { char *p = D_0021F9C0 + index * 0x50; func_0029F9F0(*(char **)(p + 0x40), p); *(char **)(p + 0x40) = 0; } }
 
-INCLUDE_ASM("asm/game", func_002FED78);
 
 INCLUDE_ASM("asm/game", func_002FED90);
 
@@ -296,7 +354,6 @@ void func_002FEE50(int index) {
 
 INCLUDE_ASM("asm/game", func_002FEE70);
 
-INCLUDE_ASM("asm/game", func_002FF0B0);
 
 INCLUDE_ASM("asm/game", func_002FF0D8);
 

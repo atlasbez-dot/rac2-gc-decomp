@@ -86,3 +86,59 @@ void func_L20_004499E8(char *arg0, char *arg1, char *arg2)
     *(TI128 *)(state + 0x50) = 0;
     func_002A7750(arg0, 2, -1);
 }
+
+/* Near miss from src/levels/20_yeedil/L20_0043ECB0.c (wave 4, 20_yeedil, 2026-10-20,
+   worker 02): the candidate is 132 bytes against retail's 140.
+
+   What the wave-4 candidate settles:
+   - The global D_L20_001B23E8 (6.0f) is read through $gp (`lwc1 $f0,0x33F8($gp)`), so the
+     unit has to be built with -G8 and the declaration needs `__attribute__((sda))`.
+   - The `cvt.w.s` + `swc1` shape of the 0xA8 store comes from `*(s32 *)(state + 0xA8) =
+     (s32)(D_L20_001B23E8 * 60.0f)`.
+   - The candidate's allocation differs from retail's (retail keeps arg0 in $a0 and loads
+     the state into $a3; the candidate copies arg0 into $a3 with `daddu $a3,$a0,$zero` and
+     every access uses that copy).  That difference is a CONSEQUENCE of the missing
+     materialisation below, not a second problem.
+
+   What still differs: exactly the two `addiu` that materialise the two 16-bit
+   destinations.  Retail: `addiu $t0,$a0,0x10` (at the top of the function, before the
+   frame is even saved) + `sq $v0,0x0($t0)`, and `addiu $a3,$a3,0x50` + `sq $zero,0x0($a3)`.
+   The candidate folds both offsets into the stores (`sq $v0,0x10($a3)` and
+   `sq $zero,0x50($a3)`).  This is the 128-bit copy wall: the CSE's `find_best_addr` replaces
+   the address pseudo by `plus(reg,const)` (the cost of a register and of a register plus a
+   small constant both being 1 in `mips_address_cost`, config/mips/mips.c, so the tie goes
+   to the plus) and the reload then prints the offset as the displacement.
+   MEASURED in wave 4 and still not enough: the destination as a TI128 pointer variable, the
+   destination through a `volatile TI128 *`, the destination through a `volatile TI128 *`
+   loaded from memory, the destination as an array element, the destination at a pointer
+   loaded from memory with an offset, the pointer used twice, the pointer stored in a local
+   and used twice, and the "volatile pointer object" (which reaches the zero displacement but
+   pays a stack store and a reload: `sw $4,0($sp)` ; `lq $3,0($5)` ; `lw $2,0($sp)` ;
+   `sq $3,0($2)`).
+
+   The candidate (a -G8 unit: the global is read through $gp):
+
+typedef int TI128 __attribute__((mode(TI)));
+
+typedef signed int s32;
+typedef unsigned short u16;
+typedef float f32;
+
+extern float D_L20_001B23E8 __attribute__((sda));
+
+extern void func_002A7750(char *, int, int);
+
+void func_L20_004499E8(char *arg0, char *arg1, char *arg2)
+{
+    char *state = *(char **)(arg0 + 0x68);
+
+    *(s32 *)(state + 0xA8) = (s32)(D_L20_001B23E8 * 60.0f);
+    *(char **)(state + 0xA4) = arg1;
+    *(s32 *)(state + 0xAC) = 0;
+    *(u16 *)(arg0 + 0x34) = (*(u16 *)(arg0 + 0x34) & 0xFFBE) | 0x1000;
+    *(s32 *)(arg0 + 0x98) = *(s32 *)(*(char **)(arg0 + 0x24) + 0x10);
+    *(TI128 *)(arg0 + 0x10) = *(TI128 *)arg2;
+    *(f32 *)(arg0 + 0x18) = *(f32 *)(arg0 + 0x18) + 0.5f;
+    *(TI128 *)(state + 0x50) = 0;
+    func_002A7750(arg0, 2, -1);
+}

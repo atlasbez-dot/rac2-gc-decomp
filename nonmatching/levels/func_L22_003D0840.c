@@ -46,3 +46,15 @@ void func_L22_003D0840(s32 a0) {
         func_31FBB8(a3, 1, -1);
     }
 }
+/* Second attempt (wave 24, worker 15): the same one word off, same check line
+   ("22_dobbo_orbit: instruction at +0x4 differs").  Ten more wordings tried
+   and all still $v1: the parameter in a named local; the parameter as
+   char * / u8 * / u16 *; two pointers spelled separately (they are CSE'd into
+   one); the call argument taken from the local instead of the parameter; the
+   halfword or through a named local; the byte test through a named local;
+   the store written out longhand; the callee declared with and without a
+   parameter list; and the unit at -G0 and at -G8 (the profile makes no
+   difference here).  The retail's own matched func_L20_00440460 gets the
+   same copy in $a3 and it has a second pointer in its body, so the
+   allocation seems to want a second live value - that is the next thing to
+   try. */

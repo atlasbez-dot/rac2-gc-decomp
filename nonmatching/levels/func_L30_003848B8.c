@@ -60,3 +60,12 @@ int func_L30_003848B8(u8 *a0)
     *(s32 *)(D_L30_001A63A8 + 0x28) = 0;
     return 1;
 }
+
+/* Second attempt (wave 24, worker 15): re-measured in the -g8 sibling with
+   the catalogue names (D_L30_001AEC90 is the $gp word at 0x001AEC90).
+   check.py (30_insomniac_museum): "30_insomniac_museum: 192 bytes, expected
+   196" - the same 192/196 the earlier note measured, and the `^ 1` spelling
+   of the bit test is what keeps the four extra bytes out; with it the size is
+   exact and only the layout of the three guards (retail branches them all to
+   one return-0 block placed after the body) is left.
+   */

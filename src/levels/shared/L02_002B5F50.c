@@ -15,7 +15,15 @@ INCLUDE_ASM("asm/levels", func_L02_002F1FB8);
 
 INCLUDE_ASM("asm/levels", func_L02_002F21C0);
 
-INCLUDE_ASM("asm/levels", func_L02_0031E918);
+float func_L02_0031E918(float scale)
+{
+  float r = ((float) (0xFFF & (func_001163B0() >> 16))) * (1.0f / 4096.0f);
+  float new_var;
+  new_var = r * r;
+  new_var = 1.0f - new_var;
+  return new_var * scale;
+}
+
 
 extern float func_L02_0031E918(float scale);
 extern float func_002A7940(void);
@@ -435,7 +443,7 @@ void func_L02_0038BA28(unsigned char *arg0) {
 
 INCLUDE_ASM("asm/levels", func_L02_0038BD00);
 
-INCLUDE_ASM("asm/levels", func_L02_0038C998);
+/* func_L02_0038C998 is defined in L02_002B5F50-g8.c (it reads $gp data). */
 
 INCLUDE_ASM("asm/levels", func_L02_0038CDE8);
 

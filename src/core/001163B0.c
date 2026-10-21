@@ -15,7 +15,7 @@ int func_001163B0(void) {
 
 INCLUDE_ASM("asm/core", func_00116E10);
 
-INCLUDE_ASM("asm/core", func_00117278);
+/* func_00117278 is in 00117278.c with its O0 quadword-save profile. */
 
 INCLUDE_ASM("asm/core", func_00117650);
 

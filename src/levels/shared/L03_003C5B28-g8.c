@@ -26,6 +26,48 @@ extern u8 *D_L03_001B2A1C_1[3] __attribute__((sda));
 
 extern unsigned short *D_L03_001FB5A0[];
 
+extern void func_00282CF0(float *, u8 *, u8 *);
+
+extern void func_002AFDD8(u8 *, float *, float *, int);
+
+extern float func_00282C48(float);
+
+extern void func_002A7750(u8 *, int, int);
+
+/* Puts into state 5 every entity of the object's group (state byte other than 1, kind byte
+   below 2) that lies in front of it, within 1.0 ahead, 0.7 sideways and 0.5 up or down in the
+   object's own frame, storing a1 at +0x374 of its state and clearing its halfword at +0x96. */
+void func_L03_003C5B28(u8 *a0, float a1) {
+    float v[4];
+    unsigned short *p;
+    u8 *e;
+    u8 *s;
+
+    if (a0[0x21] == 0xFF)
+        return;
+    for (p = D_L03_001FB5A0[a0[0x21]];
+         a0[0x21] != 0xFF && a0[0x21] <= D_L03_001B2A38 && p != 0 &&
+         ((p != 0 && (short)p[-1] >= 0) || p == D_L03_001FB5A0[a0[0x21]]);
+         p++) {
+        e = D_L03_001B2A1C_1[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (e[0x20] == 1)
+            continue;
+        if (e[0x95] < 2) {
+            func_00282CF0(v, e + 0x10, a0 + 0x10);
+            func_002AFDD8(a0, v, v, 0);
+            if (v[0] > 0.0f && v[0] < 1.0f && func_00282C48(v[1]) < 0.7f &&
+                func_00282C48(v[2]) < 0.5f) {
+                s = *(u8 **)(e + 0x68);
+                func_002A7750(e, 5, 1);
+                *(float *)(s + 0x374) = a1;
+                *(short *)(e + 0x96) = 0;
+            }
+        }
+    }
+}
+
 /* Answers 1 when the resident word at 0x18A15C equals the object's state word at +0x358, or
    when the state of an entity of the object's group holds it at +0x198; 0 otherwise. */
 int func_L03_003C5CE8(u8 *a0) {
@@ -48,6 +90,33 @@ int func_L03_003C5CE8(u8 *a0) {
             return 1;
     }
     return 0;
+}
+
+extern float func_00282E80(u8 *, u8 *);
+
+/* Answers 0 when another entity of the object's group, whose state holds the same word at
+   +0x358, is nearer to a1 than the object is; 1 otherwise. */
+int func_L03_003C5DC8(u8 *a0, u8 *a1) {
+    u8 *s = *(u8 **)(a0 + 0x68);
+    float d;
+    unsigned short *p;
+    u8 *e;
+
+    d = func_00282E80(a0 + 0x10, a1);
+    for (p = D_L03_001FB5A0[a0[0x21]];
+         a0[0x21] != 0xFF && a0[0x21] <= D_L03_001B2A38 && p != 0 &&
+         ((p != 0 && (short)p[-1] >= 0) || p == D_L03_001FB5A0[a0[0x21]]);
+         p++) {
+        e = D_L03_001B2A1C_1[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (e == a0)
+            continue;
+        if (*(int *)(*(u8 **)(e + 0x68) + 0x358) == *(int *)(s + 0x358) &&
+            func_00282E80(e + 0x10, a1) < d)
+            return 0;
+    }
+    return 1;
 }
 
 typedef struct { u8 b[0x10]; } Local16;

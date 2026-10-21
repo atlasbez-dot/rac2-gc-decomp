@@ -281,3 +281,31 @@ out2:
     func_00282CC0(D_00189F10 + 0x20, D_00189F10 + 0x20, &tmp);
     return 1;
 }
+
+/* ---- note from level-20 wave 5 (worker 12, 2026-10-21) --------------------------
+ * The float constants of this body, with the literals that this compiler turns
+ * into the retail's exact hex (measured with build/compiler's cc1):
+ *
+ *   0x3D6147AF = 0.055000003  ->  0.055000003f     (0.055f gives 0x3D6147AE)
+ *   0x3CE81B50 = 0.028333336  ->  0.028333336f     (0.0283333f gives 0x3CE81B3D)
+ *   0x3DAAAAAB = 0.083333336  ->  0.083333336f     (0.0833333f gives 0x3DAAAAA6)
+ *   0x3D4CCCCE = 0.050000004  ->  0.050000004f     (0.05f gives 0x3D4CCCCD)
+ *   0x45AFDF66 = 5627.9248    ->  5627.9248f
+ *   0xBF800000 = -1.0         ->  -1.0f
+ *   0x40000000 = 2.0          ->  2.0f
+ *
+ * The other constants of the level, measured the same way:
+ *   0x3F199999 = 0.599999964  ->  0.59999996f     (0.6f gives 0x3F19999A)
+ *   0x3EE66667 = 0.450000018  ->  0.45000002f     (0.45f gives 0x3EE66666)
+ *   0x3EB33334 = 0.350000024  ->  0.35000002f     (0.35f gives 0x3EB33333)
+ *   0x3F07AE14 = 0.529999971  ->  0.53f
+ *   0x3CA3D70A = 0.02         ->  0.02f
+ *   0x3D888889 = 0.06666667   ->  0.06666667f
+ *   0x3F666666 = 0.9          ->  0.9f
+ *   0x3ADA740F = 0.0016666668 ->  0.0016666668f
+ *   0x3EBD70A4 = 0.37         ->  0.37f
+ *   0x3F000000 = 0.5          ->  0.5f            (NOT 1.0f!)
+ *
+ * The map at the top of this file calls 0x3F000000 "1.0f" and 0x3EE66667
+ * "0.35f": both are wrong, they are 0.5f and 0.45f.
+ */

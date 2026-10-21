@@ -231,9 +231,9 @@ void func_L12_00427D50(s32 a0) {
 
 INCLUDE_ASM("asm/levels", func_L12_00427DD0);
 
-INCLUDE_ASM("asm/levels", func_L12_00428040);
+/* func_L12_00428040 is defined in L12_003E1CB0-g8.c (it reads the group count through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L12_004281D8);
+/* func_L12_004281D8 is defined in L12_003E1CB0-g8.c (it reads the colour pair through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L12_00429A50);
 

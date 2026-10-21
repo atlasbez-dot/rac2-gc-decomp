@@ -1,3 +1,9 @@
+/* Current qualification, 21 October 2026: -O2 -G0 -ffunction-sections
+   -frac2-qcopy produces 380/380 bytes, but 0/19 placements match. The copies
+   now materialize their addresses; the object pointer and following constants
+   still receive different registers/order. Keep the meaningful C below as a
+   starting point. The older measurements describe the preceding compiler. */
+
 /* func_L00_002A6008 - 380 bytes, 19 places, level 00_aranos_tutorial at 0x002A6008.
    Wave 13 s4: 0 of 19 places match; the candidate is 356 bytes and every
    instruction of the body except six is exact.  The frame (0xB0), the four

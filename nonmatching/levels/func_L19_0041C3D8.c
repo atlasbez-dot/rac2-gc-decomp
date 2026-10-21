@@ -22,3 +22,18 @@
  * Needs the corrected extent from the maintainers (same fix as func_L00_00304AE8 and the
  * other started-early rows).
  */
+
+/* --- wave 24, worker 02: the same catalogue defect, confirmed against the
+ * bytes. ---
+ *
+ * The 148-byte row at 0x0041C3D8 opens on `addiu $sp,$sp,0x10` / `nop` (the
+ * linker's filler, not code - a function never starts with a stack restore)
+ * and the real body is the 140 bytes at 0x0041C3E0.  The C below is that
+ * inner body; it still misses the retail's register order and the two
+ * 64-bit operands, but it cannot be matched under the catalogue row anyway:
+ * the row's first eight bytes are filler.
+ *
+ * tools/check.py func_L19_0041C3D8 --diff:
+ *   19_grelbin: 136 bytes, expected 148
+ *   func_L19_0041C3D8: 0 of 1 places match
+ */

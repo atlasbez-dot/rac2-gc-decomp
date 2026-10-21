@@ -31,6 +31,70 @@ void func_L02_003F56C0(void) {
         p[0] = f - 1.0f;
 }
 
+extern int D_001A8FF0;
+
+/* Four bytes: cc1 then emits the address as a single `la`, which gas expands to an adjacent
+   lui/addiu pair (an array of unknown size is split by cc1 itself). */
+extern char D_L02_001B3210[4];
+
+extern void func_L02_002ED7B0(int, float);
+
+extern float func_00282E48(void *, void *);
+
+extern void func_L01_00323310(int, int);
+
+typedef struct {
+    char pad0[0x80];
+    char pos[8];
+    float f88;
+    char pad1[0x2236];
+    unsigned char b22C2;
+    char pad2[0x22D];
+    unsigned char b24F0;
+} L02_003F5710_Hero;
+
+extern L02_003F5710_Hero D_00189E20;
+
+/* Watches the hero block's height (+0x88) against 420.0 and the copy of it the actor kept at
+   +0x98. Crossing it downwards clears the byte at +0x24F0 and the global flag; crossing it upwards
+   sets both when the flag is clear and the hero is within 150.0 of D_L02_001B3210, and clears
+   both when the flag is set and the hero is farther away. While the flag is set the hero's byte
+   at +0x22C2 is raised, and the first time the actor's word at +0xDC is set and handed its two
+   words at +0x1C and +0x20. The height is then kept at +0x98.
+
+   The flag is a plain extern int: the assembler decides each access at its use, a gp-relative one
+   inside a delay slot and the absolute lui/lw pair elsewhere, as retail has them. */
+void func_L02_003F5710(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+    float d;
+
+    if (D_00189E20.f88 < 420.0f && *(float *)(state + 0x98) >= 420.0f) {
+        func_L02_002ED7B0(0, 420.0f);
+        D_00189E20.b24F0 = 0;
+        D_001A8FF0 = 0;
+    } else if (D_00189E20.f88 > 420.0f && *(float *)(state + 0x98) <= 420.0f) {
+        func_L02_002ED7B0(1, 420.0f);
+        d = func_00282E48(D_00189E20.pos, D_L02_001B3210);
+        if (D_001A8FF0 == 0 && d < 150.0f) {
+            int on = 1;
+
+            D_00189E20.b24F0 = on;
+            D_001A8FF0 = on;
+        } else if (D_001A8FF0 != 0 && d > 150.0f) {
+            D_00189E20.b24F0 = 0;
+            D_001A8FF0 = 0;
+        }
+    }
+    if (D_001A8FF0 != 0) {
+        D_00189E20.b22C2 = 1;
+        if (*(int *)(state + 0xDC) == 0) {
+            *(int *)(state + 0xDC) = 1;
+            func_L01_00323310(*(int *)(state + 0x1C), *(int *)(state + 0x20));
+        }
+    }
+    *(float *)(state + 0x98) = D_00189E20.f88;
+}
+
 void func_L02_003FD770(char *a0) {
     char buf[16];
     func_00282C88(buf);
@@ -42,7 +106,6 @@ void func_L02_003FD770(char *a0) {
 
 extern char D_L02_001BA500[];
 extern int D_L02_001B32E8;
-extern float func_00282E48(void *, void *);
 extern void func_002A7750(char *, int, int);
 
 /* Raises the flag at 0x1B32E8. When the point at D_L02_001BA500 is within 0.0001 of the one at
@@ -151,4 +214,70 @@ void func_L02_003FD228(char *a0) {
 
     HALF(0xC, 0xC8)
     HALF(0xE, 0xC4)
+}
+
+extern unsigned char D_001395B8[0x100];
+
+/* D_001A7A0C, written as the second word of an 8-byte object: cc1 then counts the store as two
+   instructions and keeps it out of func_L02_003FCDF8's delay slot, and the assembler gives the
+   absolute `lui $at ; sw`. */
+extern int D_001A7A08[2];
+
+extern int D_001A79F8;
+
+extern int func_L02_003F9B70(int);
+
+extern int func_L02_00400650(char *, int);
+
+extern void func_00288308(int);
+
+extern void func_002AD860(int);
+
+extern int func_L02_003FCF08(int);
+
+extern int func_L02_003FCDF8(int);
+
+extern void func_L00_0030C7F8(int);
+
+extern void func_0029B3E0(int, int);
+
+/* With a1 == 0 and no count yet for func_L02_003F9B70(0), plays the hero's scene 7 with its
+   word at +0x22C8 kept; otherwise picks the scene from a1 (6, 0xB or a random one), adds the
+   two scores and starts func_L00_0030C7F8(0x168). Then counts the entry. The unit is built with
+   -frac2-gcse-unsplit-edges and -frac2-keep-block-order (config/cflags.txt): the high half of
+   D_001395B8 is computed in the entry block, and the switch keeps its `b default` with the
+   default body last, as in retail. `+= 1` keeps the counter's address out of the call. */
+void func_L02_003FCCA0(char *a0, int a1) {
+    char *state = *(char **)(a0 + 0x68);
+    int saved;
+    char *hero;
+    int v;
+
+    if (a1 == 0 && D_001395B8[func_L02_003F9B70(0)] == 0) {
+        hero = (char *)&D_00189E20;
+        saved = *(int *)(hero + 0x22C8);
+        func_L02_00400650(a0, 7);
+        func_00288308(0x26);
+        func_002AD860(0x26);
+        *(int *)(hero + 0x22C8) = saved;
+    } else {
+        switch (a1) {
+        case 6:
+            func_L02_00400650(a0, 8);
+            break;
+        case 0xB:
+            func_L02_00400650(a0, 9);
+            break;
+        default:
+            func_L02_00400650(a0, func_002A77E0(5) + 2);
+            break;
+        }
+        D_001A7A08[1] = D_001A7A08[1] + func_L02_003FCF08(a1);
+        v = func_L02_003FCDF8(a1);
+        *(int *)(state + 0x110) = v;
+        D_001A79F8 = D_001A79F8 + v;
+        func_L00_0030C7F8(0x168);
+    }
+    D_001395B8[func_L02_003F9B70(a1)] += 1;
+    func_0029B3E0(0, -1);
 }

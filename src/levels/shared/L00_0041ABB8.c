@@ -229,7 +229,80 @@ INCLUDE_ASM("asm/levels", func_L00_0041DEF0);
 
 INCLUDE_ASM("asm/levels", func_L00_0041E168);
 
-INCLUDE_ASM("asm/levels", func_L00_0041E4A8);
+extern int func_L00_0032A088(int id, int index);
+
+extern void func_002FEE50(int index);
+
+extern void func_0029F338(void *object);
+
+extern int *func_L00_0032A0B8(int id, int index);
+
+extern float func_002A7878(float a, float b);
+
+extern int func_00283CF0(float value);
+
+extern void func_L00_002EBE88(int a0, int a1, int a2, int a3, int a4, int a5,
+                              float f12, float f13, float f14);
+
+extern void func_L00_0041E648(void *self, int flags, int mode);
+
+extern unsigned char D_00139568[];
+
+extern unsigned char D_L00_00262570[];
+
+#ifndef RAC2_T_ENTRY_262570
+#define RAC2_T_ENTRY_262570
+/* one 224-byte record of the level's table: the flag byte sits at +4 */
+typedef struct {
+    unsigned char pad000[4];
+    unsigned char flag;
+} Entry262570;
+#endif
+
+/* Looks the object's record up in the level's table (the resident byte at D_00139568 + 0x16
+   is the record's number), asks the level's builder for a matrix with the flags the object's
+   own word selects, then reads the record's two colour bytes and hands the level's renderer
+   the object's record. */
+void func_L00_0041E4A8(void *arg0)
+{
+    unsigned char *self = arg0;
+    unsigned char *rec;
+    int handle;
+    int flags;
+    int mode;
+    int base;
+    float scale;
+    unsigned int c1;
+    unsigned int c2;
+
+    rec = *(unsigned char **)(self + 0x68);
+    handle = func_L00_0032A088(*(int *)(rec + 0x50), *(int *)(rec + 0x3C));
+    if (handle == 0) {
+        func_002FEE50(*(int *)(rec + 0x6C));
+        func_0029F338(self);
+    } else {
+        if (((Entry262570 *)(D_L00_00262570 + D_00139568[0x16] * 224))->flag != 0) {
+            flags = 0x802080;
+            if (*(int *)(rec + 0x68) != 0)
+                flags = 0x802020;
+            mode = 0x7F;
+        } else {
+            flags = 0x202080;
+            mode = 0x50;
+        }
+        func_L00_0041E648(self, flags, mode);
+        if (((Entry262570 *)(D_L00_00262570 + D_00139568[0x16] * 224))->flag == 0)
+            return;
+        base = handle + func_L00_0032A0B8(*(int *)(rec + 0x50), *(int *)(rec + 0x3C))[2];
+        scale = func_002A7878(0.5f, 1.0f);
+        c1 = (unsigned int)func_00283CF0(scale * 127.0f) << 24;
+        c2 = (unsigned int)func_00283CF0(scale * 48.0f) << 24;
+        func_L00_002EBE88(*(int *)((char *)base + *(int *)(rec + 0x30) * 4),
+                          0x17, 0xE, 0x7,
+                          0xFF5050 | c1, 0xFF1010 | c2,
+                          0.0f, 3.0f, 0.0f);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L00_0041E648);
 
@@ -245,7 +318,60 @@ INCLUDE_ASM("asm/levels", func_L00_0041F820);
 
 INCLUDE_ASM("asm/levels", func_L00_0041FC20);
 
-INCLUDE_ASM("asm/levels", func_L00_004200F0);
+extern float D_L00_001B8DC0[];
+
+extern float func_002A7878(float a, float b);
+
+extern float func_002A78D8(float a, float b);
+
+extern int func_00283CF0(float a);
+
+extern float func_00283B98(float a, float b);
+
+extern void func_002AF000(float *p, float a, float b, float c);
+
+extern void func_002C16C0(float *out, float *in, int a2, int a3, unsigned int a4, int a5,
+                           float f1, float f2, float f3, float f4, float f5);
+
+/* Points the level's fixed vector at the given position, then spawns twenty
+   particles around it, each one a random offset along the fixed vector.
+   `size` is written but never read: that second reference to 210000.0f is what
+   makes the compiler hold the constant in a saved float register ($f29) instead
+   of rematerialising it at the call, which is what the retail does. */
+void func_L00_004200F0(float *pos)
+{
+    float v[4];
+    float dir[4];
+    float out[4];
+    float f20;
+    float f21;
+    float f28;
+    float size;
+    float r;
+    int n;
+    int id;
+
+    func_00282CF0(v, D_L00_001B8DC0, pos);
+    f28 = func_00283248(v[0], v[1]);
+    n = 19;
+    do {
+        n--;
+        f21 = func_002A7878(0.5f, 1.0f);
+        id = func_00283CF0(func_002A78D8(1.0f, 2.0f));
+        size = func_002A7878(0.05f, 0.2f) * 210000.0f;
+        f20 = func_002A7878(0.0f, 1.3962636f);
+        r = func_00283B98(f28, func_002A78D8(0.0f, 1.3962636f));
+        func_002AF000(dir, f21 * (1.0f / 60.0f), r, f20);
+        r = func_002A78D8(0.0f, 0.1f);
+        out[0] = pos[0] + r;
+        r = func_002A78D8(0.0f, 0.1f);
+        out[1] = pos[1] + r;
+        r = func_002A78D8(0.0f, 0.1f);
+        out[2] = pos[2] + r;
+        func_002C16C0(out, dir, 30, 127, 0x7F7F7F, id,
+                      func_002A7878(0.05f, 0.2f) * 210000.0f, 500.0f, 1.0f, 0.0f, 1.0f);
+    } while (n >= 0);
+}
 
 /* calls two guards and returns 1 only when both succeed and the object's float field is not positive */
 int func_L00_00420310(char *object)

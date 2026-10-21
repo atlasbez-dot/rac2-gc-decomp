@@ -38,7 +38,26 @@ INCLUDE_ASM("asm/core", func_00115E28);
 
 INCLUDE_ASM("asm/core", func_00115FC0);
 
-INCLUDE_ASM("asm/core", func_00116300);
+extern int D_001341E0;
+
+extern int D_001341E4;
+
+extern int D_00134DB8;
+
+extern int func_0011AB10(void);
+
+extern void func_0011AC60(int arg0);
+
+int func_00116300(void) {
+    int id = func_0011AB10();
+
+    if (D_001341E0 != id) {
+        func_0011AC60(D_00134DB8);
+        D_001341E0 = id;
+        return ++D_001341E4;
+    }
+    return ++D_001341E4;
+}
 
 void func_001163A0(unsigned int value)
 {

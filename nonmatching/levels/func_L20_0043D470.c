@@ -131,3 +131,77 @@ void func_L20_0043D470(char *arg0) {
  *    addiu $a0,$s0,0xF0), func_L20_0039DBC8 (addiu $a2,$a1,0x60), func_L20_0039F268
  *    (addiu $a0,$sp,0x10), func_L20_0043D4D8 (addiu $v1,$s2,0xF0), func_L20_003B0A88
  *    (addiu $v1,$a1,0x10) and func_L20_003E6FA0 (addiu $a0,$s1,0x10). */
+
+/* ---- level-20 wave 4, worker 06 (2026-10-20): two more measurements ---------------
+ *
+ * 1. THE -G8 PROFILE DOES NOT BREAK THE 128-BIT WALL.  func_L20_0043D470 was compiled
+ *    in a -G8 unit as well: the copy still folds into the lq/sq (`lq $v0,0x60($a1)` /
+ *    `sq $v0,0x20($v1)`).  The profile changes the register allocation, not the CSE.
+ *
+ * 2. THE FLOAT REGISTER ORDER FOLLOWS THE INSTRUCTION STREAM, not the declaration.
+ *    With one constant a local variable and the other written inline
+ *    (`f32 two = 2.5f;` and `*(f32 *)(...) = 8.0f;`), this cc1 gives $f0 to the 8.0f -
+ *    the constant that ends up first in the stream - and $f1 to the 2.5f, although the
+ *    source introduces the 2.5f first.  With both constants as locals the order
+ *    follows the stores instead.  So the retail's 8.0f in $f1 with 2.5f in $f0 needs
+ *    the 2.5f to be first in the stream AND second in the FPR order, which no
+ *    spelling measured here produces.
+ *
+ * 3. The reload pattern of the object pointer (the retail re-reads state->0x84 before
+ *    every store) needs the pointer read again in each store expression; with a local
+ *    variable this cc1 keeps it in a register and does not reload.  The candidate
+ *    above does the re-reads and gives every byte store and every reload its retail
+ *    address. */
+
+/* ---- level-20 wave 5, worker 06 (2026-10-21): the two residues, measured from the
+ * compiler's own source, and what the wave's other functions have in common.
+ *
+ * 1. THE 128-BIT COPY.  The retail materialises both addresses
+ *      addiu $a2,$a1,0x60 ; lq $v0,0x0($a2) ; sq $v0,0x0($v1)
+ *    (with $v1 = the object pointer + 0x20) while this cc1 folds the constant
+ *    back into the lq/sq (`lq $v0,0x60($a1)' / `sq $v0,0x20($v1)'), which is
+ *    three instructions against the retail's five.
+ *
+ *    The fold is NOT the CSE's: with -fno-cse and with -fno-gcse the folded
+ *    form is still what comes out.  It is the RELOAD: in
+ *    gcc/config/mips/mips.h's GO_IF_LEGITIMATE_ADDRESS, `plus (reg, const_int)'
+ *    is a legitimate TImode address whenever the offset fits in
+ *    [-32768, 32752], so the reload prints the offset as the displacement
+ *    instead of materialising the address.  The address is materialised only
+ *    when the expression is something the reload cannot fold: a plain
+ *    register, a symbol, or a memory reference.
+ *
+ *    The escapes, all measured today with the project's compiler: a pointer
+ *    whose value comes from a MEMORY LOAD (`char *p = *(char **)(arg0 + 0x60);
+ *    *(TI128 *)arg1 = *(TI128 *)p;' gives `lw $3,0x60($4) ; lq $2,0($3)'), a
+ *    SYMBOL, a STACK SLOT at offset 0, a LOOP-CARRIED POINTER (`char *p =
+ *    arg0 + 0x10; while (n--) { *(TI128 *)arg1 = *(TI128 *)p; p += 2; }' gives
+ *    `addu $4,$4,16 ; lq $2,0($4)'), and a VOLATILE POINTER OBJECT (the
+ *    zero-displacement form on both sides, at the price of a stack round
+ *    trip).  Here the two addresses are `state + 0x60' and `object + 0x20',
+ *    i.e. a runtime base plus a constant, and the copy is not in a loop, so
+ *    no plain-C spelling reaches the retail's shape.
+ *
+ * 2. THE FLOAT REGISTER ORDER.  The retail puts 8.0f in $f1 and 2.5f in $f0
+ *    and materialises the 8.0f FIRST in the instruction stream; this cc1
+ *    gives $f0 to the first constant of the stream, so it can only produce
+ *    the retail's order if the 2.5f is first in the stream - but the 2.5f's
+ *    store is the second one.  Measured today with every spelling that could
+ *    break the tie: both constants as locals (the order then follows the
+ *    stores), one as a local and the other inline (the order follows the
+ *    stream, so the inline 8.0f wins again), the stores in the opposite order
+ *    (the FPRs come out right but the stores stay in that order), and with
+ *    -fno-schedule-insns / -fno-schedule-insns2 (which only move the
+ *    instructions).  No spelling produces the retail's combination, so this
+ *    residue is a compiler difference (the 2.9 local register allocator
+ *    allocates the FPRs the other way round than the 2.95 one that patch
+ *    0047 ports in), not a source shape.
+ *
+ * WHAT THE WAVE'S OTHER FUNCTIONS HAVE IN COMMON: every one of them is
+ * behind the 128-bit wall of point 1 (or, for func_L20_0039F268, behind the
+ * `por' of the 128-bit zero store).  Measured over every catalogue row of
+ * level 20: 359 of the 3978 functions that live in level 20 have the
+ * retail's shape - an addiu whose destination is the base of a
+ * zero-displacement lq/sq - and only TWO of them are already C in src/
+ * (func_002C1EF0 and func_00334710, both the SYMBOL escape).
+ */

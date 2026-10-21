@@ -151,7 +151,7 @@ extern float func_002F86B0(float);
 
 typedef int TI128 __attribute__((mode(TI)));
 
-INCLUDE_ASM("asm/levels", func_L13_0040A3B0);
+/* func_L13_0040A3B0 is matched in L13_0040A3B0.c (built with -frac2-zero-ti-barrier). */
 
 
 void func_L13_0040A480(char *a0)
@@ -175,7 +175,45 @@ void func_L13_0040A4D0(char *a0)
     func_002B0990(a0, p + 0x2E0, 1, 1, 2.5f);
 }
 
-INCLUDE_ASM("asm/levels", func_L13_0040A540);
+typedef struct L13State {
+    char pad[0x244];
+    int f244;
+    int pad2;
+    int f24C;
+} L13State;
+
+extern u16 *D_L13_001FB420[];
+extern u8 *D_L13_001B291C __attribute__((section(".sdata")));
+extern int D_L13_001B2938 __attribute__((section(".sdata")));
+
+/* Raises the +0x24C flag of each entity of kind 0xEA3 or 0xEA4 in the object's group, and the
+   +0x244 flag of kind 0xF35. The kinds are tested one by one, as retail's separate branches show. */
+void func_L13_0040A540(u8 *a0)
+{
+    u16 *q;
+    u16 *p;
+    u8 *e;
+
+    if (a0[0x21] == 0xFF)
+        return;
+    q = D_L13_001FB420[a0[0x21]];
+    if (q == 0)
+        return;
+    for (p = q; a0[0x21] != 0xFF && a0[0x21] <= D_L13_001B2938 && p != 0 &&
+           ((p != 0 && (s16)p[-1] >= 0) || p == D_L13_001FB420[a0[0x21]]);
+         p++) {
+        e = D_L13_001B291C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (*(s16 *)(e + 0xAA) == 0xEA3) {
+            ((L13State *)*(u8 **)(e + 0x68))->f24C = 1;
+        } else if (*(s16 *)(e + 0xAA) == 0xEA4) {
+            ((L13State *)*(u8 **)(e + 0x68))->f24C = 1;
+        } else if (*(s16 *)(e + 0xAA) == 0xF35) {
+            ((L13State *)*(u8 **)(e + 0x68))->f244 = 1;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L13_0040A638);
 
@@ -197,7 +235,32 @@ void func_L13_0040CA00(char *a0)
     func_002B0990(a0, p + 0x2D0, 4, 1, 2.5f);
 }
 
-INCLUDE_ASM("asm/levels", func_L13_0040CA70);
+/* Raises the +0x24C flag of each entity of kind 0xEA3 or 0xEA4 in the object's group, tested one
+   by one as in func_L13_0040A540. */
+void func_L13_0040CA70(u8 *a0)
+{
+    u16 *q;
+    u16 *p;
+    u8 *e;
+
+    if (a0[0x21] == 0xFF)
+        return;
+    q = D_L13_001FB420[a0[0x21]];
+    if (q == 0)
+        return;
+    for (p = q; a0[0x21] != 0xFF && a0[0x21] <= D_L13_001B2938 && p != 0 &&
+           ((p != 0 && (s16)p[-1] >= 0) || p == D_L13_001FB420[a0[0x21]]);
+         p++) {
+        e = D_L13_001B291C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (*(s16 *)(e + 0xAA) == 0xEA3) {
+            ((L13State *)*(u8 **)(e + 0x68))->f24C = 1;
+        } else if (*(s16 *)(e + 0xAA) == 0xEA4) {
+            ((L13State *)*(u8 **)(e + 0x68))->f24C = 1;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L13_0040D930);
 

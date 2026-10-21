@@ -38,19 +38,153 @@ fail:
 
 INCLUDE_ASM("asm/game", func_0028E640);
 
-INCLUDE_ASM("asm/game", func_0028E868);
+extern int *ref_L00_001B2608_00;
+extern int ref_L00_001B1BBC_01;
+extern int D_001A7350;
+extern int D_001A7354;
+extern int func_0028E640(int);
+
+void func_0028E868(int a0, int a1, int a2, int a3, int a4, int a5)
+{
+    short *row = (short *)((a0 << 2) + (unsigned int)D_001B1890);
+    unsigned char *entry = (unsigned char *)((unsigned int)D_001B1894 + (row[1] << 3));
+    int mask6 = 1 << entry[6];
+    int mask7 = 1 << entry[7];
+    int *p;
+    char *q;
+    int result;
+
+    *(int *)ref_L00_001B2608_00 = 0x10000005;
+    *(int *)((char *)ref_L00_001B2608_00 + 4) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 8) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 12) = 0x50000005;
+    p = ref_L00_001B2608_00;
+    ref_L00_001B2608_00 = p + 4;
+    q = (char *)ref_L00_001B2608_00;
+    *(long long *)(p + 4) = 0x7400000000008001LL;
+    *(long long *)(q + 8) = 0x05353106;
+    result = func_0028E640(a0);
+    *(long long *)(q + 16) = result;
+    *(long long *)(q + 24) = 0x156;
+    *(long long *)(q + 32) = ((long long)a5 << 24) | 0x7F7F7F;
+    *(long long *)(q + 40) = 0;
+    *(long long *)(q + 48) = ((a1 << 4) + D_001A7350 - 8) | ((long long)((a2 << 4) + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 56) = (mask7 << 20) + (mask6 << 4);
+    *(long long *)(q + 64) = (((a1 + a3) << 4) + D_001A7350 - 8) | ((long long)(((a2 + a4) << 4) + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 72) = 0;
+    ref_L00_001B2608_00 = (int *)((char *)ref_L00_001B2608_00 + 0x50);
+}
 
 INCLUDE_ASM("asm/game", func_0028EA58);
 
 INCLUDE_ASM("asm/game", func_0028ECD8);
 
 
-INCLUDE_ASM("asm/game", func_0028EE98);
+void func_0028EE98(int a0, int a1, int a2, int a3, int a4, int a5)
+{
+    short *row = (short *)((a0 << 2) + (unsigned int)D_001B1890);
+    unsigned char *entry = (unsigned char *)((unsigned int)D_001B1894 + (row[1] << 3));
+    int mask6 = 1 << entry[6];
+    int mask7 = 1 << entry[7];
+    int *p;
+    char *q;
+    int result;
 
-INCLUDE_ASM("asm/game", func_0028F078);
+    *(int *)ref_L00_001B2608_00 = 0x10000005;
+    *(int *)((char *)ref_L00_001B2608_00 + 4) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 8) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 12) = 0x50000005;
+    p = ref_L00_001B2608_00;
+    ref_L00_001B2608_00 = p + 4;
+    q = (char *)ref_L00_001B2608_00;
+    *(long long *)(p + 4) = 0x7400000000008001LL;
+    *(long long *)(q + 8) = 0x05353106;
+    result = func_0028E640(a0);
+    *(long long *)(q + 16) = result;
+    *(long long *)(q + 24) = 0x156;
+    *(long long *)(q + 32) = ((long long)a5 << 24) | 0x7F7F7F;
+    *(long long *)(q + 40) = 0;
+    *(long long *)(q + 48) = (a1 + D_001A7350 - 8) | ((long long)(a2 + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 56) = (mask7 << 20) + (mask6 << 4);
+    *(long long *)(q + 64) = (a1 + a3 + D_001A7350 - 8) | ((long long)(a2 + a4 + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 72) = 0;
+    ref_L00_001B2608_00 = (int *)((char *)ref_L00_001B2608_00 + 0x50);
+}
+
+void func_0028F078(int a0, int a1, int a2, int a3, int a4, int a5, unsigned int color)
+{
+    short *row = (short *)((a0 << 2) + (unsigned int)D_001B1890);
+    unsigned char *entry = (unsigned char *)((unsigned int)D_001B1894 + (row[1] << 3));
+    int mask6 = 1 << entry[6];
+    int mask7 = 1 << entry[7];
+    int *p;
+    char *q;
+    int result;
+    long long rgba;
+
+    *(int *)ref_L00_001B2608_00 = 0x10000005;
+    *(int *)((char *)ref_L00_001B2608_00 + 4) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 8) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 12) = 0x50000005;
+    p = ref_L00_001B2608_00;
+    ref_L00_001B2608_00 = p + 4;
+    q = (char *)ref_L00_001B2608_00;
+    *(long long *)(p + 4) = 0x7400000000008001LL;
+    *(long long *)(q + 8) = 0x05353106;
+    result = func_0028E640(a0);
+    *(long long *)(q + 16) = result;
+    *(long long *)(q + 24) = 0x156;
+    rgba = (unsigned char)color;
+    rgba |= (unsigned int)(unsigned char)(color >> 8) << 8;
+    rgba |= (long long)(unsigned char)(color >> 16) << 16;
+    rgba |= (long long)a5 << 24;
+    *(long long *)(q + 32) = rgba;
+    *(long long *)(q + 40) = 0;
+    *(long long *)(q + 48) = (a1 + D_001A7350 - 8) | ((long long)(a2 + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 56) = (mask7 << 20) + (mask6 << 4);
+    *(long long *)(q + 64) = (a1 + a3 + D_001A7350 - 8) | ((long long)(a2 + a4 + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 72) = 0;
+    ref_L00_001B2608_00 = (int *)((char *)ref_L00_001B2608_00 + 0x50);
+}
 
 INCLUDE_ASM("asm/game", func_0028F278);
 
 
 
-INCLUDE_ASM("asm/game", func_0028F788);
+/* The command cursor and the third coordinate word sit at a different address in
+   every program, so they are per-level externals named after their level-00 place.
+   The retail reaches them with lui+%lo, so they carry no sda attribute here: in this
+   -G8 unit the bare symbol form would put them in small data and make the access
+   $gp-relative. */
+extern int *ref_L00_001B2608_00;
+extern int ref_L00_001B1BBC_01;
+extern int D_001A7350;
+extern int D_001A7354;
+extern int func_0028E640(int);
+
+void func_0028F788(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9)
+{
+    int *p;
+    char *q;
+    int result;
+
+    *(int *)ref_L00_001B2608_00 = 0x10000005;
+    *(int *)((char *)ref_L00_001B2608_00 + 4) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 8) = 0;
+    *(int *)((char *)ref_L00_001B2608_00 + 12) = 0x50000005;
+    p = ref_L00_001B2608_00;
+    ref_L00_001B2608_00 = p + 4;
+    q = (char *)ref_L00_001B2608_00;
+    *(long long *)(p + 4) = 0x7400000000008001LL;
+    *(long long *)(q + 8) = 0x05353106;
+    result = func_0028E640(a0);
+    *(long long *)(q + 16) = result;
+    *(long long *)(q + 24) = 0x156;
+    *(long long *)(q + 32) = ((long long)a9 << 24) | 0x7F7F7F;
+    *(long long *)(q + 40) = a5 | ((long long)a6 << 16);
+    *(long long *)(q + 48) = (a1 + D_001A7350 - 8) | ((long long)(a2 + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 56) = a7 | ((long long)a8 << 16);
+    *(long long *)(q + 64) = (a3 + D_001A7350 - 8) | ((long long)(a4 + D_001A7354 - 8) << 16) | ((long long)ref_L00_001B1BBC_01 << 32);
+    *(long long *)(q + 72) = 0;
+    ref_L00_001B2608_00 = (int *)((char *)ref_L00_001B2608_00 + 0x50);
+}

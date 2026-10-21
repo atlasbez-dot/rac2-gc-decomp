@@ -63,7 +63,53 @@ void func_L07_003F6528(u8 *a0)
     func_L07_003F68F0(a0, 0.0f);
 }
 
-INCLUDE_ASM("asm/levels", func_L07_003F65E8);
+extern u16 *D_L07_001FAD60[];
+
+/* `sda` on an array of unknown size: cc1 emits the one-instruction load, which the assembler
+   expands absolute (`lui $r` / `lw $r,%lo($r)`), as retail has it in this -G0 unit. */
+extern u8 *D_L07_001B22DC[] __attribute__((sda));
+extern s32 D_L07_001B22F8[] __attribute__((sda));
+
+extern s32 func_002A77E0(s32 n);
+
+extern s32 func_00282948(s32 *counter);
+
+/* Picks at random one of the group's entities that are in state 1: counts them, draws an index
+   below the count, then walks the list again stepping the index down (func_00282948) until it
+   runs out. Returns 0 when there is none. */
+u8 *func_L07_003F65E8(s32 group)
+{
+    u16 *p;
+    u16 *q;
+    u8 *e;
+    s32 n = 0;
+    s32 k;
+
+    for (p = D_L07_001FAD60[group];
+         (group & 0xFF) != 0xFF && group <= D_L07_001B22F8[0] && p != 0 &&
+         ((s16)p[-1] >= 0 || p == D_L07_001FAD60[group]);
+         p++) {
+        e = D_L07_001B22DC[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (e[0x20] == 1)
+            n++;
+    }
+    if (n == 0)
+        return 0;
+    k = func_002A77E0(n);
+    for (q = D_L07_001FAD60[group];
+         (group & 0xFF) != 0xFF && group <= D_L07_001B22F8[0] && q != 0 &&
+         ((s16)q[-1] >= 0 || q == D_L07_001FAD60[group]);
+         q++) {
+        e = D_L07_001B22DC[0] + ((*q & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (e[0x20] == 1 && func_00282948(&k) != 0)
+            return e;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L07_003F67B8);
 
@@ -257,7 +303,36 @@ INCLUDE_ASM("asm/levels", func_L07_0040F0D0);
 
 INCLUDE_ASM("asm/levels", func_L07_0040F468);
 
-INCLUDE_ASM("asm/levels", func_L07_0040F598);
+/* The object's state record up to its three group words (-1 means none). Indexing the array
+   member is the spelling that gives retail's address arithmetic (the +0x94 base as a sum of its
+   own, the group word read again inside the walk); a cast sum or a pointer variable does not. */
+typedef struct {
+    u8 pad[0x94];
+    s32 groups[3];
+} GroupState;
+
+/* Walks the id list of each of the object's three groups, stopping at the first id with no
+   entity; the walk itself does nothing. */
+void func_L07_0040F598(u8 *a0)
+{
+    GroupState *state = *(GroupState **)(a0 + 0x68);
+    s32 i;
+    u16 *p;
+    u8 *e;
+
+    for (i = 0; i < 3; i++) {
+        if (state->groups[i] == -1)
+            continue;
+        for (p = D_L07_001FAD60[state->groups[i]];
+             (state->groups[i] & 0xFF) != 0xFF && state->groups[i] <= D_L07_001B22F8[0] && p != 0 &&
+             ((s16)p[-1] >= 0 || p == D_L07_001FAD60[state->groups[i]]);
+             p++) {
+            e = D_L07_001B22DC[0] + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+        }
+    }
+}
 
 /* func_L07_0040F6B8 is defined in L07_003F4578-g8.c (this unit has no $gp access for it). */
 
@@ -286,6 +361,6 @@ void func_L07_004106B8(u8 *a0)
 
 INCLUDE_ASM("asm/levels", func_L07_00410700);
 
-INCLUDE_ASM("asm/levels", func_L07_00410930);
+/* func_L07_00410930 is defined in L07_003F4578-g8.c (it takes the address of $gp data). */
 
 INCLUDE_ASM("asm/levels", func_L07_00410C50);

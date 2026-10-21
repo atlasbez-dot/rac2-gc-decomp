@@ -12,7 +12,14 @@
  * block, the array indexed inline, `D + 0x61` with p[0..3], `> 0x7F` for `>= 0x80`, an empty
  * then-arm, the constant 0x7F in a named local, and a `u8 *q` neighbour base. All land on 172
  * or 176. What would unblock it: a way to make cc1 create the base pseudo only at the stores.
- */
+    Wave 24 (worker 13) measured the same body again with two names per global
+   (`D_L05_001B1350` sda and `D_L05_001B1350_1` for its low byte): the three extra
+   reloads of the sda word disappear, but then the address of every global is kept in
+   a register instead of being rematerialised (`lui $v0,%hi(D) ; lw $v0,%lo(D)($v0)` in
+   retail).  The two spellings are mutually exclusive: the reloads and the
+   rematerialisation never come together.  With one name per global the body is 176
+   bytes, with two it is 172.
+*/
 
 typedef signed int s32;
 

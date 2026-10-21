@@ -184,7 +184,76 @@ void func_L04_00343498(u32 value, float f) {
 
 INCLUDE_ASM("asm/levels", func_L04_00344568);
 
-INCLUDE_ASM("asm/levels", func_L04_00347AB8);
+extern void func_00283658(void *dst, void *src);
+extern f32 func_00282DB0(void *a, void *b);
+extern f32 func_00282C10(f32 x);
+extern f32 func_00283248(f32 a, f32 b);
+extern void func_00282DD8(void *dst, void *a, void *b);
+extern void func_00283430(void *dst, void *src);
+extern void func_00283788(void *a, void *b, void *c);
+extern void func_002830C0(void *a, void *b, void *c);
+extern f32 func_002AA898(f32 *position, f32 *velocity, s32 direction, f32 target,
+                         f32 acceleration, f32 damping, f32 limit);
+extern void func_002AB6D8(f32 *src, f32 *out);
+
+/* Copies the caller's matrix into a local one, takes the two aim angles off
+   the target vector, springs one of them, and turns the copy by the three
+   angles before handing its axes to the caller. */
+void func_L04_00347AB8(void *a0, void *a1, void *a2, void *a3, f32 f1, f32 f2, f32 f3)
+{
+    f32 pos;
+    f32 buf0[16];
+    f32 buf1[16];
+    f32 mat[16];
+    f32 vec[4];
+    f32 res[4];
+    f32 v;
+    f32 d;
+    f32 ang;
+    f32 base;
+
+    v = *(f32 *)((u8 *)a1 + 8);
+    pos = 0.0f;
+    func_00283658(mat, a0);
+    d = func_00282DB0(a3, mat + 8);
+    base = func_00283248(d, func_00282C10(1.0f - d * d));
+    func_00282DD8(res, a3, mat + 8);
+    if (res[2] < 0.99f) {
+        ang = func_00283248(res[0], res[1]);
+        vec[0] = 0.0f;
+        vec[1] = 0.0f;
+        vec[2] = -ang;
+        func_00283430(buf1, vec);
+        func_00283788(mat, buf1, mat);
+        func_002830C0(res, res, buf1);
+        d = func_00283248(res[2], res[0]);
+        vec[0] = 0.0f;
+        vec[1] = -d;
+        vec[2] = 0.0f;
+        func_00283430(buf0, vec);
+        func_00283788(mat, buf0, mat);
+        func_002830C0(res, res, buf0);
+    } else {
+        ang = 0.0f;
+        d = 0.0f;
+    }
+    func_002AA898(&pos, (f32 *)a2, 0, base, f1, f2, f3);
+    vec[0] = 0.0f;
+    vec[1] = 0.0f;
+    vec[2] = pos;
+    func_00283430(buf1, vec);
+    func_00283788(mat, buf1, mat);
+    vec[1] = d;
+    vec[2] = 0.0f;
+    func_00283430(buf0, vec);
+    func_00283788(mat, buf0, mat);
+    vec[1] = 0.0f;
+    vec[2] = ang;
+    func_00283430(buf1, vec);
+    func_00283788(mat, buf1, mat);
+    func_002AB6D8(mat, (f32 *)a1);
+    *(f32 *)((u8 *)a1 + 8) = v;
+}
 
 
 INCLUDE_ASM("asm/levels", func_L04_003524D0);
@@ -210,7 +279,81 @@ INCLUDE_ASM("asm/levels", func_L04_00365300);
 
 INCLUDE_ASM("asm/levels", func_L04_00378838);
 
-INCLUDE_ASM("asm/levels", func_L04_0039FA08);
+extern void func_00115484(void *dst, s32 value, s32 size);
+
+/* the header of one 0x1190-byte ripple patch */
+typedef struct {
+    u8 pad00[0x20];
+    s32 field20;
+    s32 field24;
+    f32 field28;
+    f32 field2C;
+    f32 field30;
+    f32 field34;
+    f32 field38;
+    f32 field3C;
+    f32 field40;
+    s32 field44;
+} RipplePatch;
+
+/* clears the three grids of every ripple patch and sets the patch's header fields */
+void func_L04_0039FA08(u8 *base, s32 count) {
+    s32 i;
+    s32 j;
+    u8 *g1;
+    u8 *g2;
+    u8 *g3;
+    u8 *g4;
+    u8 *g5;
+    u8 *g6;
+    u8 *g7;
+    u8 *g8;
+    f32 small;
+
+    for (i = 0; i < count; i++) {
+        g8 = base + (i * 0x1190 + 0x5D0);
+        g7 = base + (i * 0x1190 + 0x590);
+        g6 = base + (i * 0x1190 + 0x510);
+        g5 = base + (i * 0x1190 + 0x550);
+        g4 = base + (i * 0x1190 + 0x4D0);
+        g3 = base + (i * 0x1190 + 0x490);
+        g2 = base + (i * 0x1190 + 0x450);
+        g1 = base + (i * 0x1190 + 0x50);
+        small = -0.0016f;
+        for (j = 0; j < 3; j++) {
+            func_00115484(g1, 0, 0x400);
+            g1 += 0x5C0;
+            func_00115484(g2, 0, 0x40);
+            g2 += 0x5C0;
+            func_00115484(g3, 0, 0x40);
+            g3 += 0x5C0;
+            func_00115484(g4, 0, 0x40);
+            g4 += 0x5C0;
+            func_00115484(g5, 0, 0x40);
+            g5 += 0x5C0;
+            func_00115484(g6, 0, 0x40);
+            g6 += 0x5C0;
+            func_00115484(g7, 0, 0x40);
+            g7 += 0x5C0;
+            func_00115484(g8, 0, 0x18);
+            g8 += 0x5C0;
+        }
+        {
+            RipplePatch *q = (RipplePatch *)(base + i * 0x1190);
+
+            q->field30 = 1.5707964f;
+            q->field34 = -1.5707964f;
+            q->field38 = 0.02f;
+            q->field3C = -0.031f;
+            q->field40 = 0.03f;
+            q->field20 = 0;
+            q->field24 = 0;
+            q->field28 = small;
+            q->field2C = small;
+            q->field44 = 0;
+        }
+    }
+}
 
 
 /* func_L04_0039FEA8 is matched in L04_0039FEA8.c (built with -g). */

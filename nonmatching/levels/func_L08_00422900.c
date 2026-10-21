@@ -9,3 +9,11 @@
  * wave measured that this cc1 cannot emit max.s from any spelling, and it is the one word
  * that differs - the row needs the same compiler-side lever as func_L08_00425328.
  */
+
+/* Measured again (wave 24, worker 10): the wall is the machine description
+   itself.  The game's mips.md (gcc-1.1, patched) has no max.s pattern at all
+   (`grep -n "max_s\|min_s" config/mips/mips.md` finds nothing), so no C
+   spelling can produce the 0x46010028 at 0x004229B4; a ternary and a
+   conditional assignment both come out as c.olt.s + bc1tl + mov.s.  Everything
+   else in the body - the quad copy, both arms, the clamp against +0x1D4 - is
+   instruction-exact. */

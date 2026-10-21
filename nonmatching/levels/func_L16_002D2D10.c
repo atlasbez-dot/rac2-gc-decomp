@@ -1,15 +1,24 @@
-/* func_L16_002D2D10, 88 bytes, 1 placement (level 16).  Best candidate 72 bytes; six
-   spellings (v1 source order, v2/v4 named reciprocal locals, v3 reversed, v5 pointer,
-   v6 guard-first) give the IDENTICAL 72-byte object.
-   Retail = 88: two 2-nop pairs (after `sw $a0,0x280($v0)` and after `swc1 $f0,0x27C($v0)`)
-   and the two reciprocals in the other order - retail's first `div.s` is by $f13 into
-   $f1 (stored at +0x278) and its second is by $f12 into $f0 (stored at +0x274); this cc1
-   always divides by $f12 first into $f1 and stores +0x274 first, whatever the source
-   order, and emits no nops.  So the gap is codegen, not spelling.
-   The resident block is 0x001B99C0 (fields +0x274, +0x278, +0x27C float, +0x280 int);
-   note the stale `T_001BFF99C0`/`D_001BFF99C0` declarations that used to sit in
-   src/levels/16_snivelak/L16_002C6378.c named 0x001BFF99C0, which is 0x6640 too high -
-   corrected to D_L16_001B99C0 there.  The body: */
+/* func_L16_002D2D10, 88 bytes, 1 placement (level 16).  Closest candidate: 76 bytes
+   (the retail's four extra `nop`s).
+
+   The store order in the source is the lever: the earlier attempt assigned
+   f278 before f274, and this cc1 then computed 1/f12 first (`div.s $f1,$f0,$f12`)
+   and stored it at +0x274.  With f274 assigned first, the divisions and the
+   stores come out in retail's order:
+
+     retail: div.s $f1,$f0,$f13 ; swc1 $f0,0x27C ; div.s $f0,$f0,$f12 ;
+             swc1 $f1,0x278 ; swc1 $f0,0x274
+     this:   div.s $f1,$f0,$f13 ; s.s   $f0,636 ; div.s $f0,$f0,$f12 ;
+             s.s   $f1,632 ; s.s   $f0,628
+
+   What is still missing is the pair of standalone `nop`s retail has before each
+   `div.s` (four in all, 16 bytes).  They are not delay-slot nops - the div.s
+   stands alone - and this cc1 and its assembler never emit one there; the
+   game's as only fills a delay slot (tools/compiler/patches/0051 touches the
+   FPR hazard nops, and it is the delay-slot search that uses them).  The same
+   pair appears in other retail bodies of this level (for instance at
+   0x002AACF0 before `div.s $f12,$f12,$f4`), while other div.s in the same
+   listing have none, so it is not a blanket rule on the division.  The body: */
 
 typedef unsigned char u8;
 typedef signed int s32;
@@ -29,7 +38,7 @@ void func_L16_002D2D10(s32 a0, f32 f12, f32 f13) {
     if (D_L16_001B99C0.f27C == 0.0f) {
         D_L16_001B99C0.i280 = a0;
         D_L16_001B99C0.f27C = 1.0f;
-        D_L16_001B99C0.f278 = 1.0f / f13;
         D_L16_001B99C0.f274 = 1.0f / f12;
+        D_L16_001B99C0.f278 = 1.0f / f13;
     }
 }

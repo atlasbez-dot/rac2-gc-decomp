@@ -297,17 +297,17 @@ int func_00274C90(char *object, float *output, int limit)
     return count;
 }
 
-INCLUDE_ASM("asm/game", func_00274D90);
+ASM_FUNC("asm/game", func_00274D90);
 
 ASM_FUNC("asm/game", func_00276158);
 
-INCLUDE_ASM("asm/game", func_002761F8);
+ASM_FUNC("asm/game", func_002761F8);
 
-INCLUDE_ASM("asm/game", func_00277258);
+ASM_FUNC("asm/game", func_00277258);
 
-INCLUDE_ASM("asm/game", func_00277F48);
+ASM_FUNC("asm/game", func_00277F48);
 
-INCLUDE_ASM("asm/game", func_00278870);
+ASM_FUNC("asm/game", func_00278870);
 
 INCLUDE_ASM("asm/game", func_00278CE0);
 
@@ -379,7 +379,90 @@ int func_00279988(void) {
     return func_00282948(D_001B7FA8);
 }
 
-INCLUDE_ASM("asm/game", func_002799A8);
+/* Index holder at 0x1B7F80: the current item index and the key that goes with it. */
+typedef struct {
+    char pad000[0x20];
+    unsigned short idx;
+    unsigned short idx2;
+} OozlaIndex_001B7F80;
+
+/* Item table at 0x1B8308: 32 entries of 40 bytes; the group key first, the item pointer at 0x1C. */
+typedef struct {
+    int key;
+    char pad004[0x18];
+    int ptr;
+    char pad020[8];
+} OozlaEntry_001B8308;
+
+typedef struct {
+    OozlaEntry_001B8308 e[32];
+    int count;
+} OozlaTable_001B8308;
+
+extern OozlaTable_001B8308 D_001B8308;
+extern int func_002798A0(int, int *, int *);
+
+/* The index holder itself, named through the symbol the file already uses for it. */
+#define OozlaHolder ((OozlaIndex_001B7F80 *)Fd8e166aa_D_001B7F80)
+
+/* The level's state word.  It sits at a different address in every program that has
+   this function (0x1B1580 in the boot, 0x1B18C0 in level 00, and so on), so it is a
+   per-level external.  The sda attribute makes the compiler emit a bare symbol
+   reference; the assembler then expands it - in reorder mode, and with the symbol's
+   size still unknown - into the retail's "lui $reg,0x1B" plus offset, with the
+   address in $at for the stores.  This unit therefore has to stay at -G0: a -G8
+   sibling would emit the .extern directive, and the reference would become
+   gp-relative instead. */
+extern int ref_L00_002E38F0_00 __attribute__((sda));
+
+int func_002799A8(void)
+{
+    int t1, t2;
+    OozlaIndex_001B7F80 *g = OozlaHolder;
+    int key, found, count;
+
+    if ((short)g->idx == -1) {
+        g->idx = 0;
+        g->idx2 = 0;
+        if (ref_L00_002E38F0_00 == 1) {
+            ref_L00_002E38F0_00 = 2;
+            g->idx = 4;
+            g->idx2 = 0;
+        }
+        return 1;
+    }
+    if (func_002798A0(D_001B8308.e[(short)g->idx].ptr, &t1, &t2)) {
+        if (D_001B8308.e[(short)g->idx].ptr != 0) {
+            g->idx = (unsigned short)t1;
+            g->idx2 = (unsigned short)t2;
+            return 1;
+        }
+    }
+    {
+        OozlaEntry_001B8308 *e = &D_001B8308.e[(short)OozlaHolder->idx];
+
+        found = 1;
+        count = D_001B8308.count;
+        key = e->key;
+        OozlaHolder->idx2 = 0;
+        OozlaHolder->idx = OozlaHolder->idx + 1;
+        if ((short)OozlaHolder->idx < count) {
+            do {
+                if (D_001B8308.e[(short)OozlaHolder->idx].key != key) {
+                    found = 0;
+                } else {
+                    OozlaHolder->idx = OozlaHolder->idx + 1;
+                }
+            } while ((short)OozlaHolder->idx < count && found);
+        }
+        if ((short)OozlaHolder->idx == 4 && ref_L00_002E38F0_00 == 0) {
+            OozlaHolder->idx = 3;
+            ref_L00_002E38F0_00 = 1;
+            return 0;
+        }
+    }
+    return !found;
+}
 
 
 INCLUDE_ASM("asm/game", func_00279B70);

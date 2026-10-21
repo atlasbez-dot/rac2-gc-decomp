@@ -1543,3 +1543,364 @@ only describe, and found the source spellings for two game-wide idioms.
   saves of a body into the retail's order.
 - **gas turns the compiler's `addu rd,rs,imm` into the retail's `addiu`**, and `move rd,rs`
   into `daddu rd,rs,$zero` - a candidate differing only in those is not a difference.
+
+## Habits measured on the small unclaimed bodies (21 October 2026)
+
+A wave of sixteen workers over the 159 smallest unclaimed functions in the project
+(level directories and `src/core/`) matched twenty of them. The findings correct
+several earlier notes, which said the opposite.
+
+- **`min.s`/`max.s` ARE reachable, with `-ffast-math`.** `fold()` in fold-const.c only
+  builds a float MIN/MAX_EXPR out of `a < b ? a : b` when the float format is not IEEE or
+  `flag_fast_math` is set. Every earlier "the min/max opcodes are a wall" note is wrong.
+  The flag is per file, and it is what made `func_L01_003BD560` reach the retail's
+  `min.s $f0,$f15,$f12` exactly.
+- **A block written as a `while` whose body returns stays a loop head**, so the label
+  after it is aligned to **eight bytes** (`.p2align 3`) and the assembler pads it with a
+  standalone `nop` - the retail's. The `if` form leaves the label four-byte aligned and
+  the body four bytes short. The eight-byte label alignment has two sources only
+  (final.c): a loop head (`LOOP_ALIGN`) and a jump table (`ADDR_VEC_ALIGN`); a merge
+  point gets four bytes (`mips_align_jumps`).
+- **A positive `addiu $sp,$sp,X` in a row's first bytes is a dead-stripped epilogue,
+  never a prologue** - a C body always allocates its frame with a negative `addiu`. That
+  is how most of the broken `src/core` rows start: the real body sits 8-56 bytes further
+  on. A census from the wave: **1465 catalogue rows open with an
+  `addiu $sp,$sp,+N ; nop` pair, and not one of them has a C definition in `src/`.**
+- **The `$gp` form and the `lui`/`%lo` form need two C names for one address.**
+  `sda` gives `$gp` for every access and `nosda` gives `lui`/`%lo` for every access, so
+  a body that uses both forms names the second access separately. In a `-G0` unit `sda`
+  is not ignored (the global goes through `$gp`); in a `-G8` unit it is `nosda` that
+  keeps the absolute form.
+- **The -G8 profile changes the register allocation, not only the `$gp` data.**
+  `func_L17_003BCBC8` matches only at `-G8`: there the two colour constants land in
+  `$a1`/`$t0` where `-G0` puts them in `$v1`/`$a3` - a body with no `$gp` at all.
+- **A named local for a constant changes the order the constants are materialised in.**
+  `s32 c1 = 0x80404040;` used once inside a branch makes cc1 materialise it *before*
+  `0x80FFFFFF`; with the two literals inline it is the other way round.
+- **A duplicated tail can restore a retail block layout.** For `func_00116300` the plain
+  `if` gave 88 bytes; duplicating the tail in both arms made the compiler keep the
+  retail's `bne` plus the unconditional jump over it.
+- **`sda` bites through the assembler, not the compiler**: cc1 emits an absolute
+  `lui`/`%lo` pair, but the `.extern NAME, size` it emits makes gas produce the
+  `$gp`-relative form. It works for a **scalar** declaration, not for an array.
+- **The retail's `nop` before a `div.s` is not the assembler's** - the game's `as` emits
+  none there, and the compiler has no FPR-hazard nop rule. It is a source shape.
+- **A store to a constant address**: non-volatile gives a split address, volatile gives
+  a materialised one but is not scheduled into a delay slot. A body that wants both
+  needs a register pin, which `src/` forbids.
+- **`sync` is unreachable in both compilers** (no pattern in either `cc1`), so the 22
+  boot bodies with a `sync` cannot be matched from C at all.
+- **`(int)double` compiles to a `jal dptoli` libcall** under the SDK profile, where the
+  retail has the old gcc inline `fixdfsi` - a toolchain difference, not a source shape.
+## Optional scheduling model for 128-bit clears (21 October 2026)
+
+- **What retail does.** Retail clears a quadword with `sq $zero,0(reg)`. Every one of the 360
+  such stores in its compiled code (outside the hand-written COP2/MMI routines) has
+  displacement 0. In 71 of 95 inspected cases a load that may alias the cleared quadword comes before an
+  independent instruction that was ready before the store. For a plain store this scheduler
+  does that rarely (43 of 1,499 stores in the functions it already matches), and sp-based
+  clears (14 of 14) behave like pointer-based ones. That is the shape of an inline-asm clear,
+  `asm volatile ("sq $0,0x0(%0)" ...)`, which both schedulers treat as a barrier. Such a helper
+  gives retail's bytes with this cc1, but `src/` does not allow inline assembly.
+- **What this cc1 did.** The C writes the clear as a TImode store of zero (`*(TI128 *)p = 0`),
+  and `rac2_fold_zero_ti_store` turns it into `sq $0` after reload. sched2 then sees an
+  ordinary store. The R5900 issues two instructions a cycle, and the scheduler never issues an
+  instruction in the cycle that made it ready, so an independent ready instruction always took
+  the store's second slot and a dependent load came later. Lowering the store's ready cost to 1
+  does not change that.
+- **The opt-in change.** `transformers/zero_ti_store_barrier.py` gives those stores, in
+  `gcc/haifa-sched.c`'s `sched_analyze_insn`, the dependences, cost and unit of a volatile asm
+  (as `sched_analyze_2` builds them). After reload that is a TImode store from `$0`. Before
+  reload it is a TImode store of const 0 that is the only one between two calls, labels or
+  jumps: a zero that several stores share stays `por` + `sq`, the C form, and the fold leaves
+  it alone. This is enabled only by `-frac2-zero-ti-barrier`, per compilation unit
+  in `config/cflags.txt`; the default remains unchanged. The test controls show
+  that the heuristic also changes a single nonzero-displacement clear. It is not
+  a general detector of original inline assembly, so enabling it elsewhere needs
+  evidence and checks for every function in that file.
+- **Measured on 21 October.** An independent comparison of the same 767 source
+  units found 756 whole objects identical, ten with only `.mdebug` differences,
+  and one changed code section: the witness. The SDK compiler is unchanged.
+  `func_L00_003BFF68` (12 places) matches with the option, and with it disabled the same C
+  is 0 of 12: its prologue saves come out grouped, its clear two instructions late, and two
+  delay slots differ. Of the 1,779 drafts in `nonmatching/`, 28 change. `func_L02_003EAE10`'s
+  record and a new draft of `func_L13_0040A3B0` (3 places) are exact with it. Of the drafts
+  that change size, `func_L23_003BFE90` reaches retail's 300 bytes, and `func_L00_003CD160`
+  comes 8 bytes closer to retail's 1,268. Those draft-screen results were reported
+  for the initial always-enabled proposal; enabling the final option for each
+  additional unit still requires its own validation.
+
+`tests/test_zero_ti_store.py` executes the injected selector against synthetic RTL
+cases: zero/nonzero registers, scalar/quadword memory, neighboring clears and
+call/jump/label/barrier boundaries in both directions. Authored C controls then
+compile and assemble with the real EE tools in default, enabled and explicitly
+disabled modes, covering isolated/shared clears, nonzero displacement, calls and
+branches. `tools/compiler/build.sh` runs these tests after installation and pins
+the scheduler, option declarations and option table alongside the existing source
+hashes. Game-byte equality remains a separate full-build gate.
+
+## Preserve materialized zeros for displaced quadword stores (21 October 2026)
+
+The original fold also replaced a dead materialized zero in a store addressed
+as `base + displacement`. That removed one instruction needed by three retained
+vector helpers. The fold now requires a `REG` memory address after reload;
+offset expressions retain their `por` and register-source `sq`. Direct stores
+at displacement zero still fold, and the existing liveness and return-value
+guards still apply. This is a compiler source correction, not an assembly-output
+rewrite or a source barrier.
+
+The same C compared with the preceding compiler gives these results:
+
+| Function | Before | After | Placements |
+| --- | ---: | ---: | ---: |
+| `func_L20_0044AB68` | 200 / 204 bytes | 204 / 204 bytes | 1 / 1 |
+| `func_L20_00443908` | 260 / 264 bytes | 264 / 264 bytes | 1 / 1 |
+| `func_L00_003ACC88` | 108 / 112 bytes | 112 / 112 bytes | 27 / 27 |
+
+The shared helper belongs in the existing `-G8` unit and declares its two local
+vectors in their measured stack order. The existing function in that unit
+continues to pass all 27 placements. Across the 775 configured units preceding
+these additions, the compiler comparison found no changed object sections
+except `.mdebug` in eleven units. These observations do not establish a fix for
+the separate vector-copy address-materialization problem in issue #248.
+
+`tests/test_zero_ti_store.py` compiles authored controls with the real compiler
+in default, enabled and explicitly disabled scheduling profiles. It checks that
+positive and negative offset stores retain a zero-producing register, while
+zero-displacement stores still fold. The compiler build pins the updated source
+hash and requires these controls to pass before installation is accepted.
+
+The integrated correction passes all 28 programs with `tools/build.py all
+--strict` and no rejected C placements; the complete container test suite
+passes 57 tests. The three witnesses add 580 distinct matched code bytes.
+
+## Two Cygnus-local passes as opt-in switches (21 October 2026)
+
+This tree carries two pieces of Cygnus's own 1998 work that the GCC 2.95 branch does not
+have. Retail's code in the witnesses below has the placement and the block order without
+them. That is an inference from retail's code, not a dated GCC fix, so both are opt-in
+switches, enabled per unit in `config/cflags.txt`.
+
+- **gcse's critical-edge split.** With `-fno-edge-lcm` (the default since patch 0016),
+  `gcse_main` builds its predecessor and successor lists with `compute_preds_succs (..., 1)`.
+  The last argument is Cygnus's (flow.c, "CYGNUS LOCAL edge splitting/law";
+  `gcc/ChangeLog.Cygnus`, 21 January 1998, restricted on 19 May and 14 September 1998): it
+  splits each critical edge that needs no new jump, a fall-through edge or an edge into a label
+  reached only by jumps, and the block LCM (`pre_lcm`) then inserts on the new block. A hoisted
+  `%hi` gets a block of its own in front of such a label, and the register allocation and the
+  delay slots around it change with it. GCC 2.95.3's `gcse_main` calls a four-argument
+  `compute_preds_succs` that only builds the lists, and its PRE inserts at the end of a block.
+  `-frac2-gcse-unsplit-edges` (`transformers/gcse_unsplit_edges.py`) passes 0 instead of 1,
+  the equivalent of GCC 2.95's call.
+- **The block merge after the jump passes.** `cygnus_merge_blocks` (flow.c, "CYGNUS LOCAL
+  law"; `ChangeLog.Cygnus`, 28 May 1998) runs after the first jump pass and after the jump
+  passes that follow cse, gcse and cse2. It moves a block reached only by a jump, from a block
+  with no other successor, up behind that block and deletes the jump: a `switch` whose default
+  is its last case loses its `b default`, and the default body moves up behind the dispatch.
+  GCC 2.95.3's `rest_of_compilation` calls no such pass. `-frac2-keep-block-order`
+  (`transformers/keep_block_order.py`) returns from it at once, before its own
+  `find_basic_blocks`.
+- **Measured on 21 October.** Against the compiler built from master (356b450), the 775 units
+  of `src/` (669 through this cc1, 106 through the SDK compiler) compile to identical objects
+  with the switches off, with each switch on in every unit, and with both on. An earlier
+  logging build of the 662 game-compiler units then in `src/` counted no block merge at all;
+  the pass merged blocks in 10 of the drafts. Of the 1,687 drafts screened, 11 change with the
+  gcse switch, 10 of them closer to retail (more words in a longest common subsequence with
+  retail's) and one unchanged, and 6 with the
+  block-order switch, 2 of which are SDK-compiler units this cc1 does not build.
+- **The witnesses, now in `src/`.** `func_L02_003E79F8` (`L02_003DB310-g8.c`, gcse switch):
+  360 bytes become retail's 352 at its one place; without the split the two `lui` land above
+  the loop's peeled first test, and reorg can empty the copy's else block into retail's
+  `bgez ; b ; lw`. `func_002CD720` (`src/game/002CD620.c`, gcse switch), with its two arms in
+  retail's order: 344 bytes become 340, at all 28 places. `func_L02_003FCCA0`
+  (`L02_003F5430-g8.c`, both switches): its `switch` gives retail's entry block, prologue and
+  `b default` layout, at its one place. `func_L18_004283F0` (`src/levels/shared/
+  L18_00427BE0.c`, block-order switch): 48 bytes become 56, at all 3 places. With the switches
+  in those four units, `tools/check.py` matches all 57 C functions of the six touched files at
+  every place. Two drafts move closer without matching: `func_L23_0041B9F0` reaches retail's
+  1,148 bytes with the gcse switch and still differs in its 16-byte copy order, and
+  `func_002900B8` goes from 1,364 to 1,380 of 1,388 bytes with the block-order switch.
+- **What a scan of retail does not show.** The split's leftover shape (a lone `lui` at a
+  branch target that nothing falls into, followed by another branch target) occurs in 47 of
+  retail's 8,606 functions, 7 of them already matched with neither switch: switch case tails
+  and constant loads have the same shape, so the count does not measure the split.
+
+`tests/test_gcse_unsplit_edges.py` and `tests/test_keep_block_order.py` check that each
+transformer uses each insertion point once and refuses a drifted source before writing any
+file, then compile authored fixtures with the real EE tools in default, enabled and explicitly
+disabled modes: the case each switch changes (a hoisted high half on a split edge; a `switch`
+with its default last) and controls whose output must not change (a diamond and a loop
+invariant; a default-first `switch`, an if/else chain and a loop). `tools/compiler/build.sh`
+runs both after installation and pins `gcse.c` and `flow.c` beside the updated `toplev.c` and
+`flags.h`. Game-byte equality remains a separate full-build gate.
+
+## Grouped vector copies and 64-bit masks (21 October 2026)
+
+`-frac2-qcopy` is a default-off, per-file profile for aligned TImode
+memory-to-memory assignments. It keeps destination and source addresses in
+registers and groups their `lq`/`sq` instructions with an explicit `$v0` scratch
+clobber. Plain C remains in `src/`; this is a compiler machine pattern, not an
+assembly-output rewrite. `-fno-rac2-qcopy` restores the default. Scalar moves,
+zero stores and explicitly unaligned accesses retain their ordinary lowering.
+
+The memory operands keep their volatile/structure flags and alias sets. No
+memory barrier is added. The pattern's length is **two instructions** in this
+backend, and assembled regression controls cover integer and FPU branch delay
+slots. Public Lombyte/RAC1 copy helpers motivated the register-address/scratch
+model; their inline assembly is not an admissible C implementation here. See
+the pinned references in [CREDITS.md](../CREDITS.md).
+
+The qualified witnesses are `func_L20_0039E158` (140 bytes) and
+`func_L20_0039F210` (32 bytes), one placement each. The latter uses
+`-fno-schedule-insns` and writes its two distinct state fields in the measured
+order. Restricting all TImode addresses to registers was insufficient: it found
+the right sizes but different allocation/order. Grouping the actual copy is
+what provides these matches. The ordinary folded-copy witness
+`func_L00_00395240` retains its default profile.
+
+The assembler also needs two bounded 64-bit immediate cases: the isolated sign
+bit uses `addiu -1` followed by `dsll32 31`; a sign bit plus a contiguous low run
+of at least 32 ones keeps the existing sign-extending `lui` path. Other values
+retain patch `0052`'s previous paths. These cases unblock the retained public
+Newlib `_strtol_r` (`func_00117278`, 884 bytes) and GCC double packer
+(`func_00122630`, 300 bytes), one placement each. The positive shifted-mask
+case is qualified separately below; these are bounded rules, not a general
+repair for every mask.
+
+The packer and its callers share the 24-byte `DoubleParts` declaration. The
+`func_001175F0` wrapper declares the callee's actual long return and forwards
+it directly: an explicit 32-bit truncation adds two instructions absent from
+retail. Accurate prototypes are required even when a previous declaration
+happened to compile to the desired bytes.
+
+Across 779 configured units, the same-source comparison changes non-debug
+sections only in the four new witness units; eleven other units differ only
+in `.mdebug`. Remaining attempts `func_00335370`, `func_L20_0044A838` and
+`func_L00_002A6008` now have the correct copy sizes but still differ in ordinary
+allocation or scheduling. Their improved sources and specific remaining
+differences stay in `nonmatching/`; they receive no match credit.
+
+### Positive shifted masks and double addition
+
+The SDK-profile double adder `_fpadd_parts` (`func_00122800`) uses
+`0x0FFFFFFFFFFFFFFE` twice. Patch `0052` now lets positive contiguous runs wider
+than 32 bits, with zero bits at both ends, reach the existing shift-based mask
+expansion. Each use becomes three instructions instead of seven; the retained
+public GCC source becomes 576 bytes instead of 608. The function lives in its
+own unit with `sdk -O2 -G2 -ffunction-sections` and shares `DoubleParts` with
+the packer and callers. The game compiler is not the matching profile for
+this source; earlier retained notes conflated the two profiles.
+
+The width boundary matters: applying this rule to all shifted runs would also
+change the 20-bit mask `0x00FFFFF000000000` in already-matched game code.
+Runs of at most 32 bits, masks with holes, and sign-bit cases keep their prior
+paths. The selector uses unsigned arithmetic without division or undefined
+shifts. It selects a family of values, not a particular function or address.
+
+`tests/test_dli_masks.py` checks all 465 positive long-run intervals with four
+destination registers and 30 fixed boundary/neighbor controls: 1,980 assembled
+outputs. A same-source comparison of all 780 configured units changes
+non-debug sections only in the new double-adder unit; eleven units differ only
+in `.mdebug`. The complete strict build verifies all 28 programs with no C
+fallback, and the container suite passes 73 tests.
+
+### Double multiplication: retain the union and select the assembler seed
+
+`func_00122B00` (`dpmul`, 680 bytes) exposed a source-representation issue:
+the retained simplification of `fp-bit.c` replaced its fraction union with a
+scalar. In the SDK compiler, a direct union-member access has alias-set zero.
+Restoring `union { unsigned long long ll; unsigned int l[2]; }` adds the real
+store-to-store dependence that keeps the fraction store before the class
+constant. The delay-slot pass then emits the retail `bnel` with its annulled
+fraction store. No scheduler modification, artificial barrier or register
+constraint is needed. The enum spelling is immaterial for this witness.
+
+The shared `DoubleParts` header and all its users retain this original union.
+Comparing the four existing units before and after the type correction gives
+identical object sections. Disabling pre-reload scheduling was only diagnostic:
+it repaired the rounding tail but changed allocation and produced 688 bytes.
+Disabling post-reload scheduling left that tail wrong and changed the prologue.
+
+Two isolated sign-bit loads still require the zero-extending assembler seed.
+The default sign-extending seed is needed by already-qualified game code, so
+patch `0059` exposes a per-object `--r5900-sign-bit=unsigned` option instead of
+changing the default. `-Wa,` forwards it from the existing per-file flag table;
+the same source-built assembler handles both forms. Explicit `signed` restores
+the default, and invalid/missing values fail. Both forms compute the same value;
+qualification requires the particular retail encoding.
+
+The assembler controls cover all 1,980 authored outputs in default, signed and
+unsigned profiles. A same-source A/B over 781 configured units changes code only
+in the new multiplier; eleven units differ only in `.mdebug`. All 80 container
+tests pass. `func_00335370` remains a separate nonmatch: its post-reload scheduler
+moves the independent return-address restore into a load-to-address latency gap.
+The retained note records the measured phase and unsuccessful controls.
+
+## Labels in front of the hazard nop (21 October 2026)
+
+When the instruction after a code label needs a coprocessor hazard `nop` (an FPU compare
+before its `bc1f`/`bc1t`, an `mtc1` before a reader of the written register), GNU `as`
+emits the nop in front of that instruction and moves every label defined since the previous
+instruction behind it: in `append_insn`, and in `mips_emit_delays` when the `.set noreorder`
+that opens a branch flushes the delay. A branch to such a label then skips the nop.
+
+**Retail census.** Scope: the boot and the 27 level programs, each catalogued function once
+(at its first place), and only branch and `j` targets inside the function; labels reached
+through data (jump tables) were not counted. A site is a target whose nearest preceding non-nop
+instruction is a coprocessor hazard producer (an FPU compare, `mtc1`, `mfc1`, `ctc1`, `cfc1`)
+outside a delay slot; "reads" follows gas's own hazard tests.
+
+| next instruction | labels | where the label is |
+| --- | --- | --- |
+| reads the compare's condition or the `mtc1` register | 198 (71 compares, 127 `mtc1`), in 148 functions | **on the nop**, every one; all reached by forward branches only; none matched |
+| a division (`div.s`) | 60 | in front of its two nops (the division floor, unchanged) |
+| does not read it | 734 (659 forward, 75 loop heads) | right after the producer, no nop |
+| does not read it | 56 loop heads, all 8-byte aligned | after one nop: the `.p2align 3` fill, not a hazard nop |
+| after `mfc1` | 75 | no nop (interlocked) |
+
+No branch target sits behind a nop that its next instruction needed. The 56 aligned loop
+heads look like "labels after the hazard nop", but their next instruction never reads the
+register: cc1 writes `.p2align 3` before a loop label, gas emits the fill there and defines the
+label after it, and nothing moves (8 of those functions are matched C). Retail has no label
+reached only backward, or both ways, at a needed hazard nop, so the census alone does not say
+where such a label goes; nor does it have any branch target after a `ctc1`, `cfc1` or
+COP2 move.
+
+**Oracle.** SN ProDG 2.0's `Ps2EeAs` (the local `toolchain/` copy, SHA-256 `c839dd63…`),
+given authored snippets, keeps every label on the nop it inserts: reached forward, only
+backward, both ways, by a `j` or by a `.word` in data, two labels at one place, after the
+`li.s` macro, and after `.p2align 3` with or without fill. It gives retail's layout of
+`func_L02_00411530`. With `.set rac2_hazard_labels`, gas places every label of
+`tests/fixtures/hazard_labels.s` where `Ps2EeAs` does; the two remaining differences in that
+file are unrelated (`Ps2EeAs` pads the section end to 8 bytes, and its division floor gives one
+nop where the SDK 3.01 floor measured above gives two).
+
+**What is not proven.** `Ps2EeAs` 2.0 is not established as the shipping assembler (2.0 and
+3.01 disagree on 44 of the 97 synthetic outputs of the division study). The placement of a
+label reached only backward rests on the oracle alone, and `ctc1`/`cfc1`/COP2 hazards on
+the code path alone. The rule covers where a label goes at a hazard nop the assembler inserts;
+it says nothing else about the original assembler.
+
+**The change.** [`hazard_labels.py`](../tools/compiler/transformers/hazard_labels.py) adds
+`-frac2-hazard-labels`. cc1 then writes `.set rac2_hazard_labels` at the top of its output,
+and gas leaves the labels where they were defined in both label loops. It is opt-in per file
+in `config/cflags.txt` because it is inferred: `tools/build.py` passes the per-file flags to cc1
+only and runs `as` without options, so the directive is how a unit reaches the assembler.
+Without the switch neither program's output changes.
+
+**Witnesses.** `func_L18_004308F0` (1,384 bytes, 1 place) in
+`src/levels/18_damosel/L18_004308F0.c` and `func_L02_00411530` (80 bytes, 7 places) in
+`src/levels/shared/L02_00411530.c`, each a unit of its own built with
+`-O2 -G0 -ffunction-sections -frac2-hazard-labels`. Without the switch each is one branch
+offset off (`bc1f` at +0xE4, `bc1tl` at +0x18); with it `tools/check.py` places both at
+every place. Of the 1,794 drafts in `nonmatching/` on 21 October, six changed with the switch
+and one became exact (`func_L18_004308F0`).
+
+**Neutrality, measured on 21 October 2026** against the previous tools. With the switch on
+the two witness units only, the other 779 units (106 SDK) compile to the same objects, and each
+witness differs in that one word from the previous tools' output without the switch (they do
+not know it). With the switch forced on every non-SDK unit of those 779, and with a gas that
+keeps the labels unconditionally (SDK units included), 778 of the 779 are identical; the last,
+`src/game/002B5EF8.c` (built with `-g`), differs only in `.mdebug`, where a line label now
+sits on a nop. Making the behaviour the default would therefore change no code in that corpus;
+that choice is left to the maintainers.

@@ -180,7 +180,7 @@ void func_L00_002DC4C0(Obj_F4778f810 *obj)
     func_00282CF0_4((char *)obj + 0x10, (char *)obj + 0x10, (char *)&tmp[2]);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002E0200);
+ASM_FUNC("asm/levels", func_L00_002E0200);
 
 /* func_L00_002E2048 (packed status field) is a near miss:
    nonmatching/levels/func_L00_002E2048.c */

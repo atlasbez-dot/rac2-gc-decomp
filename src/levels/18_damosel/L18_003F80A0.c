@@ -63,9 +63,146 @@ INCLUDE_ASM("asm/levels", func_L18_003FB708);
 
 INCLUDE_ASM("asm/levels", func_L18_003FD858);
 
-INCLUDE_ASM("asm/levels", func_L18_003FDAB8);
+extern u16 *D_L18_001FB320[];
+extern u8 *D_L18_001B281C[] __attribute__((sda));
+extern s32 D_L18_001B2838[] __attribute__((sda));
+extern s32 D_001A79F0 __attribute__((sda));
+extern u8 D_0019B2E8[];
 
-INCLUDE_ASM("asm/levels", func_L18_003FDD68);
+extern s32 func_002ACBC8(u8 *, s32);
+
+/* The part of the object's state both tests read: two lists of four ids (a at 0x00, b at 0x10),
+   the halfword flags that go with them (c at 0x20, d at 0x28) and the word at 0x74. */
+typedef struct {
+    s32 a[4];
+    s32 b[4];
+    s16 c[4];
+    s16 d[4];
+    u8 pad30[0x74 - 0x30];
+    s32 f74;
+} DamosElState;
+
+/* Returns 0 while the word at 0x74 is -1 and 1 when it is 1, when the table byte of the object has
+   bit 7 set, or when func_002ACBC8 accepts one of the flagged ids of list a. Otherwise it walks
+   the groups of the flagged ids of list b: it returns 1 only when there is such a group and none
+   of its entities (state other than 0xFE and 0xFD) has bit 0 of its halfword at +0x34 clear, and
+   then drops the ids of list b whose flag is set. */
+s32 func_L18_003FDAB8(u8 *a0, u8 *a1)
+{
+    DamosElState *state = *(DamosElState **)(a0 + 0x68);
+    s32 i;
+    s32 ok;
+    s32 any;
+    u16 *p;
+    u8 *e;
+
+    if (state->f74 == -1)
+        return 0;
+    if (state->f74 == 1)
+        return 1;
+    if (D_0019B2E8[a0[0xB0] + D_001A79F0 * 16] & 0x80)
+        return 1;
+    for (i = 0; i < 4; i++) {
+        if (state->a[i] == -1)
+            continue;
+        if (state->c[i] == 0)
+            continue;
+        if (func_002ACBC8(a1, state->a[i]))
+            return 1;
+    }
+    any = 0;
+    ok = 1;
+    for (i = 0; i < 4 && ok; i++) {
+        if (state->b[i] == -1)
+            continue;
+        if (state->d[i] == 0)
+            continue;
+        any = 1;
+        for (p = D_L18_001FB320[state->b[i]];
+             (state->b[i] & 0xFF) != 0xFF && state->b[i] <= D_L18_001B2838[0] &&
+             p != 0 && ((s16)p[-1] >= 0 || p == D_L18_001FB320[state->b[i]]);
+             p++) {
+            e = D_L18_001B281C[0] + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (e[0x20] != 0xFE) {
+                if (e[0x20] != 0xFD) {
+                    if ((*(u16 *)(e + 0x34) ^ 1) & 1) {
+                        ok = 0;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (ok && any) {
+        for (i = 0; i < 4; i++) {
+            if (state->d[i] != 0)
+                state->b[i] = -1;
+        }
+    }
+    return ok && any;
+}
+
+/* The same test with the flags read the other way round: 1 while the word at 0x74 is -1, 0 when it
+   is 1 or the table byte has bit 7 set, 1 when func_002ACBC8 accepts one of the unflagged ids of
+   list a, and the group walk of func_L18_003FDAB8 over the unflagged ids of list b. */
+s32 func_L18_003FDD68(u8 *a0, u8 *a1)
+{
+    DamosElState *state = *(DamosElState **)(a0 + 0x68);
+    s32 i;
+    s32 ok;
+    s32 any;
+    u16 *p;
+    u8 *e;
+
+    if (state->f74 == -1)
+        return 1;
+    if (state->f74 == 1)
+        return 0;
+    if (D_0019B2E8[a0[0xB0] + D_001A79F0 * 16] & 0x80)
+        return 0;
+    for (i = 0; i < 4; i++) {
+        if (state->a[i] == -1)
+            continue;
+        if (state->c[i] != 0)
+            continue;
+        if (func_002ACBC8(a1, state->a[i]))
+            return 1;
+    }
+    any = 0;
+    ok = 1;
+    for (i = 0; i < 4 && ok; i++) {
+        if (state->b[i] == -1)
+            continue;
+        if (state->d[i] != 0)
+            continue;
+        any = 1;
+        for (p = D_L18_001FB320[state->b[i]];
+             (state->b[i] & 0xFF) != 0xFF && state->b[i] <= D_L18_001B2838[0] &&
+             p != 0 && ((s16)p[-1] >= 0 || p == D_L18_001FB320[state->b[i]]);
+             p++) {
+            e = D_L18_001B281C[0] + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (e[0x20] != 0xFE) {
+                if (e[0x20] != 0xFD) {
+                    if ((*(u16 *)(e + 0x34) ^ 1) & 1) {
+                        ok = 0;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (ok && any) {
+        for (i = 0; i < 4; i++) {
+            if (state->d[i] != 0)
+                state->b[i] = -1;
+        }
+    }
+    return ok && any;
+}
 
 INCLUDE_ASM("asm/levels", func_L18_0042EBB8);
 
@@ -111,7 +248,7 @@ void func_L18_00430248(u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L18_004302B0);
 
-INCLUDE_ASM("asm/levels", func_L18_004308F0);
+/* func_L18_004308F0 is matched in L18_004308F0.c (built with -frac2-hazard-labels). */
 
 INCLUDE_ASM("asm/levels", func_L18_00430E58);
 
@@ -177,7 +314,54 @@ s32 func_L18_00432718(u8 *a0, float *a1) {
            0.00872664712369442f;
 }
 
-INCLUDE_ASM("asm/levels", func_L18_004327B0);
+extern u16 *D_L18_001FB320[];
+
+/* `sda` on an array of unknown size: cc1 emits the one-instruction load, which the assembler
+   expands absolute (`lui $r` / `lw $r,%lo($r)`), as retail has it in this -G0 unit. */
+extern u8 *D_L18_001B281C[] __attribute__((sda));
+extern s32 D_L18_001B2838[] __attribute__((sda));
+
+/* Looks through the object's group (state word 0x7B4) for the entity of class 0xB69, other than
+   the two states 0xFE and 0xFD and with bit 0 of its halfword at +0x34 clear, nearest to the
+   object (the callee measures the distance between the two +0x10 positions); keeps it in the
+   state's +0x7B8 word and tells whether there is one. A group word of -1 means no group. */
+s32 func_L18_004327B0(u8 *arg0)
+{
+    u8 *state = *(u8 **)(arg0 + 0x68);
+    u16 *p;
+    u8 *e;
+    u8 *found;
+    float best;
+    float d;
+
+    if (*(s32 *)(state + 0x7B4) == -1)
+        return 0;
+    found = 0;
+    best = 1000.0f;
+    for (p = D_L18_001FB320[*(s32 *)(state + 0x7B4)];
+         (*(s32 *)(state + 0x7B4) & 0xFF) != 0xFF && *(s32 *)(state + 0x7B4) <= D_L18_001B2838[0] &&
+         p != 0 && ((p != 0 && (s16)p[-1] >= 0) || p == D_L18_001FB320[*(s32 *)(state + 0x7B4)]);
+         p++) {
+        e = D_L18_001B281C[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (*(s16 *)(e + 0xAA) == 0xB69) {
+            if (e[0x20] != 0xFE) {
+                if (e[0x20] != 0xFD) {
+                    if ((*(u16 *)(e + 0x34) ^ 1) & 1) {
+                        d = ((float (*)(u8 *, u8 *))func_00282E80)(arg0 + 0x10, e + 0x10);
+                        if (d < best) {
+                            found = e;
+                            best = d;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    *(u8 **)(state + 0x7B8) = found;
+    return found != 0;
+}
 
 extern void func_002B60B0(u8 *arg0, float, float, float, float);
 
@@ -290,7 +474,24 @@ void func_L18_00432D08(u8 *a0) {
     *(u16 *)(s0 + 0x7FA) = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L18_00432D60);
+/* Hands every entity of the object's group (byte 0x21) to func_L18_00432AD0. */
+void func_L18_00432D60(u8 *arg0)
+{
+    u16 *p;
+    u8 *e;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    p = D_L18_001FB320[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L18_001B2838[0] && p != 0 &&
+           ((p != 0 && (s16)p[-1] >= 0) || p == D_L18_001FB320[arg0[0x21]])) {
+        e = D_L18_001B281C[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        func_L18_00432AD0(e);
+        p++;
+    }
+}
 
 s32 func_L18_00432E28(u8 *a0) {
     s32 v = *(u8 *)(a0 + 0x20);

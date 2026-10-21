@@ -69,6 +69,8 @@ extern void func_002AB668(void *a, void *b, float f);
 
 extern void func_00282D30(char *a, char *b, float f);
 
+extern void func_00282D08(char *dst, char *src, char *extra, float f);
+
 extern void func_002ACDE8(char *a, char *b, char *c);
 
 extern float func_00283BE0(float a, float b);
@@ -97,6 +99,8 @@ extern void func_00280B90(void *dst, void *src, int flag);
 
 extern char D_L09_001BF98C0[];
 
+extern char D_L09_001B98C0[];
+
 extern void func_003AEFD0(void *out);
 
 extern float func_00316AC0(float lo, float hi);
@@ -117,7 +121,7 @@ extern void func_002EACF0(char *dst, char *src);
 
 extern void func_002E6C68(char *dst, char *src, int flag);
 
-extern void func_003AF9E8(char *object, char *v);
+extern void func_L09_003AF9E8(char *object, char *v);
 
 extern void func_0031F728(char *object, char *a1, char *a2, float f1, float f2, float f3);
 
@@ -329,7 +333,53 @@ void func_L09_003AF508(char *object)
 }
 
 /* builds the effect's frame, colour word and query box, then hands the result to the stage */
-INCLUDE_ASM("asm/levels", func_L09_003AF6B0);
+void func_L09_003AF6B0(char *object)
+{
+    LOC_L09_003AF508 local;
+    float pos[3];
+    char *frame = *(char **)(object + 0x68);
+    char *data;
+    float len;
+    float scale;
+    int color;
+
+    func_L00_003C1D30(&local);
+    func_00282D08(pos, frame + 0x10, frame + 0x20, func_002A7878(0.0f, 1.0f));
+    pos[0] += func_002A7878(-0.1f, 0.1f) * *(float *)(frame + 0x50);
+    pos[1] += func_002A7878(-0.1f, 0.1f) * *(float *)(frame + 0x50);
+    pos[2] += func_002A7878(-0.1f, 0.1f) * *(float *)(frame + 0x50);
+    local.v120 = func_0027C878(11);
+    local.v128 = 0xFF9000000260LL;
+    local.v112 = 0;
+    local.v136 = 0x0000008000000040LL | ((long long)(func_001163B0() % 2 + 1) << 2);
+    color = func_002A7820(0x40, 0x7F) << 24;
+    local.v220 = 0.0f;
+    local.k0 = local.k1 = local.k2 = local.k3 = color + 0x103080;
+    data = D_L09_001B98C0;     /* the level's target point: three floats at +0x140 */
+    local.f216 = func_00283248(*(float *)(data + 0x140) - pos[0],
+                               *(float *)(data + 0x144) - pos[1]);
+    len = func_00282E80_1(pos, data + 0x140);
+    local.f212 = -func_00283248(len, *(float *)(data + 0x148) - pos[2]);
+    local.v208 = func_002A7940();
+    func_00283410(&local.m00, &local.v208);
+    local.v192 = pos[0];
+    local.v196 = pos[1];
+    local.v200 = pos[2];
+    local.v204 = 1.0f;
+    scale = func_002A7878(0.05f, 0.15f) * *(float *)(frame + 0x50);
+    func_00282D30(&local.b0, &local.b0, scale);
+    func_00282D30(&local.b1, &local.b1, scale);
+    func_00282D30(&local.b2, &local.b2, scale);
+    func_00282D30(&local.b3, &local.b3, scale);
+    func_00280B90(&local, &local.m00, 0);
+    local.k0 = local.k1 = local.k2 = local.k3 = color + 0x7F7F7F;
+    func_00282D30(&local.b0, &local.b0, 0.5f);
+    func_00282D30(&local.b1, &local.b1, 0.5f);
+    func_00282D30(&local.b2, &local.b2, 0.5f);
+    func_00282D30(&local.b3, &local.b3, 0.5f);
+    func_00280B90(&local, &local.m00, 0);
+    func_L09_003AF9E8(object, pos);
+}
 
 INCLUDE_ASM("asm/levels", func_L09_003AF9E8);
 

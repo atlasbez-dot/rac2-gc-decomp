@@ -47,3 +47,20 @@ from it is used in this repository.
 - The patch stack for the game compiler (`tools/compiler/patches/`, `sce-991111b`, MIT) and the
   recipe for the SDK compiler (`tools/compiler/sdk/build.py`, adapted from
   `scripts/build-patched-toolchain.py`, MIT, Mateusz Kłysz).
+
+The inherited files above retain their historical notices. Current Lombyte at
+`0d5b2b0cb5c0de696425831ba9b995be8fbbd439` is GPL-3.0. Its
+[qcopy helper](https://github.com/lombyte-project/Lombyte/blob/0d5b2b0cb5c0de696425831ba9b995be8fbbd439/include/qcopy.h)
+and [RAC1's helpers](https://github.com/OpenRAC/rac1-decomp/blob/813090403fe822acd929616da0fee2081131f92e/include/common.h)
+informed the register-address and scratch-register model in
+`tools/compiler/transformers/qcopy_pattern.py`. No inline-assembly helper was
+copied into RAC2's C sources. The transformer and its tests are independently
+authored.
+
+## Public C runtime sources
+
+| Source and revision | Use in this repository |
+| --- | --- |
+| [Newlib `_strtol_r`, 039e8a3](https://github.com/mirror/newlib-cygwin/blob/039e8a3c16964d02838b204b72bfdd4b7529107c/newlib/libc/stdlib/strtol.c) | Existing retained adaptation promoted to `src/core/00117278.c`; the Berkeley notice is preserved using Newlib's [advertising-clause removal](https://github.com/mirror/newlib-cygwin/commit/9042d0ce65533a26fc3264206db5828d5692332c). |
+| [GNU GCC `fp-bit.c`, 17b916d](https://github.com/gcc-mirror/gcc/blob/17b916df3d859b72736d537f6c2a98b2d76decf8/gcc/config/fp-bit.c) | Existing retained double packer, adder and multiplier promoted to `src/core/00122630.c`, `src/core/00122800.c` and `src/core/00122B00.c`, with the original fraction union in their shared caller/callee record; full GPL-2.0-or-later notices, historical linking permissions and credits remain in all three files. |
+| [RAC1 assembler model, 8130904](https://github.com/OpenRAC/rac1-decomp/blob/813090403fe822acd929616da0fee2081131f92e/tools/ps2eeas_dli.py) | Reference for the isolated sign-bit expansion in patch `0052`; the new assembler tests and synthetic constant cases are independently authored. |

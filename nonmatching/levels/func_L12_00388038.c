@@ -40,3 +40,46 @@ unsigned short func_L12_00388038(void) {
     }
     return v0;
 }
+
+/* wave 24, worker 03 (src/levels/12_todano/L12_002CF7B0-g8.c): the body is
+   reached and the SIZE is the retail's - tools/check.py
+   func_L12_00388038 prints "instruction at +0x4 differs", 21 instructions
+   against the retail's 21 - with two findings the earlier note does not have.
+
+   The function returns nothing.  The retail's exit block is a bare
+   `jr $ra` with a nop in the delay slot, and the three early exits leave $v0
+   holding the test constants (2, then the %hi of D_001BDB30), so no value is
+   returned on any path: the body is `void`, and the exits are `return;`, not
+   `return 0;`.  With `void` the three exits share the retail's one exit
+   block at the end.
+
+   The chain walk is a do-while, not a while: the retail's loop is the
+   `sw $zero,0x98($v1) ; ori ; andi ; sh ; lw $v1,0x28($v1) ; bnel $v1,$zero,
+   <top> ; lhu $v0,0x34($v1)` shape, i.e. the flag load of the NEXT node sits
+   in the delay slot of the back edge and the loop label is on the store.  The
+   pointer is read after the two mode gates, so the $gp load lands in the
+   second test's delay slot as the retail has it.
+
+   What is left is one instruction: this cc1 hoists the first test's constant
+   above the load that feeds it, and the address form follows:
+
+     retail   lui $v1, %hi(D_001A8F00)
+              lw $v1, %lo(D_001A8F00)($v1)
+              addiu $v0, $zero, 0x2
+              bne $v1, $v0, .L00388084
+     this cc1  lui $v0, %hi(D_001A8F00)
+              addiu $a0, $zero, 0x2
+              lw $v1, %lo(D_001A8F00)($v0)
+              bne $v1, $a0, .L00388084
+
+   the second test is the retail's in both (the %hi in $v0, the constant in
+   $a0, the value in $v1), so only the first one differs.  Measured here, all
+   of them compiling to the same three instructions: the globals read in the
+   conditions and in locals before the tests; the constants 2 and 5 as
+   literals, as locals and as unsigned; the tests swapped; the comparison
+   written `2 != x` and `!(x == 2)`; a switch on the first global; and the
+   pointer read in the condition of the third test.  -mno-split-addresses is
+   wrong here (it gives the absolute `lw $3,D_L12_001A8F00` instead of the
+   retail's %hi/%lo pair).  The rest of the body - the flag update, the word
+   cleared at +0x98, the chain walk and the `bnel` with the load in its delay
+   slot - is the retail's, instruction for instruction. */

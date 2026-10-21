@@ -1,128 +1,117 @@
-/* Body map for func_L20_002C57D0 (level 20, 504 bytes, 126 instructions).  No C
-   attempt yet: this worker spent its budget on the near miss of the same file
-   (func_L20_002B7A48) and measured the address shapes this body needs.  Not
-   linked, not counted.
+/* Near miss from src/levels/20_yeedil/L20_002B7A48.c (level-20 wave 5, worker 12).
+   Kept as a starting point; not linked, not counted.
 
-   The retail (read out of build/reference/20_yeedil.elf at 0x002C57D0):
+   The retail body at 0x002C57D0 (504 bytes, 126 instructions).
 
-     addiu $sp,$sp,-0x30 / sd $s0..$s4 / sd $ra        the frame, five callee
-                                                        saved registers
-     lui   $s0,%hi(D_189E20)                            the hero block
-     daddu $s1,$a0,$zero / daddu $s2,$a2,$zero /
-     daddu $s3,$a1,$zero                               the three int
-                                                        arguments, sign
-                                                        extended to 64 bit
-     jal f_002C2560
-       daddu $s4,$s0,$zero                              the %hi of D copied
-                                                        into $s4
-     addiu $s0,$s0,%lo(D_189E20)                       the address in the lui
-                                                        register itself
-     addiu $v0,$zero,1
-     jal f_002C4D20
-       sb   $v0,0x22B6($s0)                            D[0x22B6] = 1
-     lw   $v0,0xC18($s0)
-     addiu $a0,$s0,0x18E0
-     jal f_00338100
-       sw   $v0,0x2290($s0)                            D[0x2290] = D[0xC18]
-     jal f_00338100
-       addiu $a0,$s0,0x1A30
-     lw   $a0,0x2290($s0)
-     addiu $v0,$zero,-1 / addiu $v1,$zero,4
-     bne  $s1,$v1,.L584C
-       sw   $v0,0x9C($a0)                             the pointer's 0x9C = -1
-     lbu  $v0,0x22B4($s0)
-     beq  $v0,$s1,.L5854                              the state byte against
-                                                        the first argument
-     .L584C: jal f_002E6D90
-     .L5854: jal f_002B9610
-             jal f_002B7FD0
-     addiu $v0,$s4,%lo(D_189E20)                       the address again, the
-                                                        %lo added at the use
-     andi $a0,$s1,0xFF
-     sw   $s2,0x2290($v0)                              D[0x2290] = the third
-                                                        argument
-     addiu $v1,$zero,1
-     sb   $s1,0x22B4($v0)                              D[0x22B4] = the first
-                                                        argument
-     bne  $a0,$v1,.L58C4
-       sw   $s2,0xC14($v0)                             D[0xC14] = the third
-                                                        argument
-     lui  $v1,(0x140000 >> 16) / lw $v0,-0x7CE0($v1)   the global at
-                                                        0x00138320
-     andi $v0,$v0,0x10 / beqz $v0,.L58C4
-     lui  $a2,%hi(f_0030C700) / lui $a3,%hi(f_0030C748) /
-     lui  $t0,%hi(f_0030CC50) / addiu $a0,$zero,0x23 /
-     addiu $a2/$a3/$t0 with their %lo
-     daddu $a1,$zero,$zero / daddu $t1,$zero,$zero
-     jal f_0030AD58
-       daddu $t2,$zero,$zero
-     jal f_0030AD08
-       addiu $a0,$zero,3
-     .L58C4: jal f_002C63F0
-       addiu $s0,$s4,%lo(D_189E20)
-     lwc1 $f0,0x258($s0) / lwc1 $f1,0x25C($s0) /
-     swc1 $f0,0x250($s0) / swc1 $f1,0x254($s0)         the two floats moved
-                                                        down two words
-     lw   $v1,0x2290($s0)
-     lui  $at,(0x3F800000 >> 16) / mtc1 $at,$f0        1.0f
-     lhu  $v0,0x34($v1) / ori $v0,$v0,6 / sh $v0,0x34($v1)
-     swc1 $f0,0xC24($s0)
-     jal f_002E63E0
-       swc1 $f0,0xC20($s0)
-     jal f_0032E5DC
-       lw   $a0,0x2290($s0)
-     addiu $v0,$zero,1
-     beq  $s1,$v0,.L5928
-       sh   $s3,0x24F2($s0)
-     addiu $v0,$zero,4
-     beq  $s1,$v0,.L594C
-       daddu $a0,$s3,$zero
-     b    .L5980
-     .L5928: lhu $v0,0x24CC($s0) / lw $v1,0x24D0($s0) /
-             sh $v0,0x24D4($s0) / slti $a0,$v1,5 /
-             bnez $a0,.L597C
-               sw $v1,0x24CC($s0)
-             addiu $v0,$zero,4
-             b .L597C
-               sw $v0,0x24CC($s0)
-     .L594C: addiu $a0,$s0,0x80 / addiu $v1,$s2,0x10 /
-             lq $v0,0x0($v1) / sq $v0,0x0($a0)          the first 128 bit copy
-             addiu $a1,$s2,0xF0 / addiu $v1,$s0,0x90 /
-             lq $v0,0x0($a1) / sq $v0,0x0($v1)          the second one
-             lhu $a0,0x24CC($s0) / addiu $v0,$zero,3 /
-             sw $v0,0x24CC($s0) / sh $a0,0x24D4($s0)
-     .L597C: daddu $a0,$s3,$zero
-     .L5980: jal f_002D7730
-               addiu $a1,$zero,2
-             addiu $v1,$zero,4
-             bne $s1,$v1,.L59AC
-               ld $s0,0x0($sp)
-             lui $at,(0x40A00000 >> 16) / mtc1 $at,$f12   5.0f
-             addiu $a0,$zero,0xF
-             jal f_002E6090
-               daddu $a1,$zero,$zero
-             ld $s0,0x0($sp)
-     .L59AC: the epilogue, $s0..$s4 and $ra restored
+   MEASURED (tools/check.py func_L20_002C57D0 --diff): 480 bytes against the
+   retail's 504, and the first 40 instructions match the retail one for one
+   (the prologue with its five saved registers, the %hi copy in the delay slot
+   of the first call, the two stores in the delay slots of the calls, the
+   "p0 != 4" test with the "0x9C = -1" store in its delay slot and the state
+   byte test).  What is left:
 
-   What the body needs from the compiler:
+     1. the retail re-materialises the hero block from the %hi copy
+        ("addiu $v0,$s4,%lo(D)") AFTER the two calls that follow the first
+        block; this build hoists the same instruction into the delay slot of
+        the first of them (one instruction, in the wrong place);
+     2. the retail's masked state byte ("andi $a0,$s1,0xFF") is a separate
+        value from the byte it stores ("sb $s1,0x22B4($v0)", unmasked); this
+        build shares one masked value between the store and the test, so it
+        needs two "andi"s.  The common file's rule applies: separate C
+        variables for values that must stay in different registers;
+     3. the retail's "p0 == 1" and "p0 == 4" tests are forward branches to
+        two out-of-line blocks and the merge point follows them
+        ("b .L5980" + "nop"); this build puts the first body in the
+        fall-through.  That is the block layout of an if/else-if chain, and it
+        is the last difference in the body;
+     4. the 128-bit copies DO NOT fold here: both are in the retail's
+         "plain register address" shape ("addiu $a0,$s0,0x80" + "lq $v0,0($v1)"
+         + "sq $v0,0($a0)"), and this build produces the same shape.
 
-   - the address of D_00189E20 in TWO shapes out of one lui: the address in
-     the lui register itself ("lui $s0,%hi(D)" + "addiu $s0,$s0,%lo(D)") and
-     the %hi copied into $s4 with the %lo added at every use
-     ("daddu $s4,$s0,$zero" + "addiu $x,$s4,%lo(D)").  Measured on this
-     compiler: a pointer to the symbol used as a memory base gives
-     "lui $h,%hi(S)" + "addiu $b,$h,%lo(S)"; the same pointer rematerialised
-     into the base register of the load gives the retail's form; a 64 bit
-     value of the symbol gives "daddu $h2,$h,$zero" + "addiu $x,$h2,%lo(S)";
-     a 32 bit pointer that is only ever copied gives the same.  A `long` is
-     64 bit in this ABI, a pointer is 32 bit.
-   - the 128 bit copies are in the "plain register address" shape (the
-     address in a register, the lq and the sq at offset 0), which is the
-     shape that matches.
-   - the float constants are 1.0f (0x3F800000) and 5.0f (0x40A00000); the
-     "mtc1 $at,$f" pair is what the retail uses, so the constant has to be
-     spelled exactly (0.005f is 0x3EBD70A4 and 0.7f is 0x3F333333).
-   - the stores in the delay slots of the calls (D[0x22B6] = 1,
-     D[0x2290] = D[0xC18], D[0xC14] = the third argument) are the retail's
-     shape: a store in a delay slot writes the previous call's result.
- */
+   The three arguments are 32-bit and are copied into $s1/$s2/$s3 with
+   "daddu $sN,$aN,$zero" in the order a0, a2, a1 - the order in which the
+   source sets them decides the registers, and this attempt sets them in that
+   order, so the whole prologue matches. */
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed short s16;
+typedef signed int s32;
+typedef unsigned int u32;
+typedef long long s64;
+typedef float f32;
+typedef int TI128 __attribute__((mode(TI)));
+
+extern char D_00189E20[];
+extern void func_0028CC98(void);
+extern void func_0028CCE0(void);
+extern void func_0028D1E8(void);
+extern void func_0028B3D0(s32, s32, void *, void *, void *, s32, s32);
+extern void func_L00_002AF7D0(void);
+extern void func_L00_002B1F90(void);
+extern void func_L00_00322EC8(char *);
+extern void func_L00_002D2E68(void);
+extern void func_L00_002A6708(void);
+extern void func_L00_002A53B8(void);
+extern void func_L00_002F6B90(s32);
+extern void func_L00_002D24B8(void);
+extern void func_002A677C(s32);
+extern void func_L20_002D7730(s32, s32);
+extern void func_L00_002D2168(s32, s32, f32);
+extern s32 D_00138320[];
+
+void func_L20_002C57D0(s32 a0, s32 a1, char *a2)
+{
+    char *D = D_00189E20;
+    s32 p0 = a0;
+    char *p2 = a2;
+    s32 p1 = a1;
+
+    func_L00_002AF7D0();
+    *(u8 *)(D + 0x22B6) = 1;
+    func_L00_002B1F90();
+    *(s32 *)(D + 0x2290) = *(s32 *)(D + 0xC18);
+    func_L00_00322EC8(D + 0x18E0);
+    func_L00_00322EC8(D + 0x1A30);
+    *(s32 *)(*(s32 *)(D + 0x2290) + 0x9C) = -1;
+    if (p0 != 4 || *(u8 *)(D + 0x22B4) != p0)
+        func_L00_002D2E68();
+    func_L00_002A6708();
+    func_L00_002A53B8();
+    D = D_00189E20;
+    *(s32 *)(D + 0x2290) = (s32)p2;
+    *(u8 *)(D + 0x22B4) = p0;
+    *(s32 *)(D + 0xC14) = (s32)p2;
+    if ((p0 & 0xFF) == 1) {
+        if (D_00138320[0] & 0x10) {
+            func_0028B3D0(0x23, 0, (void *)func_0028CC98, (void *)func_0028CCE0,
+                          (void *)func_0028D1E8, 0, 0);
+            func_L00_002F6B90(3);
+        }
+    }
+    func_L20_002C63F0();
+    D = D_00189E20;
+    *(f32 *)(D + 0x250) = *(f32 *)(D + 0x258);
+    *(f32 *)(D + 0x254) = *(f32 *)(D + 0x25C);
+    *(u16 *)(*(s32 *)(D + 0x2290) + 0x34) |= 6;
+    *(f32 *)(D + 0xC24) = 1.0f;
+    *(f32 *)(D + 0xC20) = 1.0f;
+    func_L00_002D24B8();
+    func_002A677C(*(s32 *)(D + 0x2290));
+    *(u16 *)(D + 0x24F2) = p1;
+    if (p0 == 1) {
+        *(u16 *)(D + 0x24D4) = *(u16 *)(D + 0x24CC);
+        if (*(s32 *)(D + 0x24D0) < 5)
+            *(s32 *)(D + 0x24CC) = *(s32 *)(D + 0x24D0);
+        else
+            *(s32 *)(D + 0x24CC) = 4;
+    } else if (p0 == 4) {
+        *(TI128 *)(D + 0x80) = *(TI128 *)(p2 + 0x10);
+        *(TI128 *)(D + 0x90) = *(TI128 *)(p2 + 0xF0);
+        *(u16 *)(D + 0x24D4) = *(u16 *)(D + 0x24CC);
+        *(s32 *)(D + 0x24CC) = 3;
+    }
+    func_L20_002D7730(p1, 2);
+    if (p0 == 4)
+        func_L00_002D2168(0xF, 0, 5.0f);
+}

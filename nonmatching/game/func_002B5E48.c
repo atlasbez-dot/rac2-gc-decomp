@@ -1,34 +1,20 @@
-/* func_002B5E48 (boot function, 176 bytes; 20 levels, 21 places in all): from
- * src/game/002B5278.c, compiled -O2 -G0 (the file has no cflags line).
- * Near miss: compiles to 176 bytes, the size of retail's; 17 of its 44 words differ from
- * retail (the first attempt left 32). Fixed against that attempt: $s1 = moby, $s0 = moby + 0x60
- * and $s2 = obj + 0x10 now sit in retail's registers, because moby + 0x60 is written inline
- * three times instead of held in a named pointer.
- *
- * What is left comes from ONE cause, the recorded 16-byte copy wall:
- *   - retail has `addiu $s2,$a2,0x10 ; lq $v0,0($s2) ; sq $v0,0($sp)`; this cc1 gives
- *     `lq $v0,0x10($a0)` (`.word 0x78820010` in the diff) and puts the add after it. The
- *     fold is cse's find_best_addr: an address that is a register known to be (plus reg 16)
- *     is rewritten to the plus form whenever the two cost the same, and on MIPS a register and
- *     (plus reg small_int) both cost 1 (ADDRESS_COST), so the tie goes to the plus. It happens for
- *     every mode (a plain int load after `p = o + 16` folds the same way), not only TImode.
- *   - the missing `daddu $a2,$a0,$zero` on entry, and the one-word shift of the prologue after
- *     it, are what the fold does to the allocation: it gives obj a third reference (the lq
- *     address), global-alloc ranks pseudos by refs * floor_log2(refs) / live length, so obj
- *     (3 refs, length 9) is allocated before id (3 refs, length 10) and takes $a0, which
- *     leaves id in $v1. Retail's obj has two references (the entry copy and the add), so it
- *     would rank below id and take $a2, the other register it prefers (the dump lists
- *     preferences 4 and 6 for it). This second step is inferred from the dumps, not measured.
- * Tried without effect on the 17 words (all give the same bytes): the pointer formed as
- * `s2 = obj; s2 += 0x10`, as `(char *)((int)obj + 0x10)`, as `(char *)((TI *)obj + 1)`, through
- * a do-while(0) and through 64-bit arithmetic (`(char *)(int)((long long)obj + 0x10)`); the id
- * read once into a local or twice from memory. Forming the pointer
- * at the top of the function, before the two early returns, gives 172 bytes (the add moves into
- * the first branch delay slot) and still folds.
- * Not tried, because they are outside the rules: the qcopy helpers the notes mention (inline
- * asm) and a volatile source.
- * What would unblock it: a compiler-side change to find_best_addr for TImode (or retail's own
- * address cost), or a source form in which cse does not know the register as (plus obj 16).
+/* func_002B5E48 (boot function, 176 bytes; 20 levels, 21 places in all): near miss. Built alone (src/game/002B5E48.c) with
+ * `-O2 -G0 -ffunction-sections -frac2-qcopy` it is retail's 176 bytes and 3 of its 44 words differ, at every place
+ * (before the profile: 17 words, from the folded `lq $v0,0x10($a0)`). The register-address copy (`addiu $s2,$a2,0x10`
+ * first, then `lq $v0,0($s2)` / `sq $v0,0($sp)`), the prologue and the allocation ($a2 = obj, $s1 = moby,
+ * $s0 = moby + 0x60, $s2 = obj + 0x10) are exact. The three words are the order of the copy and one load:
+ *     retail: addiu $s2,$a2,0x10 / lq $v0,0($s2) / sq $v0,0($sp) / lwc1 $f12,0($s1) / daddu $a1,$sp / jal
+ *     here:   addiu $s2,$a2,0x10 / lwc1 $f12,0($s1) / lq $v0,0($s2) / sq $v0,0($sp) / daddu $a1,$sp / jal
+ * Cause (measured with -dS -dR -fsched-verbose-5): retail's copy is a scheduling barrier, the grouped copy is not.
+ * Before reload the dump shows no dependence between `lwc1 0($s1)` (an address based on a parameter) and the copy's
+ * store to the frame, the load has latency 2 and priority 4 against 3 for the copy (cost 1, unit none), so the load
+ * goes first, and the second scheduler keeps that order (after reload it does treat the two as possibly aliasing). Check: the same C
+ * with `__asm__ __volatile__("" ::: "memory");` after the copy (scratch only, never for src/) is `boot: OK`, 0 of
+ * 44 words different.
+ * Tried without effect: all 24 orders of func_002C9218's parameters (the three integer ones must stay in order for
+ * the registers; the float anywhere gives the same 3 words); integer-typed obj/moby; -fno-schedule-insns (11 words).
+ * What would unblock it: the grouped copy given a volatile asm's scheduling dependences, as `-frac2-zero-ti-barrier`
+ * does for `sq $zero` (func_002EE988 and func_002B50E0 are blocked by the same thing).
  */
 typedef int TI128_002B5E48 __attribute__((mode(TI)));
 typedef union { TI128_002B5E48 q; float f[4]; } Vec4Q_002B5E48;

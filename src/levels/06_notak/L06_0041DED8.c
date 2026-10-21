@@ -292,9 +292,8 @@ void func_L06_00443E18(char *a0)
 
 INCLUDE_ASM("asm/levels", func_L06_00443F30);
 
-INCLUDE_ASM("asm/levels", func_L06_00444168);
-
-INCLUDE_ASM("asm/levels", func_L06_00444300);
+/* func_L06_00444168 and func_L06_00444300 live in L06_0041DED8-g8.c (func_L06_00444300 reaches
+ * its constants through $gp; the pair is the level 6 twin of func_L14_00428A08/func_L14_00428BA0). */
 
 /* The same re-arm, with two probe addresses and two flags. */
 void func_L06_0044B250(char *arg0)

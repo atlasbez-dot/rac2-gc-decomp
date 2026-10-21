@@ -149,7 +149,6 @@ f32 func_002A7798(f32 a0) {
  return 1.0f-(1.0f-a0)*(1.0f-a0);
 }
 
-INCLUDE_ASM("asm/game", func_002A77C0);
 
 s32 func_002A77E0(s32 a0) {
     return (func_001163B0() >> 16 & 0x7fff) % a0;

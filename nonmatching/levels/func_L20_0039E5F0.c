@@ -279,3 +279,89 @@ void func_L20_0039E5F0(char *arg0) {
    The attempt below is worker 09's second one, unchanged: it is the
    closest one.
 */
+
+/* ------------------------------------------------------------------
+   Wave 4, worker 08.  What this wave measured on this body.
+
+   The C in this file is worker 09's second attempt, unchanged; it is
+   the closest one (380 bytes, the retail's size, and the prologue, the
+   first block and the epilogue are the retail's).
+
+   The three groups of differences are all in the scheduler's order or
+   in a register choice:
+
+     +0x80  retail:  daddu a0,s0 / lwc1 f1,-0x2F0(gp) / addiu a1,zero,1 /
+                      lwc1 f0,0x24(v0) / addiu a2,zero,-1 / mul.s f0,f0,f1
+              here:   daddu a0,s0 / addiu a1,zero,1 / addiu a2,zero,-1 /
+                      lwc1 f0,0x24(v0) / lwc1 f1,D_L20_001AED00(gp) /
+                      mul.s f0,f0,f1
+     +0xC4  retail:  lw v1,0x60(s1) / bnez v1 / lui v0,0x19 / lw v1,-0x3F50(v0)
+              here:   lw v0,0x60(s1) / bnez v0 / lui v0,0x19 / lw v1,-0x3F50(v0)
+     +0xE4  retail:  bc1f +0x14 / swc1 f0,0x20(s1) / daddu a0,s0,zero
+              here:   bc1f +0x14 / daddu a0,s0,zero / swc1 f0,0x20(s1)
+
+   1. The retail INTERLEAVES the setup of the f_0032F5B0 arguments with
+      the float multiply: a0, the constant, a1, the value, a2, the
+      multiply.  The attempt keeps the three argument setups together
+      and the float code after them.  Measured this wave: the
+      constant first in the source (`D_L20_001AED00 * value') swaps the
+      two loads (the value then lands in $f1 and the constant in $f0)
+      but does not interleave them; the value in a variable does not
+      change anything.  The two chains (the float multiply and the
+      argument setup) are independent, so the interleaving is the
+      scheduler's choice - it is the only difference in this group.
+
+   2. The word read from 0x60(state) is in $v1 in the retail and in
+      $v0 here.  In the retail $v0 is needed for the `lui' of
+      D_0018C0B0 in the same block, so the two do not fit together.
+      Measured: the word in a variable, the test written as `!= 0' or
+      `!x', the load before or after the test - none of them changes
+      the register.
+
+   3. Which instruction the delay slot of the bc1f takes: the store
+      in the retail, the call's first argument here.  Measured: the
+      store before or after the call, the store through a variable -
+      none of them changes it.
+
+   The attempt belongs in the -G8 unit (D_L20_001AED00 is read through
+   $gp at 0x1AEFF0-0x2F0). */
+
+/* ------------------------------------------------------------------
+   Wave 23, worker 09.  Nothing new: the attempt below is worker 09's
+   second attempt (wave 21) and it is still the closest one - SEVEN
+   instructions differ, in the three groups the earlier waves measured.
+
+   The three groups, with what this wave measured:
+
+   1. The f_0032F5B0 argument setup interleaved with the float multiply.
+      The retail:
+          daddu a0,s0 / lwc1 f1,-0x2F0(gp) / addiu a1,zero,1 /
+          lwc1 f0,0x24(v0) / addiu a2,zero,-1 / mul.s f0,f0,f1
+      the attempt:
+          daddu a0,s0 / addiu a1,zero,1 / addiu a2,zero,-1 /
+          lwc1 f0,0x24(v0) / lwc1 f1,D_L20_001AED00(gp) / mul.s f0,f0,f1
+      Measured this wave: the constant first in the source (8, worse),
+      the product in a variable (7, the same), the store after the
+      call (62, much worse).  The order is the scheduler's: the two
+      chains (the call's arguments and the float code) are independent,
+      and the retail's order is the one the scheduler picks when the
+      constant's load is issued before the value's.
+
+   2. The word at 0x60(state) is in $v1 in the retail and in $v0 in the
+      attempt (`lw $v0,0x60($s1)` / `bnez $v0` against `lw $v1,...` /
+      `bnez $v1`).  In the retail $v0 is needed for the `lui` of
+      D_0018C0B0 in the same block, so the two do not fit together.
+      Measured: the word in a variable (7, the same), the test written
+      as `!x` (7, the same).
+
+   3. Which instruction the bc1f's delay slot takes: the store in the
+      retail, the call's first argument in the attempt.  Measured: the
+      store before or after the call (7), the store through a variable
+      (7).
+
+   The flags: the default ones are the right ones for this body.  The
+   attempt in src/ in the -G8 unit:
+      20_yeedil: instruction at +0x80 differs
+      func_L20_0039E5F0: 0 of 1 places match
+   (seven instructions differ; the size is the retail's 380 bytes.)
+*/

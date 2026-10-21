@@ -92,7 +92,7 @@ char *func_003420C8(char *object) {
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_00342118);
+/* func_00342118 is in 00341C20-g8.c (it reaches small data through $gp). */
 
 void func_00342380(unsigned char *owner, float *records)
 {

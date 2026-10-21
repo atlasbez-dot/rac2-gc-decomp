@@ -52,3 +52,21 @@ one:
 ret:
     return r;
 }
+
+/* --- wave 24, worker 04 (2026-10-21) --------------------------------------------
+   Re-measured: 60 bytes, 12 of 15 words identical.  The guards, the 0xFE/0xFD
+   tests and the last test on *(int*)(state+4) are right; retail keeps the
+   result in one register ($a1) and returns it with a single exit
+   (`daddu $v0,$a1,$zero`), while this cc1 knows the result is 0 or 1 and
+   specialises the exits: `jr $ra ; addiu $v0,$zero,1` and `jr $ra ; sltu`.
+   The retail body's 0xFD branch is a branch-LIKELY (`beql`) that carries the
+   `addiu $a1,1` in its delay slot, which is the "the main path is the branch
+   target" shape; no spelling of the result kept that here.
+   What I added to the measurements:
+   - the state byte is at +0x20 and the two blocked states are 0xFE and 0xFD; the
+     third test reads the word at state+4.
+   - the result as a local assigned 0 and 1, the guards as if/else-if, as a chain
+     of `if`s and with the main path as the branch target (goto), and the pointer
+     read before the state byte and the other way round all give the same
+     specialised exits.
+   Last check.py line: "14_aranos_prison: instruction at +0x0 differs". */

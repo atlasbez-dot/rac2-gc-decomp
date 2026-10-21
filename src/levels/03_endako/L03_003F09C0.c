@@ -70,7 +70,43 @@ INCLUDE_ASM("asm/levels", func_L03_003F09C0);
 
 INCLUDE_ASM("asm/levels", func_L03_003F11A0);
 
-INCLUDE_ASM("asm/levels", func_L03_003F1470);
+extern void func_L02_00327350(s32, s32);
+extern void func_00288308(s32);
+extern s32 func_002AD860(s32);
+extern void func_0029F338(u8 *);
+extern void func_0029B3E0(s32, s32);
+
+/* Two flag bytes of the boot's state block, reached as members of one object: the stores
+ * are then `lui $at ; sb` pairs that stay out of the call's delay slot, as in retail (a
+ * separate symbol per byte puts the second store into the slot). */
+extern u8 D_001A7B08[0x40] __attribute__((sda));
+extern s32 D_L03_001B2A38[] __attribute__((sda));
+
+/* Raises the two flags, sets the entity up from the state's words 0x58 and 0x5C, runs the two
+ * boot steps with 13 (func_002AD860 returns a value that the caller drops; declaring it that way
+ * is what fixes the register choice of the table address), then hands every entity of the
+ * state's group (word 0x80) to func_0029F338 and ends with func_0029B3E0(0, -1). */
+void func_L03_003F1470(u8 *entity) {
+    u8 *state = *(u8 **)(entity + 0x68);
+    u16 *p;
+    u8 *e;
+
+    func_L02_00327350(*(s32 *)(state + 0x58), *(s32 *)(state + 0x5C));
+    D_001A7B08[0x04] = 1;
+    D_001A7B08[0x3C] = 1;
+    func_00288308(13);
+    func_002AD860(13);
+    for (p = (u16 *)D_L03_001FB5A0[*(s32 *)(state + 0x80)];
+         (*(s32 *)(state + 0x80) & 0xFF) != 0xFF && *(s32 *)(state + 0x80) <= D_L03_001B2A38[0] &&
+         p != 0 && ((p != 0 && (s16)p[-1] >= 0) || p == (u16 *)D_L03_001FB5A0[*(s32 *)(state + 0x80)]);
+         p++) {
+        e = D_L03_001B2A1C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        func_0029F338(e);
+    }
+    func_0029B3E0(0, -1);
+}
 
 INCLUDE_ASM("asm/levels", func_L03_003F4638);
 
@@ -174,6 +210,40 @@ INCLUDE_ASM("asm/levels", func_L03_003F6BA8);
 
 INCLUDE_ASM("asm/levels", func_L03_003F6E88);
 
+/* The voice-load state the level shares with the engine: the key at +0x24, a
+   cleared word at +0x28 and the busy flag at +0x68. */
+typedef struct {
+    u8 pad00[0x24];
+    s32 key;
+    s32 unk28;
+    u8 pad2C[0x3C];
+    s32 active;
+} L03VoiceState;
+
+extern L03VoiceState D_001A63A8;
+
+/* Picks the free voice slot the entity asks for, unless the engine is busy
+   or already holds that slot. */
+void func_L03_003F71E0(u8 *a0, s32 a1) {
+    L03VoiceState *st = &D_001A63A8;
+    s32 sel = a1;
+    u8 *a3 = *(u8 **)(a0 + 0x68);
+    u8 *slot;
+    s32 *row;
+    u32 v;
+
+    if (st->active != 0) return;
+    if (st->key != -1) return;
+    if (sel == *(s32 *)(a3 + 0x40C)) return;
+    slot = a3 + sel;
+    row = (s32 *)(a3 + sel * 4);
+    v = *(u32 *)((u8 *)row + 0x3D0);
+    st->unk28 = 0;
+    st->key = (v & 0x3FFF) + 0x7D0;
+    *(u8 *)(slot + 0x410) = 1;
+    *(s32 *)(a3 + 0x408) = 0x258;
+    *(s32 *)(a3 + 0x40C) = sel;
+}
 
 INCLUDE_ASM("asm/levels", func_L03_004198B0);
 
@@ -242,6 +312,8 @@ INCLUDE_ASM("asm/levels", func_L03_0041DAD0);
 
 INCLUDE_ASM("asm/levels", func_L03_0041DCE0);
 
+/* func_L03_0041DFA8 lives in L03_003F09C0-g8.c (it reaches D_L03_001B1BF0
+ * through $gp). */
 
 /* func_L03_0041E240 lives in L03_003F09C0-g8.c (same $gp access). */
 

@@ -100,6 +100,24 @@ void func_L12_00425448(u8 *a0) {
     }
 }
 
+extern u8 D_001395DB;
+extern int func_002ACBC8(void *, int);
+extern void func_L12_0031E1D0(u8 *, s32, s32);
+
+void func_L12_004254A8(u8 *arg0) {
+    u8 *s0 = arg0;
+    s32 *v;
+
+    if (*(u8 *)(s0 + 0x20) == 0) {
+        v = *(s32 **)(s0 + 0x68);
+        if (*v != -1) {
+            if (func_002ACBC8(D_00189EA0, *v) != 0) {
+                D_001395DB = 1;
+                func_L12_0031E1D0(s0, 1, -1);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L12_004285A8);
 

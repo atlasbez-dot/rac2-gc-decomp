@@ -1,16 +1,37 @@
-/* func_L02_003DB158, 164 bytes, 1 placement (level 2).  Closest candidate 160 bytes - ONE
-   instruction short, and it is the same wall as its twin func_L02_003DAF90: the 16-byte
-   lq/sq copy's destination stays folded on the frame pointer here
-   (`lq $v1,0x0($sp); sq $v1,0x10($sp)`) where retail materialises it first
-   (`addiu $v1,$sp,0x10; lq $v0,0x0($sp); sq $v0,0x0($v1)`).  Five spellings of that copy
-   in func_L02_003DAF90 (TImode cast, named destination pointer, union assignment, explicit
-   +0 through a char base, pointer-to-source) all fold, so it is the scheduler/allocator and
-   not the writing.  Everything else - the 0xA0 frame, the four scratch blocks at
-   sp+0x00/0x10/0x20/0x60 with the 0x40-byte one in the middle, all five calls and their
-   delay slots - is exact.
-   It needs the -G8 unit of src/levels/02_maktar_nebula/L02_003D26B0.c: the resident block
-   base and the two floats are `$gp + 0x1490/0x1488/0x1484`, i.e. 0x001B0480 / 0x001B0478 /
-   0x001B0474 with $gp pinned at 0x001AEFF0.  Body measured in that unit: */
+/* func_L02_003DB158, 164 bytes, 1 placement (level 2).  Near miss with the opt-in `-frac2-qcopy`
+   profile (#262): in a unit of its own (src/levels/02_maktar_nebula/L02_003DB158-g8.c, flags
+   `-O2 -G8 -ffunction-sections -frac2-qcopy`; -G8 for the three `$gp` reads below, which are
+   `$gp + 0x1490/0x1488/0x1484`) the C below is retail's 164 bytes, with the 0xA0 frame, the
+   four scratch blocks, the five calls, the delay slots and retail's copy
+   `addiu $v1,$sp,0x10 ; lq $v0,0($sp) ; sq $v0,0($v1)`.  9 of its 41 words still differ
+   (tools/check.py: 0 of 1 places match, first difference at +0xC):
+     retail prologue   sd s0, daddu a2,sp, sd s2, daddu s0,a0, sd s1, daddu s2,a1, sd s3, sd ra
+     this unit         sd s0, daddu a2,sp, sd s1, daddu s0,a0, sd s2, sd ra, daddu s2,a1, sd s3
+     retail after the first call   addiu v1,sp,0x10 ; lq ; sq ; addiu s1,sp,0x20 ; daddu a0 ; daddu a1
+     this unit                     addiu s1,sp,0x20 ; addiu v1,sp,0x10 ; lq ; sq ; daddu a0 ; daddu a1
+   Cause (measured, `-fsched-verbose-5 -dR`): retail's copy was a volatile asm, which both
+   scheduling passes treat as a barrier, and `rac2_qcopy` is an ordinary insn.  sched2 takes the five
+   prologue `sd` in the order of their priority (all equal), then of how many insns depend on each
+   store (more first), then of emission order.  Retail's barrier leaves `sd s0` and `sd s2` one
+   dependent more (their first writes `move s0,a0` / `move s2,a1` come before the barrier) than the
+   others, giving s0, s2, s1, s3, ra; without it `sd s1` (first write `addu s1,sp,32`) and `sd ra`
+   (the epilogue `ld ra`) get one more as well, giving s0, s1, s2, ra, s3.  The same dependent
+   counts make sched2 float `addu s1,sp,32` above the copy.
+   Measured in a scratch copy (not allowed in src/): with the copy written as one volatile asm
+   `__asm__ __volatile__("lq $2,0(%1)\n\tsq $2,0(%0)" : : "r"(&copy), "r"(&src) : "$2", "memory")`
+   the same C is exact (1 of 1 places); so it is with the profile's own copy kept and only
+   `__asm__ __volatile__("" : : : "memory");` written right after it, so the barrier after the
+   copy is what matters.  No single extra flag changes it (-fno-schedule-insns,
+   -fno-schedule-insns2, -fno-sched-interblock, -fno-gcse, -mno-split-addresses,
+   -fno-strength-reduce, -g, -fno-expensive-optimizations, -fno-delayed-branch,
+   -mastra-keep-frame-order: 8 to 12 words differ or the size moves).  C spellings tried
+   (9 words each, 16 for the first): `&block` in a pointer local set before the copy, the same
+   local set after it, a named destination/source pointer pair for the copy, the state load split
+   in two statements.
+   What would unblock it: a barrier form of the profile (the pattern given a volatile asm's
+   dependences in sched_analyze_insn, as -frac2-zero-ti-barrier does for the clear); the C below
+   would then go into that unit unchanged.
+   Body measured in that unit: */
 
 typedef int s32;
 typedef float f32;

@@ -235,7 +235,7 @@ INCLUDE_ASM("asm/levels", func_L11_004169E0);
 
 INCLUDE_ASM("asm/levels", func_L11_00416D70);
 
-INCLUDE_ASM("asm/levels", func_L11_00417340);
+/* func_L11_00417340 is defined in L11_003D6270-g8.c (this unit has no $gp access for it). */
 
 /* Reports whether the helper found the measured resource and updates its timer. */
 s32 func_L11_00420C38(u8 *arg0) {

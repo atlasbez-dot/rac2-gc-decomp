@@ -48,6 +48,17 @@ worktrees. What must not run twice at once is two builds of the *same* program i
 A C function that does not match where the catalogue places it is listed with the reason
 and stays assembly there; the program still has to come out equal.
 
+Before submitting a pull request, run `python3 tools/build.py all --strict`. This also
+fails when any C function was rejected and replaced by assembly. The reasons remain in
+`build/<program>/placed.json`; an `OK` byte comparison by itself does not prove that every
+C function was used. `--strict` also works with `boot`, `level N`, and `levels`.
+
+C objects are cached by their source, header contents, compiler options, compiler and
+assembler executables, and the compilation command implementation. Both the game and SDK
+compiler chains are tracked. Rebuilding a tool with changed contents invalidates the
+affected objects automatically; no manual touching of sources is needed. Cache keys stay
+in `build/obj/` and are local build state, not match evidence.
+
 ## On macOS, Windows or any host: the build image
 
 `tools/docker/run.sh` runs a command in the `rac2-build` image (32-bit Debian with Wine, Python
@@ -87,7 +98,7 @@ no SN tools, so the build is run locally and its result committed.
 
 - **The game's code**: GNU EE-GCC 2.9-ee-991111b rebuilt from its public source with
   Lombyte's patch stack and the transformers this project measured
-  ([tools/compiler/](../tools/compiler/README.md)). The build stops unless the five patched
+  ([tools/compiler/](../tools/compiler/README.md)). The build stops unless the pinned modified
   sources hash as recorded; the binaries' own hashes depend on the host, so a compiler is
   checked by its output.
 - **The boot's SDK units** (the `src/core/` files `config/cflags.txt` marks `sdk`): Sony EE-GCC 2.9-ee-991111-01, unmodified, from

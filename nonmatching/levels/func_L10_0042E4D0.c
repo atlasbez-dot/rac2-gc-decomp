@@ -11,3 +11,18 @@
  * `addiu $v1,$v1,0xC0` / `addiu $v1,$v1,-0x500` around the lq/sq pair).  Not retried here
  * beyond reading it, per that finding.
  */
+
+/* Later worker (wave 24): the wall confirmed and one step further.  The candidate below
+   reaches 180 bytes against retail's 192 with the frame, both calls, the branches, the field
+   test and the lq/sq pairs all as retail has them; the first arm's address is materialised
+   with `addiu $v0,$v0,0xC0` before the lq, as the note above asks for, when the source
+   takes the address into a pointer first (`p = D_00141780 + 0xC0`) instead of indexing.
+   What is left: (a) the $gp vector at 0x2790 is loaded twice here (once for the test, once
+   for the address) where retail loads it once, in the delay slot of the `bne` that ends the
+   field test; (b) the else branch is three words shorter - retail copies the destination
+   into $a0 and then into $a1 for the call (`daddu $a0,$s0,$zero` / `daddu $a1,$a0,$zero`)
+   and materialises the 0.03125f there, this cc1 reuses one register for the two arguments.
+   The data needs the -G8 profile (the vector at 0x2790 is reached through $gp), so the body
+   belongs in L10_00424028-g8.c; the pointer at 0x1BFAD8 is read with lui/lw, so it needs
+   `nosda` there.
+   check.py func_L10_0042E4D0: "10_hrugis_cloud: 180 bytes, expected 192". */

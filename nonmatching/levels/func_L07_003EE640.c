@@ -49,3 +49,16 @@ void func_L07_003EE640(char *arg)
         break;
     }
 }
+
+/* Second attempt (wave 24, worker 15): re-measured with the catalogue names
+   (func_002A7750, func_002ACBC8, func_L02_0031F858 are the retail's
+   f_003109C8, f_00316808 and f_00311B80 at level 07 - the names matter, the
+   addresses are per level).
+   check.py (07_siberius): "07_siberius: instruction at +0x54 differs", the
+   same line and the same five-instruction loop preheader as above: this cc1
+   hoists the -1 and the D_00189EA0 address ahead of `p = o + 8` and the loop
+   counter, retail keeps them behind.  Tried again and identical: the two
+   pointers assigned the other way round (that restructures the loop and
+   drops to 184 bytes), the -1 in a named local (212 bytes), the table
+   address in a named local, and the loop as a for over a counted index.
+   */

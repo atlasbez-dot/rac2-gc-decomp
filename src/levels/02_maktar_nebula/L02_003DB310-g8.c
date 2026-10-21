@@ -159,3 +159,68 @@ int func_L02_003EB138(unsigned char *a0, void *a1) {
     }
     return result;
 }
+
+extern unsigned char D_001395B8[0x100];
+
+extern int D_0018C2EC __attribute__((nosda));
+
+extern int D_001A7A00;
+
+/* The six weights, read through $gp: `sda` with a size of at most 8 bytes, indexed past it. */
+extern int D_L02_001B0938[2] __attribute__((sda));
+
+extern char D_L02_001B09E0[];
+
+extern char D_L02_001B09F0[];
+
+extern void func_0026FEB8(const char *, ...);
+
+extern int func_002A77E0(int);
+
+extern int func_002A7820(int, int);
+
+/* Rolls the state's mode (+0x5C) against the six weights, turns mode 4 into 1 when the two
+   reference words agree and mode 5 into 1 while the counter at D_001395B8[0x8F] is under 4,
+   copies it into the three slots at +0x90, and for mode 0 rolls three values from 1 to 5 until
+   they are not all the same. The jump pass peels the loop's first test in front of it; the unit
+   is built with -frac2-gcse-unsplit-edges (config/cflags.txt), so the two high halves gcse hoists
+   sit above that copy as in retail. */
+void func_L02_003E79F8(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+    int r;
+    int i;
+    int v;
+
+    r = func_002A77E0(1000);
+    func_0026FEB8(D_L02_001B09E0, r);
+    *(int *)(state + 0x5C) = 0;
+    for (i = 0; i < 6; i++) {
+        r -= D_L02_001B0938[i];
+        if (r < 0) {
+            *(int *)(state + 0x5C) = i;
+            break;
+        }
+    }
+    if (*(int *)(state + 0x5C) == 4) {
+        if (D_0018C2EC == D_001A7A00)
+            *(int *)(state + 0x5C) = 1;
+    }
+    if (D_001395B8[0x8F] < 4) {
+        if (*(int *)(state + 0x5C) == 5)
+            *(int *)(state + 0x5C) = 1;
+    }
+    v = *(int *)(state + 0x5C);
+    *(int *)(state + 0x90) = *(int *)(state + 0x94) = *(int *)(state + 0x98) = v;
+    func_0026FEB8(D_L02_001B09F0, v);
+    if (*(int *)(state + 0x5C) == 0) {
+        int a;
+
+        *(int *)(state + 0x90) = func_002A7820(1, 5);
+        *(int *)(state + 0x94) = func_002A7820(1, 5);
+        do {
+            a = func_002A7820(1, 5);
+            *(int *)(state + 0x98) = a;
+        } while (*(int *)(state + 0x90) == *(int *)(state + 0x94) &&
+                 *(int *)(state + 0x90) == a);
+    }
+}

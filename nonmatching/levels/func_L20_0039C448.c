@@ -197,3 +197,127 @@ void func_L20_0039C448(char *arg0) {
    This body belongs in the `-G8` unit?  No: it reaches no global
    through `$gp`.
    ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------
+   Fourth attempt (worker 07, level-20 wave of 2026-10-20): the wall is
+   read out of the compiler's own source, and the escapes are measured
+   again.  The compiler's sources are IN THE REPO'S DOWNLOADS: build/
+   downloads/gnu-ee-binutils-gcc-1.1.tar.gz holds the whole ee-gcc tree
+   (gcc/cse.c, gcc/config/mips/mips.h, gcc/reload.c); unpacking it and
+   applying tools/compiler/patches/ gives the exact source the compiler
+   was built from.  That is how the mechanism below was read.
+
+   WHAT THE COMPILER DOES, exactly:
+
+   - The front end builds the store/load address as the pointer's PSEUDO
+     (`(set (mem:TI (reg/v:SI 88) 0) ...)`) when the source uses a
+     pointer variable, and as `plus(reg, const)` directly when the source
+     writes the expression inline (`*(TI128 *)(o + 0x10)` gives
+     `(mem:TI (plus:SI (reg/v:SI 86) (const_int 16)) 0)`).
+   - The CSE (gcc/cse.c, `find_best_addr`) replaces the address of a MEM
+     by the cheapest equivalent expression it finds in the class of that
+     address.  For a class member `plus(reg, const_int)` the cost is
+     `mips_address_cost` (gcc/config/mips/mips.c):
+
+         case PLUS: ... case CONST_INT: return SMALL_INT (plus1) ? 1 : 2;
+
+     so `plus(reg, 16)` costs 1 - the same as a plain register
+     (`ADDRESS_COST (ADDR) (REG_P (ADDR) ? 1 : ...)`) - and the tie is
+     broken on the rtx cost, which favours the plus.  THAT is the fold:
+     the reload then finds `plus(reg, const)` legitimate for TImode
+     (gcc/config/mips/mips.h, `GO_IF_LEGITIMATE_ADDRESS`: the offset may
+     be -32768..32752) and prints it as the displacement.
+   - The address is MATERIALISED (`addiu $reg, $base, 0x10` +
+     `lq $v0, 0x0($reg)`) exactly when the address is still a PSEUDO at
+     reload time: the reload gives the pseudo a register and computes
+     its value there (gcc/reload.c, `find_reloads_address`).
+
+   SO THE ESCAPE IS: make the class of the address pseudo hold a value
+   whose address cost is MORE than 1, or hold no value at all.  Measured
+   today, in this level:
+
+     WORKS
+     - a pointer whose value is LOADED FROM MEMORY: the class member is
+       a MEM, `mips_address_cost (MEM)` is 4, so the CSE does not
+       substitute and the address stays a register (`lq $2,0($3)`);
+     - a pointer with DIFFERENT VALUES IN TWO BRANCHES: the class is
+       ambiguous, so nothing is substituted - but the compiler then
+       computes both values and joins them with a `movn`
+       (`addu $3,$4,16 ; addu $4,$4,32 ; movn $4,$3,$6 ; sq $2,0($4)`),
+       four instructions instead of two;
+     - a `volatile` POINTER OBJECT: the address is materialised, but the
+       pointer is spilled and reloaded (`sw $4,0($sp) ; lq $3,0($5) ;
+       lw $2,0($sp) ; sq $3,0($2)`), eight bytes over.
+
+     DOES NOT WORK (measured today, all of them fold)
+     - the pointer as a TI128 pointer variable, the pointer used twice,
+       the pointer used with two different offsets, the offset in a
+       variable (`int off = 0x10`), a 64-bit address, a struct member,
+       an array index, a union, a `volatile` store or pointee, an
+       `__inline__` copy helper (2 parameters), `__builtin_memcpy`, an
+       integer cast, the pointer loaded from memory AND offset by 0x10
+       (the offset folds), the pointer assigned twice in one block (the
+       class is rebuilt at every assignment, so each use sees one
+       value), the pointer in a `volatile` variable, the address
+       computed inline more than once.
+
+   The only spelling that reaches the retail's zero displacement with a
+   plain C source is a SYMBOL base: `plus(symbol, const)` costs 3 (the
+   symbol's cost plus one), so the CSE leaves it alone and the reload
+   materialises it.  The matched `func_L00_002D40A0` is that case:
+   `char *addr = (char *)&D_00189E20_11 + 0x18A0; *(V4 *)addr = *v;`
+   gives `addiu $v1, $v1, %lo(D_18B6C0) ; sq $v0, 0x0($v1)`.
+
+   So for a base that is a REGISTER the wall stands: the retail's
+   compiler did not make the same substitution this one does.
+
+   The second difference (the order of the two saves) is a scheduler
+   artefact of the first: with the load's address in the retail's form
+   the body differs and the scheduler has other choices.  Nothing to fix
+   on its own.
+
+   This body belongs in the `-G8` unit?  No: it reaches no global through
+   `$gp`.
+   ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------
+   Wave 5, worker 06 (2026-10-21): the 128-bit wall, measured from the
+   compiler's own source, and the two residues of this body.
+
+   THE 128-BIT LOAD.  The retail keeps the source address in $s0
+   (`addiu $s0,$s2,0x10 ; lq $v0,0x0($s0)') where this cc1 folds the
+   constant back into the load (`lq $v0,0x10($s2)').  The fold is NOT
+   the CSE's: with -fno-cse and with -fno-gcse the folded form is still
+   what comes out.  It is the RELOAD: gcc/config/mips/mips.h's
+   GO_IF_LEGITIMATE_ADDRESS accepts `plus (reg, const_int)' as a TImode
+   address (the offset has to fit in [-32768, 32752]), so the reload
+   prints the offset as the displacement instead of materialising the
+   address.  The address is materialised only when the expression is
+   something the reload cannot fold: a plain register, a symbol or a
+   memory reference.
+
+   The escapes, all measured today with the project's compiler: a
+   pointer whose value comes from a MEMORY LOAD (`char *p = *(char **)
+   (arg0 + 0x60); *(TI128 *)arg1 = *(TI128 *)p;' gives `lw $3,0x60($4)
+   ; lq $2,0($3)'), a SYMBOL, a STACK SLOT at offset 0, a LOOP-CARRIED
+   POINTER (`char *p = arg0 + 0x10; while (n--) { *(TI128 *)arg1 = *
+   (TI128 *)p; p += 2; }' gives `addu $4,$4,16 ; lq $2,0($4)'), and a
+   VOLATILE POINTER OBJECT (the zero-displacement form on both sides,
+   at the price of a stack round trip).  None of them is a plain-C
+   spelling of `base + const' with a runtime base, and this body's
+   copy is not in a loop.
+
+   THE PROLOGUE SAVE ORDER.  The retail emits `sd $s0,0x30($sp) ; sd
+   $s2,0x40($sp) ; sd $s1,0x38($sp)', this cc1 `sd $s0 ; sd $s1 ; sd
+   $s2'.  The register assignment is the same in both (the retail's
+   $s0 holds arg0+0x10, its $s2 holds arg0, its $s1 holds state+0x10
+   and its $s3 holds state), so only the order of the three stores
+   differs.  Measured today: the order does NOT follow the order in
+   which the values are first set in the source - three source orders
+   (the pointer arg0+0x10 first, the copy of arg0 first, and state+0x10
+   computed at its first use) all give the same ascending prologue.
+   -mastra-keep-frame-order keeps the emission order and gives the same
+   ascending order, so the retail's order is a scheduler artefact of a
+   body that differs in the 128-bit load: the two are not separable
+   here.
+   ------------------------------------------------------------------ */

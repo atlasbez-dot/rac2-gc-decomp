@@ -189,6 +189,113 @@
      AND the call's argument, and every escape that keeps the address in a
      register changes the instruction sequence (measured above). */
 
+   ------------------------------------------------------------------
+   2026-10-21, worker 13 of the level-20 wave (wave 5).
+
+   The attempt below is unchanged: "tools/check.py func_L20_0039BDF0:
+   208 bytes, expected 212".  The one instruction that is missing is the
+   retail's `addiu $a1,$s0,0xF0` (the materialised address of the second
+   16-byte store), and this wave MEASURED why it cannot be had.
+
+   THE RETAIL'S TWO 128-BIT ACCESSES:
+
+       0x0039BE38  addiu $a0, $s0, 0x10      <- the address, in a register
+       0x0039BE3C  lq    $v0, 0x0($s2)
+       0x0039BE40  sq    $v0, 0x0($a0)      <- the copy, through $a0
+       ...
+       0x0039BE70  addiu $a1, $s0, 0xF0      <- the address, in a register
+       0x0039BE84  sq    $zero, 0x0($a1)    <- the zeroed 16 bytes
+       0x0039BE88  addiu $a0, $s0, 0xC0
+       0x0039BE8C  jal   f_00302AC8
+       0x0039BE90   addiu $a1, $s0, 0xF0    <- the address again, for the call
+
+   and this compiler's two:
+
+       addu $a0, $s0, 0x10
+       lq   $v0, 0x0($s2)
+       sq   $v0, 0x10($s0)        <- the offset folded into the store
+       ...
+       addu $a0, $s0, 0xC0
+       sq   $zero, 0xF0($s0)      <- the offset folded into the store
+       addu $a1, $s0, 0xF0        <- the address, for the call
+
+   So the retail materialises the address of BOTH 16-byte accesses and
+   this compiler folds the offset into the store in both cases.  The
+   address is used twice in each case (the store and the call), so the
+   "used more than once" rule of wave 2 does not separate them either.
+
+   WHERE THE FOLD IS, EXACTLY (this is the same mechanism wave 4
+   measured, confirmed here by reading the compiler's source in
+   build/downloads/gnu-ee-binutils-gcc-1.1.tar.gz, gcc/cse.c and
+   gcc/config/mips/mips.{c,h}):
+
+     - the front end builds the address of the store as a pseudo register
+       whose value is `plus (reg, 240)`;
+     - the CSE's find_best_addr (gcc/cse.c) replaces that pseudo by the
+       class member `plus(reg,240)`, because mips_address_cost
+       (gcc/config/mips/mips.c) gives "register plus a small constant"
+       (SMALL_INT) the COST 1, the same as a plain register, and the tie
+       is broken on the rtx cost, which favours the plus;
+     - the change is validated by apply_change_group (gcc/recog.c), which
+       asks memory_address_p, i.e. GO_IF_LEGITIMATE_ADDRESS
+       (gcc/config/mips/mips.h): for a TImode access a plus is legitimate
+       while INTVAL >= -32768 and INTVAL + GET_MODE_SIZE(TImode) - 1 <=
+       32767, that is while the offset is in [-32768, 32752];
+     - the reload then keeps the offset in the instruction.
+
+   THE RULE (measured here, and it is the wave-4 rule): the address is
+   materialised only when the source address has NO constant offset - a
+   plain pointer, a symbol, or a stack slot at offset 0.  A `base+const`
+   with a runtime base ALWAYS folds.  The matched witnesses are
+   src/levels/shared/L00_002D3798.c (a plain pointer), src/game/
+   002C1EF0-rc2.c (a symbol) and this level's func_L20_0043F510 (a
+   stack slot).
+
+   EVERY SPELLING MEASURED THIS WAVE, all of them fold (the store keeps
+   the displacement):
+
+       *(TI128 *)(p + 0xF0) = 0;
+       TI128 *q = (TI128 *)(p + 0xF0); *q = 0;
+       char *q = p + 0xF0;       *(TI128 *)q = 0;
+       ((TI128 *)p)[15] = 0;
+       *(volatile TI128 *)(p + 0xF0) = 0;     (a volatile POINTE)
+       char *a = p + 0xF0; char *b = a; *(TI128 *)b = 0;   (two names)
+       char *a = p + 0xF0; char *b = p + 0xF0; *(TI128 *)b = 0;
+       the address used twice (the store and the call), in every order;
+       the address computed inside and outside the `if (p)`;
+       the address as an `int`, a `char *`, a `TI128 *` and a `void *`;
+
+   and every flag measured this wave leaves the shape unchanged:
+
+       -O1  -O2  -O3  -mno-split-addresses  -fno-gcse  -fno-cse-follow-jumps
+       -fno-cse-skip-blocks  -fno-expensive-optimizations
+       -fexpensive-optimizations  -fno-schedule-insns  -fno-schedule-insns2
+
+   (-fno-cse is not accepted by this cc1.)  The SDK profile (the other
+   compiler in build/compiler/sdk) folds the same way.
+
+   The escapes that DO change the shape all change something else:
+     - a `volatile` POINTER OBJECT keeps the address in a register
+       (`sw`/`lw` around the store) but the body is 8 bytes longer;
+     - a pointer given different values in two branches keeps the address
+       in a register but adds a `movn`;
+     - an offset outside [-32768, 32752] keeps the address in a register
+       but the immediate is then the offset (the retail's is 0x10);
+     - a 64-bit address keeps it in a register but the arithmetic becomes
+       `daddu`+`dsll`/`dsra` instead of the retail's `addiu`.
+
+   So: a TI copy through a register needs an address that is not a
+   register plus a small constant, and the retail's addresses here are
+   exactly that.  This is a compiler-side wall (the CSE's find_best_addr
+   tie), not a source shape.
+
+   The other two differences the attempt still has are consequences of
+   the fold: the float constants (2.0f, 0.5f) are materialised just
+   before their use in the retail and hoisted in front of the copy here,
+   and the second call's delay slot holds the store to arg0+0x98 where
+   the retail has `addiu $a1,$s0,0xF0`.
+
+
 typedef int TI128 __attribute__((mode(TI)));
 
 extern void *func_0029EFD0(int);

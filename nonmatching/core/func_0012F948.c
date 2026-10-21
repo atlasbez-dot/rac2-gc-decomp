@@ -11,6 +11,20 @@
  * 0xD8, 0xB0, 0xE4, 0xE0 and puts 0xDC in the delay slot, which is exactly
  * one instruction (the nop) short. Two spellings tried (direct expression,
  * then the mask in a local); both give the same 76 bytes.
+ *
+ * Wave 24 (worker 07): the row itself is a catalogue defect, and the 76
+ * bytes are the symptom.  The row (0x0012F948, 80 bytes) covers the eight
+ * bytes `sll $a2,$a2,4 ; nop` *and* the whole of the function at
+ * 0x0012F950, which has its own prologue (`addiu $sp,$sp,-0x10`) and its
+ * own epilogue (`jr $ra ; addiu $sp,$sp,0x10`) and ends at 0x0012F998.
+ * The shifted $a2 of the first two bytes is dead: the function overwrites
+ * $a2 at 0x0012F97C (`lw $a2, 0xE4($v1)`) before any use.  The retail's
+ * own symbol list agrees that the two are separate:
+ * symbol_addrs/usa-v2/symbol_addrs.txt has `func_0012F948 = 0x0012f948;
+ * // type:func size:0x8` and `func_0012F950 = 0x0012f950; // type:func`.
+ * So the eight bytes are a leftover of another function: the row should be
+ * 8 bytes at 0x0012F948 (the fragment) and the 72 bytes at 0x0012F950
+ * should have a row of their own; that is a tools/levels.py fix, not C.
  */
 extern void func_0012FBF0(int arg0);
 

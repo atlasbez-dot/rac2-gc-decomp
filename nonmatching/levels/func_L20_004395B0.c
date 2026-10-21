@@ -91,3 +91,53 @@ void func_L20_004395B0(char *arg0) {
     func_00282CF0(s0, s1 + 0x10, (char *)buf);
     func_002AD6F0(s2 + 0xA0, s0, s3, s1 + 0xF0);
 }
+
+/* ------------------------------------------------------------------
+   Wave 4, worker 08.  The 128-bit copy wall, measured on this body.
+
+   The C in this file is the third attempt, unchanged; what this wave
+   measured is the RULE the retail's shape follows and where the wall
+   is in the compiler.
+
+   The retail's three materialised addresses (the two sources and the
+   second destination) are exactly the three addresses the body uses
+   TWICE; the one address it uses once (the first destination, sp+0)
+   is folded (`sq $v0,0($sp)`):
+
+     addiu $v1,$s1,0x10 ; lq $v0,0($v1) ; sq $v0,0($sp)     <- source 1
+     addiu $a0,$sp,0x10 ; addiu $v1,$s1,0xF0 ;
+     lq $v0,0($v1) ; sq $v0,0($a0)                          <- source 2 + destination 2
+
+   The sources are used again as the arguments of the two calls at the
+   end (addiu $a1,$s1,0x10 and addiu $a3,$s1,0xF0), the second
+   destination is used again as $s3 (daddu $s3,$a0,$zero).
+
+   The wall, read in the compiler's own source (gcc/cse.c of the
+   retail's gcc 2.9, build/compiler/tools is built from it): the CSE's
+   find_best_addr() compares the address's class members by
+   CSE_ADDRESS_COST and then by rtx cost.  A pseudo costs 1
+   (COST(), cse.c:487) and `plus(reg,const)' costs
+   notreg_cost() = 2 * rtx_cost(plus) >= 8 (cse.c:693), so the plus
+   ALWAYS wins the tie and the address always folds into the
+   displacement.  For the retail's shape the address must therefore not
+   be a `plus(reg,const)' at the time of the CSE, i.e. the class of the
+   address pseudo must not contain the plus.
+
+   That is what the loop-carried pointer does (the pointer is set twice,
+   so the class holds two different pluses and the substitution fails):
+   measured, a pointer incremented at the end of a loop body gives
+   `addu $4,$4,16 ; lq $2,0($4)' - the retail's shape, zero
+   displacement - but it needs a loop, and this body has two
+   straight-line copies.
+
+   The volatile pointer object (the common file's escape B) gives the
+   same shape with a stack round trip (`sw $4,0($sp) ; lq $3,0($5) ;
+   lw $2,0($sp) ; sq $3,0($2)').
+
+   Also measured: the retail's shape occurs 189 times in level 20 and
+   NOT ONE of those functions is matched in src/ today (checked every
+   matched function of the repository against the retail listing), so
+   the wall is still open.
+
+   The attempt belongs in the -G8 unit (the three floats of the case 1
+   branch are read through $gp at 0x1AEFF0+0x2E18). */

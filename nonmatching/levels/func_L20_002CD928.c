@@ -4,6 +4,668 @@
    for src/levels/20_yeedil/L20_002CD928-g8.c, and the marker in
    src/levels/20_yeedil/L20_002CD928.c is back.
 
+/* =====================================================================================
+   WAVE 5 (worker 15 of the level-20 wave) -- WHAT WAS MEASURED, AND THE COMPLETE
+   BODY MAP WITH THE CALL ARGUMENTS.
+
+   1. WHAT DIFFERS: the frame and the 62 bodies.  The retail's frame is 0x1A0 (ten
+      saved GPRs, five saved FPRs, about forty float spills); the skeleton's frame is
+      whatever the (empty) bodies need.  tools/check.py says
+
+          20_yeedil: 92 bytes, expected 34964
+          func_L20_002CD928: 0 of 1 places match (src/levels/20_yeedil/L20_002CD928-g8.c)
+
+      The frame, the register allocation, the spills of `saved` and `state` and the
+      380 materialisations of the global's address are all decided by the bodies, so
+      they cannot be matched before the bodies are written.  What IS matched is in
+      points 2 to 6 below; they are measured, not argued.
+
+   2. THE DISPATCH IS THE RETAIL'S, INSTRUCTION FOR INSTRUCTION.  With
+
+          extern void *jtbl_002B27E0[149];
+          ...
+          if ((unsigned)sel < 149) {
+              goto *jtbl_002B27E0[sel];
+          }
+
+      cc1 emits the retail's seven instructions of the dispatch (the .s text, then
+      the object read with tools/elf.py):
+
+          ours (0x002CD948)                  retail (0x002CD994)
+          lui   $v0, %hi(jtbl_002B27E0)      lui   $v0, %hi(jtbl_002B27E0)
+          sll   $v1, $v1, 2                  sll   $v1, $a0, 2
+          addiu $v0, $v0, %lo(jtbl_002B27E0) addiu $v0, $v0, %lo(jtbl_002B27E0)
+          addu  $v1, $v1, $v0               addu  $v1, $v1, $v0
+          lw    $a0, 0($v1)                 lw    $a0, 0x0($v1)
+          jr    $a0                         jr    $a0
+          nop                               nop
+
+      and the range check in front of them is the retail's too: `sltiu $v0,$v1,0x95`
+      and `beqz $v0` to the tail (the retail's `sltiu $v1,$a0,0x95` / `beqz $v1`).
+      Only the register that holds the switch value differs ($v1 against $a0), and
+      that is the register allocator's business: the retail's 8741 instructions need
+      $a0 for something else.
+
+      The object gets R_MIPS_HI16 at +0x20 and R_MIPS_LO16 at +0x28 against
+      jtbl_002B27E0 (measured with tools/elf.py on the skeleton), so the build can
+      resolve the name from the retail's own `lui %hi`/`addiu %lo` pair.
+
+   3. THE EPILOGUE'S SHAPE IS THE RETAIL'S, AND THE BRANCH-LIKELY SEMANTICS ARE NOW
+      SETTLED (this is the one place where the earlier waves' note was worth
+      checking).
+
+      The retail's epilogue (0x002D6158):
+
+          lw    $a0, 0x114($sp)          ; the spilled `saved`
+          lw    $v0, 0x2298($v1)         ; D_00189E20[0x2298]
+          bnel  $a0, $v0, .L002D6168     ; if (saved != D[0x2298]) goto 0x002D6168
+          sw    $zero, 0x1C0($v1)       ; the delay slot: D[0x1C0] = 0
+          lbu   $v0, 0x43($fp)          ; the object's state byte
+          lw    $a0, 0x118($sp)          ; the spilled `state`
+          bnel  $a0, $v0, .L002D6178     ; if (state != obj[0x43]) goto 0x002D6178
+          sw    $zero, 0x1C4($v1)       ; the delay slot: D[0x1C4] = 0
+
+      The skeleton's epilogue is the same two tests with the same shape (measured:
+      `bnel $a3,$v0` + `sw $zero,0x1C0($a1)` and `bnel $t0,$v0` + `sw $zero,0x1C4($a1)`),
+      so the source is
+
+          if (saved != *(int *)(g + 0x2298)) { *(int *)(g + 0x1C0) = 0; }
+          if (state != *(u8 *)(obj + 0x43)) { *(int *)(g + 0x1C4) = 0; }
+
+      MEASURED: this cc1 turns exactly that into `bnel` + the store in the delay slot
+      (the test file: `if (a != b) { *(int *)(g + 0x1C0) = 0; }` gives
+      `bnel $3,$4,$L9` + `sw $0,448($2)`), and `if (a == b) { ... }` gives `beql`.
+
+      WHY THE STORE IS CONDITIONAL: on the R5900 the INTEGER branch-likelys execute
+      their delay slot only when the branch is TAKEN, which is the opposite of the
+      standard MIPS R3000/R4000 rule.  Two places in a matched function prove it
+      (func_L00_002D34C0: "27 of 27 places match", tools/check.py):
+
+        - src/levels/shared/L00_002D3400.c, func_L00_002D34C0 (matched byte for
+          byte): at 0x002E74CC `bnel $v0,$zero,.L002E74F0` with the delay slot
+          `daddu $a0,$sp,$zero`; the TAKEN path (the `else` of the source's
+          `if (state == 58 && field34E == 0)`) calls func_00282F20_6 with $a0 = the
+          destination buffer, so the delay slot MUST have run on the taken path.
+        - the same function at 0x002E7420: `beql $v0,$zero,.L002E7438` with the delay
+          slot `addiu $v0,$zero,0x2`; the case-2 body is reachable only through
+          `beq $v1,$v0` at 0x002E7438, and $v0 must be 2 there, so the delay slot
+          MUST have run on the taken path.  (Under the standard MIPS rule $v0 would
+          still hold the `slti` result 0 and the compiler would have folded the
+          whole case away.)
+
+      The FLOAT branch-likelys are the other way round, and another matched function
+      proves it: src/levels/shared/L00_002A6420.c, func_L00_002A9D38 ("27 of 27
+      places match", tools/check.py):
+      `bc1tl .L002BCCA8` with the delay slot `swc1 $f21,0x8($s0)`; the source's
+      `if (a1[2] < -1.0f) a1[2] = -1.0f;` only clamps when the branch is NOT taken,
+      so `bc1tl` annuls its delay slot when taken (the standard MIPS rule).
+
+      So: `beql`/`bnel` run the delay slot when TAKEN; `bc1fl`/`bc1tl` annul it when
+      taken.  This is the rule to read the whole function's branches with, and it is
+      what makes the epilogue's two stores conditional.
+
+   4. THE SPLIT ADDRESS: THE SPELLING, MEASURED.  The retail keeps the %hi of
+      D_00189E20 in $s6 and re-does the %lo at each of its 380 uses:
+
+          addiu $s0, $s6, %lo(D_189E20)
+
+      The spelling that produces it is (measured on the skeleton): the pointer
+      variable at the top, and the global's ADDRESS used as a VALUE at call sites
+      that are in different basic blocks.  The skeleton with five such call sites
+      (`probe(D_00189E20);` in five of the bodies) compiles to the retail's shape:
+
+          lui   $2, %hi(D_00189E20)      # the %hi into a temporary
+          move  $5, $2                   # the %hi into the register the split keeps
+          addiu $16, $2, %lo(D_00189E20) # the pointer variable, once
+          ...
+          jal   probe
+          addiu $4, $5, %lo(D_00189E20)  # the "low" again, at each use
+
+      The retail's own prologue has the same shape, in the same order:
+
+          lui    $v0, %hi(D_189E20)      # 0x002CD92C
+          sd     $s6, 0x150($sp)
+          sd     $s0, 0x120($sp)
+          daddu  $s6, $v0, $zero         # 0x002CD938: the %hi into $s6
+          sd     $s1, 0x128($sp)
+          addiu  $v0, $v0, %lo(D_189E20) # 0x002CD940: the pointer variable
+
+      (the retail's `daddu $s6,$v0,$zero` is cc1's `move $s6,$v0`: the ee gas
+      assembles `move` as `daddu rd,rs,$zero`.)  The only difference from the
+      skeleton is the register: the retail's %hi has to survive 746 calls, so it goes
+      to a callee-saved register ($s6), while the skeleton's goes to $a1.
+
+      So the source of the bodies has calls of the shape `func_L00_002A9E30(D_00189E20,
+      8.0f, 1.0f, -1.0f)` (the retail passes the global's address as an argument in
+      body 0 at 0x002CDDA0), and the pointer variable is used with the offsets folded
+      in (`*(int *)(g + 0x2294)`), which is what keeps the %lo raw at the uses.
+
+      NOTE: a re-assignment of the pointer at the top level (`g = D_00189E20;` before
+      the dispatch) does NOT produce the split: the CSE merges the two "low"s into
+      one register.  It is the use of the symbol as a value, in the bodies, that
+      splits it.
+
+   5. THE PROLOGUE'S THREE READS GO THROUGH A POINTER VARIABLE.  The retail's
+
+          lw $a0, 0x2294($v0)      ; sel
+          lw $fp, 0x2290($v0)      ; obj
+          lw $v0, 0x2298($v0)      ; saved
+
+      all use ONE base register, so the source is a pointer variable (`char *g =
+      D_00189E20;` and then `*(int *)(g + 0x2294)`, `*(char **)(g + 0x2290)`,
+      `*(int *)(g + 0x2298)`).  Writing `D_00189E20 + 0x2294` instead folds the three
+      offsets into one base and gives three different bases.
+
+   6. THE $gp GLOBALS.  Six small-data globals are reached through $gp (all six are
+      loads): -0x7C60 = 0x001A7390, -0x7600 = 0x001A79F0 (boot resident); -0x6000 =
+      0x001A8FF0, 0xF10 = 0x001AF000, 0x3AD8 = 0x001B2AC8, 0x4748 = 0x001B3738 (level
+      20's own data).  The attempt therefore belongs in a `-g8` unit of its own
+      (L20_002CD928-g8.c); a `-G0` unit cannot produce them.
+
+   7. THE COMPLETE BODY MAP, WITH THE CALL ARGUMENTS.  The map below adds to the two
+      maps above: for each of the 63 bodies (62 bodies plus the default) the CALLS
+      with the arguments the retail materialises for them, the BRANCHES with their
+      targets (as body + offset), the FLOAT CONSTANTS the body materialises, the
+      fields of the boot global D_00189E20 it touches, and the fields of the object
+      it drives.
+
+      The bodies are named b0..b61 in the layout order (which is the source order
+      of the case labels) and the default body is `tail`; the address in each line
+      joins them to the map above.
+
+      The arguments are read off the retail's own register set (the last definition
+      of each argument register before the call, the delay slot included), so they
+      are the values the retail passes, not guesses: `$s0` is the global's address,
+      `$sp` is the stack, `f[$s0+0x1A4]` is a float field of the global, and
+      `0x3F333333` is a float constant.  A register the allocator reused shows the
+      value it held, so the arguments of a call whose arguments were set further
+      back are approximate; everything the map says about a body's calls, its
+      branches and its fields is exact.
+
+   8. WHAT IS LEFT, AND HOW TO START.  The 62 bodies are 34 KB of C: one body per
+      case group, in the order of the map below, each one reproducing the retail's
+      instructions for its range.  The frame (0x1A0), the ten saved GPRs, the five
+      saved FPRs, the forty float spills, the spills of `saved` and `state` at
+      0x114($sp) and 0x118($sp) and the 380 `addiu $rd,$s6,%lo(D_189E20)` all fall
+      out of the bodies once they are written; they cannot be forced from the
+      skeleton.
+
+      The prototypes of the 136 callees are the other half of the work: 26 of them
+      are already matched (their prototypes are in src/), the rest have to be read
+      off the call sites (the map's argument list is the starting point: the
+      argument registers the retail sets at each call are in it).
+
+      The measurement that shows the split-address spelling (point 4) is this: the
+      skeleton with ONE extra line in five of the bodies,
+
+          extern void probe(void *p);
+          ...
+          b0:
+              probe(D_00189E20);
+
+      compiles (cc1 -O2 -G8) to the retail's prologue shape:
+
+          lui   $2, %hi(D_00189E20)       # the %hi into a temporary
+          move  $5, $2                    # the %hi into the register the split keeps
+          addiu $16, $2, %lo(D_00189E20)  # the pointer variable, once
+          ...
+          jal   probe
+          addiu $4, $5, %lo(D_00189E20)   # the "low" again, at each use
+
+      which is the retail's
+
+          lui    $v0, %hi(D_189E20)
+          daddu  $s6, $v0, $zero
+          addiu  $v0, $v0, %lo(D_189E20)
+          ...
+          addiu  $s0, $s6, %lo(D_189E20)
+
+      instruction for instruction, apart from the register the %hi sits in ($a1
+      against $s6: the retail's has to survive 746 calls) and the frame.
+
+   THE COMPLETE BODY MAP (wave 5):
+
+     body   b0  0x002CD9B0   1392 bytes   348 insns   19 calls  cases 0, 1, 3, 4, 28, 29, 30, 57, 109, 111, 125
+         calls    : func_L00_002AA478(a0=$zero+0xF, a1=$zero+0x1E); func_L00_002B54F8(a0=$zero+0xF, a1=$zero+0x1E, f12=0x3F333333, f13=0.0); func_L00_002B54F8(f12=0x3F000000, f13=0x3D088889); func_L00_002B9F00(f12=0x406CCCCD, f14=0x3EB33333); func_L00_002B39F0(a0=$zero, f12=0x406CCCCD, f14=0x3EB33333); func_00283098(a0=$s1+0x190, a1=$sp, a2=$s0); func_L00_002B3EF8(a0=$zero, a1=$sp, a2=$s0, f14=0x403A2B22); func_L00_002CAF20(); func_L00_002B3EF8(a0=$zero, f12=0x3B03126F, f13=0x3D8F5C29, f14=0x3DEE4BB0); func_00282C48(a0=$zero, f12=f[$s0+0x1A4], f13=0x3D8F5C29, f14=0x3DEE4BB0); func_L00_002D2168(a0=$a0+0xE, a1=$zero, f12=0x40A00000); func_00282C48(a0=$a0+0xE, a1=$zero, f12=f[$s0+0x1A4]); func_L00_002D2168(a0=$zero+0xD, a1=$zero, f12=0x40E00000); func_L00_002A9E30(a0=D_189E20, f12=0x41500000, f14=0x3F000000, f15=0xBF800000); func_L00_002B41B8(); func_00282C88(a0=$s0); func_L00_002B94D8(a0=$s0); func_L00_002D34C0(a0=$s0, a1=$s0, f12=0x3C75C290); func_L20_002C7588(a0=$zero, a1=$s0)
+         branches : beqz $v0 -> b0+0x18; beqz $v0 -> b0+0x44; b -> b0+0x60; beq $v1, $s2 -> b0+0xb4; bne $v1, $v0 -> b0+0x17c; beqz $v0 -> b0+0x178; beqz $v0 -> b0+0x178; bnel $v1, $v0 -> b0+0x17c; bnel $v0, $zero -> b0+0x148; bnel $v0, $zero -> b0+0x158; bnel $v0, $v1 -> b0+0x1a0; bnez $v0 -> tail+0x4; bnel $v1, $v0 -> b0+0x330; beq $a0, $v1 -> b0+0x1ec; bne $a0, $v0 -> b0+0x330; bne $v0, $v1 -> b0+0x22c; beq $v0, $a0 -> b0+0x294; b -> b0+0x330; beq $v1, $a0 -> b0+0x330; bne $v1, $v0 -> b0+0x45c; bne $v1, $v0 -> b0+0x4a0; b -> b0+0x4a0; b -> b0+0x4a0; bne $v1, $v0 -> b0+0x494; beqz $v0 -> b0+0x4a0; b -> b0+0x4a0; beqz $v0 -> b0+0x544; beqz $v0 -> b0+0x544; beqz $v0 -> tail+0x0; b -> tail+0x0; bnez $v0 -> b58+0x2e4; b -> b59+0xb0
+         floats   : 0x3F333333 0x3F000000 0x3D088889 0x406CCCCD 0x3EB33333 0x3F800000 0x403A2B22 0x3E4CCCCD 0x3B03126F 0x3D8F5C29 0x3DEE4BB0 0x3BBEA2F4 0x40A00000 0x4190BF49 0x3F0CCCCD 0x40200000 0x40E00000 0x3BF5C290 0x40B00000 0x41500000 0xBF800000 0x3F8CCCCD 0x40D00000 0x39F79499 0x3BA11BFE 0x3C75C290
+         global   : [65, 372, 380, 416, 420, 432, 440, 846, 3104, 5266, 8848, 8852, 8885, 8889, 8891, 9388, 9400]
+         object   : [65, 66, 67]
+
+     body   b1  0x002CDF20    328 bytes    82 insns    8 calls  cases 124
+         calls    : func_0029EFD0(a0=$zero+0x52A); func_002A0F48(a0=[$s0+0x7A4]); func_002E5CF8(a0=$zero, a1=$zero, a2=[$s0+0x7A4]); func_00283CF0(a0=$zero, a1=$zero, a2=[$s0+0x7A4], f12=0x40A00000); func_002A0F48(a0=[$s0+0x7A4], a1=$a1+0xF0, a2=$a1+0x10); func_00282E20(a0=$s0, a1=$a1+0xF0); func_L00_002EE4D8(a0=$s0, a1=$a0, f12=0x3F6B851F); func_L00_002C9228(a0=$s0, a1=$a0, f12=0x3F6B851F)
+         branches : bnez $v0 -> b1+0x9c; beqz $a2 -> b1+0x108; beqz $v1 -> b1+0x10c; bnel $v0, $zero -> b1+0xdc; b -> tail+0x4
+         floats   : 0x40A00000 0x3F6B851F
+         global   : [0, 248, 1956, 8848]
+         object   : [0]
+
+     body   b2  0x002CE068   3412 bytes   853 insns   50 calls  cases 50, 51, 52
+         calls    : func_L00_002B9BB0(a0=$zero+0x5, a1=[$a1+0x2290], a2=$zero+0xF); func_L00_002D6900(a0=$zero+0x16, a1=[$a1+0x2290], a2=$zero+0xF); func_002E59F8(a0=$a2, a1=[$a1+0x2290]); func_00282978(a0=$s0+0xA4A); func_L00_002AA938(a0=$s0+0xA4A, a1=$zero, a2=$zero); func_L00_002AA938(a0=$zero+0x4, a1=$zero+0x1, a2=$zero); func_L00_002AA938(a0=$a0+0x1, a1=$zero+0x1, a2=$zero); func_L00_002AABE0(a0=$zero+0x3, a1=$zero+0x10, a2=$zero); func_002FD1B8(a1=[$gp+0x4748], a2=$zero, f12=f[$s0+0x80], f13=f[$s0+0x84], f14=0x3ECCCCCD, f15=0xBE99999A); func_002AA898(a0=$s0+0x94, a1=$s0+0xA28, a2=$zero, f12=0.0, f13=0x3C75C28F, f14=0x3E4CCCCD); func_00283BE0(a0=$s0+0x94, a1=$s0+0xA28, a2=$zero, f12=f[$s0+0x94], f13=0x3C75C28F, f14=0x3E4CCCCD); func_L00_002B39F0(a0=$zero, a2=$zero, f12=0x3F800000, f13=0x3C75C28F); func_L00_002B3EF8(a0=$zero, f12=0x3BE56042, f13=0x3DA3D70A, f14=0x3DB2B8C4); func_00282948(a0=$s0+0xA34, f12=0x3BE56042, f13=0x3DA3D70A, f14=0x3DB2B8C4); func_00282948(a0=$s0); func_0029FCC0(a0=[$s2+0x2290], a1=$zero+0x4, a2=$sp); func_00283098(a0=$s1, a1=$s1, a2=$a2+0xC0); func_00282CC0(a0=$sp, a1=$sp, a2=$s1); func_00282F20(a0=$s1, a1=$s1, a2=$s1, f12=0x3CCCCCCE); func_00282CC0(a0=$s0, a1=$s0, a2=$s1, f12=0x3CCCCCCE); func_002BF728(a0=$sp, a1=$s0, f12=0x46C4E000, f13=0xBF800000); func_002A77E0(a0=$zero+0x64, a1=$s0, f12=0x46C4E000, f13=0xBF800000); func_002A7820(a0=$zero+0x28, a1=$zero+0x5A); func_00282978(a0=$s0+0xA38, a1=$zero+0x5A); func_0029FCC0(a0=$s4, a1=$s1+$a1, a2=$sp); func_00283098(a0=$s3, a1=$s3, a2=$a2+0xC0); func_00282CC0(a0=$sp, a1=$sp, a2=$s3); func_002A7878(a0=$sp, a1=$sp, a2=$s3); func_002A7878(a0=$sp, a1=$sp, a2=$s3); func_002A7878(); func_L00_00323F28(a0=$s0, a1=$s0, f12=0xBC4CCCCE, f13=f[$s2+0x98], f14=f[$s2+0x94]); func_00283CF0(f12=0x3DEEEEF0); func_002A7878(f12=0x45C4E000, f13=0x4613A800); func_002BF728(a0=$sp, a1=$s0, f12=0x45C4E000, f13=0xBF800000); func_L00_002B41B8(a0=$zero+0x34, f12=0x3B6CA864, f13=0x3B11A2B4); func_L00_002B41B8(f12=0x3AFEDCBB, f13=0x3A91A2B4); func_00283B98(f12=f[$s0+0x94], f13=0x3A91A2B4); func_002AF000(a0=$s0+0xF0, f12=f[$s0+0x1B4], f13=f[$s0+0x98]); func_L00_002A9F30(a0=D_00269110, a1=$zero+0x1E, f12=f[$s0+0x1B4]); func_002AF000(a0=D_189F10); func_00282DF0(a0=$s0+0x160); func_002AA2E8(a0=$sp+0xE0, f13=0x3B11A2B4); func_002AA2E8(a0=$sp+0xE0, f13=0x3A91A2B4); func_00282F20(a0=$s0, a1=$s0, f12=f[$sp+0xE0], f13=0x3A91A2B4); func_L20_002C7588(a0=$zero, a1=$s0, f12=f[$sp+0xE0]); func_00283180(a0=$zero, a1=$s0); func_002AA898(a0=$a0+0x90, a2=$zero, f13=0x3BE56042, f14=0x3E2E147B, f15=0x3CA6CE95); func_L00_002AB0C0(a2=$zero, f12=0x3C1374BC, f13=0x3E6147AE); func_L00_002AB0D8(f12=0x3D23D70A, f13=0x3E6147AE); func_L00_002AB0F0(f12=0x3CA3D70A, f13=0x3E6147AE)
+         branches : bnel $v0, $v1 -> b2+0x50; bnel $v0, $zero -> b2+0x34; b -> b2+0xa0; beq $a2, $v0 -> b2+0x90; bne $v1, $a1 -> b2+0x94; beqz $v0 -> b2+0x98; beql $v0, $zero -> b2+0xdc; bne $v1, $v0 -> b2+0x13c; bnez $v0 -> b2+0x13c; bne $v0, $v1 -> b2+0x198; bne $v1, $v0 -> b2+0x19c; beqz $v0 -> b2+0x198; beql $v0, $zero -> b2+0x17c; bne $v1, $v0 -> b2+0x224; bne $v0, $v1 -> b2+0x208; beqz $a0 -> b2+0x1fc; bnez $v1 -> b2+0x220; beq $v0, $v1 -> b2+0x28c; bnel $v0, $v1 -> b2+0x368; beq $v1, $v0 -> b2+0x320; bne $v1, $a0 -> b2+0x354; b -> b2+0x450; beql $v0, $zero -> b2+0x44c; beq $v1, $v0 -> b2+0x40c; b -> b2+0x450; beqz $v0 -> b2+0x510; bnez $v0 -> b2+0x4c4; bnez $v0 -> b2+0x4c8; bnel $v0, $zero -> b2+0x4e0; b -> b2+0x51c; b -> b2+0x51c; beqz $v0 -> b2+0x564; beqz $v0 -> b2+0x560; beql $v0, $zero -> b2+0x578; bnel $v0, $zero -> b2+0x58c; bne $v1, $v0 -> b2+0x5a0; bnel $v1, $v0 -> b2+0x64c; b -> b2+0x69c; bne $v1, $v0 -> b2+0x688; bnel $v0, $zero -> b2+0x69c; b -> b2+0x69c; bnez $v0 -> b2+0x6c4; bne $v1, $v0 -> b2+0x6e4; bne $v1, $v0 -> b2+0x72c; bnel $v0, $v1 -> b2+0x76c; bnez $v0 -> b2+0x778; beqz $v0 -> b2+0x898; b -> b2+0x88c; bne $v0, $v1 -> b2+0xa74; beqz $v0 -> b2+0xa3c; beqz $s4 -> b2+0xa38; bne $v1, $v0 -> b2+0xa3c; bnez $v1 -> b2+0x900; bne $v1, $a0 -> b2+0xa74; b -> b2+0xa94; bne $v1, $s1 -> b2+0xad4; b -> b2+0xbd0; bne $v1, $v0 -> b2+0xb58; bne $v0, $s1 -> b2+0xb3c; beql $v0, $zero -> b2+0xb40; b -> b2+0xbd0; bne $v1, $v0 -> b2+0xbd0; bne $v0, $s1 -> b2+0xb94; b -> b2+0xbb0; b -> b2+0xcf8; b -> tail+0x0
+         floats   : 0x41200000 0x3ECCCCCD 0xBE99999A 0x3C0EFA36 0x3C3EA2F4 0x3E4CCCCD 0x3FC00000 0x3F800000 0x3CCCCCCD 0x3F000000 0x3EB33333 0x3FAE40F2 0x44BB8000 0xBFAE40F2 0x3F400000 0x3C75C28F 0x3BE56042 0x3DA3D70A 0x3DB2B8C4 0x3DCCCCCE 0x3DEEEEF0 0x3D3F258D 0x3D4CCCCE 0x3E19999A 0x3CCCCCCE 0x3D088889 0x46C4E000 0xBF800000 0x42200000 0x3CF5C28F 0xBE19999A 0xBC4CCCCE 0x422B6DB6 0x45C4E000 0x4613A800 0x3B6CA864 0x3B11A2B4 0x3AFEDCBB 0x3A91A2B4 0x40A00000 0x3D99999A 0xC0E00000 0x3E2E147B 0x3CA6CE95 0x3C1374BC 0x3E6147AE 0x3D23D70A 0x3CA3D70A 0x423C0000 0x3FB33333 0x3F5F66F4 0xBF5F66F4 0x3F8CCCCD
+         global   : [0, 128, 132, 148, 152, 420, 432, 436, 440, 2592, 2604, 2616, 2624, 2626, 2634, 2636, 2638, 2640, 2644, 3116, 3128, 4880, 8848, 8852, 8856, 8864, 9280, 9400, 9408]
+         object   : []
+
+     body   b3  0x002CEDBC    120 bytes    30 insns    4 calls  cases 115
+         calls    : func_L00_002AA938(a0=$zero+0xA, a1=$zero, a2=$zero, a3=$zero+0x8); func_00282E20(a0=$s1, a1=$zero, a2=$zero, a3=$zero+0x8); func_L00_002EE4D8(a0=$s1, a1=$a0, f12=0x3F6B851F); func_L20_002C7588(a0=$zero, a1=$a0, f12=0x3F6B851F)
+         branches : beql $v0, $zero -> b3+0x18; b -> tail+0x4
+         floats   : 0x3F6B851F
+         global   : [248, 440]
+         object   : []
+
+     body   b4  0x002CEE34     68 bytes    17 insns    3 calls  cases 114
+         calls    : func_L00_002AA478(a0=$zero+0xF, a1=$zero+0x1E); func_00282E20(a0=$s0, a1=$zero+0x1E); func_L00_002EE4D8(a0=$s0, a1=$a0, f12=0x3F6B851F)
+         branches : b -> b6+0x2b0
+         floats   : 0x3F6B851F
+         global   : [248]
+         object   : []
+
+     body   b5  0x002CEE78    444 bytes   111 insns   13 calls  cases 103, 127
+         calls    : func_00282DF0(a0=$s0); func_002AA2E8(a0=$sp+0xE4, f12=0.0, f13=0x3A91A2B4); func_00282F20(a0=$s0, a1=$s0, f12=f[$sp+0xE4], f13=0x3A91A2B4); func_00282948(a0=$s0+0x8D0, a1=$s0, f12=f[$sp+0xE4]); func_0029FCC0(a0=[$s2+0x2290], a1=$zero+0x4, a2=$sp); func_00283098(a0=$s1, a1=$s1, a2=$a2+0xC0); func_00282CC0(a0=$sp, a1=$sp, a2=$s1); func_00282F20(a0=$s1, a1=$s1, a2=$s1, f12=0x3CCCCCCE); func_00282CC0(a0=$s0, a1=$s0, a2=$s1, f12=0x3CCCCCCE); func_002BF728(a0=$sp, a1=$s0, f12=0x46C4E000, f13=0xBF800000); func_002A7820(a0=$zero+0x2, a1=$zero+0x5, f12=0x46C4E000, f13=0xBF800000); func_002A7820(a0=$zero+0xA, a1=$zero+0x14); func_002AA2E8(a0=$s0+0xA3C, f12=0xBCCCCCCE, f13=0x39DA740E)
+         branches : bnel $v0, $v1 -> b5+0x178; beqz $v0 -> b5+0x158; beql $v1, $zero -> b5+0x148; b -> b5+0x170; bnez $v0 -> b5+0x178; b -> tail+0x0
+         floats   : 0x3A91A2B4 0x3ECCCCCD 0x3CCCCCCE 0x3D088889 0x46C4E000 0xBF800000 0xBCCCCCCE 0x39DA740E
+         global   : [0, 248, 440, 2608, 2620, 8848]
+         object   : []
+
+     body   b6  0x002CF034    712 bytes   178 insns   17 calls  cases 53, 54
+         calls    : func_L00_002AA478(a0=$zero+0xF, a1=$zero+0x1E); func_L00_002AA750(a0=$zero+0x4, a1=$zero+0xC); func_L00_002AA570(a0=$zero, a1=$zero+0x1); func_L00_002AA938(a1=$zero, a2=$zero); func_L00_002B39F0(a0=$zero, a2=$zero, f12=0x3D4CCCCE); func_L00_002B3EF8(a0=$zero, f12=0x3BE56042, f13=0x3DA3D70A, f14=0x3DB2B8C4); func_00282948(a0=$s0, f12=0x3BE56042, f13=0x3DA3D70A, f14=0x3DB2B8C4); func_00282C48(f12=f[$s0+0x1A8]); func_L00_002B41B8(f12=0x3A91A2B4, f13=0x3AB60B61); func_L00_002A9F30(a0=D_00269110, a1=$zero+0x1E, f12=0x3A91A2B4, f13=0x3AB60B61); func_00283180(a0=D_00269110, a1=$zero+0x1E, f12=f[$s0+0x98]); func_00283198(a0=D_00269110, f12=f[$s0+0x98]); func_00282C88(f12=f[$s0+0x98]); func_L00_002AA938(a0=$zero+0x4, a1=$zero+0x1, a2=$zero); func_L00_002B94D8(a0=$zero+0x4, a1=$zero+0x1, a2=$zero, f12=0x3A98EAD6); func_L20_002C7588(a0=$zero, a1=$zero+0x1, a2=$zero, f12=0x3A98EAD6); func_L00_002C9228(a0=$zero, a1=$zero+0x1, a2=$zero, f12=0x3A98EAD6)
+         branches : bnel $v0, $v1 -> b6+0x24; bnel $v1, $v0 -> b6+0x8c; beqz $v0 -> b6+0xc0; bnez $v0 -> b6+0x11c; bnel $v0, $v1 -> b6+0x230; beqz $v1 -> b6+0x19c; beqz $v0 -> b6+0x19c; b -> b6+0x238; bne $v0, $v1 -> b6+0x29c; bnez $v0 -> b6+0x29c; b -> tail+0x4
+         floats   : 0x3CCCCCCE 0x3C888889 0x3F19999A 0x3D4CCCCE 0x3BE56042 0x3DA3D70A 0x3DB2B8C4 0x3F490FDC 0x3AB60B61 0x3A91A2B4 0x40B00000 0x41200000 0x3A98EAD6
+         global   : [152, 240, 244, 248, 372, 424, 432, 436, 2634, 3104, 3116, 3128, 8852]
+         object   : []
+
+     body   b7  0x002CF2FC     48 bytes    12 insns    0 calls  cases 133
+         calls    :
+         branches : b -> tail+0x4
+         floats   :
+         global   : [0, 6192]
+         object   : []
+
+     body   b8  0x002CF32C    380 bytes    95 insns   11 calls  cases 134
+         calls    : func_00282D30(a0=$sp, a1=$s3, f12=0xBF800000); func_002AA3A8(a0=$s3+0x500, a1=$s3+0x504, f13=0x3BE56042, f15=0x3CF5C28F); func_00282D30(a0=$s0, a1=$s2, f12=f[$s2+0x7C0], f13=0x3BE56042); func_00282CC0(a0=$sp, a1=$sp, a2=$s0, f12=f[$s2+0x7C0]); func_00282F20(a0=$sp, a1=$sp, a2=$s0, f12=0x3F800000); func_L00_002B8F00(a0=$sp, a1=$sp+0x30, a2=$zero, f12=0x3CCCCCCD, f13=0x3ECCCCCD); func_00282F20(a0=$s1, a1=$s2, a2=$zero, f12=0x3CCCCCCD); func_L00_002D3B58(a0=$s1, a1=$a0, a2=$zero); func_00282C88(a0=$sp, a1=$a0); func_00283098(a0=$sp, a1=$sp, a2=D_1BA1F0); func_L00_002B3EF8(a0=$zero, a1=$sp, f12=0x3CA3D70A, f14=0x3D0EFA37)
+         branches : b -> tail+0x4
+         floats   : 0xBF800000 0x3E4CCCCD 0x3F400000 0x3E99999A 0x3CF5C28F 0x3BE56042 0x3F800000 0x3ECCCCCD 0x3CCCCCCD 0x3E5DDDDF 0x3CA3D70A 0x3D0EFA37
+         global   : []
+         object   : []
+
+     body   b9  0x002CF4A8    368 bytes    92 insns   12 calls  cases 47
+         calls    : func_L00_002B54F8(f12=0x3F333333, f13=0.0); func_L00_002B54F8(f12=0x3F000000, f13=0x3D088889); func_L00_002B9F00(f12=0x406CCCCD, f13=0.0, f14=0x3EB33333); func_L00_002B39F0(a0=$zero, f12=0x3F800000, f13=0.0); func_L00_002B41B8(a0=$zero, f12=0x3F800000); func_00282C88(a0=$s0, f12=0x3F800000); func_L00_002B94D8(a0=$s0, f12=0x3F800000); func_L00_002D34C0(a0=$s0, a1=$a0+0x20, f12=0x3BE38E39); func_L00_002B4308(a0=$s0, a1=$a0+0x20, f12=0x3BE38E39); func_L00_002D34C0(a1=$a0, f12=0x3C75C290); func_L20_002B7A48(a0=$zero); func_L00_002D2168(a0=$v0, a1=$zero, f12=0x40A00000)
+         branches : beqz $v0 -> b9+0x30; b -> b9+0x4c; beqz $v0 -> b9+0xe0; b -> b9+0xf8; beq $s1, $v0 -> b9+0x128; beq $v1, $a1 -> b9+0x128; b -> b9+0x160; beqz $v0 -> tail+0x0; bne $v1, $v0 -> tail+0x4; b -> tail+0x4
+         floats   : 0x3F333333 0x3F000000 0x3D088889 0x3EB33333 0x406CCCCD 0x3BA11BFE 0x3F800000 0x3BE38E39 0x3C75C290 0x40A00000
+         global   : [5266, 8848]
+         object   : [66]
+
+     body  b10  0x002CF618    168 bytes    42 insns    7 calls  cases 138, 139
+         calls    : func_L00_002B9F00(f12=0x406CCCCD, f14=0x3EB33333); func_L00_002B41B8(f12=0x406CCCCD); func_00282C88(a0=$s1, f12=0x406CCCCD); func_L00_002B94D8(a0=$s1); func_L00_002D34C0(a0=$s1, a1=$s0+0x120, f12=0x3BC83FB8); func_L00_002B4308(a0=$s1, a1=$s0+0x120, f12=0x3BC83FB8); func_L00_002D34C0(a1=$a0, f12=0x3C75C290)
+         branches : beqz $v0 -> b10+0x88; b -> b11+0xa4; b -> b11+0xa4
+         floats   : 0x3EB33333 0x406CCCCD 0x3BA11BFE 0x3BC83FB8 0x3C75C290
+         global   : [432, 846, 2832]
+         object   : []
+
+     body  b11  0x002CF6C0    256 bytes    64 insns    9 calls  cases 35
+         calls    : func_L00_002B9F00(f12=0x406CCCCD, f14=0x3EB33333); func_L00_002B41B8(f12=0x406CCCCD); func_00282C88(a0=$s1, f12=0x406CCCCD); func_L00_002B94D8(a0=$s1); func_L00_002D34C0(a0=$s1, a1=$s0+0x120, f12=0x3BC83FB8); func_L00_002B4308(a0=$s1, a1=$s0+0x120, f12=0x3BC83FB8); func_L00_002D34C0(a1=$a0, f12=0x3C75C290); func_00283248(a1=$a0, f12=f[$fp+0x10], f13=f[$fp+0x14]); func_L00_002B3EF8(a0=$zero, f12=0x3CA3D70A, f13=0x3E19999A, f14=0x3DD67752)
+         branches : beqz $v0 -> b11+0x88; b -> b11+0xa4; beqz $v0 -> tail+0x4; b -> tail+0x4
+         floats   : 0x3EB33333 0x406CCCCD 0x3BA11BFE 0x3BC83FB8 0x3C75C290 0x3CA3D70A 0x3E19999A 0x3DD67752
+         global   : [416, 432, 846, 2724]
+         object   : [16, 20]
+
+     body  b12  0x002CF7C0    804 bytes   201 insns   20 calls  cases 36
+         calls    : func_00282E48(a0=$s0+0x80, a1=$sp); func_002AA2E8(a0=$s0+0xAA0, f12=0x3EE66667, f13=0x3CB60B61); func_00283248(a0=$s0+0xAA0, f12=f[$v0+0x10], f13=f[$fp+0x14]); func_00283C80(f12=f[$s0+0x98], f13=f[$fp+0x14]); func_00283B98(f13=0x40490FDB); func_L00_002B3EF8(a0=$zero, f12=0x3CF5C28F, f13=0x3E19999A, f14=0x3DFA35E0); func_002AA2E8(a0=$s0+0xAA0, f13=0x3C3F258C, f14=0x3DFA35E0); func_002A88A0(a0=$sp+0xE8, a1=$sp+0xEC, f12=0xBBBF258C, f13=f[$s0+0xAA0], f14=f[$s0+0xAB0]); func_002AA800(a0=$s0+0x94, a1=$zero, f12=0.0, f13=0x3D831007); func_00282E80(a0=$s0+0x94, a1=$sp, f12=0.0, f13=0x3D831007); func_00283248(a1=$sp, f13=f[$s0+0x88]); func_00283B98(a1=$sp, f13=0x3FC90FDC); func_002AA800(a0=$s0+0x94, a1=$zero, f13=0x3DDC6C69); func_00283B98(a1=$zero, f12=f[$s2+0x98]); func_00283180(a1=$zero, f12=f[$s2+0x98]); func_00283B98(f12=f[$s2+0x98]); func_00283198(f12=f[$s2+0x98]); func_00282CC0(a0=$s0, a1=$s0, a2=$s2+0x80); func_00282CF0(a0=$s1, a1=$a1+0x10, a2=$s0); func_00282F20(a0=$s2+0xF0, a1=$s1, a2=$s0, f12=f[$s2+0xAA0])
+         branches : bnez $v1 -> b12+0x12c; beqz $v0 -> b12+0xf0; b -> b12+0x14c; bnel $v1, $v0 -> b12+0x14c; blez $v0 -> b12+0x1a4; beql $v0, $zero -> b12+0x200; b -> b12+0x250; b -> tail+0x4
+         floats   : 0x42700000 0x3EE66667 0x3CB60B61 0x3FC90FDB 0x40490FDB 0x3CF5C28F 0x3E19999A 0x3DFA35E0 0x3C3F258C 0x3FF33333 0xBBBF258C 0x41A00000 0x3D831007 0x3FC90FDC 0x3DDC6C69 0xBFC90FDC 0xBF11EB85 0x41F00000 0x3C03FB73
+         global   : [136, 152, 248, 368, 416, 550, 928, 2720, 2724, 2732, 2736, 2740, 8856]
+         object   : [16, 20]
+
+     body  b13  0x002CFAE4    236 bytes    59 insns    8 calls  cases 37
+         calls    : func_002AA2E8(a0=$s1, f12=f[$s3+0xAC0], f13=0x3E2AAAAB); func_00282D30(a0=$s4, a1=$s4, f12=0x3F666666); func_00282E48(a0=$s1, a1=$sp); func_00282CC0(a0=$s2, a1=$s1, a2=$s4); func_00282CF0(a0=$s0, a1=$s2, a2=$sp); func_00282F20(a0=$s0, a1=$s0, a2=$sp, f12=f[$s3+0xABC]); func_00282CC0(a0=$s2, a1=$sp, a2=$s0, f12=f[$s3+0xABC]); func_00282CF0(a0=$s4, a1=$s2, a2=$s1, f12=f[$s3+0xABC])
+         branches : b -> tail+0x4
+         floats   : 0x3E2AAAAB 0x3F666666 0x3B888889
+         global   : []
+         object   : []
+
+     body  b14  0x002CFBD0   2032 bytes   508 insns   55 calls  cases 43
+         calls    : func_L00_002D2168(a0=$zero+0x35, a1=$zero+0xA, f12=0x41400000); func_00283C80(f13=f[$s0+0x98]); func_00283B98(f13=0x40490FDB); func_002AA898(a0=$s0+0xAEC, a1=$s0+0xAF8, a2=$zero, f13=0x3CA3D70A, f14=0x3E99999A, f15=0.0); func_L00_002B3EF8(a0=$zero, f12=0x3CA3D70A, f13=0x3E99999A, f14=0x3DA0D97D); func_00282CF0(a0=$sp, a1=$a1+0x10, a2=$s2+0x80, f13=0x3E99999A, f14=0x3DA0D97D); func_00282F20(a0=$sp, a1=$sp, a2=$s2+0x80); func_00282C88(a0=$s0); func_00283410(a0=$s1, a1=$s0); func_00283698(a0=$s0, a1=$s1); func_002830C0(a0=$sp, a1=$sp, a2=$s0); func_00282C10(a0=$sp, a1=$sp, a2=$s0, f12=f[$sp+0x8]); func_00283248(a0=$sp, a1=$sp, a2=$s0, f12=f[$sp+0x8], f13=f[$sp+0x4]); func_00283248(f12=f[$sp+0x8], f13=f[$sp+0x0]); func_002AA898(a0=$s2+0x94, a1=$s2+0xA4, a2=$zero, f12=f[$sp+0x8], f13=f[$sp+0x0]); func_002AA898(a0=$s2+0x90, a1=$s2+0xA0, a2=$zero, f12=f[$sp+0x10]); func_L00_002B39F0(a0=$zero); func_00283180(f12=f[$s2+0x1A0]); func_00283198(f12=f[$s2+0x1A0]); func_00282CC0(a0=$s2+0xF0, a1=$a0, a2=$s3, f12=f[$s2+0x1A0]); func_00282E80(a0=$s2, a1=$a1+0x10, a2=$s3); func_L00_002D34C0(a0=$s1, a1=$s0+0x110, f12=0x3C360B61); func_L00_002D3B00(a0=$s1, a1=$s0+0x110, f12=0x3C360B61); func_00282CF0(a0=$s3, a1=$s2, a2=$a2+0x10); func_L00_002D34C0(a0=$s1, a1=$a0, a2=$a2+0x10, f12=0x3C81B4E8); func_00282DF0(a0=$s0, a1=$a0, a2=$a2+0x10, f12=0x3C81B4E8); func_00282D30(a0=$s3, a1=$s0, f12=0xBF800000); func_00282F20(a0=$s3, a1=$s3, f12=0xBF800000); func_00282CC0(a0=$s0, a1=$a0, a2=$s3, f12=0xBF800000); func_00282DF0(a0=$s1, a1=$a0, a2=$s3); func_002AA2E8(a0=$sp+0xF0, f12=f[$s0+0xC], f13=0x3B888889); func_00282F20(a0=$s1, a1=$a0, f12=f[$sp+0xF0], f13=0x3B888889); func_00283B98(a1=$a0, f12=f[$s2+0x98], f13=0xBFC90FDC); func_00283180(f12=f[$s2+0x98], f13=0xBFC90FDC); func_00283198(); func_00282CC0(a0=$s0, a1=$s0, a2=$s5); func_00282CC0(a0=$s3, a1=$s0, a2=$s4); func_00282CF0(a0=$s1, a1=$s3, a2=$a2+0x10); func_00282F20(a0=$s1, a1=$s1, a2=$a2+0x10, f12=f[$s2+0xAE4]); func_00282CC0(a0=$s3, a1=$a1+0x10, a2=$s1, f12=f[$s2+0xAE4]); func_00282CF0(a0=$s4, a1=$s3, a2=$s0, f12=f[$s2+0xAE4]); func_002AA3A8(a0=$s2+0xAE4, a1=$s2+0xAE8, a2=$s0, f12=f[$s2+0xAE0], f13=f[$s2+0xB04], f14=f[$s2+0xB08], f15=f[$s2+0xB0C]); func_00282DF0(a0=$s1, a1=$s2+0xAE8, f12=f[$s2+0xAE0], f13=f[$s2+0xB04], f14=f[$s2+0xB08], f15=f[$s2+0xB0C]); func_00282F20(a0=$s1, a1=$s1); func_00282CC0(a0=$s5, a1=$a0, a2=$s1); func_00282E20(a0=$s4, a1=$a0, a2=$s1); func_002AA3A8(a0=$sp+0xF4, a1=$s2+0xAF4, f13=0x3D408312, f14=0x3E99999A); func_00283180(a0=$sp+0xF4, a1=$s2+0xAF4, f12=f[$s2+0xAEC], f13=0x3D408312, f14=0x3E99999A); func_00283198(f12=f[$s2+0xAEC], f14=0x3E99999A); func_00282CC0(a0=$s4, a1=$a0, a2=$s3, f12=f[$s2+0xAEC]); func_00282C10(f12=f[$s0+0xAF0]); func_L00_002B5590(a0=$s3); func_L00_002D2168(a0=$zero+0x35, a1=$zero+0x6, f12=0x41880000); func_L00_002D2168(a0=$zero+0x35, a1=$zero+0x15, f12=0x41100000); func_L00_002A9E30(a0=byte[$v0+0x43], f12=0x41400000, f14=0x3F000000, f15=0xBF800000)
+         branches : beqz $v0 -> b14+0x4c; bnel $v1, $v0 -> b14+0x50; beqz $v1 -> b14+0xe4; beqz $v0 -> b14+0xe8; beqz $v0 -> b14+0xe8; beqz $v0 -> b14+0x444; beql $s7, $zero -> b14+0x320; bnel $v0, $zero -> b14+0x320; beqz $v0 -> b14+0x444; beql $v0, $zero -> b14+0x3f4; beqz $v0 -> b14+0x4a4; beqz $s0 -> b14+0x4a4; beqz $v0 -> b14+0x66c; beql $s7, $zero -> b14+0x670; beql $v0, $zero -> tail+0x4; beql $v0, $zero -> tail+0x4; beqz $v0 -> tail+0x0; beqz $v0 -> b14+0x6fc; b -> b14+0x728; beqz $v0 -> b14+0x784; beq $v1, $v0 -> b14+0x75c; b -> tail+0x4; bne $v1, $a0 -> tail+0x4; b -> b14+0x7d0; beq $v1, $v0 -> b14+0x7b0; b -> tail+0x4; bne $v1, $a0 -> tail+0x4; b -> tail+0x0
+         floats   : 0x41400000 0x3E99999A 0x42B40000 0x40490FDB 0x3CA3D70A 0x3DA0D97D 0x3F800000 0x3E6B851F 0x3D23D70A 0x3E4CCCCD 0x3E23D409 0x3E800000 0x3B656042 0x3DAAAAAB 0x3FC8F5C3 0x3FC00000 0x3C360B61 0x3C81B4E8 0x3983126F 0xBF800000 0x3B888889 0xBFC90FDC 0x3E19999A 0x3E6EEEF0 0x3D408312 0x41880000 0x42280000 0x41100000 0x3F000000
+         global   : [136, 152, 248, 272, 416, 440, 796, 846, 2772, 2780, 2784, 2788, 2796, 2800, 2804, 2812, 2814, 2820, 2824, 2828, 3104, 3112, 8848, 9400]
+         object   : [66, 67]
+
+     body  b15  0x002D03C0   1556 bytes   389 insns   27 calls  cases 20
+         calls    : func_00282E80(a0=$s0+0x80, a1=$a1+0x10); func_L00_002B41B8(f12=0x3A91A2B4); func_00283180(f12=f[$s0+0x98]); func_00283198(f12=f[$s0+0x98]); func_L00_002B41B8(f12=0x3A11A2B4); func_L00_002D3BD8(a0=$s0+0xF0, a1=$a0, f12=f[$s0+0x1B4]); func_00282CF0(a0=$sp, a1=$a1+0x10, a2=$a2+0x80); func_L00_002D3A58(a0=$sp, a1=$a1+0x10, a2=$a2+0x80); func_L00_002B41B8(f12=0x3BE38E39); func_00282F20(a0=$s2, a1=$s0, f12=f[$s0+0x1B4]); func_L00_002D3BD8(a0=$s1, a1=$s1, f12=0.0); func_00282CC0(a0=$s1, a1=$a0, a2=$s2, f12=0.0); func_L00_002B41B8(f12=0x3B888889); func_L00_002D3BD8(a0=D_189F10, a1=$a0, f12=f[$a0+0xC4]); func_L00_002B3EF8(a0=$zero, f12=0x3D4CCCCD, f13=0x3E4CCCCD, f14=0x3E90777C); func_L00_002B75A0(f12=0x41000000, f13=0x3F860A93); func_L00_002D3778(a0=$sp, a1=$sp, f12=0xBF000000); func_00282F20(a0=$s0, a1=$s2, f12=0xBF000000); func_002A8C00(a0=$s1, a1=[$s2+0x2290], a3=$s0); func_00277F48(a0=$sp, a1=$zero+0x10, a2=[$s2+0x2290], a3=$s1, f12=0x3ECCCCCD); func_L00_002B3998(a0=$sp, a1=$zero+0x10, a3=$s1, f12=0x41CD999A); func_L00_002D6900(a0=$zero+0x19, a1=$zero+0x10, f12=0x41CD999A); func_L00_002D3B00(a0=$s0); func_002AA2E8(a0=$sp+0xF8, f13=0x3D2AAAAB); func_L00_002D34C0(a0=$s1, a1=$s1, f12=0x3D13E93F); func_L00_002D3B00(a0=$s1, a1=$s1, f12=0x3D13E93F); func_L00_002D3B00(a0=$s1)
+         branches : bnez $v0 -> b15+0x44; beqz $v0 -> b15+0x15c; beqz $a1 -> b15+0x130; bnez $v0 -> b15+0x94; bnel $v0, $zero -> b15+0x98; beqz $v0 -> b15+0x98; beqz $v1 -> b15+0xec; b -> b15+0x2cc; b -> b15+0x2d0; bnez $v0 -> b15+0x1a0; bnel $v0, $zero -> b15+0x1a4; beqz $a1 -> b15+0x278; beqz $s1 -> b15+0x220; b -> b15+0x2d0; beqz $s1 -> b15+0x2a4; beqz $v0 -> b15+0x2a4; bnel $v0, $zero -> b15+0x2ec; beql $v0, $zero -> b15+0x334; b -> b15+0x370; b -> b15+0x3e0; bnez $v0 -> b15+0x4c8; beqz $v0 -> b15+0x4c8; beqz $v0 -> b15+0x534; beqz $v1 -> b15+0x530; beqz $v0 -> b15+0x578; b -> b31+0xa8; beqz $v0 -> tail+0x0; beqz $v0 -> b15+0x5f4; b -> b31+0xa8
+         floats   : 0x40000000 0x40A00000 0x3D99999A 0x3A91A2B4 0x3A11A2B4 0x40800000 0x3BE38E39 0x3B888889 0x3D4CCCCD 0x3E4CCCCD 0x3E90777C 0x41C80000 0x3F860A93 0x41000000 0x40100000 0x3E0369D0 0x3D8369D0 0x3FE66666 0x3DB7FA89 0x41BC0000 0xBF000000 0x45AFDF66 0x3ECCCCCD 0x41CD999A 0x3DCCCCCD 0x3D2AAAAB 0x3D13E93F 0x3F800000 0xBF1DDDDE 0xBF955556
+         global   : [0, 152, 240, 244, 280, 416, 432, 436, 440, 506, 548, 796, 846, 3044, 3048, 3052, 3068, 3072, 3116, 3128, 4665, 5266, 5269, 5270, 5275, 8848]
+         object   : []
+
+     body  b16  0x002D09D4   1100 bytes   275 insns   17 calls  cases 21, 131
+         calls    : func_L00_002B9B38(a0=$s0, a1=$zero); func_L00_002B9B38(a0=$s0, a1=$zero+0x1); func_00283BE0(a0=$s0, a1=$zero+0x1, f12=f[$s0+0xBEC], f13=f[$s0+0x98]); func_002AA738(a0=$zero+0x1, a1=$zero+0x1, f12=f[$s0+0xBEC], f13=f[$s0+0x98]); func_L00_002B3EF8(a0=$zero, f12=0x3D6978D5, f13=0x3E4CCCCD, f14=0x3E90777C); func_L00_002B75A0(f12=0x41600000, f13=0x3F060A93, f14=0x3F490FDC); func_L00_0041E958(f12=0x42800000, f13=0x3E32B8C4, f14=0x3EB2B8C4); func_L00_002B3998(a0=$zero+0x1A, f12=0x42040000); func_00283180(a0=$zero+0x15, f12=f[$s0+0x98]); func_00283198(a0=$zero+0x15, f12=f[$s0+0x98]); func_L00_002BA508(a0=$zero+0x15); func_L00_002B3998(a0=$zero+0x15, f12=0x42A80000); func_00283B98(f12=f[$s0+0x98], f13=0x40490FDB); func_00283180(f12=f[$s0+0x98]); func_00283198(); func_L00_002B41B8(f12=0x3C286420, f13=0x3BFEDCBB); func_L00_002B4208(f12=0x47C34F80, f13=0x3BFEDCBB)
+         branches : bnez $v0 -> b16+0x44; bne $v1, $v0 -> b16+0x70; bnel $a0, $zero -> b16+0x268; bnel $v0, $zero -> b16+0x94; beql $v0, $zero -> b16+0x1a8; beqz $v0 -> b16+0xc4; b -> b16+0xe8; beqz $s1 -> b16+0x170; b -> b16+0x180; b -> b16+0x26c; bne $v1, $v0 -> b16+0x1c4; beql $v0, $zero -> b16+0x1f4; bnez $v0 -> b16+0x1f4; beqz $a0 -> b16+0x264; bne $v1, $a0 -> b16+0x23c; b -> b16+0x26c; bnel $v0, $zero -> b16+0x338; bnel $v1, $a0 -> b16+0x338; beql $v0, $zero -> b16+0x338; beqz $v0 -> b16+0x320; bne $v1, $a0 -> b16+0x338; beqz $v0 -> b16+0x3e4; beqz $v0 -> b17+0x58; beqz $v0 -> b16+0x39c; b -> b17+0x58; beqz $v0 -> b16+0x438; b -> b56+0x5c; b -> b59+0xb0
+         floats   : 0x408BA059 0x3F800000 0x3D6978D5 0x3E4CCCCD 0x3E90777C 0x40C00000 0x41600000 0x3F060A93 0x3F490FDC 0x42800000 0x3E32B8C4 0x3EB2B8C4 0x42040000 0x3D088889 0x3CB17E4B 0x42A80000 0x40490FDB 0x3D2AAAAB 0x3D4CCCCE 0x3C286420 0x3BFEDCBB 0x47C34F80 0x3BE38E39 0x3C75C290
+         global   : [0, 152, 240, 244, 368, 416, 432, 440, 846, 3044, 3048, 3052, 3068, 3104, 3116, 3128, 4665, 5266, 8848, 8852, 8864, 8872, 8899]
+         object   : [67]
+
+     body  b17  0x002D0E20   1408 bytes   352 insns   17 calls  cases 19
+         calls    : func_L00_002B9598(); func_00282E80(a0=$a1+0x10, a1=$s1); func_00282E48(a0=$a0+0x10, a1=$s1); func_00282C48(); func_002AA2E8(a0=$s0, f12=0x3F800000, f13=0x3E4CCCCD); func_L00_002B9B38(a1=$zero, f13=f[$a0+0x98]); func_00283BE0(a1=$zero, f12=f[$a0+0xBEC], f13=f[$a0+0x98]); func_00282C48(a1=$zero, f12=f[$a0+0xBEC], f13=f[$a0+0x98]); func_L00_002B3EF8(a0=$zero, f12=0x3D4CCCCD, f13=0x3E4CCCCD, f14=0x3E90777C); func_L00_002B75A0(f12=0x40A00000, f13=0x3F490FDC); func_L00_002B41B8(f12=0x3C286420, f13=0x3BFEDCBB); func_L00_002B42D8(a0=$a0+0xBC0, f13=0x3BFEDCBB); func_L00_002B4208(a0=$a0+0xBC0, f12=f[$a0+0xBEC]); func_L00_002B4208(a0=$a0+0xBC0, f12=0x47C34F80); func_L00_002D34C0(a0=$a0+0xF0, a1=$a0+0x130, f12=0x3BE38E39); func_L00_002D34C0(a0=$a0+0xF0, a1=$a0, f12=0x3C75C290); func_L00_002B9F00(a1=$a0, f12=0x406CCCCD, f13=0.0, f14=0x3EB33333)
+         branches : bnez $v0 -> b17+0x44; beql $v0, $zero -> b17+0x68; b -> tail+0x4; beqz $a1 -> b17+0x1dc; beqz $v0 -> b17+0x1dc; beqz $v0 -> b17+0xc8; bnez $v1 -> b17+0x118; b -> b17+0x170; bne $v1, $v0 -> b17+0x148; b -> b17+0x170; beq $v1, $v0 -> b17+0x254; beqz $v0 -> b17+0x204; beqz $v1 -> b17+0x214; b -> b17+0x344; beq $v1, $v0 -> b17+0x2f4; b -> b17+0x344; b -> b17+0x340; bnez $v0 -> b17+0x280; b -> b17+0x334; b -> b17+0x334; b -> b17+0x334; bnel $v0, $zero -> b17+0x328; bnel $v0, $zero -> b17+0x384; beql $v0, $zero -> b17+0x444; beql $v0, $zero -> b17+0x3a0; b -> b17+0x3ac; bne $v1, $v0 -> b17+0x3f4; b -> b17+0x4a0; bne $v0, $v1 -> b17+0x47c; bnez $v0 -> b17+0x47c; beqz $v1 -> b17+0x4a0; beqz $v0 -> b17+0x4fc; beqz $v0 -> b17+0x4ec; b -> b17+0x514; b -> b17+0x514; beqz $v0 -> b17+0x53c; b -> b17+0x554; b -> tail+0x4
+         floats   : 0x3F000000 0x3F400000 0x3F4CCCCD 0x40800000 0x3F19999A 0x3FD9999A 0x3FA66666 0x3FF33333 0x40400000 0x3F8E38E4 0x3F800000 0x41900000 0x3D962FCA 0x41100000 0x41000000 0x3D4CCCCE 0x40E00000 0x3D99999A 0x3DC28F5C 0x41400000 0x3D7C9631 0x3E4CCCCD 0x3D4CCCCD 0x3E90777C 0x3F490FDC 0x40A00000 0x3C286420 0x3BFEDCBB 0x47C34F80 0x3BE38E39 0x3C75C290 0x406CCCCD 0x3EB33333
+         global   : [0, 416, 432, 440, 846, 3044, 3048, 3052, 3060, 3068, 3104, 3116, 3128, 4665, 5266, 8899]
+         object   : []
+
+     body  b18  0x002D13A0    336 bytes    84 insns    9 calls  cases 119
+         calls    : func_002AA2E8(a0=$s2, f13=0x3BDA740E); func_00282F20(a0=$s1, a1=$s2+0xA1C, f12=f[$s0+0x1B4], f13=0x3BDA740E); func_L00_002D34C0(a0=$s1, a1=$s2+0xA1C, f12=0x3BE38E39); func_L00_002D3B58(a0=hi(D_189FB0), a1=$a0, f12=0x3BE38E39); func_00282D30(a0=D_189FB0, a1=$a0+0xA40, f12=0xBF800000); func_00283180(a0=D_189FB0, a1=$a0+0xA40, f12=f[$s0+0xBF0]); func_00283198(a0=D_189FB0, a1=$a0+0xA40, f12=f[$s0+0xBF0]); func_00283B98(f12=f[$s0+0xBF0], f13=0x40490FDB); func_L00_002B3EF8(a0=$zero, f12=0x3D4CCCCD, f13=0x3E4CCCCD, f14=0x3E90777C)
+         branches : beqz $v0 -> b18+0xa4; b -> b18+0x88; b -> b18+0x11c; b -> b18+0x100; b -> tail+0x4
+         floats   : 0x3BDA740E 0x3BE38E39 0xBF800000 0x40490FDB 0x3D4CCCCD 0x3E4CCCCD 0x3E90777C
+         global   : [416, 3056]
+         object   : []
+
+     body  b19  0x002D14F0   1244 bytes   311 insns   35 calls  cases 31
+         calls    : func_L00_002B3EF8(a0=$zero, f12=0x3D4CCCCD, f13=0x3E4CCCCD, f14=0x3E90777C); func_L00_002B75A0(f12=0x41300000, f13=0x3F5F66F4, f14=0xBF800000); func_L00_00322A98(a0=[$s0+0x2290], a1=$s0); func_L00_00322AC0(a0=$s0, a1=$zero+0x30, a2=$zero+0x2); func_L00_00322AC0(a0=$s0, a1=$zero+0x17, a2=$zero+0x4); func_L00_00322AC0(a0=$s0, a1=$zero+0xC, a2=$zero+0x6); func_L00_00322BE0(a0=$s0+0x18E0, a1=$zero+0x5, a2=$zero+0x6); func_00283180(f12=f[$s0+0x98]); func_00283198(f12=f[$s0+0x98]); func_L00_002B9598(a0=$s0+0xF0); func_L00_002B41B8(f12=0x3D582D83, f13=0x3CCCCCCD); func_L00_002B4208(f12=f[$s0+0xBEC], f13=0x3CCCCCCD); func_L00_002B4208(f12=0x47C34F80); func_00283180(f12=f[$s3+0x98]); func_00283198(f12=f[$s3+0x98]); func_002A8C00(a0=$sp, a1=[$s3+0x2290], a3=$sp+0x30, f12=0x40400000); func_00283180(); func_00283198(); func_00282CC0(a0=$s0, a1=$s0, a2=$s1); func_00277F48(a0=$s0, a1=$zero, a2=$s2, a3=$sp); func_L00_002BA138(a0=$s2, a1=$v0, a2=$s2, a3=$sp); func_00283B98(a0=$s2, a1=$v0, a2=$s2, f12=f[$s3+0x98], f13=0xBF5F66F4); func_00283180(a0=$s2, a1=$v0, f12=f[$s3+0x98], f13=0xBF5F66F4); func_00283198(a0=$s2, f12=f[$s3+0x98], f13=0xBF5F66F4); func_00282CC0(a0=$s0, a1=$s0, a2=$s1); func_00277F48(a0=$s0, a1=$zero, a2=[$s3+0x2290], a3=$sp); func_L00_002BA138(a0=$s2, a1=$v0, a2=[$s3+0x2290], a3=$sp); func_00283B98(a0=$s2, a1=$v0, a3=$sp, f12=f[$s3+0x98], f13=0x3F5F66F4); func_00283180(a0=$s2, a1=$v0, f12=f[$s3+0x98], f13=0x3F5F66F4); func_00283198(a0=$s2, f12=f[$s3+0x98], f13=0x3F5F66F4); func_00282CC0(a0=$s0, a1=$s0, a2=$s1); func_00277F48(a0=$s0, a1=$zero, a2=$s2, a3=$sp); func_L00_002BA138(a0=$s2, a1=$v0, a2=$s2, a3=$sp); func_L00_002B9F00(f12=0x406CCCCD, f13=0.0, f14=0x3EB33333); func_L20_002C7588(a0=$zero+0x1, f12=0x406CCCCD, f13=0.0, f14=0x3EB33333)
+         branches : bnel $v0, $zero -> b19+0x20; beql $v0, $zero -> b19+0x58; b -> b19+0x8c; beqz $v0 -> b19+0x8c; beqz $v0 -> b19+0xc0; beqz $v0 -> b19+0xc4; bnel $v0, $v1 -> b19+0x14c; beql $v0, $zero -> b19+0x20c; beqz $v0 -> b19+0x1fc; beqz $v0 -> b19+0x1fc; b -> b19+0x26c; beql $v0, $zero -> b19+0x23c; beqz $v0 -> b19+0x254; b -> b19+0x268; bne $v0, $v1 -> b19+0x46c; beqz $v0 -> b19+0x46c; beql $v0, $zero -> b19+0x470; beql $s2, $zero -> b19+0x470; bnez $v0 -> b19+0x4a0; beqz $v0 -> b19+0x4c8; b -> b58+0x2f4; b -> b59+0xb0
+         floats   : 0x3D4CCCCD 0x3E4CCCCD 0x3E90777C 0x41300000 0x3F5F66F4 0xBF800000 0x3E99999A 0x3EAAAAAB 0x3E111112 0x3CA3D70B 0x3D582D83 0x3CCCCCCD 0x47C34F80 0x3F4CCCCD 0x3F0CCCCD 0x3FA66666 0x40400000 0x45AFDF66 0xBF5F66F4 0x406CCCCD 0x3EB33333 0x3BC83FB8 0x3C75C290
+         global   : [0, 152, 240, 244, 376, 388, 416, 432, 440, 846, 3044, 3048, 3052, 4640, 5266, 8848, 8852]
+         object   : []
+
+     body  b20  0x002D19CC    236 bytes    59 insns    4 calls  cases 34
+         calls    : func_L00_002B3EF8(a0=$zero, f12=0x3D23D70A, f13=0x3E4CCCCD, f14=0x3E90777C); func_L00_002B75A0(a0=$zero, f12=0x41300000, f13=0x3F5F66F4, f14=0xBF800000); func_L00_002B41B8(f12=0x3C088889, f13=0x3C1F49F5, f14=0xBF800000); func_L00_002B4208(f12=0x47C34F80, f13=0x3C1F49F5)
+         branches : beqz $v0 -> b20+0x5c; b -> b20+0x80; beqz $v0 -> b20+0xd8; b -> b58+0x2f4; b -> b59+0xb0
+         floats   : 0x3D23D70A 0x3E4CCCCD 0x3E90777C 0x41300000 0x3F5F66F4 0xBF800000 0x3C088889 0x3C1F49F5 0x47C34F80 0x3C75C290
+         global   : [0, 416, 432, 846, 3048, 3052]
+         object   : []
+
+     body  b21  0x002D1AB8   1816 bytes   454 insns   31 calls  cases 2, 112
+         calls    : func_L00_002AA570(a0=$zero, a1=$zero+0x2); func_L00_002AA750(a0=$zero+0x2, a1=$zero+0x4); func_L00_002AA938(a0=$zero+0x5, a1=$zero+0x2, a2=$zero); func_00282C48(f12=f[$s0+0x1A8]); func_L00_0032F038(a0=$zero+0x1); func_L00_0032F038(a0=$zero+0x7); func_00283C80(a0=$zero+0x7); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_L00_002B3D10(a0=$s0+0x3F0); func_L00_002ADEA0(a0=$zero); func_L00_002B54F8(f12=0x3F333333, f13=0.0); func_L00_002B5590(a0=$sp, f12=0x3F333333); func_00282C88(a0=$s1); func_L00_002B35A0(a0=$s1); func_L00_002B3EF8(a0=$zero, f12=0x3CA3D70A, f13=0x3E2E147B, f14=0x3E29C921); func_00282C48(a0=$zero, f12=f[$s0+0x1A8], f13=0x3E2E147B, f14=0x3E29C921); func_L00_002B3F68(); func_L00_002B7B80(); func_L00_002B8CB8(); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_L00_002B41B8(); func_L00_002B4208(f12=f[$a0+0x1458]); func_L00_002B4208(a0=$zero+0x1, f12=f[$a0+0x1A0]); func_L00_002B42D8(a0=$a0+0x1440, f12=f[$a0+0x1A0]); func_L00_002B42D8(a0=$a0+0x190, f12=f[$a0+0x1A0]); func_L00_002B4208(a0=$zero+0x1, f12=0x47C34F80); func_L20_002C7588(a0=$zero+0x1, f12=0x47C34F80); func_L00_002B9F00(f12=0x40A00000, f13=0x3E4CCCCD, f14=0x3EB33333)
+         branches : beqz $v0 -> b21+0x30; bnel $v0, $zero -> b21+0x4c; beql $a0, $zero -> b21+0xb8; bnel $v0, $zero -> b21+0x1f4; beql $v0, $zero -> b21+0x22c; beqz $v0 -> b21+0x25c; b -> b21+0x30c; bnel $v0, $v1 -> b21+0x2f4; beqz $v0 -> b21+0x2f4; bnez $v0 -> b21+0x2f4; b -> b21+0x30c; beql $v0, $zero -> b21+0x3a4; b -> b21+0x484; bne $a0, $v0 -> b21+0x410; bnez $v0 -> b21+0x410; bnez $v0 -> b21+0x410; b -> b21+0x484; beqz $v0 -> b21+0x47c; bnez $v0 -> b21+0x47c; beqz $v0 -> b21+0x4f0; beql $v0, $zero -> b21+0x584; bnel $v0, $zero -> b21+0x638; beqz $v0 -> b21+0x690; bnez $v0 -> b21+0x668; beqz $v0 -> b21+0x658; b -> b21+0x6a8; b -> b21+0x6a8; beqz $v0 -> b21+0x680; b -> b21+0x6a8; b -> b21+0x6a8; beql $v0, $zero -> b21+0x6e8; beqz $v0 -> b21+0x704; b -> b58+0x2f4; b -> b59+0xb0
+         floats   : 0x3E800000 0x3C888889 0x3C088889 0x3CE81B50 0x40060A93 0x3F800000 0x3FF5BE0D 0x3F9C61AB 0x3DB2B8C4 0x3D8EFA36 0x3E4CCCCD 0x3F333333 0x3C3F258C 0x3CA3D70A 0x3E2E147B 0x3E29C921 0x3F666666 0x3F490FDC 0x3CEF078D 0x3DCB17E5 0x3BA3D70A 0x3BB60B61 0x40278D37 0x3B9ABCDF 0x3F400000 0x3F1C61AB 0x3ECCCCCD 0x47C34F80 0x40A00000 0x3EB33333 0x3BE38E39 0x3C75C290
+         global   : [0, 152, 372, 416, 424, 432, 532, 846, 1032, 1036, 1039, 1040, 2656, 2672, 5204, 5208, 5268, 8856, 8889, 8890, 8899, 9400, 9404, 9412]
+         object   : []
+
+     body  b22  0x002D21D0    840 bytes   210 insns   18 calls  cases 123
+         calls    : func_L00_002B9BB0(a0=$zero+0x4, a1=[$s0+0x2290], a2=$zero+0xD); func_L00_002B39F0(a0=$zero, a1=[$s0+0x2290], a2=$zero+0xD, f12=0x3F800000); func_L00_002A9D38(a0=$sp, a1=$s0+0x9F0, f12=0x3E2E147B); func_L00_002B3DC0(f12=0.0); func_L00_002B41B8(f12=0x3CE38E39, f13=0x3B888889); func_L00_002B4208(f12=0x47C34F80, f13=0x3B888889); func_L00_002D3778(a0=$s0, a1=$s0, f12=0x3E2E147B); func_002AA458(a0=$s1+0x80, a1=$s0, a2=$s1+0xA00, f12=0x3D23D70A, f13=0x3E99999A, f14=0x3E000000); func_002AA3A8(a0=$s1+0x88, f12=0x3E2E147B, f13=0x3D23D70A, f14=0x3E99999A, f15=0x3E000000); func_00282D30(a0=$s3, a1=$s1, f12=0x40400000, f15=0x3E000000); func_00282CC0(a0=$s3, a1=$s3, f12=0x40400000); func_00277F48(a0=$s3, a1=$zero, a2=[$s4+0x2290], a3=$zero, f12=0x3F11EB85); func_00282D30(a0=$s0, a1=$s1, a2=[$s4+0x2290], a3=$zero, f12=0x40E00000); func_002ABB78(a0=[$s1+0x0], f12=0x40E00000); func_002A8F70(a0=[$s1+0x0], a1=[$s3+0x2290], a3=$s3+0x80, f12=0x3F800000); func_L00_002AB0A8(f12=0x3C8B4396); func_L00_002AB0D8(f12=0x3CCCCCCD); func_L00_002AB0F0(f12=0x3CF5C28F, f13=0x3E8A3D71)
+         branches : bnez $v0 -> b22+0xa0; beqz $v0 -> b22+0xa4; beqz $v0 -> b22+0x174; b -> b22+0x1bc; beqz $s2 -> b22+0x280; blez $s2 -> b22+0x280; beqz $v0 -> b22+0x274; bnez $s0 -> b22+0x248; b -> b22+0x324; b -> tail+0x0
+         floats   : 0x3F800000 0x3E444445 0x3E2E147B 0x3CA6CE95 0x3DCCCCCD 0x3F000000 0x3E4CCCCD 0x3CE38E39 0x3B888889 0x47C34F80 0x3D23D70A 0x3E99999A 0x3E000000 0x40400000 0x3F11EB85 0x40E00000 0x3C8B4396 0x3CCCCCCD 0x3CF5C28F 0x3E8A3D71 0x41D80000 0x3FD9999A 0xBFD9999A
+         global   : [0, 432, 440, 792, 8848, 9400]
+         object   : []
+
+     body  b23  0x002D2518    536 bytes   134 insns   12 calls  cases 46
+         calls    : func_L00_002B9598(); func_L00_002AB0A8(); func_L00_002AB0C0(); func_L00_002AB0D8(); func_L00_002AB0F0(f12=0x3CA3D70A); func_00282C48(); func_00282C48(); func_00283248(f12=f[$s0+0x110], f13=f[$s0+0x114]); func_00283BE0(f12=f[$s0+0x110], f13=f[$s0+0x98]); func_00283B98(f12=f[$s0+0x110], f13=0x40490FDB); func_00283180(); func_00283198()
+         branches : bne $v1, $v0 -> b23+0x144; b -> b23+0x1dc; bne $v1, $v0 -> b23+0x1e0; beqz $v0 -> b23+0x200; b -> b47+0x3c; b -> b59+0xb0
+         floats   : 0x3E4CCCCD 0x3D23D70A 0x3CA3D70A 0x3FB33333 0xBFB33333 0xBE0F5C29 0x3E99999A 0xBE6147AE 0x3ECCCCCD 0xBDB851EC 0x3DA3D70A 0x40490FDB 0x40DF66F4 0x3EDF66F4 0x3BE38E39 0x3D2AAAAB
+         global   : [152, 248, 272, 276, 372, 424, 846]
+         object   : [67]
+
+     body  b24  0x002D2730    868 bytes   217 insns   22 calls  cases 48
+         calls    : func_L00_002B9BB0(a0=$zero+0x2, a1=[$v0+0x2290], a2=$zero+0x13); func_L00_002B9BB0(a0=$zero+0x2, a1=[$v0+0x2290], a2=$zero+0x6); func_L00_002AA938(a0=$zero+0x4, a1=$zero+0x2, a2=$zero+0x1); func_L00_002AA938(a0=$zero+0x4, a1=$zero+0x2, a2=$zero); func_002A7878(a1=$zero+0x2); func_002A7878(); func_002A7878(f12=0xBDCCCCCD, f13=0x3ECCCCCD); func_00282D30(a0=$s1, a1=$s0+0x110, f12=0x3F666666); func_002A7878(a0=$s1, a1=$s0+0x110, f12=0x3F666666); func_002A7878(a0=$s1); func_002A7878(f12=0x3C888889, f13=0x3D088889); func_002A7878(f12=0x4713A800, f13=0x4793A800); func_L00_00338D28(a0=$sp, a1=$s1, f12=0x4713A800, f13=0x4793A800); func_L00_002B3EF8(a0=$zero, f12=0x3D072B02, f14=0x3D8EFA37); func_00283C80(f12=f[$s0+0x98], f14=0x3D8EFA37); func_00282C88(a0=$s0+0xF0, f12=f[$s0+0x98]); func_L00_002B94D8(a0=$s0+0xF0, f12=0x3AFEDCBB); func_002AA898(a2=$zero, f13=0x3BE56042, f14=0x3E2E147B, f15=0x3CA6CE95); func_002AA898(a0=$s0+0x94, a1=$s0+0xB58, a2=$zero, f12=f[$s0+0xB44], f13=0x3D0F5C29, f15=0x3D031007); func_L00_002AB0C0(a0=$s0+0x94, a2=$zero, f12=0x3C1374BC, f13=0x3E6147AE); func_L00_002AB0D8(f12=0x3D23D70A, f13=0x3E6147AE); func_L00_002AB0F0(f12=0x3CA3D70A, f13=0x3E6147AE)
+         branches : bnez $v1 -> b24+0x2c; b -> b24+0x4c; beq $v1, $v0 -> b24+0x44; beqz $v0 -> b24+0x6c; b -> b24+0x1a4; b -> tail+0x0
+         floats   : 0xBE800000 0x3E800000 0xBC3F258C 0x3C3F258C 0x3ECCCCCD 0xBDCCCCCD 0x3F666666 0x3C888889 0x3D088889 0x4713A800 0x4793A800 0x3E99999A 0x3D8EFA37 0x3D072B02 0x3AFEDCBB 0x3C638E39 0xBC360B61 0x3CBEA2F4 0x41100000 0x3F000000 0x3BE56042 0x3E2E147B 0x3CA6CE95 0x3E4CCCCD 0x3D031007 0x3D0F5C29 0x3C1374BC 0x3E6147AE 0x3D23D70A 0x3CA3D70A 0x40066666 0x40600000
+         global   : [128, 132, 136, 152, 248, 280, 416, 2880, 2884, 8848]
+         object   : []
+
+     body  b25  0x002D2A94   3904 bytes   976 insns   78 calls  cases 39, 40, 41, 42, 62
+         calls    : func_L00_002B9BB0(a0=$zero, a1=[$a0+0x2290], a2=$zero); func_002E59F8(a0=$a2, a1=[$v1+0x2290]); func_002A78D8(f13=0x3F060A93); func_00283B98(f12=f[$s0+0x64C], f13=0x3F060A93); func_002A7878(f12=0x3D888889, f13=0x3DEEEEF0); func_00283180(f12=0x3D888889, f13=0x3DEEEEF0); func_00283198(f12=0x3D888889, f13=0x3DEEEEF0); func_002A7878(f12=0x3D4CCCCE, f13=0x3DAAAAAB); func_002BE278(a0=$sp, a1=$sp+0x10, a2=$zero, f12=0xBF800000); func_L00_00341FA8(a0=[$s0+0x630], a1=$s1, a2=$s0+0x5D0, a3=$s0+0x634); func_L00_00341FA8(a0=[$s0+0x664], a1=$s1, a2=$s0+0x610, a3=$s0+0x668); func_L00_002B6560(a0=$v1+0x30); func_L00_00341820(a0=[$s4+0x630], a1=$sp, a2=$s4+0x634, a3=$s4+0x638); func_L00_00341820(a0=[$s4+0x664], a1=$sp+0x10, a2=$s4+0x668, a3=$s4+0x66C); func_L00_00341820(a0=[$s4+0x630], a1=$s5, a2=$s1, a3=$s3); func_L00_00341820(a0=[$s4+0x630], a2=$s1, a3=$s3, f12=0x3DCCCCCD); func_00283248(f12=f[$sp+0x20], f13=f[$sp+0x24]); func_00283BE0(f12=f[$s4+0x64C], f13=f[$sp+0x24]); func_L00_002AB0A8(f12=0x3CF5C28F, f13=0x3E4CCCCD); func_00282E20(a0=$s0+0x110); func_00283248(a0=$s0+0x110, f13=f[$s0+0x118]); func_L00_002AB0F0(f12=0x3C8B4396); func_L00_002AB0C0(f12=0x3C8B4396); func_L00_002AB0D8(f12=0x3C8B4396); func_00282CF0(a0=$s5, a1=$a1+0x10, a2=$s1+0x80); func_00283098(a0=$s5, a1=$s5, a2=$s1+0x40); func_00283248(a0=$s5, a1=$s5, a2=$s1+0x40, f12=f[$sp+0x20], f13=f[$sp+0x24]); func_00283BE0(a0=[$s1+0x2290], f12=f[$sp+0x20], f13=0x3FC90FDC); func_00283BE0(f13=0xBFC90FDC); func_00283B98(a0=byte[$v0+0x43], f12=0x3E0EFA36, f13=f[$s1+0x6A0]); func_00283B98(f12=0xBF51FF7F, f13=f[$s1+0x6A0]); func_00283B98(f13=f[$s1+0x6A0]); func_00283B98(f13=f[$s1+0x6A0]); func_L00_003417B8(a0=[$s0+0x630], a1=[$s0+0x634], a2=[$s0+0x648], a3=[$s0+0x654], f13=f[$s1+0x6A0]); func_00282CF0(a0=$s5, a1=$v0+$a1, a2=$sp, a3=[$s0+0x654]); func_00282DF0(a0=$s5, a1=$v0+$a1, a2=$sp); func_00283248(f12=f[$sp+0x20], f13=f[$sp+0x24]); func_00282E20(a0=$s5, f12=f[$sp+0x20], f13=f[$sp+0x24]); func_00283248(a0=$s5, f13=f[$sp+0x28]); func_00283B98(a0=$s5, f12=f[$s0+0x64C], f13=f[$s0+0x658]); func_L00_002B3EF8(a0=$zero, f12=0x3C75C28F, f13=0x3E19999A, f14=0x3DD67752); func_00283248(f12=f[$s0+0x80], f13=f[$s0+0x84]); func_00283C80(f12=f[$s0+0x98], f13=f[$s0+0x84]); func_L00_002B3EF8(a0=$zero, f12=0x3D23D70A, f13=0x3E4CCCCD, f14=0x3DD67752); func_00282CF0(a0=$s5, a1=$sp, a2=$s1); func_00282D30(a0=$s5, a1=$s5); func_00282CF0(a0=$s0, a1=$sp, a2=$s1); func_00282D30(a0=$s0, a1=$s0, a2=$s1); func_00282CC0(a0=$s0, a1=$s1, a2=$s5); func_00282CF0(a0=$s5, a1=$s0, a2=$s2+0x80); func_00282CF0(a0=$s5, a1=$sp, a2=$s2+0x5D0); func_00282CF0(a0=$s5, a1=$sp, a2=$s0); func_00282CF0(a0=$s1, a1=$s0); func_00282DF0(a0=$s1, a1=$s0); func_00282F20(a0=$s1, a1=$a0, f12=0x3C888889); func_L00_002B6560(); func_L00_002B39F0(a0=$zero, f12=0x3F800000); func_00283BE0(a0=$zero, f12=f[$s0+0x1A0], f13=f[$s0+0x64C]); func_002AA898(a0=$s0, a1=$s0+0x4, a2=$zero, f13=0x3C75C28F); func_002AA2E8(a2=$zero, f12=0x3E4CCCCE, f13=0x3B888889); func_L00_00341820(a0=[$s1+0x630], a1=$s5, a2=$sp+0x104, a3=$sp+0x108); func_00282E80(a0=[$s1+0x630], a1=$s5, a2=$sp+0x104, a3=$sp+0x108); func_00283248(a0=[$s1+0x630], a1=$s5, a2=$sp+0x104, a3=$sp+0x108, f13=f[$s1+0x5D8]); func_002AA2E8(a0=$a0+0x674, f13=0x3B11A2B4); func_002AA2E8(a0=$a0+0x674, f13=0x3A11A2B4); func_00282CF0(a0=$s1+0xF0, a1=$sp, a2=$s0); func_00282CF0(a0=$s5, a1=$s0, a2=$s2); func_00282DF0(a0=$s5, a1=$s0, a2=$s2); func_002AA3A8(a0=$sp+0x10C, a1=$s1+0x6AC, f13=0x3CF5C28F, f14=0x3E99999A, f15=0x3DEEEEF0); func_00282DF0(a0=$s5, a1=$s1+0x6AC, f14=0x3E99999A, f15=0x3DEEEEF0); func_00282F20(a0=$s5, a1=$s5, f12=f[$s1+0x6AC]); func_00282CC0(a0=$s2, a1=$a0, a2=$s5, f12=f[$s1+0x6AC]); func_002A78D8(a0=[$sp+0x114], f12=0x3EB2B8C4, f13=0x3F1C61AB); func_00283B98(f12=f[$s0+0x64C], f13=0x3F1C61AB); func_00283180(f12=f[$s0+0x64C], f13=0x3F1C61AB); func_00283198(f12=f[$s0+0x64C]); func_002A8C00(a0=$s5, a1=[$s0+0x2290], a3=$sp+0x50); func_00277F48(a1=$zero+0x10, a2=[$s0+0x2290], a3=$s5)
+         branches : bnel $v0, $zero -> b25+0x3c; beq $v1, $v0 -> b25+0x38; b -> b25+0x90; beq $a2, $v0 -> b25+0x80; bne $v1, $a1 -> b25+0x84; beqz $v0 -> b25+0x88; beq $v1, $v0 -> b25+0xa8; bnel $v1, $v0 -> b25+0x16c; beqz $s7 -> b25+0x1bc; beqz $v1 -> b25+0x234; beq $v1, $v0 -> b25+0x288; beq $v1, $v0 -> b25+0x288; bnez $v0 -> b25+0x288; beqz $a2 -> b25+0x2a0; b -> b25+0x2a8; beqz $v0 -> b25+0x2c0; bnez $v0 -> b25+0x2c8; beql $a2, $zero -> b25+0x320; beql $v0, $zero -> b25+0x304; b -> tail+0x4; b -> tail+0x0; bne $v1, $v0 -> b25+0x340; beqz $v1 -> b25+0x380; bnez $v0 -> b25+0x500; beql $s0, $zero -> b25+0x444; beqz $v0 -> b25+0x504; bne $v1, $v0 -> b25+0x504; beqz $v0 -> b25+0x4fc; b -> b25+0x500; beq $v1, $v0 -> b25+0x540; beq $v1, $v0 -> b25+0x540; beq $v1, $v0 -> b25+0x540; beqz $s7 -> b25+0x6ec; beqz $a1 -> b25+0x638; bne $v0, $v1 -> b25+0x5fc; b -> b25+0x61c; b -> b25+0x6ec; beq $a0, $v1 -> b25+0x68c; bne $a0, $v0 -> b25+0x684; b -> b25+0x6bc; bne $a0, $v0 -> b25+0x6f0; bnel $v0, $s1 -> b25+0x78c; b -> tail+0x0; beqz $v0 -> b25+0x7e8; beqz $v0 -> b25+0x7f0; bnel $v1, $v0 -> b25+0xa94; beqz $v0 -> b25+0x87c; beqz $v0 -> b25+0x9b0; beqz $v0 -> b25+0x9b0; beqz $v0 -> b25+0xa54; b -> b25+0xa58; bne $v0, $v1 -> b25+0xa84; b -> b25+0xe6c; b -> b25+0xe74; beql $v0, $zero -> b25+0xb24; b -> b25+0xcb8; bnel $v0, $zero -> b25+0xcc0; b -> b25+0xcb4; b -> b25+0xcb4; bne $v1, $v0 -> b25+0xcbc; b -> b25+0xd04; bne $v0, $v1 -> tail+0x4; beqz $v0 -> tail+0x8; b -> tail+0x4
+         floats   : 0x3F060A93 0x3DEEEEF0 0x3D888889 0x3D4CCCCE 0x3DAAAAAB 0xBC088889 0xBF800000 0x4479C000 0x40000000 0x40200000 0x3F88F5C2 0x3BC83FB8 0x41F00000 0x3DCCCCCD 0x3EF0A3D7 0x3F490FDC 0xBF490FDC 0x3CF5C28F 0x3E4CCCCD 0x3E99999A 0x3C8B4396 0x3CDD2F1B 0x3FC90FDC 0xBFC90FDC 0x3F000000 0x3E0EFA36 0xBD8EFA36 0xBF51FF7F 0x3F169696 0x3F3BA867 0x3A83126F 0x3C75C28F 0x3E19999A 0x3DD67752 0x3D23D70A 0x3CAAAAAB 0x3C888889 0x3BD159E3 0x3F800000 0x3E4CCCCE 0x3B888889 0x3E860A93 0xBDA2F982 0xBE44980A 0x3EC391D0 0xBDFA35DE 0x3B11A2B4 0x3A11A2B4 0xBD2AAAAB 0x3EB2B8C4 0x3F1C61AB 0x3F19999A
+         global   : [0, 128, 132, 136, 152, 240, 244, 248, 280, 368, 416, 440, 444, 796, 1180, 1496, 1568, 1572, 1584, 1588, 1592, 1600, 1604, 1608, 1612, 1616, 1620, 1624, 1628, 1632, 1636, 1648, 1652, 1656, 1664, 1684, 1692, 1696, 1704, 1708, 1736, 4680, 8848, 8852, 8890, 9260, 9400]
+         object   : [66, 67]
+
+     body  b26  0x002D39D4    180 bytes    45 insns    6 calls  cases 23, 24
+         calls    : func_00282CF0(a0=$s1, a1=$s1+0x3D0, a2=$s3); func_00283248(a0=$s1, a1=$s1+0x3D0, a2=$s3, f12=f[$s2+0x190], f13=f[$s2+0x194]); func_L00_002B3EF8(a0=$zero, f12=0x3D23D70A, f13=0x3E4CCCCD, f14=0x3DD67752); func_002AA800(a1=$zero, f12=0.0, f13=0x3DA0D97D, f14=0x3DD67752); func_00282CF0(a0=$s0, a1=$s3, f12=0.0, f13=0x3DA0D97D); func_002AC9F8(a0=$s0, a1=$s3, f12=0x3D888889, f13=0x3DA0D97D)
+         branches : beq $v1, $v0 -> b26+0x84; b -> b27+0x88
+         floats   : 0x3D23D70A 0x3E4CCCCD 0x3DD67752 0x3DA0D97D 0x3D888889
+         global   : []
+         object   : []
+
+     body  b27  0x002D3A88    172 bytes    43 insns    6 calls  cases 70, 71
+         calls    : func_00282CF0(a0=$s0, a1=$s0+0x3D0, a2=$s3); func_00283248(a0=$s0, a1=$s0+0x3D0, a2=$s3, f12=f[$s1+0x190], f13=f[$s1+0x194]); func_L00_002B3EF8(a0=$zero, f12=0x3CA3D70A, f13=0x3E4CCCCD, f14=0x3DA0D97D); func_00282CF0(a0=$s2, a1=$s3, f12=0x3CA3D70A, f14=0x3DA0D97D); func_002AC9F8(a0=$s2, a1=$s3, f12=0x3CE81B50, f14=0x3DA0D97D); func_002AA2E8(a0=D_18A3A0, f12=f[$s1+0x88], f13=0x3D4CCCCE)
+         branches : b -> tail+0x4
+         floats   : 0x3E4CCCCD 0x3CA3D70A 0x3DA0D97D 0x3CE81B50 0x3D4CCCCE
+         global   : []
+         object   : []
+
+     body  b28  0x002D3B34    320 bytes    80 insns   13 calls  cases 25, 26
+         calls    : func_00282CF0(a0=$s4, a1=$s1, a2=$s2); func_00283248(a0=$s4, a1=$s1, a2=$s2, f12=f[$s0+0x190], f13=f[$s0+0x194]); func_L00_002B3EF8(a0=$zero, f12=0x3CA3D70A, f13=0x3E4CCCCD, f14=0x3DA0D97D); func_00282CF0(a0=$s3, a1=$s1, a2=$s2, f13=0x3E4CCCCD, f14=0x3DA0D97D); func_00282C88(a0=$s3, a1=$s1, a2=$s2, f13=0x3E4CCCCD, f14=0x3DA0D97D); func_00282DD8(a0=$s0, a1=$s4+0x130, a2=$s3); func_00282DD8(a0=$s0, a1=$s3, a2=$s4+0x130); func_00282F20(a0=$s0, a1=$s0, a2=$s4+0x130, f12=0x3E4CCCCD); func_00282CC0(a0=$s2, a1=$s1, a2=$s0, f12=0x3E4CCCCD); func_L00_002ACF88(a0=$s1, a1=$s0, a2=$zero); func_L00_002ACF88(a0=$s2, a1=$s0, a2=$sp); func_00282CF0(a0=$s0, a1=$sp, a2=$s1); func_00283CF0(a0=$s0, a1=$sp, a2=$s1, f12=f[$s1+0xBB8])
+         branches : bne $v1, $v0 -> b28+0xa4; b -> b28+0xb4; beqz $v0 -> tail+0x0; beqz $v0 -> tail+0x0; b -> b52+0x144
+         floats   : 0x3CA3D70A 0x3E4CCCCD 0x3DA0D97D
+         global   : []
+         object   : []
+
+     body  b29  0x002D3C74     24 bytes     6 insns    0 calls  cases 118
+         calls    :
+         branches : b -> b56+0x34
+         floats   : 0x3DBBBBBC
+         global   : [812]
+         object   : []
+
+     body  b30  0x002D3C8C    292 bytes    73 insns    7 calls  cases 6, 44
+         calls    : func_002AA898(a1=$s0+0xA4, a2=$zero); func_002AA898(a0=$sp, a1=$s0+0xA0, a2=$zero); func_L00_002AA0F0(a0=$sp, a1=$s0+0xA0, a2=$zero, f12=f[$s0+0xA0], f13=f[$s0+0xA4]); func_L00_002B3D10(f13=f[$s0+0xA4]); func_L00_002B6BC8(); func_L00_002B7B80(); func_L00_002B54F8(f12=0x3F333333, f13=0.0)
+         branches : bne $v0, $v1 -> b30+0xe0; bnez $v0 -> b30+0xfc; b -> b31+0x74
+         floats   : 0x40800000 0x3EDF66F4 0x3CA3D70A 0x3E99999A 0x3D32B8C4 0x3F800000 0x3F333333
+         global   : [0, 160, 164, 480, 796, 2688, 8852, 8856]
+         object   : []
+
+     body  b31  0x002D3DB0    184 bytes    46 insns    8 calls  cases 116
+         calls    : func_002AA2E8(a0=$s0+0xA88, f12=f[$s0+0xA90]); func_002AA2E8(a0=$s0+0xA8C, f12=f[$s0+0xA94]); func_L00_002AA0F0(a0=$s0+0xA8C, f12=f[$s0+0xA88], f13=f[$s0+0xA8C], f14=0.0); func_00282E20(a0=$s1, f12=f[$s0+0xA88], f13=f[$s0+0xA8C], f14=0.0); func_L00_002EE4D8(a0=$s1, a1=$s1, f12=0x3F666666, f13=f[$s0+0xA8C], f14=0.0); func_L00_002D34C0(a0=$s1, a1=$s1, f12=f[$s0+0xA80]); func_L00_002D3B00(a0=$s1, a1=$s1, f12=f[$s0+0xA80]); func_L00_002D3B58(a0=$s1, a1=$a0, f12=0xBF555556)
+         branches : b -> tail+0x4
+         floats   : 0x3B1EDD20 0x3F666666 0xBF555556
+         global   : [2688, 2696, 2700, 2704, 2708, 8892]
+         object   : []
+
+     body  b32  0x002D3E68    924 bytes   231 insns   21 calls  cases 130
+         calls    : func_L00_002B9BB0(a0=$zero+0x4, a1=[$s0+0x2290], a2=$zero+0xD); func_L00_0031D620(a0=$zero+0x2D0, a1=$zero+0xB4, a2=$zero+0xD, f12=f[$s0+0x5B0]); func_L00_00325FC8(a0=$s0+0x5A0, f12=0x3998825C); func_00290010(a0=$zero+0x2, a1=$v0, a2=$zero, f12=f[$s0+0x5B0]); func_002AA2E8(a0=$s0+0x5B0, f13=0x3DCCCCCD); func_L00_002D38A0(a0=$s0+0xF0, a1=$a0, f12=0x3CCCCCCD, f13=0x3DCCCCCD); func_002AA2E8(a0=$s0+0xF0, a1=$a0, f12=0x3CCCCCCD, f13=0x3DCCCCCD); func_002AA2E8(a0=D_18A3D0, f12=0.0, f13=0x3F000000); func_L00_002D34C0(a0=$s0, a1=$s0, f12=0x3BF5C290, f13=0x3F000000); func_L00_002D3B00(a0=$s0, a1=$s0, f12=0x3BF5C290); func_L00_002D3B58(a0=$s0, a1=$s0, f12=0x3DCCCCCE); func_L00_002D3B00(a0=$s0, a1=$s0, f12=0x3DCCCCCE); func_L00_002D3B58(a0=$s0, a1=$s0, f12=0xBE4CCCCE); func_L00_002D3B00(a0=$s0, a1=$s0, f12=0xBE4CCCCE); func_L00_002D3B58(a0=$s0, a1=$s0); func_002AA3A8(f12=f[$s1+0x318], f13=0x3CDD2F1B, f14=0x3E99999A, f15=0x3DAAAAAB); func_L00_002D3B00(a0=D_189F10); func_L00_002B7B80(a0=D_189F10); func_L00_002B39F0(a0=$zero, f12=0x3E4CCCCE); func_L00_002B3EF8(f12=0x3CDD2F1B, f13=0x3E99999A, f14=0x3DB2B8C4); func_L00_002B6198(f12=0x3A11A2B4)
+         branches : beqz $a0 -> b32+0xf4; b -> b32+0x100; beqz $v0 -> b32+0x12c; beqz $v0 -> b32+0x2b8; b -> b32+0x2d8; b -> tail+0x4
+         floats   : 0x3CA3D70A 0x3998825C 0x3F800000 0x3DCCCCCD 0x3CCCCCCD 0x3F000000 0x3BF5C290 0x3DCCCCCE 0xBE4CCCCE 0x41C80000 0x3F99999A 0x3E800000 0x3F86BCA1 0x3CDD2F1B 0x3E99999A 0x3DAAAAAB 0x3E4CCCCD 0x3E4CCCCE 0x3DB2B8C4 0x3AB60B61 0x3A11A2B4
+         global   : [1456, 1470, 8848]
+         object   : []
+
+     body  b33  0x002D4204    596 bytes   149 insns   15 calls  cases 8
+         calls    : func_L00_002ADEA0(a0=$zero+0x3); func_002E59F8(a0=$a2, a1=[$v1+0x2290]); func_L00_002B9BB0(a0=$zero+0x3, a1=[$v0+0x2290], a2=$zero+0x2); func_002E59F8(a0=$a2, a1=[$v1+0x2290]); func_L00_002B9BB0(a0=$zero+0x4, a1=[$v0+0x2290], a2=$zero+0xD); func_L00_002D3B00(a0=$s0); func_L00_002B39F0(a0=$zero); func_L00_002B3EF8(a0=$zero, f14=0x3E567752); func_L00_002B41B8(a0=$zero, f12=0x3B888889, f13=0x3AFEDCBB, f14=0x3E567752); func_L00_002B4208(f12=0x47C34F80, f13=0x3AFEDCBB); func_L00_002B7B80(f12=0x47C34F80, f13=0x3AFEDCBB); func_L00_002D3960(a0=$s0, a1=$s0, f12=0x47C34F80); func_002AA3A8(a0=$sp+0x110, a1=$s1+0xA98, f15=0x3E911112); func_L00_002D34C0(a0=$s0, a1=$a0, f12=f[$sp+0x110], f15=0x3E911112); func_002AA2E8(a0=$s1+0x490, f12=f[$s1+0x88], f13=0x3D888889)
+         branches : bne $v0, $v1 -> b33+0x7c; beq $a2, $v0 -> b33+0x58; bne $v1, $a1 -> b33+0x5c; beqz $v0 -> b33+0x5c; b -> b33+0xe0; beq $a2, $v0 -> b33+0xc0; bne $v1, $a1 -> b33+0xc4; beqz $v0 -> b33+0xc4; bne $v1, $v0 -> b33+0x108; beqz $v0 -> b33+0x134; b -> b34+0x7dc
+         floats   : 0x3D4CCCCE 0x3DAAAAAB 0x3F3851EC 0x3E0369D0 0x3F7C84B7 0x3CCCCCCD 0x3E99999A 0x3E567752 0x3AFEDCBB 0x3B888889 0x47C34F80 0x3E911112 0x3D888889
+         global   : [136, 1168, 4920, 8848, 9272, 9276, 9416, 9455]
+         object   : []
+
+     body  b34  0x002D4458   2028 bytes   507 insns   37 calls  cases 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 27, 56, 69, 72, 91, 102, 110, 129, 137, 146
+         calls    : func_L00_002B3998(f12=0x41200000); func_L00_002B9B88(a0=$zero+0x4, a1=$zero, f12=0x41200000); func_L00_002B39F0(a0=$zero, f12=0x3DCB17E5); func_L00_002B39F0(a0=$zero, f12=f[$s0+0x4A4]); func_L00_002AABE0(a0=$zero+0x3, a1=$zero+0x10, a2=$zero+0x1); func_002FD1B8(a1=hi(D_1B3738), a2=$zero, f12=f[$s0+0x80], f13=f[$s0+0x84], f14=0x3ECCCCCD, f15=0x3EB33333); func_L00_002AA938(a0=$zero+0x7, a1=$zero, a2=$zero); func_L00_002B9598(); func_00283180(f12=f[$s0+0x98]); func_00283198(f12=f[$s0+0x98]); func_L00_002B3EF8(a0=$zero, f12=0x3C75C28F, f13=0x3E4CCCCD, f14=0x3E80157C); func_L00_002B4208(f12=f[$s0+0x1458]); func_L00_002B4208(f12=0x47C34F80); func_L00_002B41B8(f12=f[$s0+0x500], f13=f[$s0+0x504]); func_L00_002B94D8(f12=f[$v1+0x504]); func_L00_002B54F8(f12=0x3F000000, f13=0x3D088889); func_L00_002D3798(a0=$a0+0xF0, a1=$a0, f12=0x3B91A2B4); func_L00_002D3798(a0=$a0+0xF0, a1=$a0, f12=0x3C71357A); func_L00_002D38A0(a0=$sp, a1=$sp, f12=0x3F000000); func_L00_002D3798(a0=$s0, a1=$sp, f12=0x3F733333); func_002761F8(a0=$sp, a1=$s0, a2=$zero+0x4, a3=[$s1+0x2290], f12=0x3F733333); func_L00_002B6BC8(a0=$sp, a1=$s0, a2=$zero+0x4, a3=[$s1+0x2290]); func_00282E20(a0=$s0); func_00282F70(a0=$s0, a1=$a0); func_L00_002D3B00(a0=$s0+0xF0); func_L00_002B7B80(); func_L00_002B8930(); func_L00_00322BE0(a0=$s0+0x18E0, a1=$zero+0x2); func_L00_00322BE0(a0=$s1+0x18E0, a1=$zero+0x2); func_L00_002D36E0(a0=$sp, a1=$zero+0x1, f12=0x3F4CCCCD, f13=0.0, f14=0x3E99999A); func_00277F48(a0=$sp, a1=$zero, a2=[$s1+0x2290], a3=$zero, f12=0x3F666666, f14=0x3E99999A); func_00282D30(a0=$s0, a1=$s1+0x110, a2=[$s1+0x2290], a3=$zero, f12=0x40E00000); func_002ABB78(a0=[$s1+0x0], a1=$s1+0x110, f12=0x40E00000); func_002A8F70(a0=[$s1+0x0], a1=[$s4+0x2290], a3=$s4+0x80, f12=0x3F800000); func_L00_002AAE00(); func_L00_002B6560(); func_L00_002AC578()
+         branches : bne $v0, $v1 -> b34+0x54; bnel $v0, $zero -> b34+0x58; bne $v1, $v0 -> b34+0x54; beqz $v0 -> b34+0x50; beqz $v0 -> b34+0x78; beql $v0, $zero -> b34+0x7c; b -> b34+0xa8; beql $v0, $zero -> b34+0x9c; bnel $v0, $v1 -> b34+0x168; bne $v1, $v0 -> b34+0x11c; beqz $a0 -> b34+0x11c; bnel $a1, $a2 -> b34+0x188; bnel $v0, $zero -> b34+0x1dc; beqz $v0 -> b34+0x4ac; beq $v1, $v0 -> b34+0x4ac; beq $v1, $v0 -> b34+0x4ac; beq $v1, $v0 -> b34+0x4ac; beq $v1, $v0 -> b34+0x4ac; beq $v1, $v0 -> b34+0x4ac; beq $v1, $v0 -> b34+0x4ac; beq $v1, $v0 -> b34+0x4ac; beqz $v0 -> b34+0x284; bne $v1, $v0 -> b34+0x508; beqz $v0 -> b34+0x508; b -> b34+0x508; bnez $v0 -> b34+0x2d8; beql $v0, $zero -> b34+0x2f4; b -> b34+0x308; beq $v0, $v1 -> b34+0x324; beqz $v0 -> b34+0x360; beqz $v1 -> b34+0x34c; bnel $v0, $zero -> b34+0x34c; beqz $v0 -> b34+0x360; bne $v0, $v1 -> b34+0x3d8; beqz $v0 -> b34+0x3cc; bne $v0, $v1 -> b34+0x418; beqz $v0 -> b34+0x418; beqz $v0 -> b34+0x508; beqz $v0 -> b34+0x504; b -> b34+0x504; bne $v0, $v1 -> b34+0x508; beql $v0, $zero -> b34+0x608; beql $v0, $zero -> b34+0x5c4; beql $v0, $zero -> b34+0x608; bnel $v1, $v0 -> b34+0x5e4; bnel $v0, $zero -> b34+0x608; bnel $v0, $zero -> b34+0x620; bnel $v1, $v0 -> b34+0x638; beq $v1, $v0 -> b34+0x64c; bne $v1, $v0 -> b34+0x668; bnel $v0, $v1 -> b34+0x694; bne $v1, $v0 -> b34+0x78c; bnez $v0 -> b34+0x790; beqz $s2 -> b34+0x78c; blez $s2 -> b34+0x788; beqz $v0 -> b34+0x77c; bnez $s0 -> b34+0x750; bne $v0, $v1 -> b34+0x7d4; bnez $v0 -> b34+0x7d4; b -> tail+0x4
+         floats   : 0x41200000 0x3DCB17E5 0x3ECCCCCD 0x3EB33333 0x40800000 0x40E00000 0x3DEEEEF0 0x3C3F258C 0x3C75C28F 0x3E4CCCCD 0x3E80157C 0x47C34F80 0x3F000000 0x3D088889 0x3B91A2B4 0x3C71357A 0x3F733333 0x3D7C9631 0x3DCCCCCE 0x3A83126F 0x41E00000 0x3F4CCCCD 0x3E99999A 0x3F666666 0x3F800000 0x3CCCCCCE
+         global   : [0, 128, 132, 136, 152, 240, 244, 248, 376, 432, 436, 440, 792, 842, 1076, 1112, 1168, 1180, 1181, 1182, 1188, 1196, 1280, 1284, 1312, 1316, 1320, 3128, 4920, 5204, 5208, 5266, 8848, 8852, 8884, 9400, 9468]
+         object   : []
+
+     body  b35  0x002D4C44    180 bytes    45 insns    3 calls  cases 22
+         calls    : func_L00_002D3A58(a0=$s0); func_L00_002B9F00(f12=0x406CCCCD, f14=0x3EB33333); func_L00_002D3BD8(a0=$s0, a1=$s0, f12=0x406CCCCD, f14=0x3EB33333)
+         branches : bnel $v0, $zero -> b35+0x54; bnel $v0, $zero -> b35+0x54; beqz $v0 -> b35+0x9c; b -> b59+0xa4
+         floats   : 0x3A91A2B4 0x3B360B61 0x406CCCCD 0x3EB33333
+         global   : [5271]
+         object   : []
+
+     body  b36  0x002D4CF8     36 bytes     9 insns    0 calls  cases 140
+         calls    :
+         branches : b -> tail+0x0
+         floats   : 0xBEC44445
+         global   : [248]
+         object   : []
+
+     body  b37  0x002D4D1C    592 bytes   148 insns   11 calls  cases 98
+         calls    : func_00282CF0(a0=$sp, a1=$a2, a2=D_18B6C0); func_00283248(a0=$sp, a1=$a2, a2=D_18B6C0, f12=f[$sp+0x0], f13=f[$sp+0x4]); func_00282E20(a0=$sp, a1=$a2, a2=D_18B6C0, f12=f[$sp+0x0], f13=f[$sp+0x4]); func_00283248(f12=f[$sp+0x0], f13=f[$sp+0x4]); func_L00_002B3EF8(a0=$zero, f12=0x3CF5C28F, f13=0x3E99999A, f14=0x3DBEA2F4); func_L00_002B3EF8(a0=$zero, f12=0x3CF5C28F, f13=0x3E99999A, f14=0x3E060A93); func_L00_002B3EF8(a0=$zero, f12=0x3CF5C28F, f13=0x3E99999A, f14=0x3E060A93); func_L00_002B7B80(a0=$zero, f13=0x3E99999A, f14=0x3E060A93); func_L00_002B41B8(f12=0x3F800000, f13=0x3BB60B61); func_L00_002B4208(f12=0x47C34F80, f13=0x3BB60B61); func_L20_002C7588(a0=$zero+0x1, f12=0x47C34F80, f13=0x3BB60B61)
+         branches : b -> b37+0xa0; bne $v0, $v1 -> b37+0xfc; b -> b37+0xfc; bne $a0, $v1 -> b37+0x140; b -> b37+0x1b4; bne $a0, $v0 -> b37+0x17c; b -> b37+0x1b4; bnez $a0 -> b37+0x1c8; bnez $v1 -> b37+0x1c8; bnel $v0, $zero -> b37+0x220; beqz $v0 -> b37+0x23c; b -> b58+0x2f4; b -> b59+0xb0
+         floats   : 0x3E4CCCCD 0x3F800000 0x3C888889 0x3C75C290 0x3CF5C28F 0x3E99999A 0x3DBEA2F4 0x3E060A93 0x3BA3D70A 0x3BB60B61 0x47C34F80 0x3BE38E39
+         global   : [432, 846, 8884]
+         object   : []
+
+     body  b38  0x002D4F6C    164 bytes    41 insns    6 calls  cases 99
+         calls    : func_00282CF0(a0=$sp, a1=$s1); func_00282DB0(a0=$sp, a1=$s0); func_00282C88(a0=$s0, a1=$s0); func_00282C88(a0=$s0, a1=$s0); func_L00_002B94D8(a0=$s0, f12=0x3BF5C290); func_L20_002C7588(a0=$zero, f12=0x3BF5C290)
+         branches : beqz $v0 -> b38+0x90; b -> b58+0x2f4; b -> b59+0xb0
+         floats   : 0x3BF5C290 0x3BE38E39 0x3C75C290
+         global   : []
+         object   : []
+
+     body  b39  0x002D5010     20 bytes     5 insns    1 calls  cases 60, 100
+         calls    : func_00282C88(a0=D_189F10)
+         branches : b -> tail+0x4
+         floats   :
+         global   : []
+         object   : []
+
+     body  b40  0x002D5024    108 bytes    27 insns    1 calls  cases 101
+         calls    : func_00282C88(a0=$s0)
+         branches : b -> tail+0x0; b -> tail+0x0
+         floats   : 0x3F000000 0xBB888889 0xBC888889
+         global   : []
+         object   : []
+
+     body  b41  0x002D5090      8 bytes     2 insns    1 calls  cases 121
+         calls    : func_L00_002BA220()
+         branches :
+         floats   :
+         global   : []
+         object   : []
+
+     body  b42  0x002D5098     36 bytes     9 insns    1 calls  cases 120
+         calls    : func_00282C88(a0=$s0)
+         branches : b -> tail+0x0
+         floats   : 0xBC888889
+         global   : []
+         object   : []
+
+     body  b43  0x002D50BC     36 bytes     9 insns    1 calls  cases 122
+         calls    : func_00282C88(a0=$s0)
+         branches : b -> tail+0x0
+         floats   : 0xBBBF258C
+         global   : []
+         object   : []
+
+     body  b44  0x002D50E0    152 bytes    38 insns    5 calls  cases 63, 67
+         calls    : func_L00_002B9F00(f12=0x406CCCCD, f14=0x3EB33333); func_L00_002B39F0(a0=$zero, f12=0x3F800000, f14=0x3EB33333); func_L00_002B41B8(a0=$zero, f12=0x3F800000, f13=0x3B656042); func_00282C88(a0=$s1, f12=0x3F800000, f13=0x3B656042); func_L20_002C7588(a0=$zero, f12=0x3F800000, f13=0x3B656042)
+         branches : beqz $v0 -> b44+0x84; b -> b58+0x2f4; b -> b59+0xb0
+         floats   : 0x3EB33333 0x406CCCCD 0x3F800000 0x3B656042 0x3BE38E39 0x3C75C290
+         global   : [432, 846]
+         object   : []
+
+     body  b45  0x002D5178    688 bytes   172 insns   14 calls  cases 77
+         calls    : func_0029FCC0(a0=[$s3+0x2290], a1=$s0, a2=$s2); func_0029FCC0(a0=[$s3+0x2290], a1=$s0, a2=$s1); func_00282CC0(a0=$sp, a1=$s2, a2=$s1); func_00282D30(a0=$sp, a1=$sp, a2=$s1, f12=0x3F000000); func_002A8C28(a0=[$s3+0x2290], a1=$sp, a3=$zero, f12=0x3E800000, f13=0x3F800000); func_002AA2E8(a0=$s0, f12=0x3F800000); func_L00_002B3EF8(a0=$zero, f12=0x3D4CCCCD, f14=0x3E90777C); func_L00_002B75A0(f12=0x40A00000, f13=0x3F490FDC, f14=0x3E90777C); func_L00_002B41B8(f12=0x3C286420, f13=0x3BFEDCBB); func_L00_002B42D8(a0=$a0+0xBC0, f13=0x3BFEDCBB); func_L00_002B4208(a0=$a0+0xBC0, f12=f[$a0+0xBEC]); func_L00_002B4208(a0=$a0+0xBC0, f12=0x47C34F80); func_L00_002B4308(); func_L00_002B9F00(f12=0x3F333333, f13=0.0, f14=0x3E99999A)
+         branches : beqz $a0 -> b45+0x34; bne $a0, $v0 -> b45+0x68; bnez $v0 -> b45+0x134; bnel $v0, $zero -> b45+0x178; beqz $v0 -> b45+0x1a8; b -> b45+0x1c4; beqz $v0 -> b45+0x220; bne $v1, $v0 -> b45+0x210; b -> b45+0x238; b -> b45+0x238; beql $v0, $zero -> b45+0x26c; b -> b45+0x284; b -> tail+0x4
+         floats   : 0x40B00000 0x3D6EEEF0 0x3F000000 0x3F800000 0x3E800000 0x3E4CCCCD 0x3D4CCCCD 0x3E90777C 0x3F490FDC 0x40A00000 0x3C286420 0x3BFEDCBB 0x47C34F80 0x3BE38E39 0x3C75C290 0x3F333333 0x3E99999A
+         global   : [248, 280, 432, 846, 3048, 3052, 3068, 3116, 3128, 8848, 8899]
+         object   : []
+
+     body  b46  0x002D5428    148 bytes    37 insns    5 calls  cases 75
+         calls    : func_L00_002B39F0(a0=$zero, f12=0x3D088889); func_L00_002B3EF8(a0=$zero, f12=0x3D23D70A, f13=0x3E4CCCCD, f14=0x3E14EF4E); func_L00_002B41B8(a0=$zero, f12=0x3B888889, f13=0x3AFEDCBB); func_L00_002B4208(f12=0x47C34F80, f13=0x3AFEDCBB); func_L00_002D3960(a0=$s0, a1=$s0, f12=0x47C34F80)
+         branches : b -> b59+0xb0
+         floats   : 0x3D088889 0x3E14EF4E 0x3D23D70A 0x3E4CCCCD 0x3AFEDCBB 0x3B888889 0x47C34F80 0x3CC49BA7
+         global   : []
+         object   : []
+
+     body  b47  0x002D54BC     84 bytes    21 insns    2 calls  cases 78
+         calls    : func_L00_002B6198(f12=0x3BE38E39); func_L00_002D34C0(a0=D_189F10, a1=$s0+0x130, f12=0x3BA3D70A)
+         branches : b -> tail+0x4
+         floats   : 0x3DBBBBBC 0x3BE38E39 0x3BA3D70A
+         global   : [416, 432, 812]
+         object   : []
+
+     body  b48  0x002D5510     24 bytes     6 insns    0 calls  cases 65
+         calls    :
+         branches : b -> b57+0x3c
+         floats   : 0x3D4CCCCE
+         global   : []
+         object   : []
+
+     body  b49  0x002D5528     68 bytes    17 insns    1 calls  cases 68
+         calls    : func_L00_002AA0F0(f12=0.0, f13=0x3E567752)
+         branches : b -> b59+0xb0
+         floats   : 0x3E567752 0x3BB60B61
+         global   : [248]
+         object   : []
+
+     body  b50  0x002D556C    688 bytes   172 insns   14 calls  cases 64, 76
+         calls    : func_L00_002B39F0(a0=$zero, f12=0x3D4CCCCE); func_L00_002B3EF8(a0=$zero, f12=0x3D178D50, f13=0x3E19999A, f14=0x3E479297); func_L00_002B41B8(a0=$zero, f12=0x3BA3D70A, f13=0x3BB60B61); func_00282C48(f12=f[$s0+0x1A8]); func_L00_0032F038(a0=$zero); func_L00_0032F038(a0=$zero+0x2); func_00283C80(a0=$zero+0x2); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_L00_002B4208(f12=f[$v1+0x1A0]); func_L00_002B4208(f12=0x47C34F80); func_L20_002C7588(a0=$zero+0x1, f12=0x47C34F80)
+         branches : beqz $v0 -> b50+0x54; beqz $v0 -> b50+0x254; beqz $v0 -> b50+0x254; beqz $v0 -> b50+0x270; b -> b50+0x284; bnez $v0 -> b58+0x2e4; b -> b59+0xb0
+         floats   : 0x3D4CCCCE 0x3E29C921 0x3D072B02 0x3E479297 0x3D178D50 0x3E19999A 0x3BA3D70A 0x3BB60B61 0x3C3F258C 0x3FDF66F4 0x3F4CCCCD 0x40278D37 0x3F9C61AB 0x3DB2B8C4 0x3D8EFA36 0x3CADD6F3 0x47C34F80 0x3C75C290
+         global   : [372, 416, 424, 432, 846, 1036, 1039, 9400]
+         object   : []
+
+     body  b51  0x002D581C    108 bytes    27 insns    2 calls  cases 66
+         calls    : func_00282E20(a0=$s0); func_L00_002EE4D8(a0=$s0, a1=$s0)
+         branches : beql $v0, $zero -> b51+0x44; bnez $v0 -> b59+0x80; b -> b59+0xa4
+         floats   : 0x3F6B851F 0x3F7D70A4
+         global   : []
+         object   : []
+
+     body  b52  0x002D5888    364 bytes    91 insns   14 calls  cases 73, 74
+         calls    : func_00282CF0(a0=$s2+0x190, a1=$s0, a2=$s1); func_00283248(a0=$s2+0x190, a1=$s0, a2=$s1, f12=f[$s2+0x190], f13=f[$s2+0x194]); func_L00_002B3EF8(a0=$zero, f12=0x3CA3D70A, f13=0x3E4CCCCD, f14=0x3DA0D97D); func_00282CF0(a0=$s3, a1=$s0, a2=$s1, f13=0x3E4CCCCD, f14=0x3DA0D97D); func_00282C88(a0=$s2+0xF0, a1=$s0, a2=$s1, f13=0x3E4CCCCD, f14=0x3DA0D97D); func_00282DD8(a0=$s0, a1=$s2+0x2C0, a2=$s3); func_00282DD8(a0=$s0, a1=$s3, a2=$s2+0x2C0); func_00282F20(a0=$s0, a1=$s0, a2=$s2+0x2C0, f12=0x3E4CCCCD); func_00282CC0(a0=$s2, a1=$s1, a2=$s0, f12=0x3E4CCCCD); func_L00_002ACF88(a0=$s1, a1=$s0, a2=$zero); func_L00_002ACF88(a0=$s2, a1=$s0, a2=$sp); func_00282CF0(a0=$s0, a1=$sp, a2=$s1); func_00283CF0(a0=$s0, a1=$sp, a2=$s1, f12=f[$s1+0xBB8]); func_00282F20(a0=$s0, a1=$a0, f12=f[$v0+0x0])
+         branches : bne $v1, $v0 -> b52+0xac; b -> b52+0xbc; beqz $v0 -> tail+0x0; beqz $v0 -> tail+0x0; b -> tail+0x4
+         floats   : 0x3FA66666 0x3CA3D70A 0x3E4CCCCD 0x3DA0D97D 0x3F000000
+         global   : [400, 404, 416, 3104, 8852]
+         object   : []
+
+     body  b53  0x002D59F4    188 bytes    47 insns    6 calls  cases 141
+         calls    : func_L00_002B9F00(f12=0x406CCCCD, f14=0x3EB33333); func_L18_002C4000(); func_L00_002B39F0(a0=$zero, f12=0x3F800000); func_L00_002B41B8(a0=$zero, f12=0x3F800000, f13=0x3B656042); func_00282C88(a0=$s1, f12=0x3F800000, f13=0x3B656042); func_L20_002C7588(a0=$zero, f12=0x3F800000, f13=0x3B656042)
+         branches : bnez $v0 -> tail+0x4; beq $v0, $v1 -> tail+0x4; beqz $v0 -> b53+0xa8; b -> b58+0x2f4; b -> b59+0xb0
+         floats   : 0x406CCCCD 0x3EB33333 0x3F800000 0x3B656042 0x3BE38E39 0x3C75C290
+         global   : [432, 846, 8852]
+         object   : []
+
+     body  b54  0x002D5AB0     84 bytes    21 insns    2 calls  cases 145
+         calls    : func_L20_002C5A48(a0=$zero); func_0027D330(a0=$zero+0x10)
+         branches : beqz $v0 -> tail+0x0; bnez $v0 -> tail+0x4; beq $v1, $v0 -> tail+0x0; b -> tail+0x0
+         floats   :
+         global   : [480, 8852, 8860, 8897, 9376]
+         object   : []
+
+     body  b55  0x002D5B04    232 bytes    58 insns    6 calls  cases 147
+         calls    : func_L00_002B41B8(f12=0x3C286420, f13=0x3BFEDCBB); func_L00_002B4208(f12=0x47C34F80, f13=0x3BFEDCBB); func_L00_002B4308(); func_L00_002B9F00(f12=0x406CCCCD, f13=0.0, f14=0x3EB33333); func_L18_00428738(a0=$fp, f12=0x406CCCCD, f13=0.0, f14=0x3EB33333); func_L20_002D7730(a0=$zero+0x8D, a1=$zero+0x1, f12=0x406CCCCD, f13=0.0, f14=0x3EB33333)
+         branches : bnez $v0 -> tail+0x4; beq $v0, $v1 -> tail+0x4; beql $v0, $zero -> b55+0x8c; b -> b55+0xa4; beqz $v0 -> tail+0x0; b -> tail+0x4
+         floats   : 0x3C286420 0x3BFEDCBB 0x47C34F80 0x3BE38E39 0x3C75C290 0x406CCCCD 0x3EB33333
+         global   : [248, 280, 432, 846, 8852]
+         object   : []
+
+     body  b56  0x002D5BEC    108 bytes    27 insns    2 calls  cases 148
+         calls    : func_L00_002B6198(f12=0x3BE38E39); func_L00_002D34C0(a0=$s0+0xF0, a1=$s0+0x130, f12=0x3BA3D70A)
+         branches : bnez $v0 -> tail+0x4; beq $v0, $v1 -> tail+0x4; b -> tail+0x4
+         floats   : 0x3DBBBBBC 0x3BE38E39 0x3BA3D70A
+         global   : [416, 432, 812, 8852]
+         object   : []
+
+     body  b57  0x002D5C58    152 bytes    38 insns    4 calls  cases 143
+         calls    : func_L18_002C4000(); func_L00_002B39F0(a0=$zero, f12=0x3DC44445); func_L00_002B6BC8(a0=$s0+0xF0, f12=0x3DC44445); func_L00_002D34C0(a0=$s0+0xF0, a1=$a0, f12=0x3B5A740E)
+         branches : bnez $v0 -> tail+0x4; beq $v0, $v1 -> tail+0x4; bnez $v0 -> b57+0x5c; b -> tail+0x4
+         floats   : 0x3DC44445 0x3B5A740E 0xBE2AAAAB
+         global   : [248, 480, 8852]
+         object   : []
+
+     body  b58  0x002D5CF0    800 bytes   200 insns   18 calls  cases 142
+         calls    : func_L00_002B39F0(a0=$zero, f12=0x3DC44445); func_L18_002C4000(a0=$zero, f12=0x3DC44445); func_L00_002B35A0(a0=$zero, f12=0x3DC44445); func_L00_002B3EF8(a0=$zero, f12=0x3D178D50, f13=0x3E19999A, f14=0x3E0BFFAB); func_L00_002B41B8(a0=$zero, f12=0x3BA3D70A, f13=0x3BB60B61); func_00282C48(f12=f[$s0+0x1A8]); func_L00_0032F038(a0=$zero); func_L00_0032F038(a0=$zero+0x2); func_00283C80(a0=$zero+0x2); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_00282C48(f12=f[$s0+0x1A8]); func_L00_002B42D8(a0=$a0+0x1440); func_L00_002B42D8(a0=$a0+0x190); func_L20_002C7588(a0=$zero+0x1); func_L00_002D34C0(a0=$a0+0xF0, a1=$a0+0x130, f12=0x3BE38E39); func_L00_002B4308(a0=$a0+0xF0, a1=$a0+0x130, f12=0x3BE38E39)
+         branches : bnez $v0 -> tail+0x4; beq $v0, $v1 -> tail+0x4; beql $v0, $zero -> b58+0x5c; b -> b58+0xbc; beqz $a0 -> b58+0xa8; beqz $v0 -> b58+0x2a8; beqz $v0 -> b58+0x2a8; beqz $v0 -> b58+0x2c4; b -> b58+0x2cc; beqz $v0 -> b58+0x30c; b -> tail+0x4; b -> b59+0xb0
+         floats   : 0x3DC44445 0x3DDC6C69 0x3D072B02 0x3E0BFFAB 0x3D178D50 0x3E19999A 0x3BA3D70A 0x3BB60B61 0x3C3F258C 0x3FDF66F4 0x3F4CCCCD 0x40278D37 0x3F9C61AB 0x3DB2B8C4 0x3D8EFA36 0x3CADD6F3 0x3BE38E39 0x3C75C290
+         global   : [0, 152, 372, 424, 432, 846, 1036, 1039, 5204, 5208, 8852, 9400]
+         object   : []
+
+     body  b59  0x002D6010    192 bytes    48 insns    4 calls  cases 144
+         calls    : func_00282E20(a0=$s0+0xF0); func_L00_002EE4D8(a0=$s0, a1=$s0); func_L00_002D34C0(a0=$s0, a1=$a0+0x30, f12=0x3BC83FB8); func_L00_002D34C0(a0=$s0, a1=$a0, f12=0x3B83126F)
+         branches : bnez $v0 -> tail+0x4; beq $v0, $v1 -> tail+0x4; beql $v0, $zero -> b59+0x5c; beqz $v0 -> b59+0xa0; b -> tail+0x4; b -> tail+0x4
+         floats   : 0x3F6B851F 0x3F7D70A4 0x3BC83FB8 0x3B83126F
+         global   : [846, 8852]
+         object   : []
+
+     body  b60  0x002D60D0    120 bytes    30 insns    2 calls  cases 55
+         calls    : func_L00_002B3EF8(a0=$zero, f12=0x3E0C49BA, f13=0x3E800000, f14=0x3E50823A); func_L00_002B3EF8(a0=$zero, f12=0x3F800000, f13=0x3DCCCCCD, f14=0x3ED0823A)
+         branches : bne $v1, $a1 -> b60+0x48; b -> tail+0x4; b -> tail+0x4
+         floats   : 0x3E0C49BA 0x3E800000 0x3E50823A 0x3F800000 0x3DCCCCCD 0x3ED0823A
+         global   : [8848]
+         object   : [67]
+
+     body  b61  0x002D6148     12 bytes     3 insns    1 calls  cases 96, 97
+         calls    : func_00282C88(a0=D_189F10)
+         branches :
+         floats   :
+         global   : []
+         object   : []
+
+     body tail  0x002D6154    104 bytes    26 insns    0 calls  cases 5, 32, 33, 38, 45, 49, 58, 59, 61, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 92, 93, 94, 95, 104, 105, 106, 107, 108, 113, 117, 126, 128, 132, 135, 136
+         calls    :
+         branches : bnel $a0, $v0 -> tail+0x14; bnel $a0, $v0 -> tail+0x24
+         floats   :
+         global   : [448, 452, 8856]
+         object   : [67]
+
    WAVE 3 (worker 16) added, and this is the summary:
 
      - WHAT DIFFERS: the frame.  The retail's frame is 0x1A0 (ten saved GPRs,

@@ -389,6 +389,43 @@ void func_002AB800(int first, char *object)
     }
 }
 
+extern int F500f9762_FUN_00282978(char *a0);
+
+extern void F500f9762_FUN_002A0488(void *a, int b, int c, int d);
+
+void func_002AB8C0(void *owner, u8 *obj)
+{
+    int r, g, b;
+    float limit, f;
+
+    if (*(short *)obj == 0)
+        return;
+
+    if (F500f9762_FUN_00282978((char *)obj) != 0) {
+        if (*(short *)(obj + 2) != 0) {
+            F500f9762_FUN_002A0488(owner, obj[4], obj[5], obj[6]);
+            return;
+        }
+        *(short *)(obj + 2) = 1;
+        *(short *)obj = *(unsigned short *)(obj + 0xE);
+    }
+
+    if (*(short *)(obj + 2) == 0) {
+        limit = F500f9762_FUN_00283CE0(*(short *)(obj + 0xC));
+        f = (limit - (float)*(short *)obj) / limit;
+        r = obj[7] ? F500f9762_FUN_00283CF0((float)obj[4] + (float)(obj[7] - obj[4]) * f) : obj[4];
+        g = obj[8] ? F500f9762_FUN_00283CF0((float)obj[5] + (float)(obj[8] - obj[5]) * f) : obj[5];
+        b = obj[9] ? F500f9762_FUN_00283CF0((float)obj[6] + (float)(obj[9] - obj[6]) * f) : obj[6];
+    } else {
+        limit = F500f9762_FUN_00283CE0(*(short *)(obj + 0xE));
+        f = (limit - (float)*(short *)obj) / limit;
+        r = obj[7] ? F500f9762_FUN_00283CF0((float)obj[7] + (float)(obj[4] - obj[7]) * f) : obj[4];
+        g = obj[8] ? F500f9762_FUN_00283CF0((float)obj[8] + (float)(obj[5] - obj[8]) * f) : obj[5];
+        b = obj[9] ? F500f9762_FUN_00283CF0((float)obj[9] + (float)(obj[6] - obj[9]) * f) : obj[6];
+    }
+
+    F500f9762_FUN_002A0488(owner, r, g, b);
+}
 
 
 INCLUDE_ASM("asm/game", func_002ABB18);

@@ -53,3 +53,32 @@ s32 func_L08_00429350(s32 a0)
     }
     return 0;
 }
+
+Wave 24 (worker 01): the prologue's address materialisation order is still the blocker,
+but the closest spelling is now known.  `tools/check.py func_L08_00429350 --diff` with
+the plain array-index form
+    for (i = 0; i < 3; i++) {
+        if (D_L08_001B3A30[i] == a0) { ... }
+    }
+gives "08_tabora: instruction at +0x10 differs" with 17 differing lines, all of them
+the four base addresses: retail materialises 0x1B39A0 into $a2, 0x1B39E0 into $s1,
+0x1B39F0 into $s2 and 0x1B3A30 into $v1, each as a joined `lui`/`addiu` pair, while this
+cc1 splits them (`lui $a1` + `addiu $s1,$a1,0` and `lui $v0` + `addiu $s2,$v0,0`) and
+keeps the two bases that are live across the call in call-clobbered registers instead of
+$s1/$s2.  Measured with no effect: the four pointer locals in retail's own declaration
+order, the same locals in the order 1B39E0/1B39F0/1B3A30/1B39A0, the array-index form,
+and the "indexed pointer" form (`pE0 = &D_L08_001B39E0[i]` inside the loop).  All four
+give the same split materialisation.
+
+One lever measured that moves this towards retail and is worth the next worker's time:
+`-mno-split-addresses`.  With the default flags this cc1 splits the address of a level
+global - the `%hi` sits in one register and the `%lo` is added again at every use
+(`lui $v1,%hi(D_1B39E0)` then `addiu $s1,$v1,%lo(D_1B39E0)`), while retail materialises
+each base ONCE as a joined pair in one register (`lui $s1,%hi(D_1B39E0)` /
+`addiu $s1,$s1,%lo(D_1B39E0)`).  Compiling the unit with
+`-O2 -G0 -ffunction-sections -fno-builtin -mno-split-addresses` gives the joined form and
+puts three of the four bases in retail's registers ($a2 = 0x1B39A0, $s1 = 0x1B39E0,
+$s2 = 0x1B39F0); the best spelling then is 16 differing lines with the first difference
+at +0x4c (the `indexed_ptr` attempt: `pE0 = &D_L08_001B39E0[i]` inside the loop).  The
+flag is per file, and the unit already holds functions that match with the default
+flags (they read no globals), so the flag can only be used for a unit of its own.

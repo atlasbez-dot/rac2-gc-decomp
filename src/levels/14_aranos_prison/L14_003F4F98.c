@@ -85,7 +85,39 @@ extern void func_002B50E0(char *object, char *bone, float factor);
 
 extern void func_002B4FF0(char *object, char *bone, float factor);
 
+/* The level's own jump table (the label of the data blob at 0x002AA360). */
+extern void *jtbl_002AA360[];
+
 /* Dispatches on the owner's animation step and plays the matching bone animation. */
+void func_L14_00423B30(char *object)
+{
+    static void * volatile tab[] = { &&cA, &&cC };
+    char *state;
+    unsigned int sel;
+
+    sel = *(unsigned char *)(object + 0x42) - 1;
+    state = *(char **)(object + 0x68);
+    if (sel < 19) {
+        goto *jtbl_002AA360[sel];
+    }
+    goto end;
+cA:
+    if (*(short *)(state + 0x776) != 0) {
+        func_002B5278(object, *(float *)(state + 0x744));
+    } else {
+        func_002B5258(object);
+    }
+    goto out;
+cC:
+    if (*(short *)(state + 0x77A) != 0) {
+        func_002B50E0(object, state + 0x700, *(float *)(state + 0x768));
+    } else {
+        func_002B4FF0(object, state + 0x700, *(float *)(state + 0x740));
+    }
+out:
+end:
+    return;
+}
 
 extern char D_L14_001B9500[];
 
@@ -153,7 +185,7 @@ INCLUDE_ASM("asm/levels", func_L14_00425CB0);
 
 INCLUDE_ASM("asm/levels", func_L14_004265B8);
 
-INCLUDE_ASM("asm/levels", func_L14_00426D18);
+/* func_L14_00426D18 lives in the -g8 sibling file (it reads a count through $gp). */
 
 extern short D_001A6480[];
 
@@ -186,11 +218,43 @@ INCLUDE_ASM("asm/levels", func_L14_004275E0);
 
 INCLUDE_ASM("asm/levels", func_L14_004281D0);
 
-INCLUDE_ASM("asm/levels", func_L14_004286F8);
+extern unsigned char *D_L14_001FB060[];
 
-INCLUDE_ASM("asm/levels", func_L14_00428A08);
+/* The same global as D_L14_001B259C, under a second name: this access is
+   $gp-relative, that one absolute. */
+extern unsigned char *D_L14_001B259C_1 __attribute__((sda));
 
-INCLUDE_ASM("asm/levels", func_L14_00428BA0);
+/* Walks the 0x7FFF-masked id list at table[index] and flags class 0x112B entries. */
+void func_L14_004286F8(unsigned char *a0)
+{
+    unsigned char *base;
+    unsigned char *p;
+    unsigned short *q;
+    char *e;
+
+    if (a0[0x21] == 0xFF)
+        return;
+    p = D_L14_001FB060[a0[0x21]];
+    if (p == 0)
+        return;
+    q = (unsigned short *)p;
+    base = D_L14_001B259C_1;
+    for (;;) {
+        e = (char *)(base + ((*q & 0x7FFF) << 8));
+        if ((signed char)e[0x20] >= 0) {
+            if (*(signed short *)(e + 0xAA) == 0x112B) {
+                *(unsigned short *)(*(unsigned int *)(e + 0x68) + 0x316) = 1;
+            }
+        }
+        if ((signed short)*q < 0)
+            break;
+        q++;
+    }
+}
+
+/* func_L14_00428A08 lives in the -g8 sibling file (it reads a count through $gp). */
+
+/* func_L14_00428BA0 lives in the -g8 sibling file (it reads two globals through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L14_00428E68);
 

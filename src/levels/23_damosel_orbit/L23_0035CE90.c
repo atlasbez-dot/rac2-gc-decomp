@@ -34,7 +34,7 @@ void func_L23_003BFE38(char *arg0) {
         *(unsigned short *)(arg0 + 0x96) += 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L23_003BFE90);
+/* func_L23_003BFE90 is matched in L23_003BFE90.c (built with -frac2-zero-ti-barrier). */
 
 extern void func_323FF0(char *, int, int, int);
 

@@ -28,7 +28,20 @@ s32 func_L18_00428100(char *a0) {
 INCLUDE_ASM("asm/levels", func_L18_00428138);
 
 
-/* Maps the class identifier this level tags an object with to its small integer. */
+/* Maps the class identifier this level tags an object with to its small integer. The unit is
+   built with -frac2-keep-block-order (config/cflags.txt): the switch keeps its default last,
+   behind the dispatch's `b`, as in retail. */
+s32 func_L18_004283F0(u8 *a0) {
+    s32 r;
+
+    switch (*(s16 *)(a0 + 0xAA)) {
+    case 0xEC0: r = 3; break;
+    case 0xEE1: r = 10; break;
+    default: r = -1; break;
+    }
+    return r;
+}
+
 INCLUDE_ASM("asm/levels", func_L18_00428428);
 
 /* Stores the measured halfword control for the one class that carries it, leaving

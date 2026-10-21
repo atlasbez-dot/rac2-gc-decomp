@@ -312,8 +312,8 @@ extern void func_00282D30(void *a0, void *a1, float a2);
 
 extern void func_00282CC0(void *a0, void *a1, void *a2);
 
-extern void func_L05_003D1148(char *a0, char *a1, void *a2, char *a3, void *a4,
-                              float a5, float a6, float a7);
+extern void func_L05_003D1148(void *a0, void *a1, void *a2, void *a3,
+                              float f0, float f1, float f2, void *a4);
 
 /* Builds the pair of vectors the timer wants: the object's own matrix, scaled by the value the
  * looked-up sub-object holds, and that scaled matrix combined with the sub-object's table. */
@@ -334,10 +334,75 @@ void func_L05_003D1058(char *a0, char *a1, char *a2, char *a3, float f0, float f
     p = func_002AB1F0(a2);
     func_00282D30(v1, v0, *(float *)((char *)p + 0x10));
     func_00282CC0(v2, (float *)(a2 + 0x10), v1);
-    func_L05_003D1148(a0, a1, v2, a3, v0, f0, f1, f2);
+    func_L05_003D1148(a0, a1, v2, a3, f0, f1, f2, v0);
 }
 
-INCLUDE_ASM("asm/levels", func_L05_003D1148);
+extern void func_00282CF0(void *out, void *a, void *b);
+
+extern float func_00282DF0(void *v);
+
+extern void func_00282DD8(void *out, void *a, void *b);
+
+extern float func_00282DB0(void *a, void *b);
+
+extern void func_00282F20(void *out, void *in, float scale);
+
+extern void func_00282D30(void *out, void *in, float scale);
+
+extern float func_00282C48(float x);
+
+extern float func_002831B0(float x);
+
+extern float func_00283198(float x);
+
+extern float func_00283180(float x);
+
+extern void func_002ACF68(void *out, void *in, void *tmp, int mode, float value);
+
+extern void func_002ACDE8(void *out, void *in, void *v);
+
+extern float func_002703B0(void *obj, float p1, float p2, float p3, float p4, float p5);
+
+/* Rotates an object onto a vector: builds the axis vectors, then hands the object a
+   quaternion-like value scaled by the angle it makes with the target. */
+void func_L05_003D1148(void *a0, void *a1, void *a2, void *a3,
+                      float f0, float f1, float f2, void *a4)
+{
+    float v0[4];
+    float v1[4];
+    float v2[4];
+    float len;
+    float dot;
+    float prod;
+    float ang;
+    float diff;
+    float r;
+
+    func_00282CF0(v0, a2, a0);
+    len = func_00282DF0(v0);
+    if (len == 0.0f)
+        return;
+    if (len < 1.5f) {
+        func_002ACF68(a1, a1, v0, 0, 0.5f);
+        return;
+    }
+    func_00282DD8(v1, v0, a1);
+    dot = func_00282DB0(a1, v0);
+    prod = func_00282DF0(a1) * func_00282DF0(v0);
+    if (prod == 0.0f)
+        return;
+    ang = func_002831B0(dot / prod);
+    diff = 1.5707964f - ang;
+    if (func_00282C48(diff) > 2.879793643951416f) {
+        func_00282DD8(v2, a1, a4);
+        func_00282DD8(v1, v2, a1);
+    }
+    func_00282F20(v1, v1, 1.0f);
+    r = func_002703B0(a3, 0.0f, diff * 0.5f, f0, f1, f2);
+    func_00282D30(v1, v1, func_00283198(r));
+    v1[3] = func_00283180(r);
+    func_002ACDE8(a1, a1, v1);
+}
 
 INCLUDE_ASM("asm/levels", func_L05_003D1368);
 

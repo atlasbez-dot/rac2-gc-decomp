@@ -1,20 +1,24 @@
-/* func_002B50E0 (boot function, 372 bytes; 20 levels, 21 places in all).
- * Near miss: compiles to 368 bytes against retail's 372, and tools/check.py
- * reports 0 of 21 places match. The prologue and the register assignment
- * (self in $s2, target in $s3, data in $s1) match, and so do the stack slots
- * (pos at sp+0, local1 at sp+0x10, local2 at sp+0x20). What differs: (1) the
- * vector copy from self + 0x10 is folded into lq ...,0x10($s2), where retail
- * computes addiu $v1,$s2,0x10 first (four bytes less; everything after it is
- * shifted by four and agrees except the items below); (2) the lq takes $v1
- * where retail takes $v0, and the sq follows the table load; (3) the
- * argument registers of the calls to the two functions after the vector are
- * set in another order. Tried without success: the pointer held in a local,
- * the three vectors as separate locals (a different stack layout and an extra
- * saved register), and the three vectors as one array (this version). The
- * sda declaration of D_001B1688 gives the same mix of $gp and absolute loads
- * as the retail.
+/* func_002B50E0 (boot function, 372 bytes; 20 levels, 21 places in all): near miss. Built alone (src/game/002B50E0.c) with
+ * `-O2 -G0 -ffunction-sections -frac2-qcopy` it is retail's 372 bytes (368 without the profile) and 11 of its 93
+ * words differ, at every place. The prologue, the register assignment (self in $s2, target in $s3, data in $s1),
+ * the stack slots, the `$gp` / absolute mix of D_001B1688 (the `sda` declaration gives retail's) and the register-address copy
+ * (`addiu $v1,$s2,0x10` / `lq $v0,0($v1)` / `sq $v0,0($sp)`) are right. Two things are left:
+ *  (1) 8 words after the copy. Retail loads data->0xBC first and the global after it
+ *      (lw $v1,0xBC($s1) / lui $v0,%hi / lw $v0,%lo($v0) / subu $v0,$v0,$v1 / slti), and puts the copy before both;
+ *      here the global's `lui`/`lw` chain (the longest path to the branch) is issued before the copy, the copy's address
+ *      is then in $a0 and the `lw $v1,0xBC` / `subu` registers swap. Same cause as func_002B5E48: retail's copy is a scheduling
+ *      barrier, the grouped copy is an ordinary insn with cost 1 and unit none.
+ *  (2) 3 words in the arguments of the func_002B5828 call. Retail: daddu $a2,$s3 / daddu $a3,$sp / daddu $a0,$s2 /
+ *      jal (slot: daddu $a1,$s1); here: $a2, $a0, $a1, then jal with `daddu $a3,$sp` in the slot (the call of
+ *      func_002B5678 just before, and func_002B52A0, come out as retail's). Not moved by `(void *)work` for the argument,
+ *      a pointer variable for it (388 bytes), or a TI/float union for the array.
+ * Check: with `__asm__ __volatile__("" ::: "memory");` after `work[0] = *src;` (scratch only, never for src/) (1) is
+ * gone and only the 3 words of (2) are left. -fno-schedule-insns makes it worse (30 words).
+ * What would unblock it: the grouped copy given a volatile asm's scheduling dependences (see func_002B5E48), and then a source form
+ * for (2).
  */
 extern int D_001B1688 __attribute__((sda));
+extern char *func_002B5D28(void *);
 extern void func_002B5CD8(void *, void *);
 extern void func_002B5BC0(void *, void *, float);
 extern int func_00282C88(void *);

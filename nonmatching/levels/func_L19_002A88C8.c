@@ -37,6 +37,17 @@ typedef int s32;
  * register and a dead result is not something this cc1 emits, so the word needs
  * identifying first (the same 3-operand MULT shape as the R5900's MULT1 note).
  * ASM_FUNC candidate.
- */
+    Wave 24 (worker 13) attempted it: the `mult` is the index times the 0xE0 stride of
+   the table, not a stray word.  The body is the frame byte at +0x22B4, the flag at
+   +0x22BA, the halfword at +0x24EC and the word at +0x24CC of the resident block
+   D_00189E20, and, when all three allow it, the word at +0x28 of
+   D_L19_00265870[D_00139568[func_L00_002ADEA0(0)] * 0xE0]; the table path returns
+   without running the +0x24CC test (retail branches to the epilogue).  The C reached
+   35 of the 37 words; what is left: retail materialises the %hi of D_00189E20 into
+   $v0, copies it to $a2 and adds the %lo again at the last use (the split address),
+   while this cc1 keeps the whole address in one register; and the register of the
+   result variable (retail keeps it in $v0, next to the constant 4, this cc1 in
+   $a1), which decides the two delay slots of the first two branches.
+*/
 
 INCLUDE_ASM("asm/levels", func_L19_002A88C8);

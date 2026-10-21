@@ -69,6 +69,32 @@ were. A four-byte extent right after a body that ends with `jr $ra` and its dela
 slot is the word that body left behind: 25 level rows and 26 boot rows are such, and
 they leave the catalogue as well.
 
+Five additional boot extents are residual instructions between completed bodies:
+
+| Former entry | Bytes | Observation |
+| --- | ---: | --- |
+| `func_00289018` | 4 | An isolated store through `$v0`, which the extent does not initialise |
+| `func_002A77C0` | 28 | Orphan float operations reading `$f0` and `$f1`, without a complete entry/exit |
+| `func_002FDB40` | 148 | A sequence of unmatched stack restores and a store through an uninitialised register |
+| `func_002FED78` | 12 | A return-value assignment followed by a stack restore with no corresponding frame |
+| `func_002FF0B0` | 36 | Several unmatched stack restores and a GP-relative store |
+
+All five follow a completed return across alignment padding. The 148-byte extent
+also occurs in 22 levels. Across these 27 extents, the retail scan found no direct
+branch/call or aligned literal pointer into any part of them; nearby `lui` plus
+address-construction pairs also supplied no entry. The qualified R5900 Ghidra boot
+analysis has no function or incoming reference at these extents. Arbitrary computed
+indirect targets are outside those checks. The conclusion uses the complete
+neighborhood and operand lifetimes, not just the absence of `jr $ra` or FPU nops.
+
+`BOOT_RESIDUES` in `tools/levels.py` records these measured extents. The generator
+derives their normalised fingerprints from the private retail input and excludes
+only matching size/fingerprint pairs in the boot and levels. It does not widen
+`is_padding` to accept arbitrary stores or float operations. Their bytes remain in
+the assembly rebuilt from the disc, and no C or handwritten-assembly credit is
+awarded. Regeneration removes five distinct functions and 22 level placements;
+it does not decompile additional code.
+
 ## The C
 
 The layout is rac1-decomp's: every function of both catalogues appears once in `src/`, in

@@ -3,13 +3,6 @@
 #define RAC2_T_VEC16_FC936841D
 
 typedef struct {
-    char pad_000[0x140];
-    float x_140;
-    float y_144;
-    float z_148;
-} L00AimVector;
-
-typedef struct {
     float x;
     float y;
     float z;
@@ -25,8 +18,6 @@ typedef struct {
 } Entry_24efc0;
 
 extern char *D_L00_001B2B54 __attribute__((sda));
-
-extern L00AimVector D_L00_001B8C80;
 
 extern void func_002833F0_1(char *a, char *b);
 
@@ -109,7 +100,57 @@ extern Entry_24efc0 D_L00_0024EFC0[];
 
 INCLUDE_ASM("asm/levels", func_L00_003E3258);
 
-INCLUDE_ASM("asm/levels", func_L00_003E3668);
+extern char D_L00_001B8DC0[];
+
+extern void func_00282CF0(char *dst, char *src, char *arg);
+
+extern float func_00283248(float, float);
+
+extern float func_002A7878(float, float);
+
+extern float func_002A78D8(float, float);
+
+extern float func_00283B98(float, float);
+
+extern void func_002AF000(float *, float, float, float);
+
+extern void func_002C16C0(float *, float *, int, int, unsigned int, int,
+                          float, float, float, float, float);
+
+/* Twenty rounds that spawn a particle at the point: each round draws a step and a random
+   magnitude, jitters the point on each axis and hands the result to the spawn helper with
+   210000.0f, 500.0f, 1.0f, 0.0f and 1.0f; the original game role is unknown. */
+void func_L00_003E3668(float *pos)
+{
+    float v[4];
+    float dir[4];
+    float out[4];
+    float ang;
+    float angle;
+    float scale;
+    float mag;
+    float speed;
+    int id;
+    int i;
+
+    func_00282CF0((char *)v, D_L00_001B8DC0, (char *)pos);
+    ang = func_00283248(v[0], v[1]);
+
+    for (i = 19; i >= 0; i--) {
+        scale = func_002A7878(0.25f, 0.5f);
+        id = func_00283CF0(func_002A78D8(1.0f, 2.0f));
+        func_002A7878(0.05f, 0.2f);
+        speed = 210000.0f;
+        mag = func_002A7878(0.0f, 1.396263599395752f);
+        angle = func_00283B98(ang, func_002A78D8(0.0f, 1.396263599395752f));
+        func_002AF000(dir, scale * 0.01666666753590107f, angle, mag);
+        out[0] = pos[0] + func_002A78D8(0.0f, 0.075f);
+        out[1] = pos[1] + func_002A78D8(0.0f, 0.075f);
+        out[2] = pos[2] + func_002A78D8(0.0f, 0.075f);
+        func_002C16C0(out, dir, 15, 127, 0x007F7F7F, id,
+                      func_002A7878(0.05f, 0.2f) * speed, 500.0f, 1.0f, 0.0f, 1.0f);
+    }
+}
 
 /* Family 40487154aa250cc8: fixed-field addend writes into one resource record. */
 void func_L00_003E3890(char *object)
@@ -287,7 +328,7 @@ void func_L00_003E7050(char *p, float scale)
     func_00282D30_2(p + 48, p + 48, scale);
 }
 
-
+/* func_L00_003E70B8 is defined in L00_003E70B8.c. */
 INCLUDE_ASM("asm/levels", func_L00_003E7270);
 
 INCLUDE_ASM("asm/levels", func_L00_003E7650);

@@ -215,7 +215,63 @@ INCLUDE_ASM("asm/levels", func_L02_002F2B88);
 
 INCLUDE_ASM("asm/levels", func_L02_003007D8);
 
-INCLUDE_ASM("asm/levels", func_L02_00300CE8);
+typedef struct {
+    u8 pad00[0x34];
+    u16 flags;
+    u8 pad36[0x68 - 0x36];
+    u32 p68;
+    u8 pad6C[0xAA - 0x6C];
+    s16 type;
+} L02_Mob;
+
+typedef struct {
+    u8 pad00[0x30];
+    s32 mode;
+    u8 pad34[0x44 - 0x34];
+    s16 count;
+    u8 pad46[0x18C - 0x46];
+    L02_Mob *mobs[1];
+} L02_MobList;
+
+extern L02_MobList D_L02_001BE200;
+
+/* sda in this -G0 unit gives the bare-symbol load: retail has it as `lui`/`lw` after the loop and,
+   as the filler of the first branch's delay slot, as the one-instruction `$gp` form gas makes of
+   it there. */
+extern int D_001A79F0 __attribute__((sda));
+
+extern void func_L00_002FC980(void);
+
+extern void func_002E64A0(void *);
+
+extern void func_L00_00326048(void *, void *, int, int, float);
+
+extern void func_L00_002E6CF0(void *, void *);
+
+extern void func_L02_003007D8(void *);
+
+/* Walks the level's list of mobs (the same walk as func_L04_0031D630): the ones of type 0xE29 get
+   the 0x800 flag, the ones of type 0xD54 are handed to func_002E64A0 and the ones of type 0xFA0
+   that hold a 0x68 pointer give that pointer's block (from +0xC) to func_L00_00326048; the 0xD54
+   test reads the type without the null check, as retail does. When the game state is 2 and the
+   list's word at +0x30 is 2 as well, it then queues func_L02_003007D8. */
+void func_L02_00300CE8(void) {
+    int i;
+
+    func_L00_002FC980();
+    for (i = 0; i < D_L02_001BE200.count; i++) {
+        L02_Mob *mob = D_L02_001BE200.mobs[i];
+
+        if (mob != 0 && mob->type == 0xE29)
+            mob->flags |= 0x800;
+        if (mob->type == 0xD54)
+            func_002E64A0(mob);
+        if (mob != 0 && mob->type == 0xFA0 && mob->p68 != 0)
+            func_L00_00326048(mob, (u8 *)mob->p68 + 0xC, 0x80AAAAD2, 0x80396464, 0.0610865355f);
+    }
+    if (D_001A79F0 == 2 && D_L02_001BE200.mode == 2)
+        func_L00_002E6CF0(func_L02_003007D8, 0);
+}
 
 INCLUDE_ASM("asm/levels", func_L02_0033C760);
 
@@ -237,7 +293,7 @@ INCLUDE_ASM("asm/levels", func_L02_0039D708);
 
 INCLUDE_ASM("asm/levels", func_L02_003CA4A8);
 
-INCLUDE_ASM("asm/levels", func_L02_003CAE68);
+/* func_L02_003CAE68 is matched in L02_003CAE68.c (built with -frac2-qcopy). */
 
 /* func_L02_003CB090 is matched in L02_003CB090.c (built with -mno-split-addresses). */
 
@@ -279,11 +335,51 @@ INCLUDE_ASM("asm/levels", func_L02_003D0408);
 
 INCLUDE_ASM("asm/levels", func_L02_003D10F0);
 
+extern float func_00282E80(char *, char *);
+extern float func_00283248(float, float);
+extern float func_00283C80(float, float);
+extern int func_002A77E0(int);
+
 /* Picks the idle variant the actor should play, from its distance and heading. */
+int func_L02_003D1698(char *object) {
+    char *state = *(char **)(object + 0x68);
+    float dist;
+    float ang;
+
+    if (func_L02_003D18D8(object) != 0)
+        return 0;
+    dist = 100.0f;
+    ang = 1.0f;
+    if (*(char **)(state + 0x2E0) != 0) {
+        dist = func_00282E80(object + 0x10, *(char **)(state + 0x2E0) + 0x10);
+        ang = func_00283248(*(float *)(*(char **)(state + 0x2E0) + 0x10) - *(float *)(object + 0x10),
+                            *(float *)(*(char **)(state + 0x2E0) + 0x14) - *(float *)(object + 0x14));
+    }
+    if (dist < 4.0f) {
+        if (func_00283C80(ang, *(float *)(object + 0xF8)) < 0.26179942f) {
+            if (func_002A77E0(5) == 0) {
+                func_002A7750(object, 0xC, 5);
+                if (*(u8 *)(object + 0x43) != 7)
+                    func_002A7470(object, 7, 0, 0xA);
+            } else if (*(int *)(state + 0x2E4) != 0) {
+                func_002A7750(object, 0x12, 6);
+                if (*(u8 *)(object + 0x43) != 0xD)
+                    func_002A7470(object, 0xD, 8, 0xF);
+            } else {
+                func_002A7750(object, 0xF, 6);
+                if (*(u8 *)(object + 0x43) != 0xA)
+                    func_002A7470(object, 0xA, 8, 0xF);
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /* func_L02_003D18D8 is defined in L02_002ED7B0-g8.c (it reaches D_L02_001B359C through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L02_003D1998);
+/* func_L02_003D1998 is matched in L02_002ED7B0-g8.c (built with -G8: it reads D_L02_001B35B8
+   through $gp). */
 
 /* Chooses the variant the actor plays from how far along the path it has come. */
 void func_L02_003D1C38(char *object) {
@@ -407,7 +503,46 @@ void func_L02_003D2390(char *self) {
     *(unsigned short *)(self + 0x34) = (*(unsigned short *)(self + 0x34) & 0xEFFF) | 0x47;
 }
 
-/* Re-arms the actor, optionally restarting its sub-object. */
-INCLUDE_ASM("asm/levels", func_L02_003D2488);
+extern void func_00282A60(char *, int, int);
+
+extern void func_0029F978(char *, int, char *);
+
+extern void func_002A7A00(char *, float, float);
+
+extern void func_002B0A68(char *, int, char *, float, float, float, float, int);
+
+extern void func_L02_003FC248(char *, int, int);
+
+extern void func_L01_003E9CF8(char *, int, void *);
+
+/* Re-arms the actor: passes a copy of its sub-object's +0x10 quadword to func_L02_003D1ED0 and,
+   while the effect record at +0x290 is not yet set up (byte +0x291 clear), resets and registers
+   it, scales it by 0.0001 and starts the effect; then clears the word at +0x98. A clear flag1
+   also calls func_L02_003FC248; a clear flag2 hands func_L02_003D2390 to func_L01_003E9CF8,
+   otherwise func_L02_003D2390 runs at once. */
+void func_L02_003D2488(char *self, int flag1, int flag2) {
+    char *state = *(char **)(self + 0x68);
+    float vec[4];
+
+    if (*(char **)(state + 0x2E4) != 0) {
+        *(TI128 *)vec = *(TI128 *)(*(char **)(state + 0x2E4) + 0x10);
+        func_L02_003D1ED0(self, (TI128 *)vec);
+    }
+    if (*(unsigned char *)(state + 0x291) == 0) {
+        func_00282A60(state + 0x290, 0, 0x40);
+        func_0029F978(self, 3, state + 0x290);
+        *(float *)(state + 0x2B0) = *(float *)(state + 0x2B4) = *(float *)(state + 0x2B8) = 0.0001f;
+        *(unsigned char *)(state + 0x292) = 1;
+        func_002A7A00((char *)vec, 0.016666668f, 0.050000004f);
+        func_002B0A68(self, 0x20, (char *)vec, 3.0f, 6.0f, 3.0f, 6.0f, 0xFF);
+    }
+    *(int *)(self + 0x98) = 0;
+    if (flag1 == 0)
+        func_L02_003FC248(self, 0, -1);
+    if (flag2 == 0)
+        func_L01_003E9CF8(self, 0, func_L02_003D2390);
+    else
+        func_L02_003D2390(self);
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003D25C8);

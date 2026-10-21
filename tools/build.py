@@ -7,6 +7,7 @@ Build the game's programs and compare them with the retail ones.
   python3 tools/build.py levels           # all 27
   python3 tools/build.py all              # the boot and all 27
   python3 tools/build.py all --jobs 12    # that many programs at once (default: half the cores, at most 8)
+  python3 tools/build.py all --strict     # release check: also reject any C falling back to assembly
 
 Each program is disassembled with splat into build/<program>/asm/, converted for SN
 ProDG 2.0's assembler (tools/expand_asm.py) and assembled with it; the C in src/ is
@@ -30,6 +31,7 @@ import struct
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -210,31 +212,69 @@ def flags_for(source: Path) -> str:
     return DEFAULT_FLAGS.replace("-G0", "-G8") if source.stem.endswith("-g8") else DEFAULT_FLAGS
 
 
+@lru_cache(maxsize=4096)
+def file_digest(path: Path, stat_key: tuple[int, ...]) -> str:
+    """Hash once per file version; ctime/inode also detect replacements preserving mtime."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def compile_key(source: Path, flags: str) -> str:
+    """Private object-cache key for the inputs used by the selected compiler chain."""
+    compiler = SDK_COMPILER if flags.startswith("sdk") else COMPILER
+    programs = ("xgcc", "cpp", "cc1") if flags.startswith("sdk") else ("cpp", "cc1")
+    inputs = {source, Path(__file__), COMPILER / "as"}
+    inputs.update(compiler / name for name in programs)
+    for directory in (ROOT / "include", compiler / "include", source.parent):
+        inputs.update(directory.rglob("*.h"))
+    digests = []
+    for path in sorted(inputs):
+        stat = path.stat()  # A missing tool must not silently reuse an old object.
+        version = (stat.st_mtime_ns, stat.st_ctime_ns, stat.st_size, stat.st_ino)
+        digests.append((str(path), file_digest(path, version)))
+    return json.dumps([flags, os.environ.get("RAC2_LINUX", ""), digests])
+
+
 def compile_c(source: Path) -> Path:
-    """build/obj/<source>.o, compiled again only when the source or its flags changed."""
+    """build/obj/<source>.o, reused only with the same source, headers and toolchain."""
     out = BUILD / "obj" / (source.relative_to(ROOT).as_posix() + ".o")
     flags = flags_for(source)
-    stamp = out.with_suffix(".flags")
-    if out.is_file() and out.stat().st_mtime >= source.stat().st_mtime and stamp.is_file() \
-            and stamp.read_text() == flags and all(out.stat().st_mtime >= h.stat().st_mtime
-                                                   for h in (ROOT / "include").rglob("*.h")):
+    # Both frontends stop at assembly; forward standard -Wa, options ourselves.
+    compiler_args, assembler_args = [], []
+    try:
+        for arg in shlex.split(flags[3:] if flags.startswith("sdk") else flags):
+            if arg == "-Wa" or arg.startswith("-Wa,"):
+                forwarded = arg[4:].split(",")
+                if not all(forwarded):
+                    raise ValueError("-Wa, requires nonempty comma-separated assembler arguments")
+                assembler_args.extend(forwarded)
+            else:
+                compiler_args.append(arg)
+    except ValueError as error:
+        sys.exit(f"{source.relative_to(ROOT)} has invalid compiler flags: {error}")
+    compiler_flags = shlex.join(compiler_args)
+    assemble = shlex.join([str(COMPILER / "as"), *assembler_args, "-o", "x.o", "x.s"])
+    stamp = out.with_suffix(".inputs")
+    key = compile_key(source, flags)
+    if out.is_file() and stamp.is_file() and stamp.read_text() == key:
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     runner = shlex.split(os.environ.get("RAC2_LINUX", ""))
     if flags.startswith("sdk"):
         # the SDK compiler's driver (integrated cpp), then the game compiler's assembler
         script = (f"set -e; t=$(mktemp -d); cd $t; cp '{source}' x.c; "
-                  f"'{SDK_COMPILER}/xgcc' -B'{SDK_COMPILER}/' -S {flags[3:]} -I'{ROOT}/include' -I'{SDK_COMPILER}/include' "
-                  f"-I'{source.parent}' x.c -o x.s; '{COMPILER}/as' -o x.o x.s; cp x.o '{out}'.$$; mv '{out}'.$$ '{out}'; rm -rf $t")
+                  f"'{SDK_COMPILER}/xgcc' -B'{SDK_COMPILER}/' -S {compiler_flags} -I'{ROOT}/include' -I'{SDK_COMPILER}/include' "
+                  f"-I'{source.parent}' x.c -o x.s; {assemble}; cp x.o '{out}'.$$; mv '{out}'.$$ '{out}'; rm -rf $t")
     else:
         script = (f"set -e; t=$(mktemp -d); cd $t; cp '{source}' x.c; "
                   f"'{COMPILER}/cpp' -I'{COMPILER}/include' -I'{ROOT}/include' -I'{source.parent}' x.c > x.i; "
-                  f"'{COMPILER}/cc1' -quiet {flags} x.i -o x.s; '{COMPILER}/as' -o x.o x.s; "
+                  f"'{COMPILER}/cc1' -quiet {compiler_flags} x.i -o x.s; {assemble}; "
                   f"cp x.o '{out}'.$$; mv '{out}'.$$ '{out}'; rm -rf $t")
     result = subprocess.run([*runner, "bash", "-c", script], capture_output=True, text=True)
     if result.returncode:
         sys.exit(f"{source.relative_to(ROOT)} does not compile:\n{result.stderr[-3000:]}")
-    stamp.write_text(flags)
+    fresh = stamp.with_suffix(f".inputs.{os.getpid()}.tmp")
+    fresh.write_text(key)
+    os.replace(fresh, stamp)
     return out
 
 
@@ -514,7 +554,7 @@ def level_reference(number: int) -> Path:
     return path
 
 
-def build_program(name: str, reference: Path) -> tuple[int, int]:
+def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int, int]:
     """Build program NAME; returns (C functions placed, their bytes)."""
     directory = BUILD / name
     if directory.exists():
@@ -604,23 +644,27 @@ def build_program(name: str, reference: Path) -> tuple[int, int]:
         {"program": name, "functions": {sym: [a, n] for sym, (a, n, _, _) in sorted(placement.placed.items())},
          "differ": dict(placement.differ),
          "values": {k: f"{v:#010x}" for k, v in sorted(placement.values.items())}}, indent=1) + "\n")
+    if strict and placement.differ:
+        sys.exit(f"{name}: strict check failed: {len(placement.differ)} C functions fell back to assembly")
     return len(placement.placed), c_bytes
 
 
 def main() -> None:
-    args = sys.argv[1:]
+    strict = "--strict" in sys.argv[1:]
+    args = [arg for arg in sys.argv[1:] if arg != "--strict"]
     if args == ["boot"]:
-        build_program("boot", levels.BOOT)
+        build_program("boot", levels.BOOT, strict=strict)
     elif len(args) == 2 and args[0] == "level":
         number = int(args[1])
-        build_program(levels.level_dir(number), level_reference(number))
+        build_program(levels.level_dir(number), level_reference(number), strict=strict)
     elif args[:1] in (["levels"], ["all"]) and (len(args) == 1 or len(args) == 3 and args[1] == "--jobs"):
         # The programs are independent: several at once, each in a process of its own.
         jobs = int(args[2]) if len(args) == 3 else max(1, min(8, JOBS // 2))
         programs = ([["boot"]] if args[0] == "all" else []) + [["level", str(n)] for n in sorted(levels.NAMES)]
 
         def one(program: list[str]) -> tuple[int, str]:
-            done = subprocess.run([sys.executable, __file__, *program], capture_output=True, text=True)
+            done = subprocess.run([sys.executable, __file__, *program, *(["--strict"] if strict else [])],
+                                  capture_output=True, text=True)
             return done.returncode, (done.stdout + done.stderr).rstrip()
 
         failed = 0
