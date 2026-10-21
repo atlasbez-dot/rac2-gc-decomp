@@ -149,7 +149,6 @@ f32 func_002A7798(f32 a0) {
  return 1.0f-(1.0f-a0)*(1.0f-a0);
 }
 
-INCLUDE_ASM("asm/game", func_002A77C0);
 
 s32 func_002A77E0(s32 a0) {
     return (func_001163B0() >> 16 & 0x7fff) % a0;
@@ -221,7 +220,6 @@ f32 func_002A7C00 (f32 a, f32 b, f32 t)
   return a + (b - a) * u;
 }
 
-INCLUDE_ASM("asm/game", func_002A7C98);
 
 float func_002A7CA0(struct family_27f9_object *a0,
                                          float *a1,
@@ -273,15 +271,12 @@ float func_002A7E08(struct family_27f9_object *object, float *target, float *val
     return func_002A7CA0(object, value, angle, speed, damping, limit);
 }
 
-INCLUDE_ASM("asm/game", func_002A7E90);
 
 INCLUDE_ASM("asm/game", func_002A7EA0);
 
-INCLUDE_ASM("asm/game", func_002A8238);
 
 INCLUDE_ASM("asm/game", func_002A8240);
 
-INCLUDE_ASM("asm/game", func_002A84E0);
 
 extern unsigned short *D_001EE5A0[];
 extern char *D_001B1B5C __attribute__((sda));
@@ -332,13 +327,11 @@ void func_002A8598(int i, int v) {
     }
 }
 
-INCLUDE_ASM("asm/game", func_002A85F0);
 
 INCLUDE_ASM("asm/game", func_002A8600);
 
 INCLUDE_ASM("asm/game", func_002A86E8);
 
-INCLUDE_ASM("asm/game", func_002A8850);
 
 int func_002A8860(int *p, int b) {
     int w = *p;
@@ -348,7 +341,6 @@ int func_002A8860(int *p, int b) {
     return v == 0;
 }
 
-INCLUDE_ASM("asm/game", func_002A8898);
 
 
 INCLUDE_ASM("asm/game", func_002A89A8);
@@ -359,7 +351,6 @@ void func_002A8A20(void *object) {
     func_002A89A8(object, 32, 0.5f);
 }
 
-INCLUDE_ASM("asm/game", func_002A8A48);
 
 s32 func_002A8A50(const f32 *a0,const MmiPoint *a1,s32 a2) {
     s32 i;
@@ -387,7 +378,6 @@ int func_002A8AF0(float *p, float *v, int n) {
     return r;
 }
 
-INCLUDE_ASM("asm/game", func_002A8BC0);
 
 void func_002A8BD0(char *a0, int a1, int a2, float a3) { extern void func_00282C88(void *); *(int *)(a0 + 0x10) = a1; *(int *)(a0 + 0x14) = a2; *(float *)(a0 + 0x1C) = a3; *(int *)(a0 + 0x20) = 0; func_00282C88(a0); }
 
@@ -411,14 +401,12 @@ int func_002A8D70(float x, float y, float z, void *object, void *source, int mod
     return func_002A8C28(object, x, vector, mode, y, z, first, second, third);
 }
 
-INCLUDE_ASM("asm/game", func_002A8E18);
 
 INCLUDE_ASM("asm/game", func_002A8E20);
 
 INCLUDE_ASM("asm/game", func_002A8F70);
 
 
-INCLUDE_ASM("asm/game", func_002A90F0);
 
 extern int D_001B22D8 __attribute__((sda));
 extern int D_001B22DC __attribute__((sda));
@@ -481,7 +469,6 @@ int func_002A9568(int first, int second, float amount) {
 
 
 
-INCLUDE_ASM("asm/game", func_002A9698);
 
 INCLUDE_ASM("asm/game", func_002A96A0);
 
@@ -519,7 +506,6 @@ void func_002A9850(void *a0, Vec16_F5621621c *src, int *p, int n,
 
 INCLUDE_ASM("asm/game", func_002A99A0);
 
-INCLUDE_ASM("asm/game", func_002AA130);
 
 f32 func_002AA140(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
 
@@ -571,7 +557,6 @@ f32 func_002AA340(s32 *a0, s32 a1, s32 a2)
     return (f32)func_00282C30(a1 - value);
 }
 
-INCLUDE_ASM("asm/game", func_002AA3A0);
 
 float func_002AA3A8(float *a0, float *a1, float f1, float f2,
                                          float f3, float f4)

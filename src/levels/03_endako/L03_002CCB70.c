@@ -27,7 +27,6 @@ s32 func_L03_003112F8(void)
     return n;
 }
 
-INCLUDE_ASM("asm/levels", func_L03_00329ED0);
 
 extern void *func_L00_0032C638(char *a0);
 extern float func_00283248(float a, float b);

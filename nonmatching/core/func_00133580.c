@@ -64,3 +64,35 @@ int func_00133580(int arg0) {
     } while (busy == 0);
     return 0;
 }
+
+/* --- wave 24, worker 02: a candidate with the retail SIZE (188 bytes) but the
+ * callee-saved registers swapped. ---
+ *
+ * The candidate below compiles to 188 bytes - the retail's size - and every
+ * instruction matches the retail in order, including the store of the flag in
+ * the delay slot of the first `beq`, the `bnez` that skips the retry loop,
+ * the `daddu $v0,$zero,$zero` in its delay slot and the store of the flag in
+ * the delay slot of the loop's `beqz`.  The only difference is the register
+ * assignment: the retail keeps the argument in $s0 and the address of
+ * D_001A713F in $s1, this cc1 keeps the address in $s0 and the argument in
+ * $s1.
+ *
+ * Measured here (all with the -G8 unit, the sda attribute is ignored in a
+ * -G0 unit):
+ *   - with the address in a local pointer: the address gets $s0, the argument
+ *     $s1 (188 bytes, every instruction but the two registers matching);
+ *   - with the address passed as &D_001A713F: the address is re-materialised
+ *     at every call, the frame shrinks to 0x10 and there is no $s1 at all
+ *     (180 bytes);
+ *   - declaring the locals in either order, copying the argument into a local
+ *     first, passing a char * instead of an int *, and assigning the local
+ *     just before the call all give the same $s0/$s1 swap (the last one only
+ *     moves the two materialisations of the constant 1 the other way round);
+ *   - the shape above keeps the redundant `bnez $v0` (the `if (busy != 0)`
+ *     test) and the store of the flag inside the loop, which is what the
+ *     earlier candidate in this file lost.
+ *
+ * tools/check.py func_00133580 --diff (with the candidate below):
+ *   boot: instruction at +0x8 differs
+ *   func_00133580: 0 of 1 places match
+ */

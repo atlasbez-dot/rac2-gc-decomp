@@ -29,7 +29,6 @@ int func_001315E0(void) {
 
 INCLUDE_ASM("asm/core", func_00131620);
 
-INCLUDE_ASM("asm/core", func_00131668);
 
 /* rac1-decomp src/core/0012CC90.c: func_0012D3F0 */
 /* `r` assigned in both arms and returned once: a direct `return
@@ -53,7 +52,6 @@ int func_00131670(void) {
     return r;
 }
 
-INCLUDE_ASM("asm/core", func_001316C0);
 
 /* rac1-decomp src/core/0012CC90.c: func_0012D448 */
 /* One return, and r1_func_00118DC0 returns int. */

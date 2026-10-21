@@ -12,7 +12,6 @@ void func_002B5278(QwenRecovery_84e23fd54f9f_AbiByte16 *param_1, float factor)
     func_002B50E0(param_1, param_1 + 0x10, factor);
 }
 
-INCLUDE_ASM("asm/game", func_002B5298);
 
 INCLUDE_ASM("asm/game", func_002B52A0);
 
@@ -38,8 +37,6 @@ INCLUDE_ASM("asm/game", func_002B5E48);
 
 /* func_002B5EF8 is matched in 002B5EF8.c (built with -g). */
 
-INCLUDE_ASM("asm/game", func_002B60A8);
 
 /* func_002B60B0 is matched in 002B60B0.c. */
 
-INCLUDE_ASM("asm/game", func_002B6118);

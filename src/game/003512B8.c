@@ -117,7 +117,6 @@ INCLUDE_ASM("asm/game", func_00351578);
 
 /* func_00351720 is matched in 00351720.c. */
 
-INCLUDE_ASM("asm/game", func_00351820);
 
 s32 func_00351828(void) {
     func_0012EE28();
@@ -175,7 +174,6 @@ int func_00351938(unsigned char *owner)
     return func_00351268(owner + 0x48);
 }
 
-INCLUDE_ASM("asm/game", func_00351958);
 
 /* func_00351960 : builds a 16-byte packet (a 4-byte header copied from D_001AE860 and a
    12-byte body), asks the object for the two memory ranges it holds, and moves them into

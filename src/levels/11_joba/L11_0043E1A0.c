@@ -72,7 +72,7 @@ INCLUDE_ASM("asm/levels", func_L11_00440790);
 /* Finds the class entry the identifier names and hands it to that class's handler. */
 extern u8 *D_L11_001FC420[];
 
-extern u8 *D_L11_001B359C;
+extern u8 *D_L11_001B359C __attribute__((section(".sdata")));
 
 extern void func_L11_003F2F38(u8 *);
 
@@ -91,7 +91,7 @@ s16 func_L11_00440C80(u8 *obj) {
 
 INCLUDE_ASM("asm/levels", func_L11_00440C90);
 
-INCLUDE_ASM("asm/levels", func_L11_00440E18);
+/* func_L11_00440E18 lives in the sibling small-data unit (L11_0043E1A0-g8.c). */
 
 /* Walks the state's 0x120 slots in order and renews each live entry through the two shared helpers. */
 extern s32 func_417238(s32);
@@ -254,13 +254,178 @@ void func_L11_00441978(u8 *object, s32 class_id) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00441A58);
+/* Each group word of the object's state names an id list in D_L11_001FC420: halfwords whose low
+   15 bits index the 256-byte records of D_L11_001B359C, the last one with its sign bit set. A
+   walk stops when the group word (re-read after every callback) is 0xFF or above the limit
+   kept at D_L11_001B35B8. */
+extern s32 D_L11_001B35B8[] __attribute__((sda));
 
-INCLUDE_ASM("asm/levels", func_L11_00441D08);
+#define GROUP(off) (*(s32 *)(state + (off)))
+#define FOR_EACH_ID(p, off) \
+    for (p = (u16 *)D_L11_001FC420[GROUP(off)]; \
+         (GROUP(off) & 0xFF) != 0xFF && GROUP(off) <= D_L11_001B35B8[0] && p != 0 && \
+         ((p != 0 && (s16)p[-1] >= 0) || p == (u16 *)D_L11_001FC420[GROUP(off)]); \
+         p++)
+
+extern s16 func_L02_004024A0(u8 *);
+extern void func_L02_004024B0(u8 *);
+extern void func_L02_004024C0(u8 *);
+
+/* Counts the entities of the object's group (state word 0xC8) for which func_L02_004024A0
+   holds, then sets (func_L02_004024B0) or clears (func_L02_004024C0) entities until the count
+   equals the second argument. */
+void func_L11_00441A58(u8 *object, s32 count) {
+    u8 *state = *(u8 **)(object + 0x68);
+    u16 *p;
+    u8 *e;
+    s32 n = 0;
+
+    FOR_EACH_ID(p, 0xC8) {
+        e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (func_L02_004024A0(e))
+            n++;
+    }
+    if (n < count) {
+        FOR_EACH_ID(p, 0xC8) {
+            e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (!func_L02_004024A0(e)) {
+                func_L02_004024B0(e);
+                n++;
+                if (n >= count)
+                    break;
+            }
+        }
+    } else if (n > count) {
+        FOR_EACH_ID(p, 0xC8) {
+            e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (func_L02_004024A0(e)) {
+                func_L02_004024C0(e);
+                n--;
+                if (n <= count)
+                    break;
+            }
+        }
+    }
+}
+
+extern s32 func_L02_003D7300(u8 *);
+extern void func_L02_003D7310(u8 *);
+extern void func_L02_003D7320(u8 *);
+
+/* Counts the entities of the object's group (state word 0xCC) for which func_L02_003D7300
+   holds, then sets (func_L02_003D7310) or clears (func_L02_003D7320) entities until the count
+   equals the second argument. */
+void func_L11_00441D08(u8 *object, s32 count) {
+    u8 *state = *(u8 **)(object + 0x68);
+    u16 *p;
+    u8 *e;
+    s32 n = 0;
+
+    FOR_EACH_ID(p, 0xCC) {
+        e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (func_L02_003D7300(e))
+            n++;
+    }
+    if (n < count) {
+        FOR_EACH_ID(p, 0xCC) {
+            e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (!func_L02_003D7300(e)) {
+                func_L02_003D7310(e);
+                n++;
+                if (n >= count)
+                    break;
+            }
+        }
+    } else if (n > count) {
+        FOR_EACH_ID(p, 0xCC) {
+            e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (func_L02_003D7300(e)) {
+                func_L02_003D7320(e);
+                n--;
+                if (n <= count)
+                    break;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L11_00441FB8);
 
-INCLUDE_ASM("asm/levels", func_L11_00442170);
+extern s32 func_L11_00441FB8(u8 *, u8 *, s32);
+extern void func_L02_003FC248(u8 *, s32, s32);
+extern void func_L11_00449970(u8 *, s32, s32);
+extern s32 func_L11_0043A800(u8 *);
+extern void func_L01_003E9CF8(u8 *, s32, void (*)(u8 *));
+extern void func_L00_002B30E8(void);
+extern u8 D_00189E20[];
+
+/* Hands every entity of the object's group (state word 0xC0) that the shared test func_L11_00441FB8
+   accepts, and whose state byte is not 0xFE, 0xFD or below 3, to the handler of its class (the
+   halfword at +0xAA); then runs the test once more on the entity D_00189E20 holds at +0x2290. */
+void func_L11_00442170(u8 *object) {
+    u8 *state = *(u8 **)(object + 0x68);
+    u16 *p;
+    u8 *e;
+    u8 *player;
+
+    FOR_EACH_ID(p, 0xC0) {
+        e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (e[0x20] == 0xFE)
+            continue;
+        if (e[0x20] == 0xFD)
+            continue;
+        if (e[0x20] < 3)
+            continue;
+        if (func_L11_00441FB8(object, e, 0) == 0)
+            continue;
+        switch (*(s16 *)(e + 0xAA)) {
+        case 0xD98:
+            func_L11_00449970(e, 0, 0);
+            break;
+        case 0xDCF:
+            func_L02_003FC248(e, 0, -1);
+            func_L11_0044C4F0(e);
+            break;
+        case 0xDF4:
+            func_L02_003FC248(e, 0, -1);
+            func_L11_00452DF8(e);
+            break;
+        case 0xDF7:
+            func_L02_003FC248(e, 0, -1);
+            func_L11_00454DD8(e);
+            break;
+        case 0xDF9:
+            func_L02_003FC248(e, 0, -1);
+            func_L01_003E9CF8(e, 0, func_L11_00456540);
+            break;
+        case 0xD37:
+            func_L02_003FC248(e, 0, -1);
+            func_L11_00436A78(e);
+            break;
+        case 0xD4B:
+            if (func_L11_0043A800(e))
+                func_L11_0043AB28(e);
+            break;
+        }
+    }
+    player = D_00189E20;
+    if (func_L11_00441FB8(object, *(u8 **)(player + 0x2290), 1))
+        func_L00_002B30E8();
+}
 
 INCLUDE_ASM("asm/levels", func_L11_004423F8);
 
@@ -270,12 +435,48 @@ INCLUDE_ASM("asm/levels", func_L11_004427B8);
 
 INCLUDE_ASM("asm/levels", func_L11_00442B60);
 
-INCLUDE_ASM("asm/levels", func_L11_00442C80);
+extern void func_L02_003A6F78(u8 *);
 
-INCLUDE_ASM("asm/levels", func_L11_00442E38);
+/* Runs func_L02_003A6F78 on every entity of the object's two groups (state words 0x178 and
+   0x174); an empty group, or a group word of 0xFF, ends the function. */
+void func_L11_00442C80(u8 *object) {
+    u8 *state = *(u8 **)(object + 0x68);
+    u16 *p;
+    u16 *q;
+    u8 *e;
 
-/* func_L11_00443380 lives in the sibling small-data unit (L11_0043E1A0-g8.c). */
+    if (GROUP(0x178) == 0xFF)
+        return;
+    q = (u16 *)D_L11_001FC420[GROUP(0x178)];
+    if (q == 0)
+        return;
+    for (p = q; (GROUP(0x178) & 0xFF) != 0xFF && GROUP(0x178) <= D_L11_001B35B8[0] && p != 0 &&
+                ((p != 0 && (s16)p[-1] >= 0) || p == (u16 *)D_L11_001FC420[GROUP(0x178)]);
+         p++) {
+        e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        func_L02_003A6F78(e);
+    }
+    if (GROUP(0x174) == 0xFF)
+        return;
+    q = (u16 *)D_L11_001FC420[GROUP(0x174)];
+    if (q == 0)
+        return;
+    for (p = q; (GROUP(0x174) & 0xFF) != 0xFF && GROUP(0x174) <= D_L11_001B35B8[0] && p != 0 &&
+                ((p != 0 && (s16)p[-1] >= 0) || p == (u16 *)D_L11_001FC420[GROUP(0x174)]);
+         p++) {
+        e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        func_L02_003A6F78(e);
+    }
+}
 
+/* func_L11_00442E38 lives in the sibling small-data unit (L11_0043E1A0-g8.c). */
+
+/* func_L11_00443380 and func_L11_004433D8 live in the sibling small-data unit
+   (L11_0043E1A0-g8.c): they reach the level's globals through $gp. */
 
 INCLUDE_ASM("asm/levels", func_L11_00443498);
 
@@ -284,6 +485,48 @@ INCLUDE_ASM("asm/levels", func_L11_00443940);
 /* maps the class index to its measured identifier */
 extern u32 D_L11_002BB0E0[];
 
+/* The level's own jump table: the address of each case body. */
+extern void *jtbl_002BB0E0[13];
+
+s32 func_L11_00443CE0(s32 a) {
+    static void * volatile tab[] = {
+        &&c0, &&c1, &&c2, &&c3, &&c4, &&c5, &&c6, &&c7,
+        &&c8, &&c9, &&c10, &&c11, &&c12
+    };
+
+    if ((u32)a >= 13) {
+        goto def;
+    }
+    goto *jtbl_002BB0E0[a];
+c0:
+    return 0x2F66;
+c1:
+    return 0x2F67;
+c2:
+    return 0x2F68;
+c3:
+    return 0x2F69;
+c4:
+    return 0x2F6A;
+c5:
+    return 0x2F6B;
+c6:
+    return 0x2F6C;
+c7:
+    return 0x2F6D;
+c8:
+    return 0x2F70;
+c9:
+    return 0x2F71;
+c10:
+    return 0x3243;
+c11:
+    return 0x3244;
+c12:
+    return 0x3245;
+def:
+    return 0x2F66;
+}
 
 INCLUDE_ASM("asm/levels", func_L11_00443D78);
 
@@ -309,7 +552,40 @@ extern u8 D_001A63A8[];
 /* Claims the shared call slot for the state entry the caller's class identifier
    selects, unless the slot is already busy or waiting. */
 
-INCLUDE_ASM("asm/levels", func_L11_00445D28);
+s32 func_L11_00445D28(u8 *obj, s32 idx) {
+    u8 *state = *(u8 **)(obj + 0x68);
+    s32 v;
+
+    if ((u32)idx >= 0x27) {
+        return 0;
+    }
+    if (idx < 0x14) {
+        s32 *p = (s32 *)((u8 *)state + idx * 4);
+        v = p[0x84];
+    } else {
+        s32 *p = (s32 *)((u8 *)state + (idx - 0x14) * 4);
+        v = p[0x98];
+    }
+    {
+        JobaCallSlotView *slot = (JobaCallSlotView *)D_001A63A8;
+
+        if (slot->field68 != 0) {
+            goto fail;
+        }
+        if (slot->field24 != -1) {
+            goto fail;
+        }
+        slot->field24 = (v & 0x3FFF) + 0x7D0;
+        slot->field28 = 0;
+        {
+            s16 *p = (s16 *)((u8 *)state + idx * 2 + 0x2A0);
+            *p = 1;
+        }
+    }
+    return 1;
+fail:
+    return 0;
+}
 INCLUDE_ASM("asm/levels", func_L11_00445DF8);
 
 INCLUDE_ASM("asm/levels", func_L11_00446020);

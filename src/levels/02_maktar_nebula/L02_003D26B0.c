@@ -187,7 +187,7 @@ int func_L02_003D4D00(char *arg0) {
 
 INCLUDE_ASM("asm/levels", func_L02_003D4E00);
 
-INCLUDE_ASM("asm/levels", func_L02_003D4ED0);
+/* func_L02_003D4ED0 is matched in L02_003D4ED0.c (built with -frac2-qcopy). */
 
 typedef int TI128 __attribute__((mode(TI)));
 

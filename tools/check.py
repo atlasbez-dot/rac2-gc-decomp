@@ -34,7 +34,7 @@ def disassemble(data: bytes, address: int) -> list[str]:
     out = []
     for i in range(0, len(data), 4):
         word = int.from_bytes(data[i:i + 4], "little")
-        out.append(rabbitizer.Instruction(word, vram=address + i).disassemble())
+        out.append(rabbitizer.Instruction(word, address + i, rabbitizer.InstrCategory.R5900).disassemble())
     return out
 
 

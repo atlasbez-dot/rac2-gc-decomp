@@ -11,7 +11,15 @@
    measured (the declaration order of the four locals, the pointer variables for
    the copy's source and destination, the copy written inline or through them):
    all 144, all with the same rotation. The two absolute globals need the -g8
-   sibling and the `$gp` one needs -G8. */
+   sibling and the `$gp` one needs -G8.
+
+   Wave 24 (worker 13) measured it again: the copy's source is still folded here
+   (`lq $v0,0x10($s0)`), so the pair `addiu $v1,$s1,0x10 ; lq $v0,0($v1) ;
+   sq $v0,0($s0)` of the retail is not reached by the `mode(TI)` local either; a
+   `volatile TI128` pointer does not change that (measured).  The rest of the body
+   (the frame, the three calls, the two 0x3E4 guards, the stores) is exact, and the
+   prologue's save order (retail $s1,$s3,$s0,$ra,$s2) is the remaining difference.
+*/
 
 #include "common.h"
 

@@ -23,7 +23,6 @@ unsigned long func_003427B0(unsigned long param_1)
   return param_1;
 }
 
-INCLUDE_ASM("asm/game", func_003427B8);
 
 INCLUDE_ASM("asm/game", func_003427C0);
 
@@ -95,7 +94,6 @@ void func_00342F70(char *owner, char *list)
     func_00342978(owner, 0);
 }
 
-INCLUDE_ASM("asm/game", func_00343020);
 
 /* lot11 -- measured bodies with sizes recorded in the catalogue. */
 

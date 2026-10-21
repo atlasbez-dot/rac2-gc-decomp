@@ -641,7 +641,7 @@ BatchA_A18_s32 func_L18_004271C0(BatchA_A18_u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L18_00427208);
 
-INCLUDE_ASM("asm/levels", func_L18_004273F0);
+/* func_L18_004273F0 is matched in L18_004273F0-g8.c (built with -frac2-qcopy). */
 
 INCLUDE_ASM("asm/levels", func_L18_00427688);
 

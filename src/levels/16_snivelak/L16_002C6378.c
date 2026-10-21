@@ -20,8 +20,9 @@ extern void func_002A7470(void *, s32, s32, s32);
 
 INCLUDE_ASM("asm/levels", func_L16_002C6378);
 
-/* func_L16_002D2D10: six spellings give the same 72-byte object (retail is 88).
-   Deposited in nonmatching/levels/func_L16_002D2D10.c. */
+/* func_L16_002D2D10: 76 bytes against retail's 88 - the divisions and the stores
+   are now in retail's order, but retail's pair of `nop`s before each `div.s` is
+   missing.  Deposited in nonmatching/levels/func_L16_002D2D10.c. */
 INCLUDE_ASM("asm/levels", func_L16_002D2D10);
 
 INCLUDE_ASM("asm/levels", func_L16_002F60B8);

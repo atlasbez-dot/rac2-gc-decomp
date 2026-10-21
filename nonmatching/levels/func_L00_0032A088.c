@@ -1,16 +1,42 @@
-/* 1 of 12 instructions differs (27 places, all at +0x10): retail adds the element address as base + index (addu a2,a1); the compiler emits index + base (addu a1,a2). Reordering the operands, a cast, or a base local did not change it. */
+/* 0 of 27 places match - last line: 00_aranos_tutorial: instruction at +0x10 differs.
+   Every other word is retail's: the 48 bytes are the constant 0xA430 (`ori`),
+   the table's address (`lui $v1` / `addiu $a2,$v1,-0x71E0`), the R5900
+   three-operand `mult $a1,$a1,$v0` (the low product lands in $a1), the entry
+   address, the `lw` of the key at +4, the `bne`, the payload address
+   `addiu $v0,$a2,0x20` in the branch's delay slot, the sum `addu $v0,$a1,$v0`
+   in the `jr $ra` delay slot and the `daddu $v0,$zero,$zero` of the
+   "not found" path.
+
+   The one difference is the operand order of the entry address:
+     retail   addu $v0, $a2, $a1      base + index
+     this     addu $v0, $a1, $a2      index + base
+   The registers are the same in both ($a2 = the table, $a1 = the product), so
+   this is GCC's canonicalisation of the sum, not a register allocation
+   difference: this cc1 emits the *integer* operand first in a pointer+integer
+   sum whenever the pointer is a symbol address or a local variable, and the
+   pointer first only when the pointer is a parameter. Measured with ~30
+   spellings: `&D + idx*0xA430`, a local base, an integer base, an array
+   subscript (`&D[idx*0xA430]`), a struct array (`&g_table[idx]`), a struct
+   member, `base + 0x20 + product` and `product + (base + 0x20)`, with the
+   symbol declared as an object, as an incomplete array and as a sized array.
+   The payload address comes out right in every spelling (this cc1 keeps the
+   +0x20 on the base when the payload is written `&D[0x20] + product`), so only
+   the entry sum is in the wrong order.
+
+   What would unblock it: a source shape in which the table's address is a
+   value (not a constant address) at the point of the sum, so that this cc1
+   keeps the pointer operand first. */
+
 typedef int s32;
 typedef unsigned char u8;
 
-extern u8 D_L00_00262E20[];
+extern u8 D_L00_00268E20[];
 
-u8 *func_L00_0032A088(s32 a0, s32 a1)
+u8 *func_L00_0032A088(s32 key, s32 index)
 {
-    s32 idx = a1 * 0xA430;
-    s32 *e = (s32 *)(D_L00_00262E20 + idx);
+    u8 *entry = &D_L00_00268E20[index * 0xA430];
 
-    if (e[1] != a0) {
+    if (*(s32 *)(entry + 4) != key)
         return 0;
-    }
-    return (D_L00_00262E20 + 0x20) + idx;
+    return &D_L00_00268E20[0x20] + index * 0xA430;
 }

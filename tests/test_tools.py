@@ -3,12 +3,14 @@ import struct
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import elf  # noqa: E402
 import levels  # noqa: E402
+import check as function_check  # noqa: E402
 
 
 def j(target):
@@ -28,6 +30,23 @@ def lw(rt, rs, imm):
 
 
 JR_RA, NOP = 0x03E00008, 0
+
+
+class R5900Diagnostics(unittest.TestCase):
+    def test_ee_specific_words_keep_their_operands(self):
+        cases = ((0x00A22818, "mult", ["$a1", "$a1", "$v0"]),
+                 (0x700014A9, "por", ["$v0", "$zero", "$zero"]),
+                 (0x70851389, "pcpyld", ["$v0", "$a0", "$a1"]),
+                 (0x78A20010, "lq", ["$v0", "0x10($a1)"]),
+                 (0x7FA20020, "sq", ["$v0", "0x20($sp)"]),
+                 (0x68A20000, "ldl", ["$v0", "0x0($a1)"]),
+                 (0x6CA20000, "ldr", ["$v0", "0x0($a1)"]))
+        for word, mnemonic, operands in cases:
+            with self.subTest(word=hex(word)):
+                rendered = function_check.disassemble(struct.pack("<I", word), 0x1000)[0]
+                instruction, args = rendered.split(None, 1)
+                self.assertEqual(instruction, mnemonic)
+                self.assertEqual([x.strip() for x in args.split(",")], operands)
 
 
 def code(*w):
@@ -53,6 +72,41 @@ class LevelExtents(unittest.TestCase):
     def test_invalid_corrected_extent_is_rejected(self):
         with self.assertRaises(ValueError):
             levels.level_extent(0, 0x354DE8, 16)
+
+
+class Filler(unittest.TestCase):
+    """The linker's filler between the bodies: stack adjustments and nops only."""
+
+    def test_stack_adjustments_and_nops_are_filler(self):
+        self.assertTrue(levels.is_padding(code(0x27BD0030, 0, 0x27BD0010)))
+        self.assertTrue(levels.is_padding(code()))
+        self.assertTrue(levels.is_padding(code(0x00000000)))
+
+    def test_arithmetic_is_not_filler(self):
+        # addu $t0,$t1,$t2
+        self.assertFalse(levels.is_padding(code(0x012A4021)))
+        # addiu $sp,$a0,16: a write through a register, not a stack adjustment
+        self.assertFalse(levels.is_padding(code(0x249D0010)))
+
+    def test_a_body_without_a_return_can_still_be_code(self):
+        # func_00115E90 is matched C and has no jr $ra: it ends in a trap.
+        self.assertFalse(levels.is_padding(code(0x27BD0030, 0x00000000, 0x0C0A0A5E)))
+
+
+class EpilogueResidue(unittest.TestCase):
+    """The word a body leaves behind after its `jr $ra` and its delay slot."""
+
+    def test_the_word_after_a_jr_is_the_residue(self):
+        previous = code(0x03E00008, 0x27BD0010)          # jr $ra ; addiu $sp,$sp,0x10
+        self.assertTrue(levels.is_epilogue_residue(code(0x00621021), previous))
+
+    def test_a_body_that_does_not_follow_a_jr_is_not_the_residue(self):
+        previous = code(0x0080802D, 0x27BD0010)
+        self.assertFalse(levels.is_epilogue_residue(code(0x00621021), previous))
+
+    def test_more_than_one_word_is_not_the_residue(self):
+        previous = code(0x03E00008, 0x27BD0010)
+        self.assertFalse(levels.is_epilogue_residue(code(0x00621021, 0), previous))
 
 
 class Identity(unittest.TestCase):
@@ -129,6 +183,37 @@ class Identity(unittest.TestCase):
 
 
 class Catalogue(unittest.TestCase):
+    def test_measured_residue_removed_in_boot_and_level_and_replay_is_stable(self):
+        # Synthetic residue: a store without a complete function around it.
+        # A different store and a tail jump of the same size must remain.
+        body = code(0xAC400020, NOP)
+        other = code(0xAC400024, NOP)
+        tail = code(j(0x3000), NOP)
+        data = body + other + tail
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            boot, catalogue, dump = root / "boot.tsv", root / "levels.tsv", root / "dump"
+            boot.write_text("# name\taddress\tsize\nfunc_00001000\t00001000\t8\n"
+                            "func_00001008\t00001008\t8\nfunc_00001010\t00001010\t8\n")
+            catalogue.write_text("# name\tkind\tsize\tfingerprint\tlevels\tplaces\n" + "".join(
+                f"func_L00_{a:08X}\tlevel\t8\tunused\t1\t00:{a:08X}\n" for a in (0x2000,0x2008,0x2010)))
+            level = dump / "00_test"
+            level.mkdir(parents=True)
+            (level / "manifest.json").write_text('{"sections":[{"name":"text","address":8192}]}')
+            (level / "text.bin").write_bytes(data)
+            with patch.multiple(levels, BOOT_FUNCTIONS=boot, CATALOGUE=catalogue, LEVELS=root,
+                                BOOT_PAIRS=root / "absent.tsv", DUMP=dump, NAMES={0:"test"},
+                                BOOT_RESIDUES={0x1000:8}), \
+                 patch.object(levels, "boot_image", return_value=(data, [(0x1000,0,len(data))])), \
+                 patch.object(sys, "argv", ["levels.py", "catalogue"]):
+                levels.catalogue()
+                self.assertEqual([a for _,a,_ in levels.read_boot_functions()], [0x1008,0x1010])
+                places = [a for row in levels.read_catalogue() for _,a in row[4]]
+                self.assertEqual(places, [0x2008,0x2010])
+                first = boot.read_bytes(), catalogue.read_bytes()
+                levels.catalogue()
+                self.assertEqual((boot.read_bytes(), catalogue.read_bytes()), first)
+
     def test_read_catalogue_and_boot(self):
         with tempfile.TemporaryDirectory() as d:
             cat = Path(d) / "functions.tsv"

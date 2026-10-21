@@ -151,7 +151,6 @@ void func_002DE810(unsigned short *a0,u8 *a1) {
  a0[8]=0x10;a0[9]=0;
 }
 
-INCLUDE_ASM("asm/game", func_002DE850);
 
 typedef struct {
     char b[8];

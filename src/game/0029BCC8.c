@@ -7,7 +7,7 @@ void func_0029BCC8(void)
     ref_L00_0030CDA0_00 = -1;
 }
 
-INCLUDE_ASM("asm/game", func_0029BCD8);
+/* func_0029BCD8 is in 0029BCC8-g8.c. */
 
 extern char *D_001A8CFC;
 extern void func_0034E4D8(void *);
@@ -27,7 +27,7 @@ void func_0029BEB8(void) {
         func_0033A6D8(D_001A8CFC + 0x3F138);
 }
 
-INCLUDE_ASM("asm/game", func_0029BF08);
+/* func_0029BF08 is in 0029BCC8-g8.c. */
 
 void func_0029C0D0(void) {
 }
@@ -388,7 +388,6 @@ void func_0029CB20(void) {
         func_00341F38(D_001A8CFC + 0x3E430);
 }
 
-INCLUDE_ASM("asm/game", func_0029CB50);
 
 extern void func_0028A2F8(void);
 
@@ -468,7 +467,6 @@ void func_0029CE38(void)
     }
 }
 
-INCLUDE_ASM("asm/game", func_0029CE78);
 
 
 

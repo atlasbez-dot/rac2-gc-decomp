@@ -1,7 +1,16 @@
 /* Near miss from src/levels/11_joba/L11_004465F8.c: the build refuses this body at its
    place — 156 bytes, expected 160. Kept as a starting point;
    not linked, not counted. The artificial volatile store qualifier was removed;
-   the refusal above describes the historical unit, not this revised draft. */
+   the refusal above describes the historical unit, not this revised draft.
+
+   Wave 24 (worker 13) measured it again: the first sixteen words are exact with
+   `if (count < 4)` (retail skips the two stores when the counter is below four) and
+   the mask `(v >> 2) << 2`, and the call to func_0032EB98 matches.  What is left is
+   the 16-byte copy (retail `addiu $v1,$v1,0x270 ; lq $v0,0($a0) ; sq $v0,0($v1)`, both
+   addresses materialised in a register of their own; this cc1 folds the offsets into
+   the instructions, and about thirty spellings of the copy all fold) and the polarity
+   of the branch that skips the stores.
+*/
 
 /* Standalone declarations recovered from src/levels/11_joba/L11_004465F8.c. */
 typedef signed int         s32;

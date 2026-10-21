@@ -40,3 +40,13 @@ void func_L10_00425888(void) {
     D_L10_001395B8[0x68] = D_L10_001B1398;
     D_L10_001395B8[0x69] = D_L10_001B139C;
 }
+
+/* Later worker (wave 24), the same wall confirmed with tools/check.py.  In a -G8 unit
+   (L10_00424028-g8.c) with `sda` on the $gp global 0x23A0 and `nosda` on the other
+   three, the body comes to 140 bytes against retail's 164: the four clamps, the four
+   byte stores and the first global through $gp are all as retail has them, and the
+   residue is the same three words of delay-slot filling the note above describes (this
+   cc1 puts the address of the next clamp's object in the delay slot, retail puts the
+   constant 0x7F there) plus the three addresses retail rematerialises at every use
+   (lui/lw/lui/sw/lui/lbu) where this cc1 keeps them in $a1/$a0/$v1.
+   check.py func_L10_00425888: "10_hrugis_cloud: 140 bytes, expected 164". */

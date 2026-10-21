@@ -33,3 +33,19 @@
    Remaining gap, one register: the delayed load is `lw $a1,0x68($s0)` in retail and
    `lw $v1,0x68($s0)` for us. Tried and did not move it: hoisting the read as `int *` and as
    `char *`, and reading it inline. Register allocation, the wall already paid. */
+
+/* Second attempt (wave 24, worker 15): re-measured with the catalogue names
+   (func_002A0488, func_002ACBC8, func_L00_002E6EF8 - the retail's
+   f_00333460, f_00342228 and f_003076D0 at level 04) in the -g8 sibling.
+   check.py (04_barlow): "04_barlow: instruction at +0x18 differs".
+   The first branch now agrees with retail (a plain `bnez` with the load of
+   the +0x68 field in its delay slot) and the frame, both calls and the
+   stores are right.  Two differences are left:
+     00407F98  lw   $v1, 0x68($s0)   |  lw   $a1, 0x68($s0)
+     00407FD8  beq  $v1, $v0, .+0x6  |  beql $a1, $v0, .L00407FF4
+   i.e. the pointer lands in $v1 where retail keeps it in $a1, and the second
+   test comes out as a plain branch where retail uses the branch-likely form.
+   Tried and all identical: the pointer in a named local; the pointer read
+   inline; the test as `== -1` with the body in the else; the test as two
+   `if (...) goto`; the call result tested the other way round; -G0.
+   */

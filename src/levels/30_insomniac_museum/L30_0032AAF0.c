@@ -53,7 +53,6 @@ extern float func_321018(float);
 
 INCLUDE_ASM("asm/levels", func_L30_0032AAF0);
 
-INCLUDE_ASM("asm/levels", func_L30_00342FF8);
 
 INCLUDE_ASM("asm/levels", func_L30_003557F0);
 

@@ -40,7 +40,6 @@ INCLUDE_ASM("asm/levels", func_L05_00428518);
 
 INCLUDE_ASM("asm/levels", func_L05_00428AC8);
 
-INCLUDE_ASM("asm/levels", func_L05_00429530);
 
 INCLUDE_ASM("asm/levels", func_L05_0042AC30);
 
@@ -125,14 +124,12 @@ void func_L05_00430BF0(Vec16_Fc936841d *object, int index)
     func_00282CC0_14((char *)&object[index - 1], (char *)&object[index - 2], local);
 }
 
-INCLUDE_ASM("asm/levels", func_L05_00432078);
 
 /* Creates the 0x10E3 object and copies the caller's transforms into it. */
 INCLUDE_ASM("asm/levels", func_L05_00432080);
 
 INCLUDE_ASM("asm/levels", func_L05_00432158);
 
-INCLUDE_ASM("asm/levels", func_L05_004333F8);
 
 INCLUDE_ASM("asm/levels", func_L05_00441D40);
 

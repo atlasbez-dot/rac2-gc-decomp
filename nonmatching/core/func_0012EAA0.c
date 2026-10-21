@@ -23,6 +23,34 @@
  *
  * The table read, the two `ori`/`dsll` constant pairs, the variable `dsllv` and
  * the `ld`/`or` tail are the same in all three.
+ *
+ * Wave 24 (worker 06) measured the same body and adds:
+ * - the retail's value tree comes from an if/else-if chain with a RANGE test in
+ *   the middle, not from a switch: with
+ *       if (cur == 0xFFFF000000ULL) sh = 24;
+ *       else if (cur <= 0xFFFF000000ULL) sh = 32;
+ *       else if (cur == 0xFF00000000ULL) sh = 32;
+ *       else sh = 0;
+ *   the compiler emits retail's `beq $v1,$a0` / `sltu $v0,$a0,$v1` / `beq $v1,$v0`
+ *   in retail's order, with the third test dead (it is only reached when the
+ *   mask is above 0xFFFF000000, so it can never be 0xFF00000000).  The switch
+ *   above sorts its cases and never emits the range test.
+ * - the shift amount has to be an int: a 64-bit shift variable makes the
+ *   compiler sign-extend it (dsll32/dsra32) before the dsllv; retail has the
+ *   plain `dsllv $a0,$a3,$a1`.
+ * - the retail's split address of the table (lui $t0,0x13 once, the
+ *   `addiu $v0,$t0,0x7F78` at every use) needs the symbol used TWICE, not
+ *   through one pointer variable: `((u64 *)D_00137F78)[arg0 * 2 + 1]` and
+ *   `((u64 *)D_00137F78)[arg0 * 2]` give the split form, a single pointer
+ *   variable gives the materialised one.
+ * - the shift amount takes the argument's register in the retail (the argument
+ *   is copied to $a3 first, the shift lives in $a1); this cc1 keeps the
+ *   argument in $a1 and the shift in $a0, and it if-converts the third test to
+ *   a conditional move (movn) where the retail keeps the branch.
+ * - with all of the above the body is 120 of the retail's 136 bytes; what is
+ *   still missing is the 16-byte frame with nothing in it (an unused TImode
+ *   local does not leave a frame in this cc1) and the two words that put the
+ *   shift in $a1.
  */
 typedef struct {
     unsigned long long base;

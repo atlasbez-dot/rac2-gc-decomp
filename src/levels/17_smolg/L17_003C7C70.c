@@ -39,13 +39,85 @@ void func_L17_003C8248(s32 a0)
                                       (func_2EF4E0(ang) + 1.0f) * 0.5f);
 }
 
-INCLUDE_ASM("asm/levels", func_L17_003CC798);
+typedef int TI128 __attribute__((mode(TI)));
+
+/* A 16-byte vector: the engine's helpers take and return these, and the copies between
+   them are quadword moves. */
+typedef union {
+    TI128 q;
+    struct {
+        f32 x;
+        f32 y;
+        f32 z;
+        f32 w;
+    } f;
+} Vec4;
+
+extern void func_00283698(void *, void *);
+extern void func_00282CF0(void *, void *, void *);
+extern void func_002830C0(void *, void *, void *);
+extern f32 func_00282C48(f32);
+
+/* Turns the vector at a1 into the object's frame, then into the world with the matrix at
+   a0 + 0xC0, and reports whether both of the first two coordinates stay below the two
+   bounds. */
+s32 func_L17_003CC798(u8 *a0, TI128 *a1, f32 f1, f32 f2) {
+    Vec4 v[1];
+    Vec4 mat[4];
+    Vec4 w[1];
+    Vec4 out[1];
+
+    v[0].q = *a1;
+    func_00283698(mat, a0 + 0xC0);
+    func_00282CF0(&out[0].q, &v[0].q, a0 + 0x10);
+    w[0].q = out[0].q;
+    func_002830C0(&w[0].q, &w[0].q, mat);
+    if (func_00282C48(w[0].f.x) < f2) {
+        if (func_00282C48(w[0].f.y) < f1)
+            return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L17_003CC850);
 
 INCLUDE_ASM("asm/levels", func_L17_003D0620);
 
-INCLUDE_ASM("asm/levels", func_L17_003E3148);
+extern u16 *D_L17_001FB720[];
+
+/* `sda` on an array of unknown size: cc1 emits the one-instruction load, which the assembler
+   expands absolute (`lui $r` / `lw $r,%lo($r)`), as retail has it in this -G0 unit; the limit
+   word is loaded in a branch delay slot, so there it becomes the `$gp` form. The pool base is
+   the word D_L17_001B2C1C declared above as an int, reached here as a pointer under a second
+   name. */
+extern u8 *D_L17_001B2C1C_base[] __asm__("D_L17_001B2C1C") __attribute__((sda));
+extern s32 D_L17_001B2C38[] __attribute__((sda));
+
+/* The object's state record up to the group word and the word stored beside it. */
+typedef struct {
+    u8 pad[0x43C];
+    s32 group;
+    s32 mode;
+} L17GroupState;
+
+/* Walks the id list of the state's group and sets the state's mode word to 0x57 for every id
+   that has an entity, stopping at the first that has none. */
+void func_L17_003E3148(u8 *a0)
+{
+    L17GroupState *state = *(L17GroupState **)(a0 + 0x68);
+    u16 *p;
+    u8 *e;
+
+    for (p = D_L17_001FB720[state->group];
+         (state->group & 0xFF) != 0xFF && state->group <= D_L17_001B2C38[0] && p != 0 &&
+         ((p != 0 && (s16)p[-1] >= 0) || p == D_L17_001FB720[state->group]);
+         p++) {
+        e = D_L17_001B2C1C_base[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        state->mode = 0x57;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L17_003E31E8);
 

@@ -112,7 +112,108 @@
 
 */
 
-#include "include_asm.h"
+   ------------------------------------------------------------------
+   2026-10-21, worker 13 of the level-20 wave (wave 5).
+
+   The attempt below is the wave-4 one with ONE change and it is a real
+   improvement: the field at +0xB8 is now loaded TWICE, as the retail does.
+   The load is VOLATILE (`*(volatile u32 *)((u32)arg0 + 0xB8)`): the two
+   uses are in two different blocks (the "counter < 11" block and the join
+   block), and the DOM pass (gcse) was hoisting the load into the common
+   dominator, so the attempt loaded it once and shared it.  A volatile
+   load cannot be hoisted, so the two loads stay where the retail puts
+   them: 0x0039BB74 and 0x0039BB88.  The volatility costs nothing else:
+   the two loads are on mutually exclusive paths.
+
+   "tools/check.py func_L20_0039BB18: 720 bytes, expected 724" - the body
+   is now 4 bytes short (it was 12), and the four remaining differences
+   are:
+
+   1. THE 128-BIT ZERO STORE (4 bytes, the known compiler wall).
+      The retail writes
+          por $v0, $zero, $zero ; sq $v0, 0x10($sp)
+      this cc1 writes
+          sq $zero, 0x10($sp)
+      The chain's own `rac2_fold_zero_ti_store`
+      (tools/compiler/transformers/fold_zero_ti_store.py) is what folds it,
+      and the pass's TWO conditions are both met here:
+        - the store's source register is dead after the store (the next
+          use of $v0 is the `lq $v0,0x10($sp)` of the copy, which REWRITES
+          it, and the pass stops at the first write), and
+        - the materialisation is within TWELVE instructions above the store
+          in the same block.
+      In the RETAIL the two are separated by a CALL: the por is at
+      0x0039BCC4, the call at 0x0039BCD0 and the store at 0x0039BCD4 (in
+      the call's delay slot), so the pass's backward scan stops at the
+      call (GET_CODE(prev) != INSN) and the por survives.  In the RTL the
+      pass sees (before scheduling) the store immediately after the por,
+      because the source order is "vel.q = 0;" then the call
+      func_002A7878(0.5f, 2.0f): the por is materialised by the reload
+      right where the value is used, so it is always adjacent to the
+      store.  NO SPELLING SEPARATES THEM: the por's register would have
+      to be live across the call, and a TImode value cannot live in a
+      register across a call (the ABI has no 128-bit argument register),
+      so the reload would spill it and the store would read the stack.
+      The retail's own rule (wave 4's measurement over all 28 programs) is
+      that a zero register is the source of a 128-bit store only when the
+      displacement is ZERO; with a non-zero displacement the zero is
+      always materialised first.  A pass that folded only on a zero
+      displacement would keep this body.
+
+   2. THE REGISTER TIE (the whole body, 2 instructions + the save order).
+      The retail keeps the argument in $s2 and the int result of
+      func_002A7820 in $s1; this attempt keeps them the other way round.
+      The two values now have the SAME number of references as the retail
+      (the parameter 9, m 3), so the reference count is no longer the
+      cause: the tie is decided by the order of the allocation requests
+      (gcc's global.c hands the callee-saved registers out in priority
+      order and breaks a tie by the order the requests were made).  The
+      retail's request for m must come before the one for the argument.
+      Not chased further: the body cannot match while (1) stands.
+
+   3. THE COUNTER'S 64-BIT COPY (3 instructions).
+      The retail reads the u16 counter, copies it into a 64-bit register
+      and compares THAT copy:
+          lhu $v0,0x96($s2) ; daddu $v1,$v0,$zero ; addiu $v0,$v0,0x1 ;
+          sltiu $v1,$v1,0xB
+      this attempt compares the loaded value itself:
+          lhu $v0,0x96($s1) ; addiu $v1,$v0,0x1 ; andi $v0,$v0,0xFFFF ;
+          sltiu $v0,$v0,0xB
+      MEASURED THIS WAVE: this is the compiler narrowing a 64-bit
+      comparison.  Every spelling of "a 64-bit copy of the counter,
+      compared with 11" is folded back to a 32-bit comparison, in BOTH
+      compilers (the game compiler and the SDK profile):
+        - `unsigned long long c = old; ... if (c < 11)`  -> sltu on the
+          32-bit value, the copy is deleted;
+        - `if ((unsigned long long)old < 11)`             -> the same;
+        - `if (c < 11ULL)` and `if (c >= 11)`             -> the same;
+        - `unsigned long long n = load; ... if (n < 11)`  -> the 64-bit
+          copy survives but only for the ARITHMETIC (daddu $rd,$rs,1 +
+          andi $rd,$rd,0xffff); the comparison is still 32-bit.
+      The reason: the comparison's left side is a zero_extend of a 32-bit
+      value whose range the front end knows (it comes from an `lhu`), so
+      the DImode comparison is narrowed to its low word and the copy dies.
+      To keep the 64-bit register the value's high word would have to be
+      unknown, which the load forbids.
+
+   4. THE CLAMP'S RESULT REGISTER (2 instructions).
+      The retail computes the clamped value into $f0 (`sub.s $f0,$f2,$f1` /
+      `add.s $f0,$f2,$f1`, the register the product g*K had), this attempt
+      computes it in place in $f2.  The two variables of the attempt (the
+      sum v and the result w) are coalesced into one register by the
+      reload; the retail's two are not.  The retail's $f0 is free after
+      `add.s $f2,$f2,$f0`, so the reload had a free register to pick and
+      did not coalesce; the shape of the source that would keep them
+      apart is not known.
+
+   WHAT THE BODY IS (unchanged).  The emitter of the yeedil level: it
+   advances the object's counter at +0x96, decelerates the float at the
+   object's +0x68 towards 0 or 1 with a step of 0.016666667f (1/60), and
+   when the object reaches 0 it hands over to func_0029F338.  Then it
+   builds a velocity vector (a random radius, the angle from
+   func_002A7940, sin/cos through func_00283180/func_00283198) and a
+   copy of it, and calls func_00282CC0 and func_002C3150 with them, then
+   func_L00_002E6CF0 with func_L20_0039BEC8 as the callback.
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -126,8 +227,8 @@ typedef union {
 
 extern float D_L20_001AEC68 __attribute__((sda));
 
-extern int func_00282948(u32);
-extern float func_00282E80(u32, u32);
+extern int func_00282948(void *);
+extern float func_00282E80(void *, void *);
 extern float func_002AA2E8(float *, float, float);
 extern void func_0029F338(void *);
 extern float func_002A7878(float, float);
@@ -152,7 +253,8 @@ void func_L20_0039BB18(void *arg0)
     float rnd01;
     float rnd;
     float zero_arg;
-    u32 n;
+    u16 old;
+    unsigned long long c64;
     int m;
     int r;
     float r2;
@@ -160,16 +262,18 @@ void func_L20_0039BB18(void *arg0)
     float rr2;
 
     s0 = *(u32 *)((u32)arg0 + 0x68);
-    if (func_00282948(s0 + 4) != 0)
+    if (func_00282948((void *)(s0 + 4)) != 0)
         goto pathA;
-    n = *(u16 *)((u32)arg0 + 0x96);
-    *(u16 *)((u32)arg0 + 0x96) = n + 1;
-    if ((unsigned long long)n < 11)
+    old = *(u16 *)((u32)arg0 + 0x96);
+    c64 = old;
+    *(u16 *)((u32)arg0 + 0x96) = old + 1;
+    if (c64 < 11)
         goto check;
-    if (*(u16 *)(*(u32 *)((u32)arg0 + 0xB8) + 0x34) & 1)
+    if (*(u16 *)(*(volatile u32 *)((u32)arg0 + 0xB8) + 0x34) & 1)
         goto pathA;
 check:
-    if (func_00282E80((u32)arg0 + 0x10, *(u32 *)((u32)arg0 + 0xB8) + 0x10) > 0.1f) {
+    if (func_00282E80((void *)((u32)arg0 + 0x10),
+                      (void *)(*(volatile u32 *)((u32)arg0 + 0xB8) + 0x10)) > 0.1f) {
 pathA:
         zero_arg = 0.0f;
         func_002AA2E8((float *)s0, zero_arg, 0.016666667f);

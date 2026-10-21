@@ -28,7 +28,15 @@ extern int func_002A77E0(int);
 extern void func_002C3150(void *, void *, void *, void *, int, int, float);
 extern void func_L00_002E6CF0(void *, void *);
 
+/* func_L20_0039BB18 is a near miss: nonmatching/levels/func_L20_0039BB18.c
+   (720 of 724 bytes: the zero of the 16-byte local is folded by the
+   project's rac2_fold_zero_ti_store, a wall of the pass, measured in the
+   note). */
+
 INCLUDE_ASM("asm/levels", func_L20_0039BB18);
+
+/* func_L20_00310E38 is a near miss: nonmatching/levels/func_L20_00310E38.c
+   (1124 bytes against the retail's 1212 - the first C, from the map). */
 
 INCLUDE_ASM("asm/levels", func_L20_00310E38);
 

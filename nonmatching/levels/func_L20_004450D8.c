@@ -183,3 +183,183 @@ void func_L20_004450D8(char *arg0) {
         }
     }
 }
+
+/* Near miss from src/levels/20_yeedil/L20_0043ECB0.c (wave 4, 20_yeedil, 2026-10-20,
+   worker 02): the body and the layout are recovered; the candidate is 240 bytes against
+   retail's 232.
+
+   What the wave-4 candidate settles:
+   - The LAYOUT is retail's: the entry block computes the record and jumps to the loop's
+     TEST, the BODY block sits BEFORE the test and the test's two back edges go to the body.
+     A goto-loop reproduces that: `goto test;` at the entry, the body at a `body:` label
+     that ends in `goto test;`, and the test at a `test:` label after it.  A `for` loop
+     lays the test's block first and does not match.
+   - The index byte must be read TWICE: the retail re-reads `arg0[0x21]` in the test block
+     (`lbu $v1,0x21($a3)`).  Without `volatile` this cc1 keeps ONE copy of the index in a
+     register across the branch (one instruction more than retail).  `idx = *(volatile u8 *)
+     (arg0 + 0x21);` in the test block is what makes the second read happen.
+   - The bank's global D_L20_001B2F9C must be a PLAIN declaration: retail loads it with
+     the absolute single-register form `lui $v1,%hi(D_1B2F9C)` + `lw $v1,%lo(D_1B2F9C)($v1)`.
+     `__attribute__((sda))` gives the $gp form (`lw $v1,off($gp)`, one instruction fewer)
+     and `__attribute__((nosda))` gives `lui $v0,%hi(S)` + `lw $a0,%lo(S)($v0)` (the address
+     in a register of its own).  The limit D_L20_001B2FB8 IS read through $gp
+     (`lw $v0,0x3FC8($gp)`), so it keeps `__attribute__((sda))`.
+   - The three exits that skip the body duplicate the record advance into their delay slots
+     (`bnel`/`beql` + `addiu $a2,$a2,0x2`), and the body's own advance is its own block
+     (`addiu $a2,$a2,0x2`) that falls into the test.  Writing the advance explicitly in
+     each exit reproduces that.
+
+   What still differs (240 against 232 bytes, and the register allocation with it):
+   - The LAST test.  Retail: `lw $a0,0x0($v0)` ; `beql $a2,$a0,.L00445108` ;
+     `lhu $v0,0x0($a2)`.  The candidate: `bne $a2,$a0,END` ; `nop` ; `b .L00445108` ;
+     `lhu $v0,0x0($a2)`.  Two instructions against one.
+     MEASURED: this cc1 has TWO branch-likely mechanisms.  (1) The ASTRA pass
+     `mips_r5900_annul_dead_slots` (config/mips/mips.c) annuls a branch when the DELAY
+     SLOT's destination register is the register the branch tests and the write is dead on
+     the not-taken path (the retail `bnez v0,L; move v0,zero` shape).  That is what gives
+     the FIRST test its `bgezl`: its delay slot overwrites the tested register $v0.  (2) The
+     standard gcc rule (reorg.c's `optimize_skip`): a conditional branch that skips
+     EXACTLY ONE instruction becomes a branch-likely with that instruction in its delay
+     slot.  (2) is what produced a `beql` between two registers in a measured test
+     (`if (rec == slot) { D_Y = *rec; goto body; } return;` with the body right after gives
+     `beql $4,$5,$L9` and the store in the delay slot), so a `beql` between two registers is
+     NOT out of reach; what is out of reach here is the SHAPE.  In the walk the "then"
+     block is the load AND the jump back to the body, so the branch skips two instructions
+     and (2) does not fire.  Measured and rejected for the second test: `||` instead of
+     two tests, the `&&` chain, the swapped operands, a `u32` comparison, an explicit
+     `else`, a `goto` to a label at the end, `w = *rec` inside the test and `w = *rec` once
+     before the two tests (the load is then duplicated into the first branch's delay slot,
+     but the second test still gets the plain `bne`), and the load moved into the body.
+   - The branch-likely IS reachable with a comparison between two registers, and the
+     recipe is measurable: `if (rec == slot) { D_Y = *rec; goto body; } return;` with the
+     body right after gives `beql $4,$5,$L9` with the store in the delay slot.  The
+     condition is that the conditional branch skips EXACTLY ONE instruction: the "then"
+     block must be a single instruction and the block after it must be the "else"
+     block's target.  In the walk the "then" block is the load AND the jump back to the
+     body, so the branch skips two instructions and the optimisation does not fire; that
+     is why the FIRST test (whose "then" block is the load and whose delay slot overwrites
+     the tested register $v0) comes out as the retail's `bgezl` and the second does not.
+   - The table's split address.  Retail keeps the %hi in $v1 and copies it into $t0 for the
+     second use (`lui $v1,%hi(D_1FBB20)` ; `addiu $a0,$v1,%lo(D_1FBB20)` ;
+     `daddu $t0,$v1,$zero` ; `addiu $v1,$t0,%lo(D_1FBB20)`).  The candidate materialises the
+     whole address in one register and copies the %hi early (`daddu $t0,$v0,$zero` before
+     the `addiu`), because its first use destroys the %hi register.  This is the same
+     "split address" difference as func_L20_004431E0 and is not a per-function wall.
+
+   The candidate (a -G8 unit: the limit is read through $gp):
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed short s16;
+typedef unsigned int u32;
+
+extern u32 D_L20_001FBB20[];
+
+extern u32 D_L20_001B2F9C;
+
+extern int D_L20_001B2FB8 __attribute__((sda));
+
+void func_L20_004450D8(char *arg0) {
+    u32 idx;
+    u16 *rec;
+    u16 w;
+    char *e;
+    char *o;
+    u16 *slot;
+
+    idx = *(u8 *)(arg0 + 0x21);
+    if (idx == 0xFF) {
+        return;
+    }
+    rec = (u16 *)D_L20_001FBB20[idx];
+    goto test;
+
+body:
+    e = (char *)D_L20_001B2F9C + ((w & 0x7FFF) << 8);
+    if (e == 0) {
+        return;
+    }
+    if (*(s16 *)(e + 0xAA) != 0xD0F) {
+        rec++;
+        goto test;
+    }
+    o = *(char **)(e + 0x68);
+    if (o == 0) {
+        rec++;
+        goto test;
+    }
+    if (*(u8 *)(o + 0x302) & 1) {
+        if (*(u32 *)(o + 0x420) != 1) {
+            rec++;
+            goto test;
+        }
+        *(u8 *)(o + 0x302) = 2;
+        *(u16 *)(e + 0x34) &= 0xFFFD;
+    }
+    rec++;
+    goto test;
+
+test:
+    idx = *(volatile u8 *)(arg0 + 0x21);
+    if (idx == 0xFF) {
+        return;
+    }
+    if (D_L20_001B2FB8 < idx) {
+        return;
+    }
+    if (rec == 0) {
+        return;
+    }
+    if (*(s16 *)(rec - 1) >= 0) {
+        w = *rec;
+        goto body;
+    }
+    slot = (u16 *)D_L20_001FBB20[idx];
+    if (rec == slot) {
+        w = *rec;
+        goto body;
+    }
+    return;
+}
+
+/* ---- wave 5 (20_yeedil, 2026-10-21, worker 03): the layout and the allocation ---
+ *
+ * The candidate above is the wave-4 one: 240 bytes against the retail's 232,
+ * and the wave-4 candidate's own note names the residue as the LAST test.
+ * This wave re-measured it and adds the following.
+ *
+ *  - The read `w = *rec` moved BEFORE the two tests of the test block gives
+ *    EXACTLY 232 bytes - the retail's size - so the block layout, the
+ *    instruction count and the loop's shape are then the retail's.  It is
+ *    still not the retail: the last test comes out as
+ *        beq $a2,$a1,END ; nop ; b body ; lhu $v0,0x0($a2)
+ *    where the retail has
+ *        beql $a2,$a0,body ; lhu $v0,0x0($a2) ; jr $ra
+ *    and the register allocation is off (the retail keeps the object in $a3,
+ *    the record in $a2 and the entry pointer in $a1; this cc1 keeps the
+ *    argument in $a0, the record in $a1 and the entry pointer in $a2).
+ *  - The allocation follows the "split address" of D_1FBB20, which is the
+ *    known difference of func_L20_004431E0 and is not a per-function wall:
+ *    the retail materialises the table's address in $a0
+ *    (`lui $v1,%hi(D_1FBB20)` ; `addiu $a0,$v1,%lo(D_1FBB20)`) and copies the
+ *    %hi into $t0 for the second use (`addiu $v1,$t0,%lo(D_1FBB20)`), while
+ *    this cc1 keeps the %hi and the address in one register and copies the
+ *    %hi early (`daddu $t0,$v0,$zero` before the `addiu`), because its first
+ *    use destroys the %hi register.  That is also why the retail copies the
+ *    object into $a3: $a0 holds the table's address.
+ *  - The branch-likely of the last test: reorg.c's optimize_skip fires in
+ *    two cases - the branch skips exactly ONE instruction, or the branch and
+ *    the jump that follows it have the SAME label.  The retail's
+ *    `beql $a2,$a0,body` with the read in the delay slot is the second case
+ *    (the "then" block is the read and the jump back to the body).  The
+ *    source shapes measured, all of which keep the plain `bne`:
+ *        if (rec == slot) { w = *rec; goto body; } return;
+ *        if (rec != slot) { return; } w = *rec; goto body;
+ *        if (rec == slot) { w = *rec; } else { return; } goto body;
+ *        w = *rec; if (rec == slot) { goto body; } return;   (232 bytes)
+ *    The last one is the only one that changes the size, and it changes the
+ *    first test too (it becomes a plain `bltz` instead of the retail's
+ *    `bgezl`).
+ *  - The index byte must be read twice and the second read must be volatile
+ *    (the wave-4 note) - re-measured, that holds.
+ */

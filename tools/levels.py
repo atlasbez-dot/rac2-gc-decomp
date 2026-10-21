@@ -238,6 +238,73 @@ def level_extent(number: int, address: int, size: int) -> tuple[int, int]:
     return address + skip, size - skip
 
 
+# The level's linker leaves padding between the bodies, and a body that ends in a
+# `jr $ra` leaves the word after its delay slot behind.  Both are measured from the
+# retail bytes, not from a list of addresses: an extent whose words are only stack
+# adjustments and nops is padding, and a four-byte extent right after such an
+# epilogue is its residue.
+
+STACK_ADJUST = 0x09          # addiu
+MOVE = 0x21                  # addu
+ZERO = 0                     # $zero
+
+
+def _is_padding(word: int) -> bool:
+    """A nop, a stack adjustment of $sp by $sp, or a move of $zero.
+
+    These are the words the linker leaves between two bodies.  The operands matter:
+    `addu $t0,$t1,$t2` is arithmetic and `addiu $sp,$a0,16` writes through a
+    register, and neither is filler."""
+    if word == 0:
+        return True
+    op, rs, rt = word >> 26, (word >> 21) & 31, (word >> 16) & 31
+    if op == STACK_ADJUST and rs == 29 and rt == 29:
+        return True
+    if op == 0 and word & 0x3F == MOVE and rs == ZERO and rt == ZERO:
+        return True
+    return False
+
+
+def is_padding(body: bytes) -> bool:
+    """True when the words are only stack adjustments and nops: filler, not code.
+
+    A body that ends in a trap or a tail call has no `jr $ra` and is still code, so
+    the absence of a return does not decide this: only the words do."""
+    return all(_is_padding(w) for w in words(body))
+
+
+def is_epilogue_residue(body: bytes, previous: bytes) -> bool:
+    """True when the body is the word the previous body's epilogue left behind.
+
+    The previous body ends with `jr $ra` and its delay slot; the word after them is
+    the residue the compiler left, and a function of four bytes cannot hold it.  It
+    is not the linker's filler - the words say otherwise - so it is measured here:
+    the previous body's last `jr $ra` and its delay slot, and nothing else."""
+    w = words(body)
+    if len(w) != 1:
+        return False
+    p = words(previous)
+    if len(p) < 2:
+        return False
+    if p[-2] >> 26 != 0 or p[-2] & 0x3F != 0x08:      # not a jr
+        return False
+    return True
+
+
+# Measured residual instruction extents in USA v1.01, not callable entries.
+# Each follows a completed return across alignment padding, with no direct
+# branch/call or aligned pointer into the extent in any of its programs.
+# Unlike is_padding, these include stores/float arithmetic; do not generalise
+# their removal to arbitrary code without a return. See docs/LEVELS.md.
+BOOT_RESIDUES = {
+    0x00289018: 4,    # an isolated store using an uninitialised $v0
+    0x002A77C0: 28,   # orphan float operations using live-in $f0/$f1
+    0x002FDB40: 148,  # stack restores and an orphan store; also in 22 levels
+    0x002FED78: 12,   # return-value assignment and an unmatched stack restore
+    0x002FF0B0: 36,   # unmatched stack restores and an orphan GP store
+}
+
+
 def boot_image() -> tuple[bytes, list[tuple[int, int, int]]]:
     """The boot executable and its loadable segments (vaddr, file offset, file size)."""
     elf = BOOT.read_bytes()
@@ -307,8 +374,23 @@ def catalogue() -> None:
     else:
         boot = read_boot_functions()
     boot_by_fp = {}
+    # Compute from the pinned retail input even after the rows have been removed,
+    # so catalogue regeneration is repeatable. Size and normalised bytes both
+    # have to agree; a similar-looking or merely return-less function is kept.
+    residue_keys = {(fingerprint(boot_bytes(a, n), a), n) for a, n in BOOT_RESIDUES.items()}
+    corrected_boot = []
+    last_end, last_body = None, b""
     for name, a, n in sorted(boot, key=lambda r: r[1]):
-        boot_by_fp.setdefault((fingerprint(boot_bytes(a, n), a), n), []).append(name)
+        body = boot_bytes(a, n)
+        if (fingerprint(body, a), n) in residue_keys:
+            continue
+        if is_padding(body):
+            continue                    # the linker's filler, not a function
+        if len(words(body)) == 1 and last_end == a and is_epilogue_residue(body, last_body):
+            continue                    # the residue of the previous body's epilogue
+        corrected_boot.append((name, a, n))
+        boot_by_fp.setdefault((fingerprint(body, a), n), []).append(name)
+        last_end, last_body = a + n, body
     extents = {}
     if from_old:
         for number in NAMES:
@@ -316,20 +398,27 @@ def catalogue() -> None:
             extents[number] = [(a, n) for a, n in old_extents(f"{number}_{NAMES[number]}")
                                if base <= a < base + len(data)]
     else:
-        for _, _, size, _, places in read_catalogue():
+        for name, kind, size, fp, places in read_catalogue():
             for number, a in places:
                 extents.setdefault(number, []).append((a, size))
     found = {}
     for number in sorted(extents):
         base, data = level_text(DUMP / level_dir(number))
+        # the previous extent of the same program, for the epilogue residue
+        last_end, last_body = None, b""
         for a, n in sorted(extents[number]):
             a, n = level_extent(number, a, n)
             body = data[a - base:a - base + n]
-            if not trim(body):
+            if (fingerprint(body, a), n) in residue_keys:
                 continue
+            if not trim(body) or is_padding(body):
+                continue
+            if len(words(body)) == 1 and last_end == a and is_epilogue_residue(body, last_body):
+                continue                # the residue of the previous body's epilogue
             # the size too: the same instructions with different padding are two functions
             entry = found.setdefault((fingerprint(body, a), n), {"size": n, "places": []})
             entry["places"].append((number, a))
+            last_end, last_body = a + n, body
     # Boot functions paired by hand with level places the code alone cannot tell apart.
     pairs = {}
     if BOOT_PAIRS.is_file():
@@ -368,7 +457,7 @@ def catalogue() -> None:
     rows.sort(key=lambda r: r[4][0])
     BOOT_FUNCTIONS.parent.mkdir(parents=True, exist_ok=True)
     BOOT_FUNCTIONS.write_text("# name\taddress\tsize\n" +
-                              "".join(f"{n}\t{a:08X}\t{s}\n" for n, a, s in sorted(boot, key=lambda r: r[1])))
+                              "".join(f"{n}\t{a:08X}\t{s}\n" for n, a, s in sorted(corrected_boot, key=lambda r: r[1])))
     LEVELS.mkdir(parents=True, exist_ok=True)
     lines = ["# name\tkind\tsize\tfingerprint\tlevels\tplaces (level:address)"]
     for name, kind, size, fp, places in rows:
@@ -378,7 +467,7 @@ def catalogue() -> None:
     placed = sum(r[2] * len(r[4]) for r in rows)
     count = {k: sum(1 for r in rows if r[1] == k) for k in ("boot", "shared", "level")}
     size = {k: sum(r[2] for r in rows if r[1] == k) for k in ("boot", "shared", "level")}
-    print(f"boot: {len(boot)} functions, {sum(r[2] for r in boot)} bytes")
+    print(f"boot: {len(corrected_boot)} functions, {sum(r[2] for r in corrected_boot)} bytes")
     print(f"levels: {sum(len(r[4]) for r in rows)} placements, {placed} bytes; {len(rows)} distinct: " +
           ", ".join(f"{count[k]} {k} ({size[k]} bytes)" for k in count))
 

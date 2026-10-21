@@ -75,6 +75,118 @@ extern L03_003D21F8_Obj *D_L03_001B0670 __attribute__((sda));
 extern u32 D_L03_001B3458;
 extern void *func_L00_002D70A0(s32 size);
 
+extern void func_00282CF0(char *a0, char *a1, char *a2);
+extern void func_00282CC0(char *a0, char *a1, char *a2);
+extern void func_00283098(char *a0, char *a1, char *a2);
+extern void func_00283698(char *a0, char *a1);
+extern s32  func_002B38B8(char *a0);
+extern s32  func_002E5CF8(s32 a0, s32 a1, char *a2);
+extern void func_002E59F8(s32 a0);
+extern void func_L01_003115E8(int a0, int a1);
+extern u8  *D_L03_001B2A1C;
+extern u8   D_00188660[];
+extern s32  D_L03_001B0438 __attribute__((sda));
+extern f32  D_L03_001B043C __attribute__((sda));
+
+/* The actor's per-frame update: state 0 spawns it and aims, state 2 looks the
+   target up, states 3 and 4 turn it by a rate that decays; every other state
+   does nothing.  The actor's angle is at 0xF4, its rate at 0x74 of the state. */
+void func_L03_003CBE58(char *a0)
+{
+    char *s2 = a0;
+    char *s1 = *(char **)(s2 + 0x68);
+    char buf[0x40];
+    char *s0;
+
+    switch (*(u8 *)(s2 + 0x20)) {
+    case 0:
+        if (*(s32 *)(s1 + 0x70) != -1) {
+            func_002A7750(s2, 2, -1);
+            s0 = s1 + 0x60;
+            func_00282CF0(s0, D_L03_001B2A1C + *(s32 *)(s1 + 0x70) * 0x100 + 0x10, s2 + 0x10);
+            *(s32 *)(s1 + 0x7C) = -1;
+            *(s32 *)(s1 + 0x78) = 0;
+            func_00283698(buf, s2 + 0xC0);
+            func_00283098(s0, s0, buf);
+        } else {
+            func_002A7750(s2, 1, -1);
+        }
+        break;
+    case 2: {
+        char *p;
+
+        if (func_002B38B8(D_L03_001B2A1C + *(s32 *)(s1 + 0x70) * 0x100) == 0) {
+            break;
+        }
+        p = D_00188660 + *(s32 *)(s1 + 0x7C) * 0x70;
+        if (*(char **)(p + 0x88) != s2 || *(u8 *)(p + 0x74) == 0) {
+            *(s32 *)(s1 + 0x7C) = func_002E5CF8(0, 4, s2);
+        }
+        func_L01_003115E8(*(u8 *)(s2 + 0x21), 4);
+        func_002A7750(s2, 3, -1);
+        break;
+    }
+    case 3: {
+        char *p;
+        char *q;
+        f32 t;
+        f32 v;
+
+        *(f32 *)(s1 + 0x74) = *(f32 *)(s1 + 0x74)
+            + (*(f32 *)(s2 + 0xF4) / (f32)D_L03_001B0438 + 9.69627508e-05f);
+        t = *(f32 *)(s2 + 0xF4) + *(f32 *)(s1 + 0x74);
+        *(f32 *)(s2 + 0xF4) = t;
+        if (1.69646013f < t) {
+            if (*(s32 *)(s1 + 0x78) < 5) {
+                if (*(s32 *)(s1 + 0x7C) != -1) {
+                    p = D_00188660 + *(s32 *)(s1 + 0x7C) * 0x70;
+                    if (*(char **)(p + 0x88) == s2 && *(u8 *)(p + 0x74) != 0) {
+                        func_002E59F8(*(s32 *)(s1 + 0x7C));
+                    }
+                }
+                *(s32 *)(s1 + 0x7C) = -1;
+                func_002E5CF8(1, 0, s2);
+                (*(s32 *)(s1 + 0x78))++;
+            }
+            *(f32 *)(s2 + 0xF4) = 1.69646013f;
+            v = *(f32 *)(s1 + 0x74);
+            if (0.00058177649f < v) {
+                *(f32 *)(s1 + 0x74) = v * -0.5f;
+            } else {
+                *(s32 *)(s1 + 0x74) = 0;    /* the retail stores the word, not the float */
+                func_002A7750(s2, 5, -1);
+            }
+        }
+        q = D_L03_001B2A1C + *(s32 *)(s1 + 0x70) * 0x100 + 0x10;
+        func_00283098(q, s1 + 0x60, s2 + 0xC0);
+        func_00282CC0(q, q, s2 + 0x10);
+        break;
+    }
+    case 4: {
+        f32 f3;
+        f32 t;
+        f32 v;
+
+        f3 = D_L03_001B043C * 3.14159274f;
+        *(f32 *)(s1 + 0x74) = *(f32 *)(s1 + 0x74)
+            + (*(f32 *)(s2 + 0xF4) / (f32)D_L03_001B0438 + 9.69627508e-05f);
+        t = *(f32 *)(s2 + 0xF4) + *(f32 *)(s1 + 0x74);
+        *(f32 *)(s2 + 0xF4) = t;
+        if (f3 < t) {
+            *(f32 *)(s2 + 0xF4) = f3;
+            v = *(f32 *)(s1 + 0x74);
+            if (0.00058177649f < v) {
+                *(f32 *)(s1 + 0x74) = v * -0.5f;
+            } else {
+                *(s32 *)(s1 + 0x74) = 0;    /* the retail stores the word, not the float */
+                func_002A7750(s2, 5, -1);
+            }
+        }
+        break;
+    }
+    }
+}
+
 /* case 0 spawns the object and points the actor at it; case 1 clears the
    object while the state word still reads zero, and clears the word otherwise */
 void func_L03_003D21F8(char *a0)

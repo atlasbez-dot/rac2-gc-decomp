@@ -117,3 +117,26 @@ void func_0032FEA8(char *object)
     func_00330150(object);
     func_003304D8(object);
 }
+
+/* func_00335DC0: the retail reaches its three globals through $gp (the int at $gp+0x3710 and
+   the float at $gp+0x3718) and through lui/addiu (the float at 0x1B2704), so the unit is the
+   -G8 one.  The three live in the level's data, at an address that differs from level to
+   level, so they are named without an address. */
+extern int ref_L00_00335DC0_00 __attribute__((sda));
+extern float ref_L00_00335DC0_01;
+extern float ref_L00_00335DC0_02 __attribute__((sda));
+
+void func_00335DC0(int a0)
+{
+    float value;
+
+    ref_L00_00335DC0_00 = a0;
+    value = 1.076923f;
+    if (a0 == 0)
+        value = 1.0f;
+    ref_L00_00335DC0_01 = value;
+    value = 0.9f;
+    if (a0 == 0)
+        value = 1.0f;
+    ref_L00_00335DC0_02 = value;
+}

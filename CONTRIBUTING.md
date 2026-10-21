@@ -23,10 +23,15 @@ Close but not matching: put it in `nonmatching/` with a line in its README.
 ## Sending your work
 
 Branch from `master`, commit, push the branch and open a pull request to `master`. In the pull
-request, give the commands you ran and what they printed (`tools/build.py all`,
+request, give the commands you ran and what they printed (`tools/build.py all --strict`,
 `tools/progress.py`, the tests). CI runs the tests and the repository check; a maintainer merges.
 Never push to `master` and never force-push a shared branch. AGENTS.md has the full rules and docs/AGENT_WORKFLOW.md says which model takes which functions, for
 people as much as for agents.
+
+Use `--strict` for the final build before pushing: it fails if any C function falls back
+to assembly, even when the resulting program equals retail. Ordinary builds keep that
+fallback available while experimenting. Compiler and assembler changes automatically
+invalidate the affected cached C objects.
 
 ## Rules
 

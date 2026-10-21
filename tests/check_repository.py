@@ -109,6 +109,14 @@ FORBIDDEN_DOC = re.compile(r"(?i)(-C-LOT|-NATIVE-LOT|EVIDENCE|REGISTER|CAMPAIGN|
 MAX_BYTES = 2_500_000
 
 
+def check_empty_barriers(text: str, path: str, errors: list) -> None:
+    """Reject empty source loops used only to steer scheduling; ignore prose/literals."""
+    code = re.sub(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+                  ' ', text, flags=re.S)
+    if re.search(r'\bdo\s*\{[\s;]*\}\s*while\s*\(\s*0[uUlL]*\s*\)', code):
+        errors.append(f"{path}: empty do/while(0) source barrier; retain meaningful C (AGENTS.md)")
+
+
 def check_hygiene(errors: list) -> None:
     import subprocess
     files = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True).stdout.split()
@@ -131,7 +139,10 @@ def check_hygiene(errors: list) -> None:
         if path.is_file() and path.stat().st_size > MAX_BYTES and f != "assets/rac2-logo.png":
             errors.append(f"{f}: {path.stat().st_size} bytes; generated data stays out of git")
         if f.startswith("src/") and f.endswith((".c", ".h")):
-            if re.search(r"\bLVL_\d+_[A-Z]", path.read_text(errors="replace")):
+            text = path.read_text(errors="replace")
+            if f.endswith(".c"):
+                check_empty_barriers(text, f, errors)
+            if re.search(r"\bLVL_\d+_[A-Z]", text):
                 errors.append(f"{f}: per-level copies (LVL_ names); one definition per function (AGENTS.md)")
 
 

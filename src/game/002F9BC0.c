@@ -41,7 +41,6 @@ INCLUDE_ASM("asm/game", func_002FA270);
 
 INCLUDE_ASM("asm/game", func_002FA880);
 
-INCLUDE_ASM("asm/game", func_002FAD30);
 
 
 extern volatile int D_001A7A20[] __attribute__((sda));
@@ -82,7 +81,6 @@ int func_002FBFB8(int key)
     return -1;
 }
 
-INCLUDE_ASM("asm/game", func_002FC008);
 
 extern int func_002FBFB8(int);
 extern unsigned char D_001395B8[];

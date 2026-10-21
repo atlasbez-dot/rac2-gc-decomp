@@ -34,7 +34,6 @@ int func_0028DF68(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_0028DF70);
 
 INCLUDE_ASM("asm/game", func_0028DF80);
 

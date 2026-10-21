@@ -3,6 +3,28 @@
    before the call; the plain `h = X;` gives 332 bytes. Held back: a branch whose arms are identical
    is there only to steer the scheduler (AGENTS.md, no artificial barriers). */
 
+/* Opus retry, 20 October 2026: no plain-C spelling found; only a real branch reproduces retail.
+   - Calls do not end basic blocks in this cc1 (flow.c count_basic_blocks), so without a branch
+     the body is one block. Retail needs the arms' block boundaries for three separate reasons:
+     (a) combine sinks both fix_trunc insns into the $a1/$a2 argument moves within a block;
+     (b) local-alloc ties the 379 product to x ($f1) when x is local, while retail's x is a global
+     pseudo (live across the arms), so the product takes the constant's $f0;
+     (c) at the first func_00288FB8 call, `li $a0,0x31E5` and `addiu $s1,%lo(D_001ADDD8)` tie on
+     sched2 priority, and the tie goes to the insn with more dependents. A loop-note barrier later
+     in the same block adds a dependent to the $s1 insn only, which flips the delay slot.
+   - `do { h = ...; } while (0);`: 336 bytes, but 24 lines of the .s differ. A float temporary
+     reused for both values (`f = x * 170.0f + 0.5f; w = (int)f; f = x * 379.0f + 0.5f;
+     h = (int)f;`) keeps w's conversion in place (combine refuses because f is set again), and
+     with do-while(0) around the second pair 14 lines still differ, from (a) for h, (b) and (c).
+   - No single flag moves the plain or reused-temporary spelling: -fno-schedule-insns,
+     -fno-schedule-insns2 (alone or together), -fno-gcse, -fno-strength-reduce,
+     -fno-rerun-cse-after-loop, -fno-cse-follow-jumps, -fno-cse-skip-blocks,
+     -fno-expensive-optimizations, -fno-regmove, -fno-caller-saves, -fno-force-mem,
+     -fno-peephole, -fno-thread-jumps, -fno-defer-pop, -g, -mno-split-addresses, -ffast-math.
+   - jump2 cross-jumps after sched2, so a branch whose two arms compile alike leaves exactly
+     retail's schedule. The original probably had such an if/else, for example two values that
+     ended up equal. */
+
 struct SolIds {
     int ids[2];
 };

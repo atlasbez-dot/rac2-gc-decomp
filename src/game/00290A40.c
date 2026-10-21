@@ -20,7 +20,6 @@ void func_00290A40(char *a0)
     }
 }
 
-INCLUDE_ASM("asm/game", func_00290AA8);
 
 typedef struct { int source, length, destination, flags; } Request_290AB0;
 extern int func_0011AFE0(Request_290AB0 *, int);
@@ -61,23 +60,19 @@ void func_00291128(void) {
     func_00278F80();
 }
 
-INCLUDE_ASM("asm/game", func_00291148);
 
 INCLUDE_ASM("asm/game", func_00291158);
 
 /* func_00291268 is in 00290A40-g8.c. */
 
-INCLUDE_ASM("asm/game", func_002912E8);
 
 void func_002912F0(void)
 {
 }
 
-INCLUDE_ASM("asm/game", func_002912F8);
 
 INCLUDE_ASM("asm/game", func_00291308);
 
-INCLUDE_ASM("asm/game", func_00291448);
 
 extern void func_00291788(void);
 extern void func_00282A88(void *, int);

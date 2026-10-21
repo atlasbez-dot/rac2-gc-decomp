@@ -273,6 +273,55 @@ void func_L00_002D3208(void) {
     if (secondary) secondary->flags &= ~1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002D3240);
 
 
+/* The matrix the level state keeps 0x90 bytes in; the state itself is 0x90 below it. */
+extern char D_00189EB0[];
+
+extern float func_00283180(float);
+extern float func_00283198(float);
+extern float func_00283248(float, float);
+extern void func_00282C88(void *);
+extern void func_002830C0(void *, void *, void *);
+extern void func_00283410(void *, void *);
+
+typedef int TI128_L00_002D3290 __attribute__((mode(TI)));
+
+/* Rotates the level state's aim vector: the two angles of the state's yaw and pitch
+   drive two matrix builds, and the state's own vector is transformed between them. */
+void func_L00_002D3290(void)
+{
+    TI128_L00_002D3290 matrix[4];
+    float v[4];
+    float w1[4];
+    float w2[4];
+    float w3[4];
+    float a;
+    char *state;
+
+    v[0] = func_00283180(0.0f);
+    v[1] = func_00283198(0.0f);
+    v[2] = 0.0f;
+    func_00283410(matrix, D_00189EB0);
+    func_002830C0(v, v, matrix);
+    state = D_00189EB0 - 0x90;
+
+    if (*(float *)(state + 0x2A0) != 0.0f || *(float *)(state + 0x2A4) != 0.0f) {
+        *(TI128_L00_002D3290 *)w3 = *(TI128_L00_002D3290 *)(state + 0x2A0);
+        func_00282C88(w1);
+        func_00282C88(w2);
+        a = func_00283248(*(float *)(state + 0x2A0), *(float *)(state + 0x2A4));
+        w1[2] = -a;
+        func_00283410(matrix, w1);
+        func_002830C0(v, v, matrix);
+        func_002830C0(w3, w3, matrix);
+        w2[1] = -func_00283248(w3[2], w3[0]);
+        func_00283410(matrix, w2);
+        func_002830C0(v, v, matrix);
+        w1[2] = -w1[2];
+        func_00283410(matrix, w1);
+        func_002830C0(v, v, matrix);
+    }
+
+    func_00283248(v[0], v[1]);
+}

@@ -1,11 +1,13 @@
-# decomp.dev progress report, as rac1-decomp publishes its own.
+# ByteMatch progress report (https://bytematch.dev/OpenRAC/rac2-gc-decomp), as rac1-decomp
+# publishes its own.
 #
-# decomp.dev reads objdiff's report.json from an artifact named "<VERSION>_report" on the
-# default branch. This job does NOT build the game: SN ProDG's tools and the retail programs
-# cannot be redistributed. The report is generated locally after a full build (tools/build.py
-# all, then tools/progress.py) and committed as progress/report.json; this job proves it is
-# current, validates it and uploads it. It holds names, addresses, sizes and percentages: no
-# retail bytes. The repository must be registered once at https://decomp.dev/manage/new.
+# ByteMatch reads objdiff's report.json from an artifact named "<VERSION>_report", from
+# successful push runs on the default branch. This job does NOT build the game: SN ProDG's
+# tools and the retail programs cannot be redistributed. The report is generated locally after
+# a full build (tools/build.py all, then tools/progress.py) and committed as
+# progress/report.json; this job proves it is current, validates it and uploads it. It holds
+# names, addresses, sizes and percentages: no retail bytes. The repository must be registered
+# once on https://bytematch.dev (sign in with GitHub, Manage, Add project).
 name: Progress report
 
 on:

@@ -6,7 +6,7 @@ INCLUDE_ASM("asm/levels", func_L07_002C3CC0);
 
 INCLUDE_ASM("asm/levels", func_L07_002E2090);
 
-INCLUDE_ASM("asm/levels", func_L07_002F2C70);
+/* func_L07_002F2C70 is defined in L07_002BE770-g8.c (it reads small data through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L07_00336860);
 

@@ -45,7 +45,6 @@ s32 func_L06_00382850(char *a0, char *a1, float f12) {
     return best;
 }
 
-INCLUDE_ASM("asm/levels", func_L06_003829D8);
 
 INCLUDE_ASM("asm/levels", func_L06_0039A2F0);
 
@@ -94,7 +93,6 @@ INCLUDE_ASM("asm/levels", func_L06_00403710);
 
 INCLUDE_ASM("asm/levels", func_L06_00403DA8);
 
-INCLUDE_ASM("asm/levels", func_L06_0042EAB8);
 
 INCLUDE_ASM("asm/levels", func_L06_00444D00);
 
@@ -120,4 +118,3 @@ INCLUDE_ASM("asm/levels", func_L06_0047AC68);
 
 INCLUDE_ASM("asm/levels", func_L06_0047C1D0);
 
-INCLUDE_ASM("asm/levels", func_L06_00491A30);

@@ -29,9 +29,58 @@ void func_L07_003E5A70(char *arg)
         *(unsigned short *)(arg + 0x96) = v + 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L07_003E5AC8);
+extern unsigned short *D_L07_001FAD60[];
 
-INCLUDE_ASM("asm/levels", func_L07_003E5B70);
+/* `sda` on an array of unknown size: cc1 emits the one-instruction load, which the assembler
+   expands absolute (`lui $r` / `lw $r,%lo($r)`), as retail has it in this -G0 unit. */
+extern unsigned char *D_L07_001B22DC[] __attribute__((sda));
+extern int D_L07_001B22F8[] __attribute__((sda));
+
+/* Sets the +0x244 word of every entity of the object's group state to 1. */
+void func_L07_003E5AC8(unsigned char *arg0)
+{
+    unsigned short *p;
+    unsigned char *e;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    p = D_L07_001FAD60[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L07_001B22F8[0] && p != 0 &&
+           ((p != 0 && (short)p[-1] >= 0) || p == D_L07_001FAD60[arg0[0x21]])) {
+        e = D_L07_001B22DC[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        *(int *)(*(char **)(e + 0x68) + 0x244) = 1;
+        p++;
+    }
+}
+
+/* Counts the entities of the group whose class is 0xD1D and whose state byte is neither 0xFE nor
+   0xFD into *count; returns the last entity of the group in state 8, or 0. */
+unsigned char *func_L07_003E5B70(int group, int *count)
+{
+    unsigned short *p;
+    unsigned char *e;
+    unsigned char *result;
+
+    *count = 0;
+    if (group == -1)
+        return 0;
+    result = 0;
+    for (p = D_L07_001FAD60[group];
+         (unsigned char)group != 0xFF && group <= D_L07_001B22F8[0] && p != 0 &&
+         ((short)p[-1] >= 0 || p == D_L07_001FAD60[group]);
+         p++) {
+        e = D_L07_001B22DC[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (*(short *)(e + 0xAA) == 0xD1D && e[0x20] != 0xFE && e[0x20] != 0xFD)
+            (*count)++;
+        if (e[0x20] == 8)
+            result = e;
+    }
+    return result;
+}
 
 INCLUDE_ASM("asm/levels", func_L07_003E5C78);
 
@@ -62,7 +111,24 @@ INCLUDE_ASM("asm/levels", func_L07_003E69B8);
 
 INCLUDE_ASM("asm/levels", func_L07_003E6E00);
 
-INCLUDE_ASM("asm/levels", func_L07_003E6F40);
+/* Sets the +0x2D0 word of every entity of the object's group state to 1. */
+void func_L07_003E6F40(unsigned char *arg0)
+{
+    unsigned short *p;
+    unsigned char *e;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    p = D_L07_001FAD60[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L07_001B22F8[0] && p != 0 &&
+           ((p != 0 && (short)p[-1] >= 0) || p == D_L07_001FAD60[arg0[0x21]])) {
+        e = D_L07_001B22DC[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        *(int *)(*(char **)(e + 0x68) + 0x2D0) = 1;
+        p++;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L07_003E6FE8);
 
@@ -111,7 +177,24 @@ void func_L07_003EB700(char *arg)
     func_002B0990(arg, o + 0x230, 5, 1, 2.5f);
 }
 
-INCLUDE_ASM("asm/levels", func_L07_003EB790);
+/* Twin of func_L07_003E6F40. */
+void func_L07_003EB790(unsigned char *arg0)
+{
+    unsigned short *p;
+    unsigned char *e;
+
+    if (arg0[0x21] == 0xFF)
+        return;
+    p = D_L07_001FAD60[arg0[0x21]];
+    while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L07_001B22F8[0] && p != 0 &&
+           ((p != 0 && (short)p[-1] >= 0) || p == D_L07_001FAD60[arg0[0x21]])) {
+        e = D_L07_001B22DC[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        *(int *)(*(char **)(e + 0x68) + 0x2D0) = 1;
+        p++;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L07_003EB838);
 

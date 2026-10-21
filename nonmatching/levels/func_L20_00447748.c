@@ -23,3 +23,20 @@
  * so the source order has to be found by trying the permutations. The unit also has to be
  * the -G8 sibling (it reads gp+0x3340 and gp+0x3FAC).
  */
+
+/* ---- wave 5 (20_yeedil, 2026-10-21, worker 01): the order of the fourteen stores -----
+ *
+ * The body recovered above is right; the wall is the order of the fourteen stack stores
+ * (0x0, 0x4, 0x20, 0x24, 0x8, 0xC, 0x10, 0x14, 0x18, 0x1C, 0x2C, 0x30, 0x28 - thirteen
+ * of them, plus the address that is passed to the callee).  The store order is an
+ * arbitrary permutation of the source order, so the source order has to be searched:
+ * 13! is far too many, but the permutation is a "sort by the value that is stored"
+ * in most of the game's similar functions, and the structure of the retail's list
+ * (0x0, 0x4, then 0x20, 0x24, then 0x8, 0xC, 0x10, 0x14, 0x18, 0x1C, then 0x2C, 0x30,
+ * 0x28) suggests the source builds the structure in three groups - a head of two words,
+ * then eight words, then a tail of three - and that the compiler reorders each group
+ * by the register it had to free.
+ *
+ * The unit also has to be the -G8 sibling: it reads the table at gp+0x3340 and the
+ * limit at gp+0x3FAC.
+ */

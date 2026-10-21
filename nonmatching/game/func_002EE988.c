@@ -1,30 +1,33 @@
-/* func_002EE988: 368 bytes compiled with the project compiler (-O2 -G0), retail 372; 41 words differ.
-   With a cc1 whose cse follows the rule below (scratch patch, see the end of this comment) the
-   same C is 372 bytes and 10 words differ, so the remaining wall is compiler-side.
+/* func_002EE988 (boot function, 372 bytes; 28 places): near miss. Built alone (src/game/002EE988.c) with
+   `-O2 -G0 -ffunction-sections -frac2-qcopy` it is retail's 372 bytes and 9 of its 93 words differ, at every
+   place; all nine are in the block of the first copy (`*pd = D_001BAFA0`). Both profiles together
+   (`-frac2-zero-ti-barrier` too) give the same bytes. The first 50 and the last 32 words, the other two copies
+   (`*(V4 *)pos = *pe` and `= D_001BAFB0`) and every call are exact; the table pointer (`D_001B1C54` as `sda`
+   gives `lui $s0` / `lw $s0,%lo($s0)`), the saves, the stack slots (five float[4] arrays declared in order,
+   `d` at 0x30 and `e` at 0x40) and the pointers to d and e kept in $s2 and $s0 all match. The dead
+   `object = 0;` of the earlier attempt is not needed with the profile (same 9 words without it).
 
-   What is solved here (and was not in the first attempt): the table pointer (`D_001B1C54` is
-   `extern ... __attribute__((sda))`, which gives `lui $s0` / `lw $s0,%lo($s0)`), the saves
-   ($s4 first, owner in $s4, the object pointer in $a0 and dead after `pos`, `pos` in $s3), the
-   stack slots (d at 0x30, e at 0x40: five float[4] arrays declared in order), and the pointers to
-   d and e living in callee-saved registers like retail's ($s2 = &d, $s0 = &e created late).
-   `object = 0;` after `pos = ...` is a dead assignment: it stops this cse from rewriting the later
-   `*(V4 *)pos = ...` stores to `0x60(object)`, which would keep `object` alive and shift every
-   register (without it: 376 bytes).
+   What differs (the first copy, then the call of func_00282D30):
+     retail: beqz (slot: lui $a1,hi) / addiu $s2,$sp,0x30 / addiu $a1,$a1,lo / lq $v0,0($a1) / sq $v0,0($s2) /
+             addiu $s0,$sp,0x10 / lui,ori,mtc1 $f12 / daddu $a0,$s0 / jal (slot: addiu $a1,$a1,0x20)
+     here:   beqz (slot: lui $v1,hi) / addiu $s0,$sp,0x10 / addiu $s2,$sp,0x30 / addiu $v1,$v1,lo / lui,ori,mtc1 $f12 /
+             addiu $a1,$v1,0x20 / lq $v0,0($v1) / sq $v0,0($s2) / jal (slot: daddu $a0,$s0)
 
-   What differs with the project compiler: retail never lets cse rewrite the address of a
-   TImode store from a register to register-plus-constant, and never rewrites a TImode address
-   to a frame-pointer-based one (`sq $v0,0($s2)` with $s2 = $sp+0x30, `lq $v0,0($s0)` with
-   $s0 = $sp+0x40); this cc1 does both (find_best_addr in cse.c), so d and e are accessed as
-   `0x30($sp)` / `0x40($sp)` and no pointer register is shared. The rule that fits retail
-   (cse.c: no find_best_addr for a TImode destination, and no frame-based candidate for any TImode
-   address) changes no byte of any of the 535 game-compiled files of src/ (it is TImode-only) and
-   is in /home/vbess/rac2-gc-decomp/work/p2/build/scratch/cc1build/cse-ti-address.diff.
-   Under it the 10 remaining words are scheduling: retail keeps `lq`/`sq` adjacent (the first copy
-   is `lq $v0,0($a1)` `sq $v0,0($s2)` before `addiu $s0,$sp,0x10`, this cc1 puts the `sq` in the
-   delay slot of func_00282D30) and loads the last vector as `lq $v0,0($v1)` where this cc1 picks
-   `lq $v1,0($v0)`. (Not the load latency: a one-cycle TImode load delay in the machine
-   description leaves this function and func_002EE920 unchanged and changes 8 matched files;
-   -fno-schedule-insns / -fno-schedule-insns2 make it worse.) */
+   Cause (measured with -dS -dR -fsched-verbose-5): retail's copy is a scheduling barrier and the grouped copy is an
+   ordinary insn. It has unit none, cost 1 and priority 9, so both schedulers issue it last: the f12 constant
+   (priority 10), the address of `b` (10) and `$a1 = addr + 0x20` (9, with more dependents) all go first. The
+   copy then still needs the address register when `$a1` is set, so the allocator puts the address in $v1; in retail
+   the copy comes first, the address dies in the add and takes $a1. Check: the same C with
+   `__asm__ __volatile__("" ::: "memory");` after the first copy (scratch only, never for src/) is `boot: OK`, 0 of
+   93 words different. Without the barrier nothing measured changes the order.
+
+   Tried without effect (about 40 compiles): the source in a pointer variable (`ps = &D_001BAFA0`, `*pd = *ps`,
+   `(char *)ps + 0x20` or `(char *)(ps + 2)` for the argument); callee parameter orders of func_00282D30 (float first,
+   float second); an explicit TI temporary (`V4 t = D_001BAFA0; *pd = t;` is two separate insns and the store folds to
+   `sq $v0,0x30($sp)`); -fno-schedule-insns (368 bytes), -fno-schedule-insns2 (15 words), both together; the flag
+   pair. What would unblock it: the grouped copy given the dependences of a volatile asm in the scheduler, as
+   `-frac2-zero-ti-barrier` gives them to `sq $zero` (func_002B5E48 and func_002B50E0 are blocked by the same thing).
+*/
 typedef int V4 __attribute__((mode(TI)));
 extern int func_002ED688(unsigned char *owner);
 extern unsigned int func_002ED870(void);
@@ -58,7 +61,6 @@ void func_002EE988(char *owner)
     if (object == 0)
         return;
     pos = object + 0x60;
-    object = 0;
     table = D_001B1C54 + D_00214F90[0] * 128;
     func_00282CF0(a, pos, table + 0x30);
     len = func_00282DF0((char *)a);

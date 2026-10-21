@@ -1,33 +1,34 @@
-/* func_L23_00418650 (124 bytes, 1 place, L23_00416388.c, -O2 -G0) -- measured 0 of 1 with
-   the C below: exact size, TWO pairs of words swapped (four words), both scheduling.
-   (Wave 6 recorded three pairs; the third, the float constant, is fixed here.)
+/* func_L23_00418650 (124 bytes, 1 place, L23_00416388.c, -O2 -G0) -- NEAR MISS, not integrated.
+   Measured on 21 October 2026 in a unit of its own (src/levels/23_damosel_orbit/L23_00418650.c) built with
+   `-O2 -G0 -ffunction-sections -frac2-qcopy`: 124 bytes, retail's size; check.py "instruction at +0x14
+   differs", 0 of 1 places. One pair of words is left (+0x14/+0x18); the earlier second pair (the tail
+   `lq; sq; ld $s0` against `lq; ld $s0; sq`) is fixed by the qcopy pattern, which is one insn, so the frame
+   restore cannot slip between the lq and the sq.
 
-   Retail builds a sixteen-byte vector in a stack local through three shared helpers and
-   copies it back over the argument with lq/sq.
+   Retail builds a sixteen-byte vector in a stack local through three shared helpers and copies it back
+   over the argument with lq/sq. The float global is read through `lui $at` because it is declared sda in
+   this -G0 unit (cc1 emits the bare symbol, the assembler expands it through $at). Plain, it splits into
+   `lui $v0` + `lwc1`. (D_L23_001B36A4 is level data, not D_001B36A4.)
 
-   Fixed since wave 6: the float global is read through `lui $at` because it is declared
-   sda in this -G0 unit (cc1 emits the bare symbol, the assembler expands it through $at).
-   Plain, it splits into `lui $v0` + `lwc1`. (D_L23_001B36A4 is level data, not D_001B36A4.)
+   Left: retail has `lui $s0 ; swc1 $f20 ; addiu $s0,$s0,%lo(D_00189ED0) ; daddu $s1,$a0,$zero ; sd $ra`,
+   this cc1 swaps the `addiu` and the `daddu` (the parameter copy comes first).
+   Cause (measured with -dR -fsched-verbose-5): sched1 emits `high, $84=$4, lo_sum, $85=$f12` (the copy
+   takes the second slot of cycle 1 against the float copy: priorities 12 and 11), and in sched2 the two
+   tie at cycle 4: priority 17 each, five dependents each (the return, the restore, the argument setup, the
+   call), so the LUID, i.e. sched1's order, puts the copy first. With the volatile asm macro of the original
+   (`__asm__ __volatile__("lq $2,0(%1)\n\tsq $2,0(%0)" :: "r"(arg0), "r"(local) : "$2")`, scratch only)
+   this file is exact (0 words differ): the asm clears the register-use and register-set lists, so the two
+   restore loads are no longer dependents of the `addiu` and of the copy, and the `addiu` ends with five
+   dependents against four and goes first. The qcopy insn leaves those lists alone: five against five.
+   Tried without effect (all 124 bytes, the same pair): a TI local instead of char[16]; the float parameter
+   declared first (the copies are then emitted float first); a `char *base = D_00189ED0` local; the sum in
+   a float local; adding -frac2-zero-ti-barrier (no change); and, on the qcopy unit, 50 single extra cc1 flags (-fno-schedule-insns,
+   -fno-schedule-insns2, -fno-gcse, -fno-strength-reduce, -fno-rerun-cse-after-loop, -mno-split-addresses,
+   -g, ...): none moves the pair (-fno-schedule-insns2 loses the prologue interleave, -mno-split-addresses
+   makes D_00189ED0 one `la`). sched1 would need the float copy to outrank the parameter copy (priority 12
+   or more against 12, with more dependents) or the high/lo_sum pair to precede the copy in the stream;
+   neither follows from a source shape. */
 
-   Left:
-   1) +0x14/+0x18: this cc1 emits `daddu $s1,$a0,$zero` before `addiu $s0,$s0,%lo(D_00189ED0)`;
-      retail has the address half first. The sched2 dump (-dR -fsched-verbose-4) shows the two
-      insns tied: same priority, four dependents each, so the LUID decides, and sched1 always
-      issues the parameter copy in its first cycle (beside the `lui`), ahead of the lo_sum.
-   2) +0x60/+0x64: `lq $v0,0($sp); ld $s0,0x10($sp); sq $v0,0($s1)` against retail's
-      `lq; sq; ld $s0`. The restores are RTX_UNCHANGING frame loads, which true_dependence never
-      orders after an ordinary store, so sched2 fills the lq delay with `ld $s0`. Retail never
-      does: across the boot and all 27 levels, 64 functions end in `lq; sq; <restore>` and
-      none in `lq; <restore>; sq` (none of the 64 is C yet). -fno-schedule-insns2 gives
-      retail's tail but loses the prologue interleave, so this looks compiler-side (how the
-      retail scheduler orders TI stores against the restores), not a source shape.
-
-   Tried without change to the two pairs: a TI local instead of char[16], a `V4 *dst` or a
-   `char *base` local, a V4 * parameter, a local pointer to the vector, the sum in a float
-   local, and the flags -fno-schedule-insns, -fno-gcse, -fno-strength-reduce,
-   -fno-rerun-cse-after-loop, -fno-caller-saves and -g. -mno-split-addresses fixes the float
-   too, but makes D_00189ED0 one `la` (lui/addiu adjacent, where retail splits them).
-*/
 
 typedef int V4_L23_418650 __attribute__((mode(TI)));
 

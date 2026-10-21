@@ -367,3 +367,195 @@ void func_L20_0039ED78(char *arg0) {
         func_L00_002E6CF0(func_L20_0039F230, arg0);
     }
 }
+
+/* ------------------------------------------------------------------
+   Wave 4, worker 08.  What this wave measured on this body.
+
+   The C in this file is the third attempt (the `nosda' attributes are
+   gone from the three absolute words, which is right: without the
+   attribute this cc1 emits the retail's `lui $a1,%hi(D) / lw
+   $a1,%lo(D)($a1)', with it the high part goes to a scratch register).
+
+   Three differences are left, and this wave measured two of them:
+
+     0039EDE4  mtc1 $at,$f1   | mtc1 $at,$f12      the 0.5f
+     0039EDF0  mul.s $f0,$f0,$f1 | mul.s $f0,$f0,$f12
+     0039EE48  add.s $f12,$f0,$f1 | add.s $f12,$f0,$f12
+     0039EE4C  lw $v1,0x10($s0) | daddu $a1,$v0,$zero
+     0039EE50  daddu $a1,$v0,$zero | lw $v0,0x10($s0)
+     0039EE68  or $a0,$v1,$a0 | or $a0,$v0,$a0
+
+   1. The 0.5f is in $f12 in the retail and in $f1 here.  NEW: the
+      SECOND branch is the one that is wrong in the third attempt; the
+      first branch is the retail's.  Writing the half as the LITERAL
+      0.5f in both branches (and in the tail) makes the second branch
+      come out exactly like the retail's - the conversion of
+      D_L20_001AEDA8 lands in $f0, the constant 0.0002908882452f in
+      $f13, and the multiply is the retail's `mul.s $f13,$f0,$f13'.
+      With the half as a variable the second branch gets $f13 for the
+      conversion and $f0 for the constant instead.  So the difference
+      is the register the RELOAD gives the two operands of the
+      multiply, and it is decided by whether the half is a variable.
+
+      With the literal the tail costs one instruction more than the
+      retail's: the literal at the tail is a second constant, so it is
+      materialised again (`mtc1 $at,$f12' before the call), while the
+      retail reuses the $f12 the branches left.  The retail therefore
+      has ONE half, a variable live across the branch, materialised in
+      each branch - and the second branch's register allocation then
+      differs from the retail's.  Measured and not understood: with the
+      half as a variable the first branch is the retail's and the
+      second is not; with the half as a literal the second is the
+      retail's and the tail costs one instruction more.
+
+      Tried: the half as a variable (the third attempt), as a literal
+      in both branches and in the tail, as a literal in the branches
+      only, the half assigned at the top of the else block (that one
+      puts the constant in a saved $f20 and grows the frame), the half
+      declared and assigned in each branch.
+
+   2. The word read from 0x10(state) is in $v1 here and in $v0 in the
+      retail, and the retail moves the first call's result out of $v0
+      first (`daddu $a1,$v0,$zero' before `lw $v0,0x10($s0)').  That
+      is the scheduler's order, not the source's: the load and the
+      move are independent.  Tried: the load before and after the
+      mask block, the mask block as one expression or as two
+      statements, the two masks in either order - the attempt above is
+      the best of them (the mask block is the retail's, instruction for
+      instruction).
+
+   The attempt belongs in the -G8 unit (D_L20_001AEDA8 and
+   D_L20_001AED90 are read through $gp). */
+
+/* ------------------------------------------------------------------
+   Wave 5, worker 08.  The attempt below is 332 bytes, the retail's
+   size, and seven instructions differ - all of them the register of
+   one value, the 0.5f.
+
+   What this wave measured on the floating point register allocation,
+   which is the wall of this body:
+
+   - THE 0.5f MUST BE IN $f12, and the way to get it there is to make
+     it the ARGUMENT of the call.  A value that is passed to a call
+     gets the argument register ($f12 for the first float argument),
+     and the global allocator tries the preferred register first; a
+     value that is only an operand of an expression does not get a
+     preference and lands in the next free $f register ($f1 here).
+
+       half = 0.5f;
+       ...
+       half = f0 + half;
+       v = func_00303410(half, a0, a1);
+
+     gives the 0.5f in $f12 in both branches (the retail's
+     `mul.s $f0,$f0,$f12') and the tail's `add.s $f12,$f12,$f0'.
+
+   - But that spelling canonicalises the add's operands: the
+     destination of the add is the same value as one of its operands
+     (`half = f0 + half' becomes `half = half + f0'), and the retail
+     has the operands in the other order (`add.s $f12,$f0,$f12', the
+     destination first).  With a different variable for the sum the
+     operand order is the source's order, but then the half is only
+     an operand of the expression and it loses $f12.  The two
+     requirements contradict each other as far as this cc1 is
+     concerned.
+
+   - The rest of the difference is the same value in the second
+     branch: with the half as a variable the conversion of
+     D_L20_001AEDA8 lands in $f13 and the constant 0.0002908882452f
+     in $f0; the retail has the conversion in $f0 and the constant in
+     $f13, the same as the first branch.  With the half as the LITERAL
+     0.5f both branches come out the retail's, and the tail then
+     costs two instructions more (the constant is materialised again
+     in $f12 before the call).
+
+   - The word read from 0x10(state) is in $v1 here and in $v0 in the
+     retail: the retail moves the first call's result out of $v0
+     first (`daddu $a1,$v0,$zero' before `lw $v0,0x10($s0)'), this
+     attempt loads it into $v1 before that move.  It is the order of
+     the scheduler, not of the source.
+
+   What else was measured: the `nosda' attribute on the three
+   absolute words (D_L20_001AED94/9C/98) is WRONG - without it this
+   cc1 gives the retail's form (`lui $a1,%hi(D) / lw $a1,%lo(D)($a1)'),
+   with it the high part goes to a scratch register.  The two words
+   read through $gp (D_L20_001AEDA8 at -0x248 and D_L20_001AED90 at
+   -0x260) keep their `sda'.
+
+   The attempt belongs in the -G8 unit.
+*/
+
+#include "include_asm.h"
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed short s16;
+typedef unsigned int u32;
+typedef signed int s32;
+typedef float f32;
+
+extern int func_00301ED0(void *);
+
+extern void func_003253A8(void *);
+
+extern float func_00303270(float, float);
+
+extern float func_00302870(float);
+
+extern int func_00303410(float, int, int);
+
+extern float func_003033B8(int);
+
+extern void func_L00_002E6CF0(void *, void *);
+
+extern void func_L20_0039F230(char *);
+
+extern int D_L20_001AEDA8 __attribute__((sda));
+
+extern int D_L20_001AED90 __attribute__((sda));
+
+extern int D_L20_001AED94;
+
+extern int D_L20_001AED9C;
+
+extern int D_L20_001AED98;
+
+void func_L20_0039ED78(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    if (func_00301ED0(state) != 0) {
+        func_003253A8(arg0);
+    } else {
+        f32 x = *(f32 *)(state + 0x8);
+        f32 r, s, f0, half;
+        int v, v0, v1;
+        int a0, a1;
+
+        if (*(int *)(state + 0xC) != 0) {
+            r = func_00303270(x, (f32)D_L20_001AEDA8 * 0.0002908882452f);
+            *(f32 *)(state + 0x8) = r;
+            s = func_00302870(r);
+            half = 0.5f;
+            f0 = s * half;
+            a1 = D_L20_001AED94;
+            a0 = D_L20_001AED90;
+        } else {
+            r = func_00303270(x, (f32)D_L20_001AEDA8 * 0.0002908882452f);
+            *(f32 *)(state + 0x8) = r;
+            s = func_00302870(r);
+            half = 0.5f;
+            f0 = s * s * half;
+            a1 = D_L20_001AED9C;
+            a0 = D_L20_001AED98;
+        }
+        half = f0 + half;
+        v = func_00303410(half, a0, a1);
+        v = func_00303410(0.15f, *(int *)(state + 0x10) | *(int *)(state + 0x4), v);
+        v0 = v & 0xFFFFFF;
+        v1 = v & 0xFF000000;
+        *(int *)(state + 0x10) = v1;
+        *(int *)(state + 0x4) = v0;
+        *(f32 *)(state + 0x14) = func_003033B8(v1 >> 24) * 0.00390625f;
+        func_L00_002E6CF0(func_L20_0039F230, arg0);
+    }
+}

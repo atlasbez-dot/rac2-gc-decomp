@@ -270,7 +270,6 @@ void func_L00_00341658(char *p)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00341798);
 
 /* advances an index with signed delta and either wraps by count or clamps the applicable endpoint */
 /* Advances a signed index, wrapping or clamping to the measured count. */
@@ -323,7 +322,6 @@ INCLUDE_ASM("asm/levels", func_L00_00341FA8);
 
 INCLUDE_ASM("asm/levels", func_L00_003425F8);
 
-INCLUDE_ASM("asm/levels", func_L00_00342C80);
 
 #define NOT_SDA __attribute__((section(".data")))
 
@@ -934,7 +932,6 @@ int func_L00_0034EF68(void)
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00350F20);
 
 extern int D_L00_001C95D4;
 
@@ -948,7 +945,6 @@ unsigned int func_L00_00351608(void)
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00357CB0);
 
 /* A03-counter-mod50-80 freshly exact-verified under family reservation */
 void func_L00_003584B0(void)
@@ -970,9 +966,7 @@ int func_L00_00358668(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00358670);
 
-INCLUDE_ASM("asm/levels", func_L00_003586A0);
 
 extern void func_00282A60(unsigned int *dst, unsigned int val, int size);
 

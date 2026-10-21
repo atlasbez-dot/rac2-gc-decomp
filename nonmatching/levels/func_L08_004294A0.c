@@ -59,3 +59,8 @@ s32 func_L08_004294A0(s32 a0, s32 a1, char *a2)
     }
     return 0;
 }
+
+Wave 24 (worker 01): not cracked; the attempt above still gives "08_tabora: instruction at
++0x20 differs", the slot counter and the walk base trading registers ($a2/$a3 against
+$a1/$a2 here) and the four state constants shifting with them.  The 16-byte copy and the
+`jal` with 0x40 are reproduced by the attempt.

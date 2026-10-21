@@ -30,3 +30,16 @@ void func_L08_003F79E0(u8 *a0) {
     D_L08_001B9E04 = 0;
     *(TQ *)(v1 + 0x0) = *(TQ *)buf;
 }
+
+/* Measured again (wave 24, worker 10).  The zero store is the project's own
+   pass, not the compiler: tools/compiler/transformers/fold_zero_ti_store.py
+   folds `por $rd,$zero,$zero` into the consuming `sq` when the register is
+   dead after the store - and retail's own register ($a0) is dead after its
+   `sq $a0,0x0($sp)` too (the argument was already consumed by the
+   `lw $v1,0x68($a0)`), so retail's por is exactly what the pass removes.  The
+   pass only leaves the materialisation alone when the register is referenced
+   again before it is rewritten, and no spelling of this body does that: the
+   four `swc1`s overwrite the quad right after the store.  The frame also grows
+   to 0x20 with $ra and $s0 saved where retail saves nothing, and the four
+   constants land in $f3/$f0/$f1/$f2 against retail's $f3/$f2/$f0/$f1.  A -G8
+   unit (the same body in a L08_003D8348-g8.c file) changes neither. */

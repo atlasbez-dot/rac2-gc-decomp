@@ -1,5 +1,12 @@
-/* from src/game/0027F128.c: 16-byte near miss; 2 instructions differ.
-   Retail converts in place (cvt.w.s $f12,$f12) and reads the word back from
-   the same register; this cc1 always converts into a fresh FPR and moves the
-   word through a GPR (cvt.w.s $f0,$f12 ; mfc1 $v0,$f0). */
-int func_00283CF0(f32 a0) { f32 b = a0; return (int)b; }
+/* func_00283CF0 - 16 bytes, 28 places (the boot and every level), retail at
+   0x00283cf0: cvt.w.s $f12,$f12 ; mfc1 $v0,$f12 ; jr $ra ; nop.  Only the
+   destination register differs: this cc1 always converts into a fresh FPR
+   (`cvt.w.s $f0,$f12 ; mfc1 $v0,$f0`).  Nine spellings were measured (the
+   cast direct, through a float local, through an int local, through an
+   unsigned cast, with the argument used twice, with the argument used in an
+   addition): all give $f0.  The SDK compiler in build/compiler/sdk gives
+   the same words.  What would unblock it: a source that lets the
+   conversion reuse the argument's register. */
+typedef float f32;
+
+int func_00283CF0(f32 a0) { return (int)a0; }

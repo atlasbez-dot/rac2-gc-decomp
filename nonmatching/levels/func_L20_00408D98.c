@@ -85,3 +85,43 @@
    The attempt below is unchanged: no C was written for this body in
    this wave.
 */
+
+/* ------------------------------------------------------------------
+   Wave 23, worker 09.  No C was written for this body in this wave
+   (1760 bytes, eight arms); what is measured here is that the jump
+   table's escape works with the right NAME and a SIZE, so that the
+   next attempt can start from the arms.
+
+   MEASURED: `extern void *jtbl_002B5340[8];` with
+   `goto *jtbl_002B5340[sel];` and a
+   `static void *volatile tab[8] = { &&c0, ... };` compiles to exactly
+   the retail's dispatch:
+       lui   $v0,%hi(jtbl_002B5340)
+       sll   $a0,$a0,2
+       addiu $v0,$v0,%lo(jtbl_002B5340)
+       addu  $a0,$a0,$v0
+       lw    $v1,0($a0)
+       jr    $v1
+       nop
+   The table of &&labels lands in .data, which the build discards, and
+   the eight case bodies stay alive.  The name has to be
+   `jtbl_002B5340` (the level's config/undefined_syms_auto.txt has
+   `jtbl_002B5340 = 0x2B5340;`); a `D_L20_002B5340` spelling does not
+   resolve.  The declaration needs the size: an
+   `extern void *jtbl_002B5340[];` never takes the absolute form in a
+   -G8 file.
+
+   The table's entries (the level's own data):
+     [0] 0x00408E08   [1] 0x00408EA8   [2] 0x004090AC   [3] 0x004090AC
+     [4] 0x00409154   [5] 0x004091E8   [6] 0x0040925C   [7] 0x004093BC
+   and the dispatch's guard is `sltiu $v0,$v1,0x8`, so the index is the
+   byte itself.
+
+   The wall that remains is the arm by arm work: the retail's prologue
+   interleaves the body with the saves (the `lui $v1,%hi(D_1CA540)` and
+   the `daddu $s4,$v1` sit between the `sd $s2` and the `sd $s0`), the
+   first arm writes the constant 0x42AA0000 (85.0f) through D_1B2BE8
+   with `lui $at` + `mtc1` + `swc1 %lo(D_1B2BE8)($at)` (an absolutely
+   addressed float), and the arms use D_001A79F0 (the $gp base at
+   0x1AEFF0 - 0x7600) and D_0019B2E8 as table bases.
+*/

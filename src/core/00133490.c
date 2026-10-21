@@ -58,7 +58,6 @@ int func_00133890(void) {
     return func_00132C48(61, 0, 0);
 }
 
-INCLUDE_ASM("asm/core", func_001338B8);
 
 void func_001338C8(void)
 {
@@ -75,7 +74,6 @@ int func_001338F0(int first, int second, int third, int fourth, int fifth) {
     return func_00132C48(62, 20, payload);
 }
 
-INCLUDE_ASM("asm/core", func_00133928);
 
 int func_00133930(int first, int second)
 {

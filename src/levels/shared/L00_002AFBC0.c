@@ -224,7 +224,6 @@ void func_L00_002B2BD0(void)
     func_002B8518();
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002B2C50);
 
 /* dispatch on the second integer argument: each arm runs a pair of sub-calls passing the first argument twice, the second call also forwarding the float argument */
 void func_L00_002B2C58(int a, int b, float x, float y)
@@ -360,7 +359,6 @@ void func_L00_002B3EF8(int a0, float x, float y, float z) {
         D_00189E20.f1A8 = func_002AA898(&D_00189E20.f98, (char *)&D_00189E20.f1A4, a0, D_00189E20.f1A0, x, y, z);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002B3F60);
 
 INCLUDE_ASM("asm/levels", func_L00_002B3F68);
 

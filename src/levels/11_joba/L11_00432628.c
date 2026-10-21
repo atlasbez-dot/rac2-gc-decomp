@@ -256,7 +256,8 @@ INCLUDE_ASM("asm/levels", func_L11_00438F18);
 
 INCLUDE_ASM("asm/levels", func_L11_004390D0);
 
-INCLUDE_ASM("asm/levels", func_L11_004393D8);
+/* func_L11_004393D8 is defined in L11_00432628-g8.c (it reaches D_L11_001B12C4
+   through $gp). */
 
 /* func_L11_004395C8: attempt kept in drafts (112 bytes, expected 116). */
 /* func_L11_004395C8 is defined in L11_00432628-g8.c (this unit has no $gp access for it). */

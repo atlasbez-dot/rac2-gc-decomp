@@ -6,7 +6,22 @@
    Measured gaps: (1) cc1 folds the +0x340 into the sq (sq $v0,0x340($s1)) where retail
    materialises `addiu $a0,$s1,0x340` and stores at offset 0 - the wall the wave-6 note
    records for the TI128 copies; (2) the func_420C68 argument setup lands in a different
-   order (retail a0, a1, a2; here a1, a2, then a0 after the jal). */
+   order (retail a0, a1, a2; here a1, a2, then a0 after the jal).
+
+   Wave 24 (worker 06) re-measured it and confirms both gaps, and adds:
+   - the 128-bit type is `typedef int TI __attribute__((mode(TI)))`; the source of
+     the copy (a1) is a plain pointer and comes out as the retail's
+     `lq $v0,0($s2)`, so only the DESTINATION (s1 + 0x340) folds.  The
+     destination is the "source address is base + const" case and is out of C's
+     reach (the common file's wall).
+   - the argument setup's schedule: the retail has
+     `lw $s1,0x68($s0) ; lw $a0,0x220($s1) ; addiu $a1,$s0,0x10` before the jal
+     and only `daddu $a2,$s2,$zero` in its delay slot; this cc1 puts the load of
+     s1 into the jal's delay slot and the addiu of a1 into the delay slot of the
+     branch above it.  The order of the C's statements does not change it.
+   - the calls are func_L03_00419BD8 (the callee at 14:00420C68) and func_002A7750
+     (the callee at 14:00321F58); with the catalogue's names the call targets
+     resolve to the retail's addresses. */
 
 #include "include_asm.h"
 #include "common.h"

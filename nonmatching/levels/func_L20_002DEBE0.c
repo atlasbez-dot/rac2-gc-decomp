@@ -220,3 +220,110 @@
    -G8) and not in L20_002DEBE0.c.
 
 */
+
+   ------------------------------------------------------------------
+   2026-10-21, worker 13 of the level-20 wave (wave 5): the map, finer.
+
+   MEASURED over the whole body (0x002DEBE0 .. 0x002E5A10, from the retail
+   listing build/20_yeedil/asm/5B0B0.s, the label f_002DEBE0):
+
+       7052 instructions, 7052 / 4 = 1763 words, 28208 bytes
+       440 calls to 83 distinct callees
+       501 internal labels (.L...)
+       987 branches, of which
+           beqz 214   bnez 202   bc1f 136   bnel 116   beql 74
+           bne  71    beq  60    bc1t  43   bc1tl 30   bc1fl 26
+           bgtzl 6    blez  5    break 2    bgtz  1    blezl 1
+
+   The 68 branches that LEAVE the sequence go straight to an exit; the
+   numbers in the map above (196, 107, 62, 24, 9, 4) are the transitive
+   counts (a branch to an internal label that ends at the exit).  The
+   direct ones are
+
+       0x002E591C  29    the main exit (the level is done)
+       0x002E5958  19    the "the other object changed" exit
+       0x002E5954  16    the same, one branch further
+       0x002E595C   3    the "the saved value changed" exit
+       0x002E58B8   1    the "the camera is too high" exit
+
+   THE SHAPE OF A TEST BLOCK.  The body is a sequence of blocks of the
+   form
+
+       jal   f_002DCC80            the test
+       nop
+       bnez  $v0, .L002E5958       if it failed, leave
+       addiu $s0, $s3, %lo(D_189E20)   the argument, in the delay slot
+
+   The tests are the six "is this level live" ones (func_002C5D00,
+   func_002DE870, func_002DCC80, func_002DC628, func_002DC4C8,
+   func_002DC418), each with an exit, and then the update calls, each of
+   which is a `jal` whose result is tested with a branch to an exit or
+   not.  The argument of the call is usually set up in the delay slot of
+   the branch that follows the PREVIOUS call, so the source's argument
+   order is visible in the delay slots.
+
+   THE FIRST BLOCKS IN FULL (0x002DEC8C .. 0x002DEE30), which show the
+   patterns the whole body is made of:
+
+       0x002DEC8C  jal   f_002DCC80
+       0x002DEC90   nop
+       0x002DEC94  bnez  $v0, .L002E5958
+       0x002DEC98   addiu $s0, $s3, %lo(D_189E20)
+       0x002DEC9C  jal   f_002DC628
+       0x002DECA0   nop
+       0x002DECA4  bnez  $v0, .L002E595C
+       0x002DECA8   lw    $a0, 0x7C($sp)      the object, from the stack
+       0x002DECAC  jal   f_002DC4C8
+       0x002DECB0   nop
+       0x002DECB4  bnez  $v0, .L002E595C
+       0x002DECB8   lw    $a0, 0x7C($sp)
+       0x002DECBC  jal   f_002DC418
+       0x002DECC0   nop
+       0x002DECC4  bnez  $v0, .L002E595C
+       0x002DECC8   lw    $a0, 0x7C($sp)
+       0x002DECCC  lui   $v1, %hi(D_138180)   another global, in two forms
+       0x002DECD0   daddu $s2, $v1, $zero
+       0x002DECD4   addiu $v1, $v1, %lo(D_138180)
+       0x002DECD8  lw    $v0, 0x1A4($v1)
+       0x002DECDC  andi  $v0, $v0, 0x10
+       0x002DECE0  bnez  $v0, .L002DECF8
+       0x002DECE4   addiu $a0, $s3, %lo(D_189E20)
+       0x002DECE8  lw    $v0, 0x1C4($v1)
+       0x002DECEC  andi  $v0, $v0, 0x10
+       0x002DECF0  beqz  $v0, .L002DEE30
+       0x002DECF4   nop
+       0x002DECF8  addiu $v1, $zero, 0x2
+       0x002DECFC  lbu   $v0, 0x123C($a0)
+       0x002DED00  beq   $v0, $v1, .L002DEE30
+       0x002DED04   lw    $v0, -0x603C($gp)   0x001A8FB4
+       0x002DED08  bnez  $v0, .L002DEE30
+       0x002DED0C   nop
+       0x002DED10  lui   $v0, 0x1A7BB3
+       0x002DED14  lbu   $v0, 0x1A7BB3($v0)
+       0x002DED18  bnez  $v0, .L002DEE30
+       0x002DED1C   lw    $v0, 0x3AD4($gp)    0x001B2AC4
+       0x002DED20  slti  $v0, $v0, 0x8
+       0x002DED24  bnez  $v0, .L002DEE30
+       0x002DED28   nop
+       0x002DED2C  lbu   $v0, 0x22BC($a0)
+       0x002DED30  beqz  $v0, .L002DED50
+
+   Note the shape of the "several conditions, one exit" blocks: each test
+   ends in a branch-LIKELY to the SAME label (here .L002DEE30), with the
+   next test's first instruction in the delay slot.  That is the shape
+   the source must have: several separate `if (...) goto L;` statements,
+   not one `&&` chain (the chain gives a plain branch).
+
+   THE $gp ACCESSES, with their addresses: -0x603C (0x001A8FB4), 0x3AD4
+   (0x001B2AC4), -0x7600 (0x001A79F0, twice) and -0x65A8 (0x001A8A48,
+   three times, the stores in the tail).
+
+   WHAT A C ATTEMPT WOULD HAVE TO REPRODUCE (the list above, plus): the
+   440 calls in their order with their arguments, the 68 exits, the 987
+   branches with their polarity and their branch-likely forms, the 369
+   float constant materialisations, the four values the prologue reads out
+   of D_00189E20 and spills to 0x78..0x84, and the epilogue's two
+   conditional stores.  It is a transcription of a whole level update:
+   the next worker should start from the phase table above and work one
+   phase at a time, checking each phase against the retail with
+   tools/check.py (which will show the first difference).

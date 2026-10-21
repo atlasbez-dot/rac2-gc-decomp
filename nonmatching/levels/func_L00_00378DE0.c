@@ -1,37 +1,59 @@
-/* 0 of 27 places match - last line: 00_aranos_tutorial: 172 bytes, expected 176
-   Reads the per-level block at 0x0022F7C0 (0x80 slot index, 0x84 live count, 0x148+index*16
-   a resident limit): if the count is set, the caller's id is updated and the engine queue is
-   fed one of two request words with the 0x80F0F0F0 colour.
-   Shape notes worth keeping: the limit must be read BEFORE the call so the base dies in $a0
-   and only the limit lives in $s0, and the branch must be written `if (r >= limit)` so the
-   0x1128 arm is the fall-through (retail `bnez` jumps to the 0x1129 arm).  What stays: this
-   cc1 hoists the inner call's `addiu $a0,$zero,0x1129` into the `bnez` delay slot and then
-   keeps the base in $a1, retail leaves a `nop` and keeps it in $a0. */
+/* 0 of 27 places match - last line: 00_aranos_tutorial: instruction at +0x28 differs
+ *
+ * Every instruction of the body matches except one: the retail adds the block's
+ * base to the scaled index with the base as the first source operand
+ * (`addu $v0, $a0, $v0`), this cc1 always puts the index there
+ * (`addu $v0, $v0, $a0`). The RTL order is canonicalised, so the source order
+ * does not change it: tried the hoisted pointer, the inline expression, an int
+ * base, a char * base, an unsigned index with a multiply, a 16-byte record
+ * array and the pre-scaled index - all give the same instruction.
+ *
+ * What was measured and works:
+ *  - the body needs a -G8 unit: the retail reaches the first registry word with
+ *    `lw $a0, -0x1850($gp)`, which only comes out of a -G8 file with an `sda`
+ *    declaration; the second word is reached absolutely (`lui $a1, 0x1B;
+ *    lw $a1, -0x285C($a1)`), so it is declared without the attribute;
+ *  - the block is the level's own data at 0x0022F7C0 (D_L00_0022F7C0, the same
+ *    block func_L00_00374708 reads);
+ *  - the helper is the boot function func_002B0D70 (the retail's jal target
+ *    0x003269A8 in level 00); it takes no argument, the block pointer simply
+ *    happens to still be in $a0;
+ *  - the limit has to be read before the call (it then lives in $s0 across it);
+ *  - the dispatch is `if (r >= limit)` with the 0x1129 arm in the then branch
+ *    and the 0x1128 arm in the else branch - the retail's `bnez` jumps to the
+ *    0x1128 arm;
+ *  - the third argument of func_0027FB40 is a long, so the 0x80F0F0F0 colour
+ *    comes out as `ori; dsll; ori`.
+ *
+ * The file lives in src/levels/shared/L00_00358D98-g8.c; the candidate needs
+ * that -G8 unit, so it cannot stay in the plain unit.
+ */
+extern int D_L00_0022F7C0[];
 
-#include "include_asm.h"
+extern int D_L00_001AD7A0 __attribute__((sda));
 
-extern int func_3269A8();
-extern int func_2F4668(int);
-extern void func_2E9B40(int, int, unsigned int, int, int);
+extern int D_L00_001AD7A4;
 
-extern char ref_L00_00378DE0_00[];
-extern int ref_L00_00378DE0_01 __attribute__((sda));
-extern int ref_L00_00378DE0_02;
+extern int func_002B0D70(void);
+
+extern unsigned char *func_00288FB8(int);
+
+extern int func_0027FB40(int, int, long, unsigned char *, int);
 
 void func_L00_00378DE0(void)
 {
-    char *p = ref_L00_00378DE0_00;
+    int base = (int)D_L00_0022F7C0;
+    int index;
     int limit;
     int r;
 
-    if (*(int *)(p + 0x84) == 0)
+    if (*(int *)(base + 0x84) == 0)
         return;
-    limit = *(int *)(p + (*(int *)(p + 0x80) << 4) + 0x148);
-    r = func_3269A8(p);
+    index = *(int *)(base + 0x80);
+    limit = *(int *)(base + (index << 4) + 0x148);
+    r = func_002B0D70();
     if (r >= limit)
-        func_2E9B40(ref_L00_00378DE0_01, ref_L00_00378DE0_02, 0x80F0F0F0,
-                    func_2F4668(0x1128), -1);
+        func_0027FB40(D_L00_001AD7A0, D_L00_001AD7A4, 0x80F0F0F0, func_00288FB8(0x1129), -1);
     else
-        func_2E9B40(ref_L00_00378DE0_01, ref_L00_00378DE0_02, 0x80F0F0F0,
-                    func_2F4668(0x1129), -1);
+        func_0027FB40(D_L00_001AD7A0, D_L00_001AD7A4, 0x80F0F0F0, func_00288FB8(0x1128), -1);
 }

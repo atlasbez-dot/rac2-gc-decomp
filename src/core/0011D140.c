@@ -431,4 +431,3 @@ int func_0011D810(void *arg0) {
     return 1;
 }
 
-INCLUDE_ASM("asm/core", func_0011D850);

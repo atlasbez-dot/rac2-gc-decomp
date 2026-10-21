@@ -97,6 +97,82 @@ void func_L07_003F4970(u8 *a0)
     }
 }
 
+
+typedef int TI128 __attribute__((mode(TI)));
+
+/* The object up to its flag word, its state pointer and its counter. */
+typedef struct {
+    u8 pad00[0x34];
+    u16 flags34;
+    u8 pad36[0x68 - 0x36];
+    u8 *state;
+    u8 pad6c[0x98 - 0x6C];
+    s32 f98;
+} SibObj;
+
+/* The state record up to its two group words. */
+typedef struct {
+    u8 pad00[0xCC];
+    s32 groupCC;
+    s32 groupD0;
+} SibGroups;
+
+extern f32 D_L07_001B173C;
+
+extern u8 D_L07_001B1730 __attribute__((sda));
+
+extern u16 **D_L07_001A9014;
+
+extern u8 *D_L07_001B2954;
+
+extern u8 *D_L07_001B295C;
+
+extern s32 D_L07_001B1E90;
+
+extern void func_L00_002B9D60(void *obj, void *pos, s32 a2, s32 a3);
+
+extern void func_L00_0036AE00(s32 id, s32 a1);
+
+/* Switches the object to its second phase. */
+void func_L07_00410930(SibObj *a0)
+{
+    f32 arg[4];
+    f32 v[4];
+    SibGroups *state;
+    u16 *p;
+    u16 *q;
+    u8 *e;
+
+    *(TI128 *)v = 0;
+    v[2] = D_L07_001B173C;
+    *(TI128 *)arg = *(TI128 *)v;
+    state = (SibGroups *)a0->state;
+    func_L00_002B9D60(&D_L07_001B1730, arg, 0, 1);
+    a0->flags34 |= 2;
+    a0->f98 = 0;
+    for (p = D_L07_001A9014[state->groupD0];
+         p != 0 && ((s16)p[-1] >= 0 || p == D_L07_001A9014[state->groupD0]) &&
+         (e = D_L07_001B2954 + ((*p & 0x7FFF) << 5)) != 0;
+         p++) {
+        e[0x1E] &= 0xFB;
+    }
+    for (p = D_L07_001A9014[state->groupCC];
+         p != 0 && ((s16)p[-1] >= 0 || p == D_L07_001A9014[state->groupCC]) &&
+         (e = D_L07_001B2954 + ((*p & 0x7FFF) << 5)) != 0;
+         p++) {
+        e[0x1E] |= 4;
+    }
+    for (q = D_L07_001A9014[state->groupCC];
+         q != 0 && ((s16)q[-1] >= 0 || q == D_L07_001A9014[state->groupCC]) &&
+         (e = D_L07_001B295C + ((*q & 0x7FFF) << 6)) != 0;
+         q++) {
+        *(f32 *)(e + 0x38) -= 100.0f;
+        func_L00_0036AE00(*q & 0x7FFF, 1);
+    }
+    D_L07_001B1E90 = 2;
+}
+
+
 /* Seeds the two shared field defaults, then fills the 0x450 record once. */
 INCLUDE_ASM("asm/levels", func_L07_003F8780);
 

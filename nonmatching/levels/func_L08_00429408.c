@@ -33,3 +33,17 @@ void func_L08_00429408(s32 a0) {
         *v = -1;
     }
 }
+
+Wave 24 (worker 01): the address materialisation is still grouped differently.  With the
+attempt above `tools/check.py func_L08_00429408 --diff` gives "08_tabora: instruction at
++0x8 differs" with 24 differing lines; the prologue is the only difference: retail
+materialises 0x1B39E0 into $v0 and 0x1B39A0 into $v1 (each a joined lui/addiu pair)
+before the `sll $s0,$a0,2`, this cc1 materialises 0x1B39E0 into $v0 but keeps 0x1B39A0 in
+$a0 and 0x1B3A30 in $v1, and interleaves the pairs with the `sd` saves differently.
+Measured with no effect: the four pointer locals in retail's order, the same in
+1B39A0-first order, the array-index spelling, a manual `i = a0 << 2` with the bases
+added by hand, and the fully inlined `D_L08_001B39A0[a0]` spelling.
+
+Measured lever: `-mno-split-addresses` turns the split address into retail's joined
+`lui`/`addiu` pair, but the body then comes out four bytes short (148 against 152) with
+all six spellings tried, so it does not land this function either.

@@ -42,3 +42,15 @@ void func_L08_00424F40(char *a0)
     *(s32 *)(*(char **)(s1 + 0x1FC)) = *(s32 *)(*(char **)(s1 + 0x1FC)) - 1;
     func_L08_00424ED0(s0);
 }
+
+Wave 24 (worker 01) re-measured the wall and did not break it.  `tools/check.py
+func_L08_00424F40 --diff` with the attempt above still gives "08_tabora: instruction at
++0x80 differs" and the ONLY differing word is the loop test's reload: retail
+`lw $v1,0x0($sp)` against `lw $v0,0x0($sp)` here (the two `jal` lines differ only in the
+relocated symbol name).  Six further spellings measured, all giving the same single
+word: the `do { ... } while (buf != 0)` form with an `if (buf != 0)` guard in front,
+the loop counter `i` declared `int` instead of `s32`, the byte read through a named
+`u8 b` local, `while (buf)`, the pointer-to-buffer form (`s32 *pb = &buf`, which costs
+12 extra bytes), and the tail decrement written through a `s32 *p`.  The reload always
+lands in $v0 while retail keeps the same $v1 for both loads of the stack slot, so the
+block is a register-allocation wall, not a source shape.

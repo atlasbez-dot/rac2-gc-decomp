@@ -33,3 +33,16 @@ char *func_L01_003BC490(char *a0, char *a1)
     }
     return s0;
 }
+
+/* Wave 24 (worker 09) -- confirms the TI-destination wall and adds what is
+   left of it.  The source below reaches 168 bytes against 176: the load
+   (lq $v0, 0x0($s2), a plain pointer) is instruction-exact, the store is not
+   (retail: addiu $a1, $s0, 0x10 ; sq $v0, 0x0($a1); here: sq $v0, 0x10($s0)),
+   and the two float constants are scheduled before the copy here and after it
+   in retail.  The object is allocated with func_00305EE8(0xA26) (the boot
+   function at 0x002761F8 is at 01:00305EE8? no: retail's callee is
+   f_00305EE8), the angle is seeded with func_00310580(-pi, pi), whose result
+   is stored at +0xF8, and the +0x38 word is copied with func_00308938.
+
+   Checked with: python3 tools/check.py func_L01_003BC490 --diff
+   Last line: func_L01_003BC490: 0 of 1 places match (src/levels/01_oozla/L01_003BB9D0.c) */

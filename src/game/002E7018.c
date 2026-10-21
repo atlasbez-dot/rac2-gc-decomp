@@ -72,7 +72,6 @@ void func_002E7B48(void *object)
         func_002E76C0(object, index, 0);
 }
 
-INCLUDE_ASM("asm/game", func_002E7BC0);
 
 INCLUDE_ASM("asm/game", func_002E7BC8);
 
@@ -156,7 +155,6 @@ void func_002EAAA8(void *arg, int *status) {
 
 INCLUDE_ASM("asm/game", func_002EAB18);
 
-INCLUDE_ASM("asm/game", func_002EB150);
 
 typedef struct { char pad[0x30]; int selected; char gap[0x3C]; int destination; } State2EB158;
 extern State2EB158 D_001B8840;
@@ -191,7 +189,7 @@ INCLUDE_ASM("asm/game", func_002EBC70);
 
 INCLUDE_ASM("asm/game", func_002EBDF0);
 
-INCLUDE_ASM("asm/game", func_002EC1C0);
+/* func_002EC1C0 is matched in 002E7018-g8.c (-G8 small data). */
 
 INCLUDE_ASM("asm/game", func_002EC408);
 

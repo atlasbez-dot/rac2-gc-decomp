@@ -218,7 +218,29 @@ void func_L11_00458DF0(char *a0, void *a1, void *a2, int a3, int t0, float f12, 
     func_00280B90(&local, &local.m00, 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_0045FEF8);
+/* Emits two effects at the object's position with independently sampled
+ * intensities and the two colour/scale presets. */
+extern int func_002A7820(int, int);
+
+extern float func_002A7940(void);
+
+extern void func_L11_004600A0(void *, int, int, int, int, float, float, float);
+
+void func_L11_0045FEF8(void *a0)
+{
+  float new_var;
+  char *p = ((char *) a0) + 0x10;
+  int v = func_002A7820(0x2F, 0x3F);
+  int new_var2;
+  float f;
+  func_L11_004600A0(p, (float) 0x103080, v, 0xB, 2, 2.0f, func_002A7940(), 1.0f);
+  new_var = 1.0f;
+  new_var2 = func_002A7820(0x1F, 0x3F);
+  v = new_var2;
+  f = func_002A7940();
+  func_L11_004600A0(p, 0x606060, v, 0xB, 2, new_var, f, new_var);
+}
+
 
 /* resets a state record: zero words, plus/minus one float flags and two 64-bit fields in the retail store order */
 void func_L11_0045FFB0(char *p)

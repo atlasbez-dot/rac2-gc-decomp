@@ -1,22 +1,23 @@
-/* Level table lookup, 27 places: the record at base + index * 0xA430 whose second word is the
- * key, returning a pointer to its third word. Closest candidate is 11 of 12 instructions exact
- * - all 27 places differ only at +0x10: retail adds the element address as base + index
- * (addu $v0,$a2,$a1) where this cc1 always emits index + base (addu $v0,$a1,$a2). Operand
- * reorder, s32/u8* casts, named base and entry locals, an all-integer spelling, the spellings of
- * nonmatching/levels/func_L00_0032A088.c (same table, +0x20), the -G8 profile and the SDK
- * compiler all produce the same single swap. */
+/* 0 of 27 places match - last line: 00_aranos_tutorial: instruction at +0x10 differs.
+   The same body as func_L00_0032A088 (the two functions differ only in the
+   payload offset, +0x20 here against +8 there): every word is retail's except
+   the operand order of the entry address, where retail has
+     addu $v0, $a2, $a1      base + index
+   and this cc1 has
+     addu $v0, $a1, $a2      index + base
+   with the same registers ($a2 = the table, $a1 = the product). See
+   nonmatching/levels/func_L00_0032A088.c for the ~30 spellings measured. */
+
 typedef int s32;
 typedef unsigned char u8;
 
 extern u8 D_L00_00268E20[];
 
-u8 *func_L00_0032A0B8(s32 a0, s32 a1)
+u8 *func_L00_0032A0B8(s32 key, s32 index)
 {
-    s32 idx = a1 * 0xA430;
-    s32 *e = (s32 *)(D_L00_00268E20 + idx);
+    u8 *entry = &D_L00_00268E20[index * 0xA430];
 
-    if (e[1] != a0) {
+    if (*(s32 *)(entry + 4) != key)
         return 0;
-    }
-    return D_L00_00268E20 + 8 + idx;
+    return &D_L00_00268E20[8] + index * 0xA430;
 }

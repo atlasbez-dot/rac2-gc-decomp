@@ -57,3 +57,17 @@ DItype func_00121AB8(DItype u, DItype v) {
 
     return w.ll;
 }
+
+/* Measured again (wave 24, worker 10): the residue is still one allocation
+   rotation, and it is the first instruction that differs.  Retail computes the
+   high word of u into $a2 (dsra32 $a2,$a0,0) and keeps the 0xFFFFFFFF mask in
+   $a1 (lui $a1,0xFFFF ; dsrl32 $a1,$a1,0), with the mflo in $a0 and the mfhi
+   in $v0; this candidate computes the high word of u into $v0, the mask into
+   $a2, the mflo into $a3 and the mfhi into $a0, and it materialises the mask
+   between the mult1 and the multu where retail keeps it after the multu.  The
+   rest of the body (the mult/multu/multu sequence, the two dsll32/dsrl32
+   pairs, the or, the and, the final or) is the same sequence.  Measured:
+   swapping the two cross terms, splitting `w.s.high +=` into two statements
+   (28 words, it runs into func_00121B20), dropping the union for explicit
+   shifts (20 words) and swapping the two union assignments all leave the
+   rotation in place; the SDK's compiler and the game's compiler agree. */

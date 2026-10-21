@@ -72,7 +72,6 @@ void func_L00_003AB618(char *a0, char *a1, char *a2)
 
 INCLUDE_ASM("asm/levels", func_L00_003AB6F0);
 
-INCLUDE_ASM("asm/levels", func_L00_003AB8B0);
 
 INCLUDE_ASM("asm/levels", func_L00_003AB8B8);
 
@@ -84,7 +83,7 @@ INCLUDE_ASM("asm/levels", func_L00_003AC8E8);
 
 INCLUDE_ASM("asm/levels", func_L00_003ACA60);
 
-INCLUDE_ASM("asm/levels", func_L00_003ACC88);
+/* func_L00_003ACC88 is defined in L00_003A8E28-g8.c (the scale is read through $gp). */
 
 
 INCLUDE_ASM("asm/levels", func_L00_003AD7C8);

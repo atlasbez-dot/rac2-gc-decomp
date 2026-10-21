@@ -214,3 +214,20 @@ void func_L20_002B93E0(void)
     hero = D_00189E20;
     func_002A677C(*(int *)(hero + 0x2290));
 }
+
+/* ---- fifth attempt (level-20 wave 5, worker 12, 2026-10-21) --------------------
+ * The brief's hint - "the retail's call at 0x002B9554 sets no argument, so the
+ * declaration must be (void)" - is right about the retail's bytes and wrong
+ * about the fix: with "extern void func_L00_002A5840(void);" and
+ * "func_L00_002A5840();" the body comes out 552 bytes, not the retail's 556,
+ * because the two instructions that set $a0 (= &D_002683EC) disappear and
+ * nothing replaces them.  With the argument (the attempt above) the body is
+ * 556 bytes, the retail's size, and the first difference is at +0x164
+ * (0x002B9544), the branch-likely's delay slot - the same six words as
+ * before.  So the call keeps its argument; what is missing is somewhere
+ * else, and the (void) declaration is not the answer.
+ *
+ * MEASURED (tools/check.py func_L20_002B93E0 --diff): 552 bytes with the
+ * (void) declaration and 556 with the argument, the retail's 556.  The
+ * differences are the ones the note above lists.
+ */

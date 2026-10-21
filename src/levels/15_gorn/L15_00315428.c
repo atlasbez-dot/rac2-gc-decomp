@@ -32,7 +32,7 @@ INCLUDE_ASM("asm/levels", func_L15_0042EFE0);
 /* func_L15_0042FD40: attempt kept in drafts (148 bytes, +0x4 differs). */
 /* func_L15_0042FD40 is defined in L15_00315428-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L15_0042FFB8);
+/* func_L15_0042FFB8 is defined in L15_00315428-g8.c (it reaches a global through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L15_00430168);
 

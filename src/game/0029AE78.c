@@ -122,7 +122,6 @@ void func_0029B6D0(int first, int second) {
         func_0034CAE8(D_001A8CFC[0] + 0x376C8, first, second);
 }
 
-INCLUDE_ASM("asm/game", func_0029B710);
 
 extern void func_0034B000(void *, int);
 

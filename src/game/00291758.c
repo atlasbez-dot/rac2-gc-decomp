@@ -1,8 +1,8 @@
 #include "include_asm.h"
 
-extern void func_00291788(unsigned long long);
+extern void func_00291788(int);
 
-extern void func_00291640(unsigned long long);
+extern void func_00291640(int);
 
 /* Frozen Batch A A02-list-add-88; acknowledged claim 38ceeb041b6ba12996de10c402ca54295587db96246845b83b2ec894986b096f. */
 typedef unsigned char BatchA_A02_u8;
@@ -33,17 +33,55 @@ extern struct Table1 Fee2b87d1_D_0014B540;
 
 extern struct Table2 Fee2b87d1_D_00152CD0;
 
-void func_00291758(unsigned long long param_1)
+void func_00291758(int param_1)
 {
     func_00291788(param_1);
     func_00291640(param_1);
 }
 
-INCLUDE_ASM("asm/game", func_00291788);
+/* One slot of the moby-part table the loader walks: six 16-bit indices into a
+   shared index array, and the array itself. The table's address differs from
+   program to program, so it carries no address in its name. */
+typedef struct {
+    short idx0;
+    short idx1;
+    short idx2;
+    short idx3;
+    short idx4;
+    short idx5;
+    short *index;
+    char pad[0x30 - 0x10];
+} BatchA_A02_Part;
+
+extern BatchA_A02_Part ref_L00_002FD338_00[];
+
+extern int ref_L00_002FD338_01(short *, short *, int);
+extern int ref_L00_002FD338_02(short *, short *, int);
+extern int ref_L00_002FD338_03(short *, short *, int);
+
+/* Hands the three index pairs of one part-table entry to the routines that
+   consume them and clears the indices. The index is a 32-bit one: the table
+   holds eight entries. The three routines live at another address in every
+   program, so they carry no address in their names. */
+void func_00291788(int index)
+{
+    BatchA_A02_Part *s0 = ref_L00_002FD338_00 + index;
+
+    if (s0->index) {
+        ref_L00_002FD338_01(s0->index + s0->idx0, s0->index + s0->idx0 + s0->idx1, index);
+        s0->idx0 = 0;
+        s0->idx1 = 0;
+        ref_L00_002FD338_02(s0->index + s0->idx2, s0->index + s0->idx2 + s0->idx3, index);
+        s0->idx2 = 0;
+        s0->idx3 = 0;
+        ref_L00_002FD338_03(s0->index + s0->idx4, s0->index + s0->idx4 + s0->idx5, index);
+        s0->idx4 = 0;
+        s0->idx5 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/game", func_00291850);
 
-INCLUDE_ASM("asm/game", func_00291CA0);
 
 INCLUDE_ASM("asm/game", func_00291CA8);
 
@@ -72,7 +110,6 @@ void func_002923C0(void *param)
 
 INCLUDE_ASM("asm/game", func_00292408);
 
-INCLUDE_ASM("asm/game", func_002925E0);
 
 INCLUDE_ASM("asm/game", func_002925F0);
 
@@ -170,15 +207,12 @@ INCLUDE_ASM("asm/game", func_002934F8);
 
 /* func_00293890 is in 00291758-g8.c. */
 
-INCLUDE_ASM("asm/game", func_002939B8);
 
 INCLUDE_ASM("asm/game", func_002939D0);
 
-INCLUDE_ASM("asm/game", func_00293A58);
 
 INCLUDE_ASM("asm/game", func_00293A60);
 
-INCLUDE_ASM("asm/game", func_00293CA0);
 
 int func_00293CA8(int index)
 {
@@ -216,7 +250,7 @@ void func_002940C0(void)
 }
 
 
-INCLUDE_ASM("asm/game", func_00294130);
+/* func_00294130 is matched in 00291758-g8.c (-G8 small data). */
 
 INCLUDE_ASM("asm/game", func_00294180);
 

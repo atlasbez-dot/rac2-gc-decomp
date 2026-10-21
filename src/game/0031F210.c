@@ -89,7 +89,6 @@ INCLUDE_ASM("asm/game", func_00322138);
 INCLUDE_ASM("asm/game", func_00322340);
 
 
-INCLUDE_ASM("asm/game", func_00322680);
 
 INCLUDE_ASM("asm/game", func_00322690);
 
@@ -175,10 +174,11 @@ INCLUDE_ASM("asm/game", func_00325430);
 
 INCLUDE_ASM("asm/game", func_00325638);
 
-INCLUDE_ASM("asm/game", func_003258B8);
 
 INCLUDE_ASM("asm/game", func_003258C0);
 
+/* func_00325A88 (cursor bookkeeping and a 16-byte copy) is a near miss:
+   nonmatching/game/func_00325A88.c */
 INCLUDE_ASM("asm/game", func_00325A88);
 
 /* func_00325B28 is in the -G8 sibling. */
@@ -232,7 +232,6 @@ INCLUDE_ASM("asm/game", func_00326198);
 
 INCLUDE_ASM("asm/game", func_00326A10);
 
-INCLUDE_ASM("asm/game", func_00326BD0);
 
 
 

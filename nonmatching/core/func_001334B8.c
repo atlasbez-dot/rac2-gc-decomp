@@ -72,3 +72,27 @@ int func_001334B8(int arg0, int arg1, int arg2) {
     func_00132DF0(0x38, 0xC, payload, 0, 0);
     return 1;
 }
+
+/* --- wave 24, worker 02: the same three differences, measured again. ---
+ *
+ * The candidate at the top of this file (196 bytes, one instruction off) is
+ * still the closest.  Re-measured here: with the addresses passed as symbols
+ * this cc1 folds the two materialisations of the address of D_001A7100 into
+ * one and the body comes out two instructions short (188 against 196); the
+ * retail materialises it twice - once for the store (`lui $at,0x1A ;
+ * sw $s0,0x7100($at)`) and once for the argument (`lui $a0,0x1A ;
+ * addiu $a0,$a0,0x7100`), which is the split-address form the earlier note
+ * calls the compiler's own form.  The constant 1 is materialised in the
+ * prologue here and in the delay slot of the call to func_00133580 in the
+ * retail; assigning the local just before the call only swaps the two
+ * materialisations.  The store of D_001A7110 sits in the delay slot of the
+ * call to func_0011B3D0 here, where the retail has a nop.
+ *
+ * The body needs the $gp-relative form of D_001A748C, D_001A7494 and
+ * D_001A7498, so it has to live in a -G8 unit; src/core/00133490-g8.c holds
+ * the already-matching sibling func_00133640.
+ *
+ * tools/check.py func_001334B8 --diff:
+ *   boot: 188 bytes, expected 196
+ *   func_001334B8: 0 of 1 places match
+ */

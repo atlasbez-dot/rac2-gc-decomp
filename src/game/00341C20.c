@@ -44,14 +44,12 @@ char *func_00341C90(char *p) {
     return p;
 }
 
-INCLUDE_ASM("asm/game", func_00341CD0);
 
 /* Measured target: byte-identical across all 27 levels. */
 void func_00341CD8(u8 *a0, s32 a1) { *(s32 *)(a0 + 0x8) = a1; }
 
 
 
-INCLUDE_ASM("asm/game", func_00341E50);
 
 extern void func_00341E90(char *);
 
@@ -94,7 +92,7 @@ char *func_003420C8(char *object) {
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_00342118);
+/* func_00342118 is in 00341C20-g8.c (it reaches small data through $gp). */
 
 void func_00342380(unsigned char *owner, float *records)
 {

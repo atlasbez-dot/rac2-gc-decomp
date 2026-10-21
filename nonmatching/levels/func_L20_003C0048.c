@@ -457,3 +457,290 @@ set3:
 end:
     return;
 }
+
+/* ------------------------------------------------------------------
+   Wave 4, worker 08.  What this wave measured on this body.
+
+   The C in this file is the wave 21 attempt with ONE change: the first
+   table of the v == 0 case is read at +0x464 from D_L20_0021EFB0, and
+   the wave 21 attempt reads it at +0x00 - so the attempt was WRONG
+   about the data, not only about the registers.
+
+   The retail's two table accesses of the v == 0 case:
+
+     lui $v0,%hi(D_21EFB0) ; addiu $v0,$v0,%lo(D_21EFB0)
+     sll $a2,$a1,16 ; sra $v1,$a2,16 ; addu $v0,$v0,$v1
+     lbu $a0,0x464($v0)                  <- the first table, +0x464
+     ...
+     lui $v1,%hi(D_19B4A8) ; addiu $v1,$v1,%lo(D_19B4A8)
+     addu $v0,$v0,$a0 ; addu $v0,$v0,$v1
+     lbu $v0,0x0($v0)                    <- the second table, +0x00
+
+   so the first index is the sign extended halfword at 0xB2(arg0) as a
+   BYTE offset and the table's entry is at +0x464; the second index is
+   the same halfword shifted once more (>> 1) plus (D_001A79F0 << 10).
+
+   NEW: the constant stays in the load's displacement only when the
+   address is built through a BYTE POINTER VARIABLE:
+
+     u8 *p = (u8 *)D_L20_0021EFB0 + (s16)a1;
+     u8 c = p[0x464];
+
+   gives the retail's `addu $v0,$v0,$v1 ; lbu $a0,0x464($v0)' (the
+   base + the index in a register, the constant in the load).  Written
+   as one expression - `*(u8 *)((s32)D_L20_0021EFB0 + (s16)a1 +
+   0x464)' or with the constant first - the compiler folds the constant
+   into the base instead (`addiu $v0,$v0,0x464 ; lbu $a0,0x0($v1)'),
+   whatever the order of the two terms in the source.  The same
+   spelling with `* 128' instead of `<< 7' changes nothing.
+
+   What is left (the attempt is 636 bytes against the retail's 648, so
+   three instructions are still missing):
+
+   1. The register allocation of the two pointers: the retail gives
+      $s0 to the copy of arg0 (`daddu $s0,$a0,$zero') and $s1 to the
+      state (`lw $s1,0x68($s0)'), the attempt gives $s0 to the state
+      and $s1 to the copy.  Measured and not understood: the copy in
+      its own variable (`char *self = arg0;' used everywhere), the two
+      declarations in either order, the state as a u8 * or through a
+      void ** - none of them changes the allocation.
+
+   2. The constant 1: the retail materialises it TWICE (the dispatch's
+      comparison in $v0 at the top of the function, the store of the
+      state 1 in the v == 0 case in $v0 again), the attempt
+      materialises it ONCE (in $a3) and uses it for both - the front
+      end unified the two constants.  To keep them apart the source
+      has to write the store's value differently from the comparison's
+      constant; nothing tried so far does that.
+
+   3. The shift of the parity case is `sra' in the retail and `srl' in
+      the attempt (`sra $v0,$v0,4' at 0x3C0118 against `srl $v0,$v0,4'),
+      while the shift of the v == 1 case is `srl' in both.  So the
+      value of the first table is shifted as a SIGNED byte and the
+      value of the second as an unsigned one, although both are loaded
+      with `lbu'.
+
+   4. The division of the v == 1 case: the retail has two nops before
+      `div.s' (the SDK 3.01 assembler's rule: a division fewer than
+      two slots after a code label gets `2 - n' nops), the attempt has
+      none.  The nops are the assembler's, so the retail's .s must
+      have had a label right before the division; what puts a label
+      there is not known.
+
+   5. The v == 0 case's address registers (the index in $a1/$a2, the
+      base in $v0/$v1) and the v == 1 case's block order (the retail
+      has the store of the state 1 in the delay slot of the call to
+      f_003C02D0, the attempt before it).
+
+   The attempt belongs in the -G8 unit (D_001A79F0 is read through
+   $gp in the v == 1 case). */
+
+   The C of this wave (the body with the corrections above):
+
+
+extern void func_003253A8(void *);
+
+extern int func_0033E7F8(void *);
+
+extern int func_00327008(u8);
+
+extern float func_003033B8(int);
+
+extern int func_00301ED0(void *);
+
+extern void func_003C0350(void *);
+
+extern void func_002C5A48(void *);
+
+extern void func_0036E9D0(void *, void *);
+
+extern void func_003C02D0(void *);
+
+extern void func_004604E8(s32);
+
+extern char *D_L20_001B2F9C __attribute__((nosda));
+
+extern char D_L20_0019B4A8[] __attribute__((nosda));
+
+extern char D_L20_0021EFB0[] __attribute__((nosda));
+
+extern char D_L20_00189E20[] __attribute__((nosda));
+
+extern int D_001A79F0 __attribute__((nosda));
+
+extern int D_001A79F0_1 __attribute__((sda));
+
+void func_L20_003C0048(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+    s32 v = *(u8 *)(arg0 + 0x20);
+
+    if (v == 1) {
+        goto case1;
+    }
+    if (v >= 2) {
+        goto case2;
+    }
+    if (v == 0) {
+        goto case0;
+    }
+    goto end;
+
+case2:
+    if (v == 2) {
+        goto case2body;
+    }
+    goto end;
+
+case0:
+    if (*(s32 *)(state + 0xC) < 0) {
+        goto err0;
+    }
+    if (*(s32 *)(state + 0x0) < 0) {
+        goto err0;
+    }
+    if (*(s32 *)(state + 0x10) >= 0) {
+        goto body0;
+    }
+err0:
+    func_003253A8(arg0);
+    goto end;
+body0:
+    {
+        u16 a1 = *(u16 *)(arg0 + 0xB2);
+        u8 *p = (u8 *)D_L20_0021EFB0 + (s16)a1;
+        u8 c = p[0x464];
+
+        if (c != 0) {
+            goto set3;
+        }
+        {
+            s32 g = D_001A79F0;
+            u8 b = *(u8 *)((s32)D_L20_0019B4A8 + ((a1 << 16) >> 17) + (g << 10));
+
+            if (a1 & 1) {
+                b = b >> 4;
+            }
+            if ((b & 7) != 0) {
+                goto set3;
+            }
+        }
+        *(u8 *)(arg0 + 0x20) = 1;
+        func_003C02D0(arg0);
+    }
+    goto end;
+
+case1:
+    {
+        s32 i = *(s32 *)(state + 0xC);
+        char *base = D_L20_001B2F9C;
+        u8 a1 = *(u8 *)(state + 0x14);
+        u8 v1 = *(u8 *)(base + (i << 8) + 0x20);
+        u16 h;
+
+        if (v1 == a1) {
+            h = *(u16 *)(arg0 + 0xB2);
+        } else {
+            if (*(u8 *)(state + 0x15) == 0) {
+                goto end;
+            }
+            if (func_0033E7F8(arg0) == 0) {
+                goto end;
+            }
+            h = *(u16 *)(arg0 + 0xB2);
+        }
+        if (h & 1) {
+            s32 idx = (h << 16) >> 17;
+            s32 g = D_001A79F0_1;
+            u8 *p = (u8 *)((s32)D_L20_0019B4A8 + idx + (g << 10));
+            u8 b = *p;
+
+            if (((b >> 4) & 7) != 7) {
+                *p = b + 0x10;
+            }
+        } else {
+            s32 idx = (h << 16) >> 17;
+            s32 g = D_001A79F0_1;
+            u8 *p = (u8 *)((s32)D_L20_0019B4A8 + idx + (g << 10));
+            u8 b = *p;
+
+            if ((b & 7) != 7) {
+                *p = b + 1;
+            }
+        }
+        if (*(u8 *)(state + 0x17) != 0) {
+            func_00327008(*(u8 *)(arg0 + 0xB0));
+        }
+        *(u8 *)(arg0 + 0x20) = 2;
+        *(s32 *)(state + 0x4) = 0x78;
+        *(f32 *)(state + 0x8) = 1.0f / func_003033B8(0x78);
+        func_004604E8(*(s32 *)(state + 0x10));
+    }
+    goto end;
+
+case2body:
+    {
+        func_00301ED0(state + 0x4);
+        func_003C0350(arg0);
+        if (*(s32 *)(state + 0x4) != 0) {
+            goto end;
+        }
+        {
+            char *s2 = (char *)D_L20_00189E20;
+
+            if (*(s32 *)(s2 + 0x2294) == 0x6F) {
+                goto end;
+            }
+            if (*(u8 *)(state + 0x16) != 0) {
+                func_002C5A48((void *)0);
+            }
+            if (*(u8 *)(state + 0x17) != 0) {
+                func_0036E9D0(s2 + 0x80, s2 + 0x90);
+            }
+        }
+set3:
+        *(u8 *)(arg0 + 0x20) = 3;
+    }
+    goto end;
+
+end:
+    return;
+}
+
+
+/* ------------------------------------------------------------------
+   Wave 23, worker 09.  The attempt below is the wave-4 one; it is 636
+   bytes against the retail's 648 (three instructions short) and its
+   first difference is at +0x4.  The wave-4 note listed what is left;
+   this wave measured two more spots.
+
+   NEW: the shift of the v == 0 case's byte is SIGNED in the retail
+   (`sra $v0,$v0,4` at 0x3C0118) while the attempt has `srl` - the
+   value is loaded with `lbu` in both.  The spelling that gives the
+   `sra` is a SIGNED variable:
+       s32 b = *(u8 *)((s32)D_L20_0019B4A8 + ((a1 << 16) >> 17) + (g << 10));
+       if (a1 & 1) { b = b >> 4; }
+   (the load stays `lbu`, the shift becomes `sra`) - but that change on
+   its own makes the body WORSE (137 instructions different instead of
+   133), because the register allocation around it moves.
+
+   The constant 1: the retail materialises it TWICE - in $v0 at the top
+   of the function for the dispatch's comparison (0x3C004C) and in $v0
+   again for the store of the state 1 in the v == 0 case (0x3C0128) -
+   while the attempt materialises it ONCE (in $a3) and uses it for
+   both.  Measured this wave: a local variable `u8 one = 1` used for
+   both (the compiler copy-propagates the constant, so the attempt is
+   unchanged), the store's value as a word (the same), the comparison
+   against a variable (the same).  The front end unifies the two
+   constants and nothing tried keeps them apart.
+
+   The register allocation of the two pointers: the retail gives $s0 to
+   the copy of arg0 (`daddu $s0,$a0,$zero`) and $s1 to the state, the
+   attempt gives $s0 to the state and $s1 to the copy.  The same wall
+   as in func_L20_0039D680 and the same cause: the quantity allocator
+   hands the callee-saved registers out by priority, so the value with
+   the shorter live range gets the lower one.
+
+   The attempt in src/ in the -G8 unit:
+      20_yeedil: 636 bytes, expected 648
+      func_L20_003C0048: 0 of 1 places match
+*/

@@ -99,3 +99,37 @@ char *func_L20_00448A18(char *arg0, char *arg1, char *arg2, char *arg3) {
     }
     return obj;
 }
+
+/* ---- wave 4 (20_yeedil, 2026-10-20, worker 01): the TI copies and the float order --
+ *
+ * The attempt is in src/levels/20_yeedil/L20_00448A18-g8.c (a unit of its own: the
+ * body reaches four globals through $gp).  It is 264 bytes against retail's 284.
+ *
+ * What the fourth wave measured:
+ *
+ *  1. The two 16-byte copies into the object keep retail's shape only with the
+ *     volatile pointer object, and that costs a stack round trip per copy: the
+ *     attempt is then 288 bytes (four instructions over).  Measured here and all
+ *     folding: the plain store, a `TI128 *` variable, a `char *` variable, an array
+ *     index, a volatile pointee, `__builtin_memcpy`, the destination read through a
+ *     pointer variable.  The two copies into the state pointer (an address loaded
+ *     from memory) match in every spelling, as the wave-3 note says.
+ *  2. The order of the two float loads of the two calls to func_002A7878.  The retail
+ *     loads the absolute one (1.0f and 20.0f) before the call and the $gp one
+ *     (0.666f and 7.0f) in the delay slot.  This cc1 loads them in the source order,
+ *     so the absolute one lands in the delay slot - and there the assembler can only
+ *     use the $gp form, so the `lui %hi` is lost as well: two instructions per call.
+ *     The source's argument order cannot change it (the ABI fixes which value goes to
+ *     $f12 and which to $f13), and no per-file flag tried changes it.
+ *  3. The absolute int global D_001B238C.  The retail has
+ *     `lui $a1,%hi(D_001B238C) ; lw $a1,%lo(D_001B238C)($a1)` - the assembler's own
+ *     expansion of the macro `lw $a1,D_001B238C` (the destination register in both
+ *     words).  In a -G8 unit this cc1 emits the compiler's two-instruction form
+ *     (`lui $v0,%hi(D) ; lw $a1,%lo(D)($v0)`) for `nosda` and for a declaration whose
+ *     size is over the threshold, and the $gp form for a plain `extern int`; the
+ *     macro form is only emitted for an `sda` global, which gas then expands to the
+ *     $gp form.  So the retail's shape needs the macro form on a symbol gas does not
+ *     treat as small, and no declaration tried gives it.
+ *  4. The order of the two argument set-ups of the call to func_002B37E8 (the object
+ *     and the argument): retail sets `$a1` first, this cc1 sets `$a0` first.
+ */

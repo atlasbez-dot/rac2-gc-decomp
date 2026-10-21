@@ -83,7 +83,6 @@ char *func_0033F0A0(char *object)
 }
 
 
-INCLUDE_ASM("asm/game", func_0033F210);
 
 INCLUDE_ASM("asm/game", func_0033F218);
 
@@ -202,7 +201,7 @@ void func_00341550(u8 *a0, s32 a1) { *(s32 *)(a0 + 0x220) = a1; }
 
 
 
-INCLUDE_ASM("asm/game", func_00341610);
+/* func_00341610 is in 0033F030-g8.c (it reaches small data through $gp). */
 
 
 

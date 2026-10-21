@@ -958,3 +958,483 @@ no_frames:
         func_002C61E0();
     }
 }
+
+   ------------------------------------------------------------------
+   WAVE 5 (worker 14, 21 October 2026): THE FRAME, THE ORDER AND WHAT
+   IS STILL MISSING
+   ------------------------------------------------------------------
+
+   The wave-3 note's "the second C name" is not the rule either: the rule
+   (measured on this body, and confirmed by the matched witness
+   src/levels/shared/L18_002C4000-g8.c) is that the SPLIT form needs a
+   SECOND ASSIGNMENT of the same symbol, in a place where the CSE cannot
+   merge it with the first one - i.e. after a nested block, with the
+   global used more than once.  A second NAME alone is merged by the CSE
+   and changes nothing (measured here: the same 1936 bytes and the same
+   60 of 511 instructions with and without the second name).
+
+   WHAT THE WAVE-5 ATTEMPT GETS RIGHT (tools/check.py func_L20_002D6488
+   --diff, the C at the end of this file, compiled in a -G8 unit):
+
+     20_yeedil: 1936 bytes, expected 2044
+     func_L20_002D6488: 0 of 1 places match
+     60 of 511 instructions identical (the wave-3 attempt: 12 of 511,
+     1916 bytes).
+
+     - the FRAME is 0x80 and the frame layout is the retail's: $s0-$s7
+       at 0x20..0x58, $ra at 0x60, $f20 at 0x70, the two 16-byte locals
+       at 0x00 and 0x10;
+     - $s0 holds the plain 32-bit address of D_00189E20, exactly as the
+       retail does, and $s6 holds the constant 0x16, exactly as the
+       retail does;
+     - the split form of D_00189E20 is produced: the %hi lives in a
+       callee-saved register and the address is re-made at every use
+       ("addiu $vN,$sN,%lo(D_189E20)"), which is the retail's shape.
+
+   THE SPELLINGS THAT PRODUCE IT (all measured on this body):
+
+     char *q;                       /* the plain address */
+     ...
+     q = D_00189E20;                /* the second assignment: the split */
+     ... q + 0x1454 ...             /* many uses of the split value */
+
+   The assignment has to come AFTER a nested block; put it at the top of
+   the function and the CSE merges it with the first assignment and the
+   split form disappears (measured: the frame drops back to 0x70 and the
+   %hi copy is lost).  The same happens with a re-assignment of the same
+   variable instead of a second name.
+
+   THE FRAME IS 0x80 ONLY IF 15.37f IS ASSIGNED INSIDE THE OBJECT-LOOP
+   BLOCK ("f20v = 15.37f;" next to the table pointer).  At the top of the
+   function the constant is hoisted into the prologue, $f20 is never live
+   across a call, the frame drops to 0x70 and one callee-saved register
+   is lost.  The same holds for the constant 0x16 (the object-kind test):
+   it has to be assigned inside the object-loop block too, or it is
+   allocated before the loop and the register order shifts.
+
+   BYTE FIELDS: every byte read has to be "*(u8 *)(p + off)".  "p[0x22BD]"
+   on a char * is a signed lb; the retail has lbu.  With the unsigned
+   reads the early part of the body matches instruction for instruction
+   (the counter increments, the 34 calls with their arguments in the
+   delay slots, the 0x20C / 0x21C / 0x22B8 / 0x1D8 tests).
+
+   WHAT IS STILL MISSING - the register order, and why it is hard:
+
+     retail: $s0 = the plain address of D_00189E20, $s1 = the %hi of
+             D_00138180, $s2 = the address of D_00189EA0, $s3 = the
+             object table, $s4 = the %hi of D_00189EA0, $s5 = the %hi
+             of D_00189E20, $s6 = the constant 0x16, $s7 = a copy of
+             the address of D_00189E20;
+     here:  $s0 = the plain address of D_00189E20 (right), $s1 = ?, $s2
+             = the plain address of D_00138180, $s3 = the %hi copy of
+             D_00189E20, $s4 = the plain address of D_00189EA0, $s5 = the
+             object table, $s6 = ?, $s7 = the constant 0x16.
+
+     The retail's callee-saved registers are handed out in the order the
+     PSEUDOS are created, and the pseudos are numbered in the order the
+     values are first SET in the source.  So the source has to set, in
+     this order: the plain address of D_00189E20, the %hi of D_00138180,
+     the address of D_00189EA0, the object table, the %hi of D_00189EA0,
+     the %hi of D_00189E20, the constant 0x16, the copy of the address.
+
+     That means D_00138180 and D_00189EA0 must ALSO be in the split form
+     (the %hi in a callee-saved register, the low half re-made at every
+     use) - the retail never keeps their plain addresses in a register.
+     MEASURED: they do not take the split form here.  Two names for
+     D_00138180 (one for the 0x1A0 access, one for 0x1D4 and 0x1A4) and
+     one for D_00189EA0 all come out in the plain form, and a second
+     assignment of the same variable is merged by the CSE.  The only
+     symbol that took the split form here is D_00189E20, whose value is
+     used twenty times; D_00138180 is used three times and D_00189EA0
+     three times, and they stay in a register.  The rule that decides it
+     is still unknown.
+
+   THE REMAINING WALLS (unchanged from wave 2 and wave 3):
+
+     - the two 128-bit copies (the retail materialises both pointers:
+       "addiu $v1,$v0,0x2D0" / "addiu $a0,$v0,0xD0" / "lq" / "sq"; this
+       compiler folds the offset into the lq/sq);
+     - the object loop's shape (the retail duplicates the table
+       increment into three delay slots and reloads the list entry at
+       the bottom);
+     - the unknown prototypes (the ones that decide the allocation:
+       f_003343B8/s32, f_00302408/float, f_0032F680/s32, f_002E7A28/float,
+       f_00331398(void*,void*,s32,void*,void*,float));
+     - the 128-bit zero store, the retail's "por $v0,$zero,$zero" before
+       the sq (a compiler-side wall, see the common file).
+
+   THE C BELOW IS THE ATTEMPT.  It is not a match and does not belong in
+   src/: it is kept here for the next attempt.  It DOES belong in a -G8
+   unit of its own - src/levels/20_yeedil/L20_002D6488-g8.c - because the
+   body reaches D_001A8F00 (-0x60F0($gp)), D_L20_001B29E4 (0x39F4($gp))
+   and D_L20_001B2AC8 (0x3AD8($gp)) through $gp.
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed short s16;
+typedef unsigned int u32;
+typedef signed int s32;
+typedef float f32;
+
+#ifndef RAC2_T_V4_FBFDC087A
+#define RAC2_T_V4_FBFDC087A
+typedef int V4_Fbfdc087a __attribute__((mode(TI)));
+#endif
+
+extern char D_00189E20[];
+extern char D_00138180[];
+extern char D_00189EA0[];
+extern char D_00189F00[];
+
+extern char *D_L20_001FBEE0[];
+extern char D_L20_00267060[];
+
+extern u8 D_001A7AFF;
+
+extern int D_001A8F00 __attribute__((sda));
+extern int D_001A8F00_1 __attribute__((nosda));
+
+extern int D_L20_001B2AC8 __attribute__((sda));
+extern int D_L20_001B2AC8_1 __attribute__((nosda));
+
+extern float D_L20_001B29E0;
+extern float D_L20_001B29E4 __attribute__((sda));
+extern float D_L20_001B29E4_1;
+
+extern void func_002CC4D0(void);
+extern void func_00301F00(void *);
+extern void func_00301ED0(void *);
+extern void func_002BA910(void);
+extern s32 func_003343B8(void *);
+extern s32 func_0032F680(s32);
+extern f32 func_00302408(void *, void *);
+extern void func_00302290(void *, void *, void *);
+extern void func_00302548(void *, void *, f32);
+extern void func_00331398(void *, void *, s32, void *, void *, f32);
+extern f32 func_002E7A28(void *);
+extern void func_00302228(void *);
+extern void func_00302260(void *, void *, void *);
+extern void func_003022D0(void *, void *, f32);
+extern f32 func_00302390(void *);
+extern void func_002D6C88(void);
+extern void func_002E7608(void *, s32, f32, f32);
+extern void func_002E76A0(f32, void *);
+extern void func_002C61E0(void);
+extern void func_L20_002D7730(s32, s32);
+
+void func_L20_002D6488(void)
+{
+    char *p = D_00189E20;
+    char *q;
+    char *r;
+    char *r2;
+    char *s = D_00189EA0;
+    char **u;
+    char *s2 = D_00189EA0;
+    s16 kind;
+    char *w;
+    char *t;
+    s32 i;
+    s32 n;
+    s32 x;
+    f32 buf[4];
+    f32 buf2[4];
+    f32 f20v;
+    f32 f1v;
+
+    if (*(u8 *)(p + 0x22BD) == 0) {
+        func_002CC4D0();
+    }
+
+    *(s32 *)(p + 0x1B8) += 1;
+    *(s32 *)(p + 0x1BC) += 1;
+    *(s32 *)(p + 0x1C0) += 1;
+    *(s32 *)(p + 0x1C4) += 1;
+
+    func_00301F00(p + 0x1E0);
+    func_00301F00(p + 0x1DC);
+    func_00301F00(p + 0x1D2);
+    func_00301F00(p + 0x1E4);
+    func_00301F00(p + 0x1F8);
+    func_00301F00(p + 0x1FE);
+    func_00301ED0(p + 0x1D4);
+    func_00301F00(p + 0x210);
+    func_00301F00(p + 0x1D0);
+    func_00301F00(p + 0x1F4);
+    func_00301F00(p + 0x1F6);
+    func_00301F00(p + 0x204);
+    func_00301F00(p + 0x206);
+    func_00301F00(p + 0x1F0);
+    func_00301F00(p + 0x1EC);
+    func_00301F00(p + 0x1EE);
+    func_00301F00(p + 0x208);
+    func_00301F00(p + 0x200);
+    func_00301F00(p + 0x20E);
+    func_00301F00(p + 0x20A);
+    func_00301F00(p + 0x214);
+    func_00301F00(p + 0x212);
+    func_00301F00(p + 0x1FC);
+    func_00301F00(p + 0x216);
+    func_00301F00(p + 0x1FA);
+    func_00301F00(p + 0x218);
+    func_00301F00(p + 0x1F2);
+    func_00301F00(p + 0x21A);
+    func_00301F00(p + 0x21C);
+    func_00301F00(p + 0x1DE);
+    func_00301F00(p + 0x1E6);
+    func_00301F00(p + 0x222);
+    func_00301F00(p + 0x224);
+    func_00301F00(p + 0x226);
+
+    r = D_00138180;
+
+    if (!(*(s32 *)(r + 0x1A0) & 4)) {
+        *(u16 *)(p + 0x20C) = 0;
+    }
+
+    if (*(s16 *)(p + 0x21C) != 0) {
+        func_002BA910();
+    }
+
+    r2 = D_00138180;
+
+    if (*(u8 *)(p + 0x22B8) == 0) {
+        *(s32 *)(p + 0x1D8) = 0;
+    } else {
+        *(s32 *)(p + 0x1D8) += 1;
+    }
+
+    q = D_00189E20;
+
+    if (*(s32 *)(r2 + 0x1D4) == 0) {
+        n = *(s32 *)(q + 0x1CC);
+        *(s32 *)(q + 0x1C8) = 0;
+        *(s32 *)(q + 0x1CC) = n + 1;
+    } else {
+        n = *(s32 *)(q + 0x1C8);
+        *(s32 *)(q + 0x1CC) = 0;
+        *(s32 *)(q + 0x1C8) = n + 1;
+    }
+
+    if (*(u8 *)(q + 0x22C3) != 0 && *(s32 *)(q + 0x229C) == 0 && *(s32 *)(q + 0x340) != 0) {
+        if (*(f32 *)(q + 0x170) < 0.0016666668f) {
+            if (*(f32 *)(q + 0x184) < 0.0016666668f) {
+                *(V4_Fbfdc087a *)(q + 0x80) = *(V4_Fbfdc087a *)(q + 0x2030);
+            }
+        }
+    }
+
+    if (*(s16 *)(q + 0x1454) == 0) {
+        *(s32 *)(q + 0x1E8) = 0;
+    } else {
+        *(s32 *)(q + 0x1E8) += 1;
+    }
+
+    if (*(s32 *)(q + 0x24CC) != 0) {
+        if (D_001A8F00 != 0) {
+            goto after_flag;
+        }
+        if (*(u8 *)(q + 0x22B4) == 4) {
+            if (*(s32 *)(q + 0x2294) == 0x6F) {
+                goto load_flag;
+            }
+            if (!(*(s32 *)(r2 + 0x1A4) & 0x10)) {
+                goto load_flag;
+            }
+            *(s32 *)(q + 0x24CC) = 0;
+            *(u16 *)(q + 0x1E0) = 0;
+            func_L20_002D7730(0x91, 1);
+        }
+        goto check_flag;
+    }
+load_flag:
+    n = D_001A8F00_1;
+check_flag:
+    if (n != 0) {
+        goto after_flag;
+    }
+    if (0.0f < D_L20_001B29E0) {
+        *(u16 *)(q + 0x22A) += 1;
+    } else {
+        *(u16 *)(q + 0x22A) = 0;
+    }
+    f1v = D_L20_001B29E4;
+    if (*(s16 *)(q + 0x22A) >= 0x79) {
+        *(int *)&D_L20_001B29E0 = 0;
+        *(u16 *)(q + 0x22A) = 0;
+        f1v = D_L20_001B29E4_1;
+    }
+    if (0.0f < f1v) {
+        *(u16 *)(q + 0x228) += 1;
+    } else {
+        *(u16 *)(q + 0x228) = 0;
+    }
+    if (*(s16 *)(q + 0x228) >= 0x79) {
+        *(u16 *)(q + 0x228) = 0;
+        D_L20_001B29E4_1 = 0;
+    }
+after_flag:
+
+    if (*(s16 *)(q + 0x224) == 0) {
+        goto end_objects;
+    }
+
+    u = D_L20_001FBEE0;
+    t = *u;
+    if (t == 0) {
+        goto end_objects;
+    }
+    f20v = 15.37f;
+    kind = 0x16;
+    s2 = D_00189EA0;
+    w = D_00189E20;
+object_loop:
+    if (func_003343B8(t) == 0) {
+        if (*(s32 *)(t + 0x24) != 0) {
+            if (*(s16 *)(*(s32 *)(t + 0x24) + 0x46) == kind) {
+                goto have_value;
+            }
+        }
+        goto next;
+    }
+have_value:
+    if ((D_L20_001B2AC8 & 7) != (((s32)t >> 8) & 7)) {
+        if (func_0032F680(4) != 0) {
+            goto next;
+        }
+    }
+    {
+        f32 f = func_00302408(s2, t + 0x10);
+
+        if (f < f20v) {
+            func_00302290(buf, t + 0x10, s2);
+            func_00302548(buf, buf, 1.7f);
+            func_00331398(t, *(void **)(w + 0x2290), 0x04000000, s2, buf, 1.0f);
+        }
+    }
+next:
+    u += 4;
+    t = *u;
+    if (t != 0) {
+        goto object_loop;
+    }
+end_objects:
+
+    for (w = D_L20_00267060; w < D_L20_00267060 + 0x1C0; w += 0x70) {
+        func_00301ED0(w);
+    }
+
+    if (*(s16 *)(q + 0x34E) == 0) {
+        goto no_frames;
+    }
+    *(f32 *)(q + 0x24DC) = 9999.0f;
+    {
+        f32 f = func_002E7A28(q + 0xF0);
+
+        if (f < 0.0f) {
+            goto no_frames;
+        }
+    }
+    if (*(s32 *)(q + 0x23C8) == 0x20) {
+        func_00302228(buf);
+        i = 0;
+        x = *(s32 *)(q + 0x23C4);
+frame_loop:
+        {
+            s32 d;
+            s32 a;
+            s32 b;
+            s32 c;
+            s32 e;
+            s32 p1;
+            s32 p2;
+
+            d = x - i;
+            a = d + 0x1F;
+            b = d + 0x1E;
+            c = d + 0x3D;
+            e = d + 0x3E;
+            if (b < 0) {
+                c = b;
+            }
+            if (a < 0) {
+                e = a;
+            }
+            p1 = a - ((e >> 5) << 5);
+            p2 = b - ((c >> 5) << 5);
+            func_00302290(buf2, q + 0x1D90 + (p1 << 4), q + 0x1D90 + (p2 << 4));
+            func_00302260(buf, buf, buf2);
+        }
+        i++;
+        x = *(s32 *)(q + 0x23C4);
+        if (i < 8) {
+            goto frame_loop;
+        }
+        func_003022D0(buf, buf, 0.125f);
+        {
+            f32 f = func_00302390(buf);
+
+            if (f < 0.016666668f) {
+                *(u16 *)(q + 0x202) += 1;
+            } else {
+                *(u16 *)(q + 0x202) = 0;
+            }
+        }
+    }
+no_frames:
+
+    func_002D6C88();
+
+    if (*(u8 *)(q + 0x22B4) == 1) {
+        func_002E7608(D_00189F00 + 0xE0, 1, 0.0f, 0.4f);
+    } else if (*(u8 *)(q + 0x22B4) == 4) {
+        func_002E7608(D_00189F00, 1, 0.0f, 0.7f);
+    }
+
+    if ((D_L20_001B2AC8 & 3) == 0) {
+        if (*(u8 *)(q + 0x22B4) == 1) {
+            *(f32 *)(q + 0x24A4) = 2.125f;
+            *(f32 *)(q + 0x24A8) = 1.25f;
+        } else if (*(u8 *)(q + 0x22B4) == 4) {
+            if (D_001A7AFF) {
+                *(f32 *)(q + 0x24A4) = 14.0f;
+                *(f32 *)(q + 0x24A8) = 4.5f;
+            } else {
+                *(f32 *)(q + 0x24A4) = 4.25f;
+                *(f32 *)(q + 0x24A8) = 2.25f;
+            }
+        }
+    }
+
+    {
+        f32 f = *(f32 *)(q + 0x31C);
+
+        if (f < 4.0f) {
+            *(V4_Fbfdc087a *)(q + 0xD0) = *(V4_Fbfdc087a *)(q + 0x2D0);
+            func_002E76A0(0.5f, q + 0xD0);
+        } else {
+            *(V4_Fbfdc087a *)(q + 0xD0) = *(V4_Fbfdc087a *)(q + 0xE0);
+        }
+    }
+
+    {
+        s32 ptr = *(s32 *)(q + 0x5C0);
+
+        if (ptr != 0) {
+            if (!(*(u16 *)(ptr + 0x34) & 0x1000)) {
+                *(s32 *)(q + 0x5C0) = 0;
+            } else if (ptr == *(s32 *)(q + 0x33C)) {
+                *(s32 *)(q + 0x5C0) = 0;
+            }
+        }
+    }
+    if (*(s32 *)(q + 0x5C0) != 0) {
+        if (*(s32 *)(q + 0x1248) == 0x2E) {
+            *(s32 *)(q + 0x5C0) = 0;
+        }
+    }
+
+    if (!(*(f32 *)(q + 0x88) < 1.0f)) {
+        func_002C61E0();
+    }
+}

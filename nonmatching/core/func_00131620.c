@@ -42,3 +42,13 @@ int func_00131620(void) {
     }
     return r;
 }
+
+/* --- worker 08, wave 24: confirmed, no new attempt. ---
+ * The row's first word is 0xB4E30000, which is the R5900's SDR ($v1, 0($a3)),
+ * followed by 0x00000000 (a nop); the body is the 64 bytes at 0x131628 and
+ * ends with `jr $ra` / `addiu $sp,$sp,0x20` at 0x131660.  The previous row
+ * (func_001315E0, 64 bytes) returns at 0x13161C, so nothing reaches those two
+ * words: this is a catalogue boundary that is eight bytes early, not a C
+ * problem.  A tools/levels.py split that starts the row at 0x131628 unblocks
+ * it.
+ */

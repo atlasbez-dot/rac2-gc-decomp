@@ -66,7 +66,86 @@ INCLUDE_ASM("asm/levels", func_L19_00422178);
 
 INCLUDE_ASM("asm/levels", func_L19_00422238);
 
-INCLUDE_ASM("asm/levels", func_L19_00422810);
+extern u16 *D_L19_001FB5A0[];
+extern u8 *D_L19_001B2A1C[] __attribute__((sda));
+extern s32 D_L19_001B2A38[] __attribute__((sda));
+extern s32 D_001A79F0 __attribute__((sda));
+extern u8 D_0019B2E8[];
+extern char D_0019B4A8[];
+
+extern s32 func_002B38B8(u8 *);
+extern void func_0029F338(u8 *);
+extern void func_L02_0031F858(s32, s32);
+
+/* The part of the object's state this function reads: the id of its first entity, three group
+   words, four mark words (-1 means none). */
+typedef struct {
+    s32 first;
+    s32 groups[3];
+    u8 pad[0x10];
+    s32 marks[4];
+} GrelbinState;
+
+/* Leaves at once when byte 0xBC is clear, func_002B38B8 returns zero, the entity of state word 0
+   is in neither state 0xFE nor 0xFD and the table byte of the object lacks bit 7; otherwise hands
+   every entity of the three groups to func_0029F338, releases the four marks, counts one nibble of
+   the table byte at 0xB2 up (saturating at 7) and releases the object. */
+void func_L19_00422810(u8 *a0)
+{
+    GrelbinState *state = *(GrelbinState **)(a0 + 0x68);
+    u16 *p;
+    u8 *e;
+    u8 *first;
+    s32 i;
+    s32 k;
+    u16 f;
+
+    if (a0[0xBC] == 0) {
+        if (func_002B38B8(a0) == 0) {
+            if (state->first != -1) {
+                first = (u8 *)((state->first << 8) + (int)D_L19_001B2A1C[0]);
+                if (first[0x20] != 0xFE) {
+                    if (first[0x20] != 0xFD) {
+                        if ((D_0019B2E8[a0[0xB0] + D_001A79F0 * 16] & 0x80) == 0)
+                            return;
+                    }
+                }
+            }
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        if (state->groups[i] == -1)
+            continue;
+        for (p = D_L19_001FB5A0[state->groups[i]];
+             (state->groups[i] & 0xFF) != 0xFF && state->groups[i] <= D_L19_001B2A38[0] &&
+             p != 0 && ((s16)p[-1] >= 0 || p == D_L19_001FB5A0[state->groups[i]]);
+             p++) {
+            e = D_L19_001B2A1C[0] + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            func_0029F338(e);
+        }
+    }
+    for (k = 0; k < 4; k++) {
+        if (state->marks[k] != -1)
+            func_L02_0031F858(state->marks[k], 1);
+    }
+    f = *(u16 *)(a0 + 0xB2);
+    if (f & 1) {
+        u8 *q = (u8 *)(((s16)f >> 1) + (D_001A79F0 << 10)) + (int)D_0019B4A8;
+        u8 c = *q;
+
+        if (((c >> 4) & 7) != 7)
+            *q = c + 0x10;
+    } else {
+        u8 *q = (u8 *)(((s16)f >> 1) + (D_001A79F0 << 10)) + (int)D_0019B4A8;
+        u8 c = *q;
+
+        if ((c & 7) != 7)
+            *q = c + 1;
+    }
+    func_0029F338(a0);
+}
 
 INCLUDE_ASM("asm/levels", func_L19_00422A98);
 

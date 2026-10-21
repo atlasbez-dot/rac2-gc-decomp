@@ -325,7 +325,6 @@ void func_002AB668(void *a0, int a1, float x)
     *(float *)((char *)a0 + 12) = func_00283180_8(h);
 }
 
-INCLUDE_ASM("asm/game", func_002AB6D0);
 
 /* Copies 64 bytes of a source record onto the stack, normalises the last element of the copy to 1.0, queries three pairwise float angles from the copy after two scratch-matrix builds, and writes the three angles into the caller's output record. */
 void func_002AB6D8(float *src, float *out)
@@ -390,12 +389,47 @@ void func_002AB800(int first, char *object)
     }
 }
 
+extern int F500f9762_FUN_00282978(char *a0);
 
-INCLUDE_ASM("asm/game", func_002ABB10);
+extern void F500f9762_FUN_002A0488(void *a, int b, int c, int d);
+
+void func_002AB8C0(void *owner, u8 *obj)
+{
+    int r, g, b;
+    float limit, f;
+
+    if (*(short *)obj == 0)
+        return;
+
+    if (F500f9762_FUN_00282978((char *)obj) != 0) {
+        if (*(short *)(obj + 2) != 0) {
+            F500f9762_FUN_002A0488(owner, obj[4], obj[5], obj[6]);
+            return;
+        }
+        *(short *)(obj + 2) = 1;
+        *(short *)obj = *(unsigned short *)(obj + 0xE);
+    }
+
+    if (*(short *)(obj + 2) == 0) {
+        limit = F500f9762_FUN_00283CE0(*(short *)(obj + 0xC));
+        f = (limit - (float)*(short *)obj) / limit;
+        r = obj[7] ? F500f9762_FUN_00283CF0((float)obj[4] + (float)(obj[7] - obj[4]) * f) : obj[4];
+        g = obj[8] ? F500f9762_FUN_00283CF0((float)obj[5] + (float)(obj[8] - obj[5]) * f) : obj[5];
+        b = obj[9] ? F500f9762_FUN_00283CF0((float)obj[6] + (float)(obj[9] - obj[6]) * f) : obj[6];
+    } else {
+        limit = F500f9762_FUN_00283CE0(*(short *)(obj + 0xE));
+        f = (limit - (float)*(short *)obj) / limit;
+        r = obj[7] ? F500f9762_FUN_00283CF0((float)obj[7] + (float)(obj[4] - obj[7]) * f) : obj[4];
+        g = obj[8] ? F500f9762_FUN_00283CF0((float)obj[8] + (float)(obj[5] - obj[8]) * f) : obj[5];
+        b = obj[9] ? F500f9762_FUN_00283CF0((float)obj[9] + (float)(obj[6] - obj[9]) * f) : obj[6];
+    }
+
+    F500f9762_FUN_002A0488(owner, r, g, b);
+}
+
 
 INCLUDE_ASM("asm/game", func_002ABB18);
 
-INCLUDE_ASM("asm/game", func_002ABB70);
 
 extern char *g_mobyTableBase __attribute__((sda));
 extern char *g_mobyTableEnd __attribute__((sda));
@@ -418,13 +452,11 @@ INCLUDE_ASM("asm/game", func_002ABBB8);
 
 INCLUDE_ASM("asm/game", func_002AC728);
 
-INCLUDE_ASM("asm/game", func_002AC9F0);
 
 extern void func_00282F20(float *, float);
 extern float func_00282DF0(float *);
 void func_002AC9F8(float *p, float threshold) { if (threshold < func_00282DF0(p)) ((void (*)(float *, float *, float))func_00282F20)(p, p, threshold); }
 
-INCLUDE_ASM("asm/game", func_002ACA48);
 
 extern int D_L02_001B359C;
 
@@ -489,7 +521,6 @@ int func_002ACBC8(void *point, int index)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002ACCA0);
 
 extern char *D_001B1C54 __attribute__((sda));
 
@@ -513,7 +544,6 @@ int func_002ACCA8(void *point, int index)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002ACD30);
 
 typedef struct { int selected, reserved04, reserved08, count; } MatchRange;
 extern MatchRange ref_L00_002ACD38_00;
@@ -532,7 +562,6 @@ int func_002ACD38(void *object)
     return found == ref_L00_002ACD38_00.selected;
 }
 
-INCLUDE_ASM("asm/game", func_002ACDC8);
 
 INCLUDE_ASM("asm/game", func_002ACDE8);
 
@@ -545,7 +574,6 @@ INCLUDE_ASM("asm/game", func_002ACEC0);
 
 INCLUDE_ASM("asm/game", func_002ACF68);
 
-INCLUDE_ASM("asm/game", func_002AD0A8);
 
 s32 func_002AD0B0(u8 *a0) {
  if(a0==0) return 0;
@@ -626,7 +654,6 @@ INCLUDE_ASM("asm/game", func_002AD980);
 
 INCLUDE_ASM("asm/game", func_002ADB78);
 
-INCLUDE_ASM("asm/game", func_002AE728);
 
 INCLUDE_ASM("asm/game", func_002AE730);
 
@@ -648,7 +675,6 @@ int func_002AEB60(char *object, float threshold)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002AEBF0);
 
 void func_002AEC18(void *a0, int a1) { extern void func_002A0488(void *, unsigned char, unsigned char, unsigned char); int high = a1 >> 16; int middle = a1 >> 8; func_002A0488(a0, (unsigned char)a1, (unsigned char)middle, (unsigned char)high); }
 
@@ -683,7 +709,6 @@ void func_002AEF28(float *out, float *p, float *q,
     *q = func_00283B98_8(*q, k3);
 }
 
-INCLUDE_ASM("asm/game", func_002AEFF0);
 
 /* Writes three floats built from two one-float helpers and the three incoming floats: f(b)*a*f(c), g(b)*a*f(c) and g(c)*a. */
 void func_002AF000(float *p, float a, float b, float c)
@@ -693,7 +718,6 @@ void func_002AF000(float *p, float a, float b, float c)
     p[2] = func_00283198_10(c) * a;
 }
 
-INCLUDE_ASM("asm/game", func_002AF0A0);
 
 INCLUDE_ASM("asm/game", func_002AF0A8);
 
@@ -744,7 +768,6 @@ INCLUDE_ASM("asm/game", func_002AF460);
 
 INCLUDE_ASM("asm/game", func_002AF580);
 
-INCLUDE_ASM("asm/game", func_002AFD70);
 
 void func_002AFD88(float x, float y, float z, char *a0, char *a1)
 {
@@ -768,7 +791,6 @@ void func_002AFDD8(char *a0, char *a1, char *a2, char *a3)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002AFE40);
 
 extern void func_00282F70(char *, char *, float);
 extern void func_00283098(char *, char *, char *);

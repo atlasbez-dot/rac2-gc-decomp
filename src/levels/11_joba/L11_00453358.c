@@ -90,7 +90,7 @@ extern char D_00188660[];
 
 INCLUDE_ASM("asm/levels", func_L11_00453358);
 
-INCLUDE_ASM("asm/levels", func_L11_00454508);
+/* func_L11_00454508 lives in the sibling small-data unit (L11_00453358-g8.c). */
 
 void func_L11_00454AE0(char *p)
 {
@@ -382,7 +382,7 @@ INCLUDE_ASM("asm/levels", func_L11_00459F30);
 
 INCLUDE_ASM("asm/levels", func_L11_0045A3C8);
 
-INCLUDE_ASM("asm/levels", func_L11_0045A578);
+/* func_L11_0045A578 lives in the sibling small-data unit (L11_00453358-g8.c). */
 
 INCLUDE_ASM("asm/levels", func_L11_0045A8C0);
 

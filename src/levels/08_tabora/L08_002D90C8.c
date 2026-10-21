@@ -22,6 +22,12 @@ extern float func_L08_0032ED98(ti_word *, int, float);
 
 extern char D_L08_002A0D00[];
 
+extern char *D_L08_001B2ACC __attribute__((sda));
+
+extern char *D_L08_001B2AD4 __attribute__((sda));
+
+extern char *D_L08_001B2ADC __attribute__((sda));
+
 extern void func_L04_003A21F8(void *, int);
 
 extern void func_L04_003A02A0(void *, int);
@@ -53,11 +59,48 @@ f32 func_L08_0032EA60(char *a0, char *a1, char *a2, f32 f0, f32 f1, f32 f2, f32 
     return f0;
 }
 
-INCLUDE_ASM("asm/levels", func_L08_0032EB48);
+float func_L08_0032EB48(ti_word *object, int index, float minimum) {
+    char *entry;
+    float a, b, c;
 
-INCLUDE_ASM("asm/levels", func_L08_0032EC38);
+    if (index == -1) return minimum;
+    entry = (char *)D_L08_001B2ACC + index * 128;
+    for (c = -1.0f; c <= 1.0f; c += 1.0f)
+        for (b = -1.0f; b <= 1.0f; b += 1.0f)
+            for (a = -1.0f; a <= 1.0f; a += 1.0f)
+                minimum = func_L08_0032EA60((char *)object, entry, entry + 0x30, minimum, a, b, c);
+    return minimum;
+}
 
-INCLUDE_ASM("asm/levels", func_L08_0032ED98);
+float func_L08_0032EC38(ti_word *object, int index, float minimum) {
+    char *entry;
+    float x;
+
+    if (index == -1) return minimum;
+    entry = (char *)D_L08_001B2AD4 + index * 128;
+    for (x = -1.0f; x <= 1.0f; x += 2.0f)
+        minimum = func_L08_0032EA60((char *)object, entry, entry + 0x30, minimum, 0.0f, 0.0f, x);
+    for (x = -1.0f; x <= 1.0f; x += 2.0f)
+        minimum = func_L08_0032EA60((char *)object, entry, entry + 0x30, minimum, 0.0f, x, 0.0f);
+    for (x = -1.0f; x <= 1.0f; x += 2.0f)
+        minimum = func_L08_0032EA60((char *)object, entry, entry + 0x30, minimum, x, 0.0f, 0.0f);
+    return minimum;
+}
+
+float func_L08_0032ED98(ti_word *object, int index, float minimum) {
+    char *entry;
+    float a, b, c;
+
+    if (index == -1) return minimum;
+    entry = (char *)D_L08_001B2ADC + index * 128;
+    for (c = -1.0f; c <= 1.0f; c += 1.0f) {
+        for (a = -1.0f; a <= 1.0f; a += 2.0f)
+            minimum = func_L08_0032EA60((char *)object, entry, entry + 0x30, minimum, 0.0f, a, c);
+        for (b = -1.0f; b <= 1.0f; b += 2.0f)
+            minimum = func_L08_0032EA60((char *)object, entry, entry + 0x30, minimum, b, 0.0f, c);
+    }
+    return minimum;
+}
 
 float func_L08_0032EED8(ti_word *object, int index, float minimum) {
     int *list;

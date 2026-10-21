@@ -9,7 +9,6 @@ extern float func_002EE9C8(float, float);
 extern void func_002EE5F0(void *, void *, float);
 extern void func_002EE440(void *, void *, void *);
 
-INCLUDE_ASM("asm/levels", func_L26_002EC840);
 
 INCLUDE_ASM("asm/levels", func_L26_002FC8D8);
 
@@ -50,7 +49,7 @@ INCLUDE_ASM("asm/levels", func_L26_003D4590);
 
 INCLUDE_ASM("asm/levels", func_L26_003D4930);
 
-INCLUDE_ASM("asm/levels", func_L26_003D4AE8);
+/* func_L26_003D4AE8 is defined in L26_002EC840-g8.c (it reads the group count and a word through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L26_003DB818);
 

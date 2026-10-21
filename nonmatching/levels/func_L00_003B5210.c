@@ -1,18 +1,29 @@
-/* func_L00_003B5210 (180 bytes, 27 places) -- NEAR MISS, not integrated.  Needs the
-   -G8 unit (the two angle constants are lwc1 off $gp, gp+0xA10/0xA14); the three
-   absolute pointers (0x001B28B0, 0x001B28B8, 0x0023D9E0) stay lui+addiu, so their
-   declarations carry no sda.
-   Four 0x50-strided records: for each, when the first short of the 0x001B28B0
-   array is non-zero, scales a rand by 0x001B28D8, converts it and hands the record
-   to func_L00_003B52C8 with the two $gp angles and 0.2f.
-   The candidate is 176 bytes against 180 and matches instruction for instruction
-   including the source/destination mapping (s1 = the short array, s2 = the record,
-   s3 = the second array) once the three pointers are declared r, p, q - the
-   declaration order decides the s-registers here.  The missing word is the
-   annulled slot: retail's `beql $v0,$zero` duplicates the p += 0x50 into its
-   delay slot (executed only on the skipped path), this cc1 emits a plain `beqz`
-   and hoists q++ into the slot instead; measured on three loop spellings
-   (if-block then increments, comma increment clause, continue form). */
+/* func_L00_003B5210 (180 bytes, 27 places) -- NEAR MISS, not integrated.  G8
+
+   New measurement (wave 12, worker s4): the `-g8` route works for the two angle
+   constants - in a `-G8` sibling (`L00_003B5210-g8.c`) with
+
+       extern float D_L00_001AFA00 __attribute__((sda));
+       extern float D_L00_001AFA04 __attribute__((sda));
+
+   they come out as retail's bare `lwc1 $f12,0xA10($gp)` and
+   `lwc1 $f13,0xA14($gp)` (no `-mno-split-addresses` needed here), and the
+   absolute 0x001B28D8 stays `lui $at,0x1B ; lwc1 $f12,0x28D8($at)`.
+
+   What is left is the annulled delay slot, the same wall as
+   func_L00_003B60E8: retail's `beql $v0,$zero` duplicates the `p += 0x50` into
+   its annulled slot (executed only on the skipped path) and keeps the fall-through
+   copy after the call, while this cc1 emits a plain `beqz` and merges the two
+   increments into the loop tail.  Writing the increment in both arms of the `if`
+   gives 188 bytes (the tail merging and the extra branch), so it is not that
+   either; three spellings measured (the increment common, in both arms, and the
+   `continue` form).
+
+   The three pointers' declaration order does decide the callee-saved registers
+   (s1 = the short array 0x001B28B0, s2 = the record 0x0023D9E0, s3 = the second
+   array 0x001B28B8), as the earlier wave measured.
+
+   Wave 12 (worker s4). */
 extern short D_L00_001B28B0[];
 extern short D_L00_001B28B8[];
 extern float D_L00_001B28D8;

@@ -259,6 +259,7 @@ void func_L11_0044C0F0(char *a0)
    manager, and refreshes the matching slot of the 0x270 table from the live 0x4A4 record */
 INCLUDE_ASM("asm/levels", func_L11_0044C180);
 
+/* func_L11_0044C220 is defined in L11_004465F8-g8.c (its globals are reached through $gp). */
 
 /* state handler: clears the 0x490 word while the frame byte is out of the 0..3 window, otherwise
    arms the 0x4CA gate through the 0xB8 handle and runs the 100-unit smash into it */

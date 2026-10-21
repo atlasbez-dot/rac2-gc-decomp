@@ -26,10 +26,7 @@ INCLUDE_ASM("asm/levels", func_L02_00410F68);
 
 /* Plays one of nine resident messages, chosen by the sub-object's state word. */
 
-INCLUDE_ASM("asm/levels", func_L02_00411530);
-
-/* The float clamp at 00411530 stores through $gp; its best attempt is in
-   the draft notes (w40) and it stays an INCLUDE_ASM for now. */
+/* func_L02_00411530 is matched in L02_00411530.c (built with -frac2-hazard-labels). */
 
 /* True while the record's state byte still says 2. */
 int func_L02_004127F8(u8 *a0) {
@@ -136,10 +133,6 @@ void func_L02_0043FA98(u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L02_004547D0);
 
-INCLUDE_ASM("asm/levels", func_L02_00457068);
 
-INCLUDE_ASM("asm/levels", func_L02_0045B280);
 
-INCLUDE_ASM("asm/levels", func_L02_004692D0);
 
-INCLUDE_ASM("asm/levels", func_L02_00469748);

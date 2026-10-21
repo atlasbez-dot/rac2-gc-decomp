@@ -6,9 +6,9 @@
 # Run it on 32-bit-capable x86-64 Linux (gcc -m32), e.g. in the rac2-linux container
 # (docs/BUILDING.md). It downloads the two inputs to build/downloads/ and checks them,
 # applies the patches in tools/compiler/patches/ (Lombyte's sce-991111b stack, MIT, with its
-# retired 0034 and its earlier 0020), the opt-in 0057 and 0058 extensions and the
+# retired 0034 and its earlier 0020), the 0057/0058 compiler profiles, the 0059 assembler option and the
 # transformers in tools/compiler/transformers/,
-# refuses to build unless the five patched sources hash as listed below, and builds.
+# refuses to build unless the patched sources hash as listed below, and builds.
 #
 # The binaries' hashes depend on the build host; the sources' do not. A compiler from these
 # sources compiles every matched function in src/ to the retail bytes (tools/build.py).
@@ -40,6 +40,7 @@ for p in 0000 0001 0015 0016 0019 0020 0021 0022 0025 0026 0027 0028 0029 0030 0
 done
 patch -R -p1 -s < "$HERE"/patches/0001-r5900-quad-saves.patch   # the retail saves in 8-byte slots
 git apply --whitespace=nowarn "$HERE"/patches/0058-*.patch       # the opt-in -mastra-quad-saves switch
+git apply --whitespace=nowarn "$HERE"/patches/0059-*.patch       # per-object sign-bit seed selection
 T=$HERE/transformers
 python3 $T/neutralise_timode_anchor.py gcc/config/mips/mips.c
 python3 $T/enable_loop_padding.py gcc/config/mips/mips.h
@@ -56,12 +57,22 @@ python3 $T/pad_div_erratum_nops.py gas/config/tc-mips.c
 python3 $T/neutralise_div_dslot.py gcc
 python3 $T/pad_div_erratum_branch.py gas/config/tc-mips.c >/dev/null
 python3 $T/r5900_mfc1_interlock.py gas/config/tc-mips.c
+python3 $T/tidy_condjump_fallthru.py gcc/flow.c
+python3 $T/zero_ti_store_barrier.py gcc/haifa-sched.c
+python3 $T/gcse_unsplit_edges.py gcc/gcse.c
+python3 $T/keep_block_order.py gcc/flow.c
+python3 $T/qcopy_pattern.py gcc
+python3 $T/hazard_labels.py .
 sha256sum --check --quiet <<'SUMS'
-8e6d97e725c1af7533d8b474e9b7a12fde95b0363eb4db99040c9e2596daba3a  gcc/config/mips/mips.c
+18e6fffb84ed8d7edd504167462a69cc8a8bedfc260ddae0dd17f21c5830fb47  gcc/config/mips/mips.c
 d43a3f2274e1ca640c1f877b9aa2a82b2e337298d7d0ebf7e5498fe91b3523f4  gcc/config/mips/mips.h
-9f6894ef4dfaa19708b4fd68203a1424e36b680741969b8b3531c92c0a628e40  gcc/config/mips/mips.md
-38d52727addc0b0b299700835788808cf23fe59c863a961cdd6f28170faaf3cc  gcc/toplev.c
-35a06b9ab08420b29503c6bb97d954ddb3d65571326f6f54ba3f315ad6aac029  gas/config/tc-mips.c
+790a54f4772853284ab43a7afc9f592913da8f012b46d43abf5f2a3660467eef  gcc/config/mips/mips.md
+7479c2cc0f362101cb9594285397778e66e272b456c43dcbaa52df3eedf5678f  gcc/toplev.c
+7f6129ee785e81c4232a1f518e1520318884ce5ce97e9568061cf6196dd9c072  gcc/haifa-sched.c
+2d88cae8090695044828a35909f78077c76ca9e5ab9190f9bbc5305bdd894a35  gcc/flags.h
+02f386e5e25a90684b912fbb11ce1a634a40a80dbefc93b20b0546259e1f8bfc  gcc/gcse.c
+ba947e44256e3d5144e353a4976aac931a4941acc8dcb1dc0fda99fa8b7b504a  gcc/flow.c
+89227b294163fdd860f559d67c1e4bce6ea2b3b1c86f16a3812401f7b187e1ff  gas/config/tc-mips.c
 SUMS
 
 # bison 1.28: the 1999 grammars need its skeleton.
@@ -92,4 +103,11 @@ cp gcc/cc1 gcc/cpp "$OUT/" && cp gas/as-new "$OUT/as"
 # SDK recipe installs them: an authored unit that includes <stdarg.h>
 # (a varargs body) needs them on the preprocessor's path.
 mkdir -p "$OUT/include" && cp "$W/src/gcc/ginclude/"*.h "$OUT/include/"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_zero_ti_store.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_gcse_unsplit_edges.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_keep_block_order.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_qcopy.py"
+python3 "$ROOT/tests/test_qcopy_rtl.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_dli_masks.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_hazard_labels.py"
 echo "compiler in $OUT"

@@ -38,3 +38,49 @@ void func_L22_00415A48(s32 a0) {
     func_2F9E20(0x9FD, 0x54);
     *(s32 *)s1 = 0x708;
 }
+
+/* Second attempt (wave 24, worker 15): 160 bytes, ONE word off.
+   check.py (22_dobbo_orbit): "22_dobbo_orbit: instruction at +0x84 differs";
+   every other word matches, including the annulled-slot idiom the earlier
+   draft could not get:
+     00415ACC  addiu $v0, $zero, 0x708   |  addiu $v1, $zero, 0x708
+     00415AD0  sw     $v0, 0x0($s1)     |  sw     $v1, 0x0($s1)
+   What unblocked it: the two guards are written as two separate `if` blocks
+   (not one && chain), the record is read through an `__asm__` alias without
+   `sda` so that the address keeps retail's `lui $v0,%hi(D); lw $s0,%lo(D)($v0)`
+   split form, and the unit stays at -G0 (at -G8 that same load comes out
+   `lui $s0; lw $s0,%lo(D)($s0)` and no longer matches).
+   Still open: the second 0x708 lands in $v0 where retail has $v1.  Tried
+   and all identical: the 0x708 constant in a named local (it is then kept
+   in $s2 across the call, which the retail does not do), the constant named
+   only in the first block, the constant named only in the second block, the
+   two inner tests as one && chain, the two tests in the other order.
+
+typedef unsigned char u8;
+typedef unsigned int u32;
+typedef int s32;
+
+/* The same object as D_L22_0018B6A8, read with an absolute address. */
+extern s32 D_L22_0018B6A8_abs __asm__("D_L22_0018B6A8");
+
+void func_L22_00415A48(s32 a0) {
+    s32 s1 = *(u32 *)(a0 + 0x68);
+    s32 s0;
+
+    if (*(u8 *)(a0 + 0x20) == 0) {
+        *(u8 *)(a0 + 0x20) = 1;
+        *(u8 *)(a0 + 0x30) = 0xFF;
+        *(u32 *)s1 = 0x708;
+    }
+    if (*(u8 *)(a0 + 0x20) == 1) {
+        s0 = D_L22_0018B6A8_abs;
+        if (func_2F36F0(s1) != 0) {
+            if (*(u32 *)(s0 + 8) == 0) {
+                if (*(u32 *)(s0 + 0xC) == 0) {
+                    func_2F9E20(0x9FD, 0x54);
+                    *(u32 *)s1 = 0x708;
+                }
+            }
+        }
+    }
+}

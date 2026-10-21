@@ -1,13 +1,24 @@
-/* func_L00_00409480 — NOT MATCHED, best attempt — 212 bytes expected, 27 places.
- * last check.py line: "00_aranos_tutorial: 216 bytes, expected 212"
- * then "func_L00_00409480: 0 of 27 places match".
+/* func_L00_00409480 - NOT MATCHED, best attempt - 212 bytes expected, 27 places.
+ * last check.py line: "func_L00_00409480: 0 of 27 places match (src/levels/shared/L00_003FFA70.c)"
+ * with "00_aranos_tutorial: instruction at +0x40 differs" - the body is the exact
+ * 212 bytes of the retail.
  *
- * Only difference: the value `c` is born in $v1 then copied into $a2 for the
- * call (one `daddu $a2,$v1,$zero` too many), whereas the retail births it in
- * $a2 (`addiu $a2,$zero,0x80; subu $a2,$a2,$v0`). Everything else — including
- * the order of the shifts/or and the 4 calls — is identical.
- * (Putting the call before the rgba computation keeps `c` alive across the
- * call: cc1 then places it in $s0 and the body grows to 224 bytes. Worse.)
+ * The light lookup, the value 128 minus it (born in $a2, as in the retail), the
+ * four effect calls and the two table reads all match. What is left is the order
+ * of the four shifts and of the three ors that build the colour:
+ *
+ *   retail: sll $v0, $a2, 16 ; sll $s1, $a2, 24 ; sll $v1, $a2, 8 ;
+ *           or $s1, $s1, $v0 ; or $s1, $s1, $v1 ; or $s1, $s1, $a2
+ *   ours:   sll $v1, $a2, 16 ; sll $s1, $a2, 24 ; sll $v0, $a2, 8 ;
+ *           or $s1, $s1, $a2 ; or $v0, $v0, $v1 ; or $s1, $s1, $v0
+ *
+ * this compiler reassociates the chain of ors and sorts the operands, so the
+ * plain "c << 24 | c << 16 | c << 8 | c" and every grouping of it come out as
+ * (c << 24 | c) | ((c << 8) | (c << 16)); the retail keeps the chain strictly
+ * left-associative. Measured: all six orders of the four terms and the four
+ * groupings of the expression give the same reassociated tree, so the order is
+ * a property of the compiler's fold, not of the source. The single expression
+ * (rather than four statements) is what puts the value in $a2 instead of $v1.
  */
 
 extern int func_002EF250(float x);
@@ -23,10 +34,7 @@ void func_L00_00409480(char *arg)
     int rgba;
 
     c = 128 - func_002EF250((float)(o[2] * 2));
-    rgba = c << 24;
-    rgba |= c << 16;
-    rgba |= c << 8;
-    rgba |= c;
+    rgba = (c << 24) | (c << 16) | (c << 8) | c;
     func_0037B508(66, 72, c);
     t = D_001A6480;
     func_002E7DD8(0, t[0xA9], 0, t[0xA8], rgba);

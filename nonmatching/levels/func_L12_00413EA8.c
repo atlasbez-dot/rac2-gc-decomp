@@ -9,7 +9,17 @@
    Writing `base = D_L12_001B2E9C_2;` before the loop gives 128 bytes (hoisted
    load); referring to the extern inside the loop gives 120: every instruction
    present, one word short of retail's 124 and the constants scheduled
-   differently. Blocker: that missing scheduling `nop`. */
+   differently. Blocker: that missing scheduling `nop`.
+
+   Wave 24 (worker 13) measured it again: spelling the two tests as two
+   `if (...) goto` (and not as a nested if) is what keeps the branch-likely form
+   (`bltzl`, `bnel`) - with the nested if this cc1 merges the tests with an `or` and
+   drops it.  With that spelling the body is 124 bytes, retail's size, and the loop
+   body is word for word retail's; what is left is that retail reads the base
+   D_L12_001B2E9C inside the loop (`lui $a0,%hi(D) ; lw $a0,%lo(D)($a0)`) while this
+   cc1 hoists it out of the loop - assigning it inside the loop does not help, the
+   %hi is hoisted and only the %lo load stays.
+*/
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;

@@ -317,3 +317,285 @@ check:
 out:
     *(int *)(state + 0x27C) = count < 2;
 }
+
+/* ------------------------------------------------------------------
+   Wave 22, worker 09.  The attempt below is the previous wave's C in
+   a unit of its own, built with -fno-schedule-insns.  It is 300 bytes,
+   the retail's size, and the loop matches the retail instruction for
+   instruction from 0x39D6E8 to the end.  Only the PROLOGUE differs,
+   and only in two things:
+
+     - the copy of the high half of D_00189EA0
+       (`daddu $s4,$s0,$zero` in the retail, at 0x39D6DC, AFTER the
+       call) is emitted BEFORE the call in the attempt
+       (`daddu $s5,$s0,$zero` at 0x39D6AC);
+     - because of that, the two values take the other two callee-saved
+       registers: the retail has the copy in $s4 and the state in $s5,
+       the attempt has the state in $s4 and the copy in $s5.
+
+   What this wave measured:
+
+   - `-fno-schedule-insns` is the flag that puts the `lui $s0,%hi` back
+     between the saves of $s1 and $s2 (the retail's shape).  With the
+     default flags the `lui` is hoisted to the top of the prologue and
+     the whole prologue differs.  The flag needs a unit of its own:
+       src/levels/20_yeedil/L20_0039D680-g8.c  -O2 -G8 -ffunction-sections -fno-schedule-insns
+     (with the default flags the attempt is 42 instructions different,
+     with the flag it is 32 - all of them in the prologue).
+
+   - The copy of the high half is a RELOAD of the pseudo that holds
+     %hi(D_00189EA0) for the loop's use.  It is emitted before the call
+     because the pseudo is live across the call; the retail emits it
+     after the call, which is what a quantity that was SPLIT at the
+     call would give (the first part in $s0 for the prologue's use, the
+     second part in $s4 for the loop's use, with the copy joining them).
+     The same thing happens in the retail for %hi(D_001FBB20): the
+     table's high half is materialised into $a0 and copied into $s0
+     (0x39D6E4) after the high half of D_00189EA0 has been copied out
+     of it (0x39D6DC) - the register is reused.
+
+   - Tried and measured, all of them 32 instructions different (with
+     the flag) and all of them keeping the copy before the call:
+     the state loaded after the call in the source (the load then
+     leaves the jal's delay slot), the state loaded from a second
+     expression, the two uses of D_00189EA0 through two different C
+     names (that gives the MATERIALISED address, `lui`+`addiu`, not
+     the split form), the loop's use through a local variable that
+     holds the address (the high half then lands in a caller-saved
+     register), the loop's use through a local variable declared inside
+     the loop body (LICM does not hoist the copy out of the loop), the
+     second use written as `(void *)D_00189EA0` or as
+     `D_00189EA0 + 0`, the declaration order of the locals, the order
+     of the three top-level statements, and the type of `count`,
+     `idx`, `state` and `limit`.
+
+   - The register allocation of the two values (the copy and the
+     state) is the same wall as in func_L20_003BFEB8: the retail gives
+     the LOWER callee-saved register to the value with the SHORTER
+     live range, this compiler gives it to the other one.  gcc's
+     quantity allocator hands the hard registers out in the order of
+     the quantities' priority
+     (floor_log2(n_refs) * n_refs * size / life), and the copy's
+     live range is the shorter of the two, so the copy should get the
+     lower register - it does not, and the reason is not understood.
+
+   The attempt below is the previous wave's C, unchanged.  With the
+   attempt in src/ (the unit's default flags):
+     20_yeedil: instruction at +0x8 differs
+     func_L20_0039D680: 0 of 1 places match
+   With the attempt in a unit of its own built with -fno-schedule-insns:
+     20_yeedil: instruction at +0x20 differs
+     func_L20_0039D680: 0 of 1 places match
+*/
+
+#include "include_asm.h"
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed short s16;
+typedef unsigned int u32;
+typedef signed int s32;
+typedef float f32;
+
+extern float func_00302440(void *, void *);
+extern char D_00189EA0[];
+extern u16 *D_L20_001FBB20[];
+extern char *D_L20_001B2F9C __attribute__((nosda));
+extern int D_L20_001B2FB8 __attribute__((sda));
+
+void func_L20_0039D680(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+    float limit = func_00302440(arg0 + 0x10, D_00189EA0);
+    u16 *rec = (u16 *)D_L20_001FBB20[*(u8 *)(arg0 + 0x21)];
+    int count = 0;
+    u8 idx;
+
+    goto check;
+body:
+    {
+        char *p = D_L20_001B2F9C + ((*rec & 0x7FFF) << 8);
+
+        if (p == 0) {
+            goto out;
+        }
+        if (p != arg0 && *(u8 *)(p + 0x20) != 6) {
+            if (func_00302440(p + 0x10, D_00189EA0) < limit) {
+                count++;
+            }
+        }
+        rec++;
+    }
+check:
+    idx = *(u8 *)(arg0 + 0x21);
+    if (idx == 0xFF) {
+        goto out;
+    }
+    if (D_L20_001B2FB8 < idx) {
+        goto out;
+    }
+    if (rec == 0) {
+        goto out;
+    }
+    if (*(s16 *)(rec - 1) >= 0) {
+        goto body;
+    }
+    if (rec == (u16 *)D_L20_001FBB20[idx]) {
+        goto body;
+    }
+    goto out;
+out:
+    *(int *)(state + 0x27C) = count < 2;
+}
+
+/* ------------------------------------------------------------------
+   Wave 23, worker 09.  The attempt below is the closest one yet: in a
+   unit of its own built with -fno-schedule-insns it is 300 bytes (the
+   retail's size) and only EIGHTEEN instructions differ, all of them in
+   the prologue and the entry block.  The wave-22 attempt was 32
+   instructions different with the same flag; the three source changes
+   below are what got it closer.
+
+   WHAT THIS WAVE CHANGED IN THE SOURCE
+
+   1. The loop's index in a variable:
+
+          u32 idx2 = (*rec & 0x7FFF) << 8;
+          char *p = D_L20_001B2F9C + idx2;
+
+      instead of `char *p = D_L20_001B2F9C + ((*rec & 0x7FFF) << 8);`.
+      This is what makes the loop's registers the retail's: the retail
+      keeps the index in $v0 and the base in $v1 (`andi $v0,$v0,0x7FFF ;
+      sll $v0,$v0,8 ; addu $a0,$v1,$v0`) and the attempt had them the
+      other way round.  (32 -> 24 instructions different.)
+
+   2. D_L20_001B2F9C WITHOUT the nosda attribute.  In a -G8 unit the
+      plain declaration gives the retail's absolute form (`lui
+      $v1,%hi(D_1B2F9C) ; lw $v1,%lo(D_1B2F9C)($v1)`) - the wave-4
+      correction - and it is measured here: with nosda the body is 24
+      instructions different, without it 22.  (The same symbol is
+      declared plainly for func_L20_0039E890 in
+      src/levels/20_yeedil/L20_0039C448-g8.c, and that function is
+      matched.)
+
+   3. The check block's table through a BYTE POINTER:
+
+          if (rec == *(u16 *)((u8 *)D_L20_001FBB20 + (idx << 2))) {
+
+      instead of `if (rec == (u16 *)D_L20_001FBB20[idx]) {`.  This is
+      the wave-4 finding (the constant stays in the load's displacement
+      only when the address is built through a byte pointer variable),
+      and it holds here too.
+
+   The flag: the attempt needs a unit of its own, built with
+   -fno-schedule-insns (the default flags give 38 instructions
+   different against the 18 with the flag).  The row would be:
+
+        src/levels/20_yeedil/L20_0039D680-g8.c  -O2 -G8 -ffunction-sections -fno-schedule-insns
+
+   and the function's marker has to be taken out of
+   src/levels/20_yeedil/L20_0039C448-g8.c.
+
+   WHAT IS STILL DIFFERENT (18 instructions, all in the prologue and the
+   entry block; the loop from 0x39D6E8 to the end matches the retail
+   instruction for instruction):
+
+     - the copy of the high half of D_00189EA0.  The retail copies it
+       into $s4 AFTER the call (`daddu $s4,$s0,$zero` at 0x39D6DC), the
+       attempt copies it into $s5 BEFORE the call (`daddu $s5,$s0,$zero`
+       at 0x39D6AC).  Because the copy lands early, the two values take
+       the other two callee-saved registers (the attempt has the state in
+       $s4 and the copy in $s5, the retail the other way round), the
+       frame's saves come out in the order s0, s1, s2, s3, s5, s4
+       instead of the retail's ascending s0, s1, s2, s3, s4, s5, and the
+       copy of %hi(D_1FBB20) into $s0 lands before the `addu` instead of
+       in the branch's delay slot.
+     - the word at 0x60(state) and the two table registers: the retail
+       has the word in $v1 and the base in $v0, the attempt the other
+       way round.  Same cause: the copy's position.
+
+   MEASURED AND NOT CHANGING THE PROLOGUE (all with the flag, all 18
+   instructions different): the state's load before or after the call in
+   the source, the rec load before or after the count, the count as
+   int/s32/u32, the index as u8/s32, the order of the three top-level
+   statements, the table's entry type (u16/u32/pointer), the comparison
+   with the table's start as a word, the D_00189EA0 pointer in a local
+   variable, the state as a local variable, the second assignment of
+   D_00189EA0, and the nosda attribute on D_00189EA0 and on
+   D_L20_001FBB20 (both make it worse).
+
+   THE COMPILER'S TWO MOVES THAT MATTER HERE (measured on this body):
+   the reload pass emits the copy of a value that is live across a call
+   BEFORE the call (the value has to be in a callee-saved register by
+   then), and the quantity allocator hands out the callee-saved
+   registers by the priority floor_log2(n_refs) * n_refs * size / life,
+   so the value with the SHORTEST live range gets the LOWEST register.
+   The retail's copy is made late (after the call) and therefore has the
+   shorter live range, and it gets $s4; the attempt's copy is made early
+   and gets $s5.  One wall, both symptoms.
+
+   The attempt below is the closest one; it is 18 instructions different
+   with the flag and 38 with the default flags.  With the attempt in
+   src/ in a unit of its own:
+      20_yeedil: instruction at +0x20 differs
+      func_L20_0039D680: 0 of 1 places match
+*/
+
+#include "include_asm.h"
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed short s16;
+typedef unsigned int u32;
+typedef signed int s32;
+typedef float f32;
+
+extern float func_00302440(void *, void *);
+extern char D_00189EA0[];
+extern char *D_L20_001FBB20[];
+extern char *D_L20_001B2F9C;
+extern int D_L20_001B2FB8 __attribute__((sda));
+
+void func_L20_0039D680(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+    float limit = func_00302440(arg0 + 0x10, D_00189EA0);
+    u16 *rec = (u16 *)D_L20_001FBB20[*(u8 *)(arg0 + 0x21)];
+    int count = 0;
+    u8 idx;
+
+    goto check;
+body:
+    {
+        u32 idx2 = (*rec & 0x7FFF) << 8;
+        char *p = D_L20_001B2F9C + idx2;
+
+        if (p == 0) {
+            goto out;
+        }
+        if (p != arg0 && *(u8 *)(p + 0x20) != 6) {
+            if (func_00302440(p + 0x10, D_00189EA0) < limit) {
+                count++;
+            }
+        }
+        rec++;
+    }
+check:
+    idx = *(u8 *)(arg0 + 0x21);
+    if (idx == 0xFF) {
+        goto out;
+    }
+    if (D_L20_001B2FB8 < idx) {
+        goto out;
+    }
+    if (rec == 0) {
+        goto out;
+    }
+    if (*(s16 *)(rec - 1) >= 0) {
+        goto body;
+    }
+    if (rec == *(u16 *)((u8 *)D_L20_001FBB20 + (idx << 2))) {
+        goto body;
+    }
+    goto out;
+out:
+    *(int *)(state + 0x27C) = count < 2;
+}

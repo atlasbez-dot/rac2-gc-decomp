@@ -52,3 +52,15 @@ void func_00124780(void) {
     D_001363A0 = func_0011AC20(buf);
     D_001363B0 = 0;
 }
+
+/* Later worker (wave 24): the shape of the first test decides the frame.  With
+   `if (D_001363A8 != -1) { v = D_001363AC; if (v != -1) return; } else { v = 1; }`
+   the compiler emits retail's `beq $v0,$v1` over the else block, the frame is 0x50 with
+   three saved registers and the two addresses of the globals sit in $s1 and $s0 as
+   retail has them - the other spelling (`if (D == -1) v = 1; else ...`) puts the
+   branch the other way and costs a fourth saved register (frame 0x60).  What is left
+   is the same two stores of v into the record: retail keeps `sw $v0,0x4($sp)` before
+   the first call and puts `sw $v0,0x8($sp)` in its delay slot, this cc1 always moves
+   one of the two into a delay slot.  check.py func_00124780: "boot: 156 bytes,
+   expected 148" (with the results of the calls used directly) and 152 with them
+   through a variable. */

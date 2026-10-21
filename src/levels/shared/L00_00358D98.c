@@ -64,9 +64,7 @@ void func_L00_00358E50(void)
     func_L00_00358D98(D_L00_0021DE10);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0035CC98);
 
-INCLUDE_ASM("asm/levels", func_L00_0035D168);
 
 extern int D_001B19E8 __attribute__((sda));
 
@@ -99,6 +97,28 @@ int func_L00_0035F5A0(int index, int a1, int a2)
     return r;
 }
 
+/* Same slot table as func_L00_0035F5A0, but with the caller's own record: the helper gets the
+ * slot's record, the value goes in at 0x40 and the helper's second value becomes the fifth
+ * argument; the record's index word is written at 126 and the value word at 140. */
+int func_L00_0035F640(int index, int a1, int a2, int a3)
+{
+    int r;
+    char *p;
+
+    if (index >= D_001B19E8)
+        return -1;
+    if (index == 0xFFFFFFFFU) {
+        return -1;
+    } else {
+        r = func_002E5AD0((char *)(D_001B19EC + index * 32), a1, 0, a2 + 0x40, a3);
+        if (r >= 0) {
+            p = D_00188660_3 + r * 112;
+            *(int *)(p + 140) = a2;
+            *(short *)(p + 126) = index;
+        }
+        return r;
+    }
+}
 
 /* Builds a slot index out of three weight/kind arguments and fills the same 112-byte record as
  * above; the record's value word comes from the fifth argument, the helper's from the sixth. */
@@ -125,7 +145,22 @@ int func_L00_0035F6D8(int a0, int a1, int a2, int a3, int a4, int a5)
     return r;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0035F7E8);
+extern Entry32fd6f60 D_L00_002A3B00[];
+
+/* Table search: walks the 8-byte records of D_L00_002A3B00 until the key is
+ * found or the -1 terminator is met, and stores the record's index and value. */
+void func_L00_0035F7E8(Query *q)
+{
+    int i = 0;
+
+    if (D_L00_002A3B00[0].key != -1 && D_L00_002A3B00[0].key != q->key) {
+        do {
+            i++;
+        } while (D_L00_002A3B00[i].key != -1 && D_L00_002A3B00[i].key != q->key);
+    }
+    q->index = i;
+    q->value = D_L00_002A3B00[i].value;
+}
 
 void func_L00_0035F8D0(int value60, int selector68, int value64, int axis69, int mode6A)
 {
@@ -152,11 +187,9 @@ void func_L00_0035F9F0(int value, long address) {
         *target = value;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0035FA80);
 
 INCLUDE_ASM("asm/levels", func_L00_003603C0);
 
-INCLUDE_ASM("asm/levels", func_L00_00364EE0);
 
 extern void func_002B7B18(int value, char *target);
 
@@ -364,7 +397,6 @@ void func_L00_0037AF58(void)
 {
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0037AFB0);
 
 INCLUDE_ASM("asm/levels", func_L00_0037B408);
 
@@ -372,4 +404,3 @@ INCLUDE_ASM("asm/levels", func_L00_0037B4B8);
 
 INCLUDE_ASM("asm/levels", func_L00_0037B5C0);
 
-INCLUDE_ASM("asm/levels", func_L00_0037B6E8);

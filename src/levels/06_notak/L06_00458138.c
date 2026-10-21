@@ -12,6 +12,21 @@ extern void func_002A7750(char *, int, int);
 
 extern void func_0029F338(char *);
 
+extern void func_002ABBB8(void *, void *, int, int, int, int, int, int, int, int, int, int,
+                          float, float, float, float, float, float, float);
+
+extern void func_002A7A00(float *, float, float);
+
+extern float func_00282C48(float);
+
+extern float func_002A78D8(float, float);
+
+extern float func_002A7878(float, float);
+
+extern char *func_00273730(char *, int, int, int, char *, char *, float *, int, float, float);
+
+extern void func_L06_0045C350(unsigned char *);
+
 extern int func_002A8600(char **, int, int, int);
 
 extern int func_002A86E8(char **, char *, int, int);
@@ -70,7 +85,27 @@ INCLUDE_ASM("asm/levels", func_L06_00459620);
 
 INCLUDE_ASM("asm/levels", func_L06_00459828);
 
-INCLUDE_ASM("asm/levels", func_L06_00459B18);
+extern float func_0032D788(void *, void *);
+
+void func_L06_00459B18(char *a0) {
+    int count;
+    int i;
+    float f;
+
+    if (a0 == 0) {
+        return;
+    }
+    count = *(int *)a0;
+    i = 0;
+    while (i < count) {
+        int off = i * 16;
+
+        f = func_0032D788(a0 + (off + 16), a0 + (((i + 1) % count) * 16 + 0x10));
+        *(float *)(a0 + off + 0x1C) = f;
+        i++;
+        count = *(int *)a0;
+    }
+}
 
 int func_L06_00459BA8(char *a0, char *a1)
 {
@@ -144,7 +179,25 @@ int func_L06_0045A1B0(char *a0, char *a1, float p1, float p2, float p3, float p4
 
 INCLUDE_ASM("asm/levels", func_L06_0045A2D8);
 
-INCLUDE_ASM("asm/levels", func_L06_0045A490);
+extern void func_003514C8(void *, int, void *);
+
+extern int func_0031EBF8(f32, void *, int, void *);
+
+extern void *D_L06_001BFC98;
+
+int func_L06_0045A490(void *a0, void *a1, f32 f12) {
+    char buf[16];
+    int r;
+
+    func_003514C8(a0, 0, buf);
+    r = func_0031EBF8(f12, buf, 0x21, a0);
+    if (r != 0) {
+        if (D_L06_001BFC98 == a1) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 int func_L06_0045A500(char *a0, int a1, int a2)
 {
@@ -227,7 +280,41 @@ void func_L06_0045BFC0(unsigned char *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L06_0045C0F0);
+/* Looks up the object bound to the given flags; unless the hit object's own field says
+   0xFE5, it starts a smoke emitter, spawns one particle with the level's own callback
+   and six more in a loop, then clears the object's byte at 0xA8. */
+void func_L06_0045C0F0(char *a0)
+{
+    char *hit;
+    char *p;
+    float local[3];
+    int i;
+
+    hit = (char *)func_002A9640(a0, 0x4010001, 0);
+    if (hit != 0 && *(short *)(*(char **)(hit + 0x20) + 0xAA) != 0xFE5) {
+        func_002E5CF8(0, 0, a0);
+        func_002ABBB8(a0, a0 + 0x10, 0, 10, 3, 9, -1, 1, 1, -1, 0, 0x810001,
+                      0.0f, 0.0f, 4.0f, 2.0f, 9.0f, 0.0f, 15.0f);
+        func_002A7A00(local, 0.0333333350718021392822265625f, 0.066666670143604278564453125f);
+        local[2] = func_00282C48(local[2]);
+        p = func_00273730(a0, 1, *(short *)(a0 + 0xAA), 6, a0 + 0x10, a0 + 0xF0,
+                          local, 1, func_002A78D8(20.0f, 45.0f), 15.0f);
+        if (p != 0) {
+            *(void (**)(void))(p + 0x64) = (void (*)(void))func_L06_0045C350;
+        }
+        for (i = 0; i < 6; i++) {
+            func_002A7A00(local, 0.10000000894069671630859375f, 0.2000000178813934326171875f);
+            local[2] = func_00282C48(local[2]);
+            func_00273730(a0, 2, *(short *)(a0 + 0xAA), i, a0 + 0x10, a0 + 0xF0,
+                          local, 0xFF, func_002A78D8(20.0f, 45.0f),
+                          func_002A7878(15.0f, 25.0f));
+        }
+        func_002E5CF8(1, 0, a0);
+        func_L00_00326110(a0, 1, 0.0f);
+        func_0029F338(a0);
+    }
+    *(unsigned char *)(a0 + 0xA8) = 0xFF;
+}
 
 void func_L06_0045C350(unsigned char *a0)
 {
@@ -263,7 +350,6 @@ INCLUDE_ASM("asm/levels", func_L06_004649F0);
 
 INCLUDE_ASM("asm/levels", func_L06_00464F40);
 
-INCLUDE_ASM("asm/levels", func_L06_00471948);
 
 void func_L06_00478548(float a, float b)
 {
@@ -281,4 +367,3 @@ void func_L06_00478548(float a, float b)
     *(float *)(v + 0x48) = b;
 }
 
-INCLUDE_ASM("asm/levels", func_L06_00498EF8);

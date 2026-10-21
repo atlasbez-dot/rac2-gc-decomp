@@ -388,7 +388,59 @@ void func_0032B378(char *p, float scale)
     F2c74c194_FUN_00282D30(p + 48, p + 48, scale);
 }
 
-INCLUDE_ASM("asm/game", func_0032B3E0);
+extern long long func_0027C878(char *p);
+
+extern float func_00283248(float x, float y);
+
+extern float func_00282E80(char *p, float *v);
+
+extern void func_00283410(float *matrix, float *quat);
+
+extern void func_00282CF0(float *off, float *v, char *p);
+
+extern void func_00280B90(char *pkt, float *matrix, int mode);
+
+/* Builds a 144-byte packet, aims a quaternion at the shared 0x001B5200 vector from pos through three float helpers, derives an offset basis by a fourth, writes the last matrix row from pos plus that offset, then dispatches the packet. */
+void func_0032B3E0(char *pos, int a1, int a2, char *a3, int t0,
+                   float f12, float f13, float f14)
+{
+    char pkt[144];
+    float m[16];
+    float quat[4];
+    float off[4];
+    long long r;
+
+    func_0032B2F0(pkt);
+    r = func_0027C878(a3);
+
+    *(long long *)(pkt + 136) = ((long long)t0 << 2) | 0x8000000040LL;
+    *(long long *)(pkt + 128) = 280993940374112LL;
+    *(int *)(pkt + 76) = a1 + (a2 << 24);
+    *(int *)(pkt + 72) = a1 + (a2 << 24);
+    *(int *)(pkt + 68) = a1 + (a2 << 24);
+    *(int *)(pkt + 64) = a1 + (a2 << 24);
+    *(long long *)(pkt + 112) = 0LL;
+    *(long long *)(pkt + 120) = r;
+
+    quat[3] = 0.0f;
+    quat[2] = func_00283248(D_001B5200.x_140 - *(float *)(pos + 0),
+                            D_001B5200.y_144 - *(float *)(pos + 4));
+    quat[1] = -func_00283248(func_00282E80(pos, &D_001B5200.x_140),
+                             D_001B5200.z_148 - *(float *)(pos + 8));
+    quat[0] = f13;
+
+    func_00283410(m, quat);
+    func_00282CF0(off, &D_001B5200.x_140, pos);
+    func_00282F20(off, off, f14);
+
+    m[12] = *(float *)(pos + 0) + off[0];
+    m[13] = *(float *)(pos + 4) + off[1];
+    m[14] = *(float *)(pos + 8) + off[2];
+    m[15] = 1.0f;
+
+    func_0032B378(pkt, f12);
+    func_00280B90(pkt, m, 0);
+}
 
 INCLUDE_ASM("asm/game", func_0032B598);
 
@@ -409,13 +461,11 @@ INCLUDE_ASM("asm/game", func_0032BE30);
 
 INCLUDE_ASM("asm/game", func_0032C2E8);
 
-INCLUDE_ASM("asm/game", func_0032C688);
 
 INCLUDE_ASM("asm/game", func_0032C700);
 
 INCLUDE_ASM("asm/game", func_0032CA40);
 
-INCLUDE_ASM("asm/game", func_0032D6F0);
 
 /* finds the first matching object pointer in thirty resident32-byte records or returns-1 */
 s32 func_0032D700(void *object) {
@@ -432,17 +482,14 @@ s32 func_0032D700(void *object) {
 
 INCLUDE_ASM("asm/game", func_0032D758);
 
-INCLUDE_ASM("asm/game", func_0032DA50);
 
 INCLUDE_ASM("asm/game", func_0032DA58);
 
 INCLUDE_ASM("asm/game", func_0032DD40);
 
-INCLUDE_ASM("asm/game", func_0032E4E8);
 
 INCLUDE_ASM("asm/game", func_0032E4F0);
 
-INCLUDE_ASM("asm/game", func_0032E568);
 
 INCLUDE_ASM("asm/game", func_0032E588);
 

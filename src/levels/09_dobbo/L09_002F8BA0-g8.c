@@ -34,3 +34,42 @@ void func_L09_003F6AB8(unsigned char *a0) {
    D_L09_001B11D8 (0x21E8($gp)); func_L09_003F69A0 reads D_L09_001B0F04
    (0x1F14($gp)). Their closest attempts are in
    D:/RAC2/work/wave8-20261013/w12/drafts/ . */
+
+/* The walk below reads the group count through $gp; the group table of id lists is absolute and
+   the entity base (the level's record table, D_L09_001B285C) is the bare `lui`/`lw` pair here, a
+   second name sized over 8 bytes with `sda` in this -G8 unit. */
+extern int D_L09_001B2878 __attribute__((sda));
+
+extern unsigned char *D_L09_001B285C_1[3] __attribute__((sda));
+
+extern unsigned short *D_L09_001FB560[];
+
+/* Flags the peers of the object: sets the byte at +0x440 of the private state of every entity of
+   the object's group whose own word at +0x310 equals the object's. Nothing happens when the
+   object's group byte (+0x21) or the word at +0x310 of its state is 0xFF. The state pointer is
+   loaded ahead of the first test, as retail does. */
+void func_L09_003FE978(unsigned char *a0) {
+    unsigned char *state;
+    unsigned short *p;
+    unsigned char *e;
+    unsigned char *s;
+
+    state = *(unsigned char **)(a0 + 0x68);
+    if (a0[0x21] == 0xFF)
+        return;
+    if (*(int *)(state + 0x310) == 0xFF)
+        return;
+    for (p = D_L09_001FB560[a0[0x21]];
+         a0[0x21] != 0xFF && a0[0x21] <= D_L09_001B2878 && p != 0 &&
+         ((p != 0 && (short)p[-1] >= 0) || p == D_L09_001FB560[a0[0x21]]);
+         p++) {
+        e = D_L09_001B285C_1[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        s = *(unsigned char **)(e + 0x68);
+        if (s != 0) {
+            if (*(int *)(s + 0x310) == *(int *)(state + 0x310))
+                s[0x440] = 1;
+        }
+    }
+}

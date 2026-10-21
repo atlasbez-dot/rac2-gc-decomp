@@ -25,7 +25,6 @@ INCLUDE_ASM("asm/levels", func_L18_002E68B0);
 
 INCLUDE_ASM("asm/levels", func_L18_003170F8);
 
-INCLUDE_ASM("asm/levels", func_L18_0033D768);
 
 /* Fills the record with the requested fields and derived coordinates. */
 char *func_L18_0035B6B8(char *p0, s16 p1, char *p2, s32 p3, char *p4, float f0, float f1,

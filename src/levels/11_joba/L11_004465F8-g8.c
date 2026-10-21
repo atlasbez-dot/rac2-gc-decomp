@@ -68,3 +68,24 @@ s32 func_L11_00448D28(u8 *a0)
     }
     return 0;
 }
+
+extern void func_2FD7E8(void *a0, int a1, void *a2, void *a3, int a4, int a5,
+                        int a6, int a7, float f12);
+
+extern s32 D_L11_001B1C50 __attribute__((sda));
+
+extern u8 D_L11_001B1C10 __attribute__((sda));
+
+extern s32 D_L11_001B1C54;
+
+/* hands the object's 0x270 and 0x370 tables, its 0x4B0/0x4B4/0x4B8 words and the level's
+   own 0x1B1C50/0x1B1C54 state to the scene manager */
+void func_L11_0044C220(char *a0)
+{
+    char *v0 = *(char **)(a0 + 0x68);
+
+    func_2FD7E8(&D_L11_001B1C10, 4, v0 + 0x270, v0 + 0x370,
+                *(s32 *)(v0 + 0x4B4), *(s32 *)(v0 + 0x4B0),
+                D_L11_001B1C50, D_L11_001B1C54,
+                *(f32 *)(v0 + 0x4B8));
+}

@@ -39,3 +39,14 @@ void func_L07_003F6C40(char *a0, s32 a1, TI128 *a2, f32 f12)
     *(s32 *)(a0 + 0x98) = *(s32 *)(*(char **)(a0 + 0x24) + 0x10);
     func_3109C8((u8 *)a0, 2, -1);
 }
+
+/* wave 24, worker 03: the note above is confirmed as far as the TI stores
+   are concerned - the two `mode(TI)` stores fold their constant offset into
+   the `sq` (sq $v0,0x10($s0) and sq $zero,0x50($s1)) where the retail
+   materialises $a0 = s0 + 0x10 and $v1 = s1 + 0x50 and stores at offset 0.
+   The offsets were measured in the cast, through a pointer variable, in a
+   `u32 *`, through a struct member, with and without `volatile`, and with the
+   base loaded from memory: all of them fold, in this compiler and in the
+   `mode(TI)` route that reaches lq/sq at all.  This body also wants the two
+   globals through $gp (D_L07_001B0FD8 and D_L07_001B0FDC), so it belongs in
+   the -g8 sibling of src/levels/07_siberius/L07_003F4578.c. */

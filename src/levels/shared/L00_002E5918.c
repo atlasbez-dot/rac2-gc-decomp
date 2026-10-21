@@ -17,7 +17,6 @@ void func_L00_002E5918(void) {
  func_00284EA8();
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002E6440);
 
 /* calls the measured callee with zero */
 void func_L00_002E6448(void) {
@@ -152,13 +151,9 @@ void func_L00_002E6F48(void) {
         D_L00_001BE2C0[i](D_L00_001BE3C0[i]);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002E7F98);
 
-INCLUDE_ASM("asm/levels", func_L00_002E8120);
 
-INCLUDE_ASM("asm/levels", func_L00_002E8428);
 
-INCLUDE_ASM("asm/levels", func_L00_002E8DD8);
 
 extern void func_0027F128(void *a0, void *a1, void *a2);
 extern char D_L00_0028C590[];
@@ -186,7 +181,6 @@ void func_L00_002E9210(void *a0, void *a1) {
  func_0027F1D8(a0, a1, D_L00_0028C590);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002E94B8);
 
 extern int func_0027C878(int);
 
@@ -197,9 +191,7 @@ void func_L00_002E95C0(void *a0, void *a1, void *a2, void *a3, void *a4) {
  func_0027F2A8(a0, a1, a2, a3, a4, t, D_L00_0028CCD0);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002E9AA0);
 
-INCLUDE_ASM("asm/levels", func_L00_002EA318);
 
 extern void func_0027A9F0(void);
 
@@ -211,15 +203,12 @@ void func_L00_002EA600(void) {
  func_0027AB40();
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002EA660);
 
 INCLUDE_ASM("asm/levels", func_L00_002EA668);
 
-INCLUDE_ASM("asm/levels", func_L00_002EA708);
 
 INCLUDE_ASM("asm/levels", func_L00_002EBE88);
 
-INCLUDE_ASM("asm/levels", func_L00_002EC230);
 
 INCLUDE_ASM("asm/levels", func_L00_002EC248);
 
@@ -229,13 +218,11 @@ INCLUDE_ASM("asm/levels", func_L00_002EC970);
 
 INCLUDE_ASM("asm/levels", func_L00_002ECFE8);
 
-INCLUDE_ASM("asm/levels", func_L00_002ED3F0);
 
 void func_L00_002ED420(void)
 {
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002ED7F8);
 
 /* Measured partial layout of the 0x20-byte slots of D_L00_001BECC0. */
 typedef struct {
@@ -318,6 +305,4 @@ void func_L00_002EF548(float a, float b, float c)
     func_00283B98_10(a, c);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002EF688);
 
-INCLUDE_ASM("asm/levels", func_L00_002F0498);

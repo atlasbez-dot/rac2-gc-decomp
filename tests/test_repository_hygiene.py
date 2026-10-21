@@ -9,6 +9,20 @@ import check_repository
 
 
 class ScratchHygieneTests(unittest.TestCase):
+    def test_empty_source_barriers_are_rejected(self):
+        for text in ("do { } while (0);", "do { /* schedule */ ; }\nwhile (0U);"):
+            errors = []
+            check_repository.check_empty_barriers(text, "src/example.c", errors)
+            self.assertEqual(len(errors), 1)
+
+    def test_nonempty_macro_blocks_and_literal_mentions_are_allowed(self):
+        for text in ("do { high = value.hi; low = value.lo; } while (0);",
+                     '/* do { } while (0) */ const char *s = "do {} while (0)";',
+                     '// do {} while (0)\nreturn 0;'):
+            errors = []
+            check_repository.check_empty_barriers(text, "src/example.c", errors)
+            self.assertEqual(errors, [])
+
     def check_paths(self, paths):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
