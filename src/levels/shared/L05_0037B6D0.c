@@ -128,10 +128,6 @@ int func_L05_0037BBB8(char *obj)
     return 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0037BC08);
-
-INCLUDE_ASM("asm/levels", func_L05_0037BD40);
-
 void func_L05_0037BE98(char *obj)
 {
     int *p = (int *)func_002ED688(obj);

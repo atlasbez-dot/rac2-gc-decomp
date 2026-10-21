@@ -197,7 +197,7 @@ INCLUDE_ASM("asm/game", func_003313E0);
 
 INCLUDE_ASM("asm/game", func_00331580);
 
-INCLUDE_ASM("asm/game", func_00331718);
+/* func_00331718 uses small data in 0032EB28-g8.c. */
 
 INCLUDE_ASM("asm/game", func_00331800);
 
@@ -214,6 +214,8 @@ void func_003323F0(int a0) {
     }
     func_0026FEB8(D_001B0A88);
 }
+
+/* func_00332440 is a near miss in nonmatching/game/func_00332440.c (328 bytes against 324). */
 
 INCLUDE_ASM("asm/game", func_00332440);
 

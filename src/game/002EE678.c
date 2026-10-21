@@ -106,4 +106,4 @@ void func_002EE8B0(char *a0)
 
 /* func_002EE920 is matched in 002EE920.c (built with -frac2-qcopy). */
 
-INCLUDE_ASM("asm/game", func_002EE988);
+/* func_002EE988 is matched in 002EE988.c (built with -frac2-qcopy -frac2-qcopy-barrier). */

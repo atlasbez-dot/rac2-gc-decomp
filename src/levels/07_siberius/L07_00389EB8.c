@@ -216,7 +216,7 @@ INCLUDE_ASM("asm/levels", func_L07_003EE3B0);
 
 INCLUDE_ASM("asm/levels", func_L07_003EE640);
 
-INCLUDE_ASM("asm/levels", func_L07_003EE708);
+/* func_L07_003EE708 is matched in L07_003EE708-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L07_003EEBF8);
 

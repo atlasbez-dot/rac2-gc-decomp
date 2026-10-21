@@ -1257,6 +1257,14 @@ The boot-era habits above still hold; these are the ones the level units added.
   `+ -2.0f` is an ADD where `- 2.0f` compiles to `sub.s`; positive `&&` guards match where the
   negated chain does not; two identical adjacent stores are written in the **reverse** of retail's
   order; `&rec->champ` keeps the displacement in a register where `rec->champ` folds it.
+- **Two base addresses, two orders** (func_002980D0): when a body materialises two base
+  addresses and then builds two pointers from them, retail's order of the `lui`/`addiu` pairs
+  and its order of the pointers can differ - the pairs come out in the order the bases are
+  *taken*, the pointers in the order they are *built*.  Taking the two bases into two locals
+  first, in retail's pair order, and then building the two pointers in retail's pointer
+  order, reproduces both: `table = D_L00_001C5620; colours = D_00139A28; dst = &colours[first * 4];
+  src = &table[first];`.  Swapping the two pointer statements alone swaps the pairs as well
+  and then the pointers land in the wrong argument registers.
 - **Float constants can be one ulp off the natural spelling**: `1.0471977f` (`0x3F860A93`, one
   above π/3) and `0.78539824f` (`0x3F490FDC`, one above π/4) are what retail holds; take the bits
   from the disassembly, not from the arithmetic.
@@ -1904,3 +1912,264 @@ keeps the labels unconditionally (SDK units included), 778 of the 779 are identi
 `src/game/002B5EF8.c` (built with `-g`), differs only in `.mdebug`, where a line label now
 sits on a nop. Making the behaviour the default would therefore change no code in that corpus;
 that choice is left to the maintainers.
+
+## The grouped copy as a scheduling barrier (21 October 2026)
+
+- **What retail does.** With `-frac2-qcopy` (#262), a dozen near misses have retail's size,
+  copy and register addresses, and differ only in the order of instructions around the copy:
+  instructions this cc1 moves across it (a float constant into the stall before the copy, the
+  epilogue's restores, a call's argument moves, the next statement's address arithmetic) stay
+  on their source side in retail. Each of these records is exact when, in a scratch copy only,
+  its copy is written as `__asm__ __volatile__("lq $2,0(%1)\n\tsq $2,0(%0)" :: "r"(dst),
+  "r"(src) : "$2")`. That is the shape of a volatile inline-asm copy macro. Both schedulers
+  treat such an asm as a barrier: `sched_analyze_2` makes it depend on every earlier register
+  use and set and flushes the pending memory lists, so later instructions depend on it instead
+  of on the instructions before it, and the priorities change. `src/` allows no inline
+  assembly.
+- **What this cc1 did.** `rac2_qcopy` is an ordinary insn. It depends only on its address
+  registers and its two memory operands, so a register-only instruction that is ready earlier
+  takes the issue slot in front of it or sinks behind it, and the dependent counts that break
+  priority ties differ from retail's (the records hold the `-fsched-verbose-5` traces).
+- **The opt-in change.** `transformers/qcopy_barrier.py` recognises the `rac2_qcopy` insn by
+  its shape, a TImode memory-to-memory SET beside a clobber of `(reg:TI 2)`, which no other
+  insn of this backend has, and adds it to the condition of the block `-frac2-zero-ti-barrier`
+  uses for the clear in `haifa-sched.c`'s `sched_analyze_insn`: the dependences of a volatile
+  asm, cost 1 and no unit, before and after reload. Instructions, operands, register-allocation
+  inputs and memory flags are unchanged. It is enabled by `-frac2-qcopy-barrier` per
+  compilation unit in `config/cflags.txt`, only matters together with `-frac2-qcopy` (the only
+  source of the insn), and `-fno-rac2-qcopy-barrier` disables it again.
+- **Neutrality, measured on 21 October** against the compiler built from master (e238b93),
+  each unit compiled with both tools directories. With master's flags all 794 units of `src/`
+  (108 through the SDK compiler), and the twelve new units below with the default flags,
+  give byte-identical objects, all sections included. With the switch forced on in the eight
+  units that use `-frac2-qcopy`, the eight objects are identical too, and `tools/check.py`
+  matches their eight functions at all 64 places with and without it: the barrier moves no
+  instruction in those functions.
+- **Witnesses.** Twelve functions, 3,616 bytes at 59 places, each in a unit of its own built
+  with `-O2 -G0|-G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier`: `func_002B5E48`
+  (21 places) and `func_002EE988` (28) in `src/game/`; `func_L02_003DB158`,
+  `func_L02_003D47B0` and `func_L02_00401BF8` in `src/levels/02_maktar_nebula/`;
+  `func_L12_00413CE0` in `src/levels/12_todano/`; `func_L23_00418650`, `func_L23_003C01F8`,
+  `func_L23_00418DC0`, `func_L23_004256F0` and `func_L23_0041D0A0` in
+  `src/levels/23_damosel_orbit/`; and `func_L26_003D4930` in `src/levels/26_jamming_array/`.
+  With the switch `tools/check.py` places each at every place; without it each is 0 of its
+  places. Ten are their records' C unchanged. Two needed an ordinary C detail:
+  `func_L02_003D47B0` names its destination pointer, because written inline the source's
+  small-data address is forced into a register while the right-hand side is expanded, before
+  the destination's, and the two address registers swap (the asm evaluates its operands in
+  order); `func_L23_003C01F8` takes `b`'s address between its two copies,
+  where retail forms it. `func_L23_0041D0A0`, which the asm copy left one operand order off,
+  is exact. The 90 C functions of the nine files whose markers moved still match.
+- **A near miss.** `func_002B50E0` (372 bytes, 21 places): the switch removes the 8 words
+  around its copy, and 3 remain in the argument moves of the `func_002B5828` call: sched1
+  puts the `$a3` move of `&work[0]` after the `$a0` and `$a1` moves (equal priority, equal
+  dependents, no dying source), where retail has it right after `$a2`. That is a source
+  question, not the barrier; the record stays in `nonmatching/`.
+- **Draft screen.** Of the 475 drafts in `nonmatching/` that declare a TImode type, 438
+  compile as they stand. Each was built with `-G0` and with `-G8`, with `-frac2-qcopy` alone
+  and with both switches, and placed as `tools/check.py` places a function. The barrier
+  changes 165 of their objects. With `-frac2-qcopy` alone 4 drafts are exact at every place;
+  with both switches 31 are, the same 4 among them. Of the 27 that only the barrier makes
+  exact, 9 are the witnesses above and 18 are functions not yet integrated. These are screen
+  results on the drafts' own C: each still needs a unit of its own and the usual checks.
+- **What it is not.** The rule is inferred from these records and their scratch-asm
+  measurements: it is not proof of the original macro, and not a general rule. Enable it in a
+  unit only after checking every function of the unit. It models the schedulers' view of a
+  volatile asm and nothing else: links into the copy keep their producers' latencies (an
+  unrecognised consumer makes them cost 1 in `insn_cost`), interblock motion still classifies
+  the copy as a store, and the other passes see an ordinary insn. jump2, for one, deletes a
+  redundant move across the copy: `find_equiv_reg` stops at a volatile insn, so with the asm a
+  `move $4,$16` before a call is kept, and with the switch it is deleted (an authored control
+  pins this).
+
+`tests/test_qcopy_barrier.py` executes the injected selector against synthetic RTL: the
+pattern's shape, and fifteen near shapes, among them the asm copy's own. It also checks that
+the transformer extends the clear's block and refuses a drifted source before writing any
+file. Then it compiles authored controls with the real EE tools in six profiles: the default,
+`-frac2-qcopy`, both switches, the barrier alone, both switches disabled again, and the copy
+written as the volatile asm. The disabled switch restores `-frac2-qcopy`, and the barrier
+alone restores the default. Six controls are scheduled exactly as with the asm. A float
+constant and the epilogue's restores cross the copy without the switch and do not with it.
+A copy with no neighbours, a copy in each arm of a branch and copies among volatile accesses
+are unchanged. The jump2 difference above is pinned, and every pair stays complete and out of
+delay slots. `tools/compiler/build.sh` runs the test after installation and pins
+`haifa-sched.c`, `toplev.c` and `flags.h`. Game-byte equality remains a separate full-build gate.
+
+## Wide stores kept out of annulled delay slots (21 October 2026)
+
+**Retail census.** Scope: the boot from 0x26EA00 and the 27 level programs, each catalogued
+function once (at its first place), the functions marked `ASM_FUNC` left out: 7,825 functions.
+
+| delay slot of | stores | of which `sd` / `sq` | wide loads (`ld` / `lq`) |
+| --- | ---: | ---: | ---: |
+| a branch-likely (annulled when not taken) | 2,895: 1,433 `sw`, 962 `swc1`, 294 `sb`, 206 `sh` | 0 / 0 | 1,215 / 23 |
+| any other branch or jump | 23,137 | 497 / 547 | 4,054 / 69 |
+
+The ordinary-slot `sq` are 472 after a `jal`, 74 after a branch and 1 after a `jr`; the `sd`
+are 143, 345 and 9. So retail never has a 64- or 128-bit store in an annulled slot, while it
+has them in other slots and has wide loads in annulled ones.
+
+**What this cc1 did.** When reorg fills a conditional branch's slot from the branch's target
+(`fill_eager_delay_slots`, `fill_slots_from_thread`), a store can only go into an annulled
+slot, since the other path needs memory. A loop whose first statement is a 16-byte clear then
+ends in `bnel ... ; sq $zero,0(...)` and its label moves behind the copied store;
+`steal_delay_list_from_target` copies a wide store from the delay list of a branch at the
+target in the same way.
+
+**The change.** [`no_annulled_wide_stores.py`](../tools/compiler/transformers/no_annulled_wide_stores.py)
+adds `-frac2-no-annulled-wide-stores`. With it, `fill_slots_from_thread` stops its search of a
+thread at a store wider than 32 bits that it cannot put into an ordinary slot, and
+`steal_delay_list_from_target` refuses such a store for an annulled slot. Refusing the store
+and searching on would take a later instruction of the thread instead (the first witness below
+needs the stop); reorg's search stops in the same way at an `asm` insn (`stop_search_p`), which
+fits the inline-asm clear inferred above but does not prove it. `optimize_skip`, which annuls
+the one instruction a branch skips, is unchanged: the boot's `func_00116460`, compiled by this
+cc1 and matched, has two `bnel ; sd`. The rule is inferred from retail's code, so it is off by
+default and enabled per unit in `config/cflags.txt`; `-fno-rac2-no-annulled-wide-stores`
+disables it.
+
+**Witnesses.** Each is a unit of its own; `tools/check.py` places both at every place.
+
+- `func_L23_00422668` (300 bytes, 1 place), `src/levels/23_damosel_orbit/L23_00422668.c`,
+  `-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-no-annulled-wide-stores`. The target of the
+  `beqz` that picks the else branch starts with the grouped 16-byte copy, which no slot takes.
+  Without the switch reorg searches past it, takes the `$a0 = $sp` move into the `beqz`'s slot,
+  and the return test's branch becomes a `beql` filled from the epilogue: 296 bytes. With it the
+  `beqz` keeps its `nop`, as retail does. Without `-frac2-qcopy` it is 296 bytes either way.
+- `func_L02_0042EDD0` (476 bytes, 2 places), `src/levels/shared/L02_0042EDD0-g8.c`,
+  `-O2 -G8 -ffunction-sections -frac2-no-annulled-wide-stores -frac2-zero-ti-barrier`. Its
+  second loop starts with `*(TI128 *)v = 0`. Without the switch the loop ends in
+  `bnel $s1,$zero,top+4 ; sq $zero,0($sp)` (first difference at +0xF8, with or without the
+  barrier); with the switch alone it ends in retail's `bnez ; lwc1`, and the first call's slot
+  still differs (check.py: +0x110; retail issues the `swc1` before the `jal` and fills the
+  slot with `p++`); the clear's barrier gives that order.
+
+**Near miss.** `func_L02_003E7370` (564 bytes, 1 place) keeps its marker. Its draft (two loops
+that start with `*(TI128 *)a = 0`, and a clear of a second vector between them) in a `-G8`
+unit with the switch: 564 bytes, both loops close as retail's (`bnez ; por`, `bgtz ; nop`),
+and one call slot in the second loop differs (+0x178: retail `jal ; mov.s $f13,$f21`, then
+`addiu $s1,$s1,1`). Adding `-frac2-zero-ti-barrier` fixes that slot but also selects the clear
+between the loops, which retail writes in the C form (`por` + `sq $v0,0x10($sp)`): before
+reload its address is frame+16, and its barrier reorders the block around it. A scratch cc1
+whose pre-reload selector also requires a register address compiles the same C to retail's
+bytes; that change to `-frac2-zero-ti-barrier` is not made here.
+
+**Neutrality, measured on 21 October 2026** against the tools built from master (e238b93).
+The 796 units of `src/` (688 through this cc1, 108 through the SDK compiler), the two witness
+units without the switch, compile to identical objects. With the switch forced on every
+game-compiler unit, the only objects that change are the two witness units. An instrumented
+scratch build shows the thread search reaching a wide store, without a change, in three
+`-frac2-qcopy` units (the grouped copy), and the steal path in no unit and in no draft built
+`-G0` or `-G8`.
+
+**Screen.** Of the 1,808 drafts in `nonmatching/` named after a function, 786 compile as they
+stand: 2,058 configurations (`-G0`, `-G8`, and both with `-frac2-qcopy` for the drafts that use
+a TImode type). With the switch, 12 configurations of 5 drafts change: `func_L00_003CD160`
+(`-G8 -frac2-qcopy`: 1,212 to 1,220 of 1,268 bytes), `func_L02_003CEFD8` (same sizes),
+`func_L02_0042EDD0`, `func_L23_00422668` (296 to 300 bytes, exact with `-G0 -frac2-qcopy`) and
+`func_L23_00425AF8` (1,496 to 1,488 of 1,516). With `-frac2-zero-ti-barrier` added to every
+configuration, the same 5 drafts change and `func_L02_0042EDD0` is exact too.
+
+`tests/test_no_annulled_wide_stores.py` checks the transformer's anchors, its refusal of a
+drifted or already patched source, and compiles authored fixtures with the real EE tools in
+default, enabled and explicitly disabled modes, in the plain profile and with
+`-fno-thread-jumps` (which keeps the branch to a branch that the steal path needs): loops that
+start with an `sq` or an `sd` clear (the thread path), the stolen `sd`, and controls whose
+output must not change (a word clear keeps its `bnel ; sw`, `optimize_skip`'s `beql ; sd`, an
+`sd` in a `beq` slot, an `sq` in a `b` slot). `tools/compiler/build.sh` runs it after
+installation and pins `reorg.c` beside the updated `toplev.c` and `flags.h`. Game-byte
+equality remains a separate full-build gate.
+
+## Plain C stack clears keep their `por` (21 October 2026)
+
+- **What retail does.** `rac2_fold_zero_ti_store` (the zero fold above, restricted to bare
+  register addresses on 21 October) turns `por $rX,$zero,$zero` ... `sq $rX,0(reg)` into
+  `sq $zero,0(reg)` when the zero dies at the store. That models retail's clear: 396 stores
+  `sq $zero,0(reg)` in 263 functions (345 in 241 outside functions with COP2 instructions or an
+  `ASM_FUNC` marker), most likely an inline-asm macro (the clear barrier above). Retail also
+  stores a `por`-materialised zero at displacement 0: 183 stores in 153 functions, none of them
+  in a function with COP2 instructions. Those are plain C zero stores, which the original
+  compiler never folded, and every one of them is to `0($sp)`, a local: none goes through
+  another register (the candidates through other registers that a nearby `por` suggests all
+  reload the register first, with the `lq` of a copy or a call). The address alone does not
+  decide it: 82 of the 396 `sq $zero` stores (58 functions) are to `0($sp)` too, and four of
+  the matched functions are such clears. Counted on one place per catalogue row (the boot's
+  from 0x26EA00, every shared and level row at its first place); a `por` store is one whose
+  every reaching definition, over the function's control flow with delay slots and calls, is
+  the `por` (a straight-line scan finds 175 in 149 functions; the others have the `por` in a
+  branch's delay slot). Of the 153 functions, 131 hold no `sq $zero` clear at all, 21 also
+  clear through another register, and one (`func_L07_003E4BD0`) also clears `0($sp)` with
+  `sq $zero`.
+- **The opt-in change.** `transformers/zero_ti_por.py` makes `rac2_fold_zero_ti_store` skip, under
+  `-frac2-zero-ti-por`, a store whose address is `$sp` alone: it keeps its `por` and its register
+  source, as the compiler without the fold emits plain C. A store through any other register (a
+  pointer, or a global's address) still folds, as retail always has it, and so does the
+  function-value case of `fold_zero_ti_return_value.py` through a pointer. Nothing else changes.
+  It is enabled per compilation unit in `config/cflags.txt`, and `-fno-rac2-zero-ti-por`
+  disables it again. So a unit says that its stack clears are plain C; of the 21 functions that
+  also clear through another register, 16 clear only a global, whose `lui`/`addiu` and
+  `sq $zero,0(reg)` plain C gives with the fold, and they stay reachable with the switch. The
+  other five clear through a materialised stack or field address (`addiu $v0,$sp,0x40` ...
+  `sq $zero,0($v0)`), which plain C does not give (cse folds the offset into the store), and
+  `func_L07_003E4BD0` mixes both forms at `0($sp)`; no per-unit rule expresses them. Combined
+  with `-frac2-zero-ti-barrier`, the clear barrier still applies to a stack clear in sched1 (its
+  pre-reload selector) and no longer in sched2, which finds no `sq $0` there; no unit uses both.
+- **Neutrality, measured on 21 October** against the compiler of the copy-barrier branch (PR
+  #275), each unit compiled with both tools directories: with the flags of `config/cflags.txt`,
+  the 806 other units of `src/` (108 through the SDK compiler) give byte-identical objects, all
+  sections included, and so do the five new units with the switch left out. Forced on in every
+  one of the 806 units, the switch changes 4 objects and leaves 802 identical: the four units
+  whose matched functions retail clears `0($sp)` with `sq $zero` (`func_L02_003EAE10`,
+  `func_L22_0040DD20`, `func_L00_003BFF68`, `func_L13_0040A3B0`). The four units whose
+  functions clear through a pointer (`func_00282C88`, `func_002AD330`, `func_002E5FE0`,
+  `func_L00_002B2BD0`) are identical with it.
+- **Witnesses.** Five functions, 2,368 bytes at 5 places, each in a `-G8` unit of its own with
+  the switch; `tools/check.py` places each at its place, and without the switch each is 0 of 1.
+  `func_L02_003DB200` (`src/levels/02_maktar_nebula/L02_003DB200-g8.c`) declares
+  `D_L02_001B359C` as a plain `int`: its load is then one macro instruction, which the assembler
+  expands into retail's `lui $v1,0x1B ; lw $v1,0x359C($v1)`, whereas the record's incomplete
+  array split the address, and local-alloc, which keeps a value out of a register that dies
+  just before it when sched2 follows, loaded it into `$a3` (`lui $v0` ... `lw $a3,0($v0)`).
+  `-mno-split-addresses` gives the load too, but also joins the `lui`/`addiu` of
+  `D_L02_001BA500` that retail splits. `func_L02_003DBA70` (`L02_003DBA70-g8.c`, with
+  `-frac2-qcopy -frac2-qcopy-barrier`) and `func_L02_00423520` (`L02_00423520-g8.c`) are their
+  drafts' C. `func_L23_00429DC8` (`src/levels/23_damosel_orbit/L23_00429DC8-g8.c`, with
+  `-frac2-qcopy -frac2-qcopy-barrier`; 0 of 1 without the barrier too) needed ordinary C
+  details: `payload` is read before the `obj[0x20]` test, which puts its load in the branch's
+  delay slot and the object in `$a2`; the payload's three stores are written `[0]`, `[2]`, `[1]`
+  and the two halfword globals `0x1B1B96` before `0x1B1B94`, which sched2 emits in retail's
+  order; the closing loop's count is a variable of its own; and `D_L23_001B3980` is declared
+  `sda`, for retail's unsplit `lui $t0 ; addiu $t0,$t0`. `func_L23_00422798`
+  (`L23_00422798-g8.c`) is its record's C. The 56 C functions of the nine files touched (the
+  four whose markers moved and the five units) match at all 56 places.
+- **A near miss.** `func_L23_003C16D8` (644 bytes) clears four vectors: one as plain C
+  (`por` ... `sq $v0,0($sp)`), three with the macro through a materialised stack address
+  (`addiu $v0,$sp,0x40 ; sq $zero,0($v0)`). Plain C folds that offset into the store
+  (`sq $v0,0x40($sp)` after its `por`), and its record's volatile store and identical-arm
+  conditionals are not allowed in `src/`; with the switch and plain clears it is 656 bytes.
+- **Draft screen.** 1,642 of the 1,954 records in `nonmatching/` name a catalogue function, and
+  775 of them compile as they stand and define it; so do the drafts of the three level-2
+  witnesses, which were not in `nonmatching/`. Each was built with `-G0` and `-G8`, alone, with
+  `-frac2-qcopy` and with both copy switches, each with and without `-frac2-zero-ti-por`, and
+  placed as `tools/check.py` places a function. The switch changes 14 records and the three
+  drafts, and makes three exact: `func_L23_00422798` and `func_L02_00423520` (in all three `-G8`
+  profiles) and `func_L02_003DBA70` (with both copy switches). `func_L07_00378898` (580 bytes)
+  and `func_L07_00410700` (560, with `-frac2-qcopy`) reach retail's size with it and still
+  differ in 31 and 36 words. These are screen results on the drafts' own C.
+- **What it is not.** The switch is a statement about a unit's stack clears, not a detector: the
+  fold stays the default because the matched code needs it, at `0($sp)` too, and a function
+  that clears `0($sp)` both ways cannot be expressed. The rule is inferred from these counts,
+  not from the original source. Enable it in a unit only after checking every function of the
+  unit.
+
+`tests/test_zero_ti_por.py` checks the transformer's anchors against the texts the earlier
+transformers write, its single insertion of the test and the refusal of drifted sources before
+any file is written. Then it compiles authored controls with the real EE tools in the default,
+enabled and disabled profiles: a stack clear, alone and in a loop, folds by default and keeps
+`por` + register `sq` with the switch, with the other instructions unchanged; clears through a
+pointer, a global's address and a pointer in a loop, and the function-value fold, are the same
+in every profile; in a function with a pointer clear and a stack clear, only the stack clear
+keeps its `por`; stores at a nonzero displacement from `$sp` or a pointer, one zero feeding three
+stores, and a zero that stays live past a join are identical in every profile; and the disabled
+switch restores the default. `tools/compiler/build.sh` runs the test after installation and pins
+`mips.c`, `toplev.c` and `flags.h`. Game-byte equality remains a separate full-build gate.

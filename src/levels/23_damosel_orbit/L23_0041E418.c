@@ -14,9 +14,9 @@ INCLUDE_ASM("asm/levels", func_L23_0041E5B0);
 
 INCLUDE_ASM("asm/levels", func_L23_00422540);
 
-INCLUDE_ASM("asm/levels", func_L23_00422668);
+/* func_L23_00422668 is matched in L23_00422668.c (built with -frac2-qcopy -frac2-no-annulled-wide-stores). */
 
-INCLUDE_ASM("asm/levels", func_L23_00422798);
+/* func_L23_00422798 is matched in L23_00422798-g8.c (built with -frac2-zero-ti-por). */
 
 INCLUDE_ASM("asm/levels", func_L23_00422A30);
 
@@ -30,11 +30,11 @@ INCLUDE_ASM("asm/levels", func_L23_00423378);
 
 INCLUDE_ASM("asm/levels", func_L23_004236B8);
 
-INCLUDE_ASM("asm/levels", func_L23_00425568);
+/* func_L23_00425568 is matched in L23_00425568.c (built with -frac2-qcopy). */
 
-INCLUDE_ASM("asm/levels", func_L23_004256F0);
+/* func_L23_004256F0 is matched in L23_004256F0.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
-INCLUDE_ASM("asm/levels", func_L23_00425848);
+/* func_L23_00425848 is matched in L23_00425848.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L23_00425AF8);
 
@@ -108,22 +108,22 @@ void func_L23_004278B0(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L23_004278D8);
+/* func_L23_004278D8 is matched in L23_004278D8-g8.c (built with -g). */
 
-INCLUDE_ASM("asm/levels", func_L23_00427CE8);
+/* func_L23_00427CE8 is matched in L23_00427CE8-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L23_004280D8);
 
 INCLUDE_ASM("asm/levels", func_L23_00428490);
 
-INCLUDE_ASM("asm/levels", func_L23_00428CF8);
+/* func_L23_00428CF8 is matched in L23_00428CF8-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier -frac2-no-annulled-wide-stores). */
 
 INCLUDE_ASM("asm/levels", func_L23_00429098);
 
 INCLUDE_ASM("asm/levels", func_L23_00429430);
 
 
-INCLUDE_ASM("asm/levels", func_L23_00429DC8);
+/* func_L23_00429DC8 is matched in L23_00429DC8-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por). */
 
 /* increments the 16-bit counter at object + 0x96 while it stays below 0xFFFF */
 void func_L23_00429FF8(u8 *arg0) {

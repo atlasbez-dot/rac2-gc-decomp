@@ -1,21 +1,27 @@
-/* func_002B50E0 (boot function, 372 bytes; 20 levels, 21 places in all): near miss. Built alone (src/game/002B50E0.c) with
- * `-O2 -G0 -ffunction-sections -frac2-qcopy` it is retail's 372 bytes (368 without the profile) and 11 of its 93
- * words differ, at every place. The prologue, the register assignment (self in $s2, target in $s3, data in $s1),
- * the stack slots, the `$gp` / absolute mix of D_001B1688 (the `sda` declaration gives retail's) and the register-address copy
- * (`addiu $v1,$s2,0x10` / `lq $v0,0($v1)` / `sq $v0,0($sp)`) are right. Two things are left:
- *  (1) 8 words after the copy. Retail loads data->0xBC first and the global after it
- *      (lw $v1,0xBC($s1) / lui $v0,%hi / lw $v0,%lo($v0) / subu $v0,$v0,$v1 / slti), and puts the copy before both;
- *      here the global's `lui`/`lw` chain (the longest path to the branch) is issued before the copy, the copy's address
- *      is then in $a0 and the `lw $v1,0xBC` / `subu` registers swap. Same cause as func_002B5E48: retail's copy is a scheduling
- *      barrier, the grouped copy is an ordinary insn with cost 1 and unit none.
- *  (2) 3 words in the arguments of the func_002B5828 call. Retail: daddu $a2,$s3 / daddu $a3,$sp / daddu $a0,$s2 /
- *      jal (slot: daddu $a1,$s1); here: $a2, $a0, $a1, then jal with `daddu $a3,$sp` in the slot (the call of
- *      func_002B5678 just before, and func_002B52A0, come out as retail's). Not moved by `(void *)work` for the argument,
- *      a pointer variable for it (388 bytes), or a TI/float union for the array.
- * Check: with `__asm__ __volatile__("" ::: "memory");` after `work[0] = *src;` (scratch only, never for src/) (1) is
- * gone and only the 3 words of (2) are left. -fno-schedule-insns makes it worse (30 words).
- * What would unblock it: the grouped copy given a volatile asm's scheduling dependences (see func_002B5E48), and then a source form
- * for (2).
+/* func_002B50E0 (boot function, 372 bytes; 20 levels, 21 places in all): NEAR MISS, measured
+ * 22 October 2026.  Built alone (src/game/002B50E0.c) with
+ * `-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier` it is retail's 372 bytes and
+ * 0 of 21 places match, first difference at +0x124: the barrier puts the copy and the loads
+ * after it in retail's order, and 3 words are left, the argument moves of the func_002B5828
+ * call:
+ *     retail: daddu $a2,$s3 ; daddu $a3,$sp ; daddu $a0,$s2 ; jal ; daddu $a1,$s1 (slot)
+ *     here:   daddu $a2,$s3 ; daddu $a0,$s2 ; daddu $a1,$s1 ; jal ; daddu $a3,$sp (slot)
+ *
+ * Cause, measured with -fsched-verbose-5 (sched1, block of the five calls): the four moves
+ * ($a0 = self, $a1 = data, $a2 = target, $a3 = &work[0]) become ready together after the
+ * func_002B5678 call, with the same priority (6), the same class and 3 dependents each.  Before
+ * reload the ranking then uses INSN_REG_WEIGHT: `target` dies at its move (weight 0), so $a2 goes
+ * first; the other three have weight 1 and fall to luid order, $a0, $a1, $a3.  sched2 keeps that
+ * order (all ties again), and reorg puts the last move in the slot.  Retail's order needs the $a3
+ * move to tie with the $a2 one, i.e. its source a pseudo that dies there; but &work[0] is the
+ * soft frame pointer itself (`$7=$1` in the dump), which never dies, and CSE turns any pointer
+ * copy of it back into $1.  No source shape found: `work` for `&work[0]`, `float work[12]` with
+ * casts (both unchanged), three separate TI locals (380 bytes); earlier `(void *)work`, a pointer
+ * variable (388 bytes), a TI/float union; -fno-schedule-insns is worse (30 words).
+ *
+ * The rest is retail's: the prologue, self in $s2, target in $s3, data in $s1, the stack slots,
+ * the `$gp` / absolute mix of D_001B1688 (the `sda` declaration) and the register-address copy
+ * (`addiu $v1,$s2,0x10` / `lq $v0,0($v1)` / `sq $v0,0($sp)`).
  */
 extern int D_001B1688 __attribute__((sda));
 extern char *func_002B5D28(void *);

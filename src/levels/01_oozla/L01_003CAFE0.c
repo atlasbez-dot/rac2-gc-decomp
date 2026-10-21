@@ -234,16 +234,6 @@ INCLUDE_ASM("asm/levels", func_L01_003D26C0);
 
 INCLUDE_ASM("asm/levels", func_L01_003D2890);
 
-/* Marks the object at 0x68 busy and notifies the owner once the 0xBC flag is clear. */
-void func_L01_003D2C38(u8 *a0)
-{
-    u8 *p = a0;
-
-    *(u32 *)(*(u8 **)(p + 0x68) + 0x5C) |= 1;
-    if (*(u8 *)(p + 0xBC) != 0 || *(u8 *)0x001A7B26 != 0)
-        func_0029F338(p);
-}
-
 INCLUDE_ASM("asm/levels", func_L01_003D2E50);
 
 INCLUDE_ASM("asm/levels", func_L01_003D68C0);

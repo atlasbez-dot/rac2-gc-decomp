@@ -93,7 +93,8 @@ void func_L01_003B46C8(char **arg0, int *arg1) {
 
 INCLUDE_ASM("asm/levels", func_L01_003B4700);
 
-
+/* func_L01_003B49D8 and func_L01_003B4AD0 live in L01_003B49D8.c: their clamp needs
+   -ffast-math (the retail's min.s), which is a per-file flag. */
 
 void func_L01_003B4BD8(u8 *arg0) {
     char *s0 = *(char **)(arg0 + 0x68);
@@ -186,6 +187,8 @@ void func_L01_003B5310(u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L01_003B53C8);
 
+/* func_L01_003B57A8 is in nonmatching/levels/func_L01_003B57A8.c: it reads a word
+   through $gp and still differs from retail in four places. */
 INCLUDE_ASM("asm/levels", func_L01_003B57A8);
 
 INCLUDE_ASM("asm/levels", func_L01_003B5878);

@@ -99,7 +99,7 @@ void func_L11_003F1D18(u8 *arg0) {
     *(s32 *)(s0 + 0x290) = -1;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_003F1DB0);
+/* func_L11_003F1DB0 is defined in L11_003D6270-g8.c (this unit has no $gp access for it). */
 
 INCLUDE_ASM("asm/levels", func_L11_003F1F48);
 

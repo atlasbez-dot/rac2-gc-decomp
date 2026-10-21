@@ -1,0 +1,5 @@
+#include "include_asm.h"
+
+INCLUDE_ASM("asm/us2/levels", func_US2_L14_003DFE88);
+
+INCLUDE_ASM("asm/us2/levels", func_US2_L14_003E01F8);

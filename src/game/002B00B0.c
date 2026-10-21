@@ -252,13 +252,6 @@ INCLUDE_ASM("asm/game", func_002B0CE0);
 s32 func_002B0D60(void) { return D_00139648; }
 
 extern int func_002B0DB8(void);
-int func_002B0D70(void) {
-    int count = func_002B0DB8();
-    int diff = count - func_002B0D60();
-    if (diff < 0) diff = 0;
-    if (diff > 40) diff = 40;
-    return diff;
-}
 
 int func_002B0DB8(void)
 {

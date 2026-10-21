@@ -147,7 +147,7 @@ int func_002B49C8(int value) {
 
 
 
-INCLUDE_ASM("asm/game", func_002B4C18);
+/* func_002B4C18 is matched in 002B3868-g8.c (small data through $gp). */
 
 extern char *func_002B5D28(void *);
 extern float func_00283B98(float, float);

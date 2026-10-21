@@ -140,7 +140,7 @@ INCLUDE_ASM("asm/levels", func_L12_00413108);
 
 INCLUDE_ASM("asm/levels", func_L12_004135A8);
 
-INCLUDE_ASM("asm/levels", func_L12_00413CE0);
+/* func_L12_00413CE0 is matched in L12_00413CE0-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 
 

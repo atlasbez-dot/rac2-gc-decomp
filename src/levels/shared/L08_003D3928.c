@@ -43,18 +43,6 @@ INCLUDE_ASM("asm/levels", func_L08_003D4600);
 
 INCLUDE_ASM("asm/levels", func_L08_003D4690);
 
-/* Two values of the resident word 0x001A79F0 select a shared byte or word. */
-s32 func_L08_003DB4A0(void)
-{
-    s32 v = *(s32 *)0x001A79F0;
-
-    if (v == 8)
-        return *(s16 *)0x001A7A1A;
-    if (v == 0x13)
-        return *(s32 *)0x001A7A1C;
-    return 0;
-}
-
 /* The same resident word, but the 8 case falls through to a 1/2 selector. */
 s32 func_L08_003DB4E8(void)
 {

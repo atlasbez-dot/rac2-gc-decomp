@@ -59,3 +59,6 @@ void func_L01_003B5290(u8 *arg0) {
         p += 2;
     }
 }
+
+/* func_L01_003B57A8 is in nonmatching/levels/func_L01_003B57A8.c: it reads a word
+   through $gp and still differs from retail in four places. */

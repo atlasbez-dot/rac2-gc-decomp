@@ -47,7 +47,7 @@ INCLUDE_ASM("asm/levels", func_L26_003BFF58);
 
 INCLUDE_ASM("asm/levels", func_L26_003D4590);
 
-INCLUDE_ASM("asm/levels", func_L26_003D4930);
+/* func_L26_003D4930 is matched in L26_003D4930-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 /* func_L26_003D4AE8 is defined in L26_002EC840-g8.c (it reads the group count and a word through $gp). */
 

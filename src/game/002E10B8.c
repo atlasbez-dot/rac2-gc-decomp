@@ -279,19 +279,6 @@ void func_002E4708(void *self, void *other)
     func_00283CF0(w * 57.2957763671875f);
 }
 
-void func_002E4860(void)
-{
-    struct Layout { char reserved[0x48]; int a,b,c,d,e,f; };
-    struct Layout *layout = (struct Layout *)D_00188660;
-    int width = *(int *)0x1A7BA0;
-    layout->a = width * 7 / 10;
-    layout->b = *(int *)0x1A7B9C;
-    layout->c = width;
-    layout->d = width * 6 / 10;
-    layout->e = 614;
-    layout->f = width * 25 / 32;
-}
-
 INCLUDE_ASM("asm/game", func_002E48E8);
 
 extern int D_001507E4;

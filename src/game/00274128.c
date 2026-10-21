@@ -351,25 +351,6 @@ void func_00279790(int p0, int p1, int p2, int p3, int p4, int p5,
     D_L04_001BCE48[idx].v[9] = p9;
 }
 
-
-void func_00279828(void)
-{
-    char *g = Fd8e166aa_D_001B7F80;
-    int i = 0;
-    int *table = *(int **)(g + 8);
-    char *p = (char *)table + table[*(unsigned char *)0x1A7BB4];
-    int n = *(int *)p;
-
-    *(char **)(g + 12) = p + 8;
-    *(int *)(g + 16) = n;
-    for (i = 0; i < *(int *)(g + 16); i++) {
-        char *q = *(char **)(g + 12);
-        char *r = q - 8;
-
-        *(int *)(q + i * 16) = *(int *)(q + i * 16) + (int)r;
-    }
-}
-
 INCLUDE_ASM("asm/game", func_002798A0);
 
 extern int func_00282948(void *);

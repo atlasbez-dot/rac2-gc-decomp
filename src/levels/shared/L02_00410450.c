@@ -105,7 +105,7 @@ void func_L02_0042ED48(u8 *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_0042EDD0);
+/* func_L02_0042EDD0 is matched in L02_0042EDD0-g8.c (built with -frac2-no-annulled-wide-stores -frac2-zero-ti-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L02_0043F4C8);
 

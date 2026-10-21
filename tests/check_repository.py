@@ -4,9 +4,12 @@
   python3 tests/check_repository.py
 
 1. config/levels/functions.tsv and config/boot/functions.tsv parse: right column count,
-   unique names, kinds in {boot, shared, level}, places NN:XXXXXXXX of a known level.
+   unique names, kinds in {boot, shared, level}, places NN:XXXXXXXX of a known level; so do
+   the other releases' (config/pal/, config/us2/: docs/VERSIONS.md).
 2. Every function of the two catalogues appears in src/**/*.c exactly once, as its C or as an
-   INCLUDE_ASM marker (rac1-decomp's layout), and nothing else does.
+   INCLUDE_ASM marker (rac1-decomp's layout), and nothing else does. A release's own functions
+   (func_PAL_..., func_US2_...) are in its src/<version>/ and only there; every other function
+   of its catalogues is v1.01's, with the one definition src/ has for every release.
 3. Nothing of the removed system comes back: no gzipped or generated data, no generated sources
    or fragments, no per-level copies, no per-batch or campaign documents, no file over 2.5 MB.
 
@@ -22,14 +25,15 @@ import levels  # noqa: E402
 
 KINDS = {"boot", "shared", "level"}
 PLACE = re.compile(r"^(\d\d):([0-9A-F]{8})$")
-NAME = r"(?:func_(?:L[0-9]{2}_)?[0-9A-F]{8}|sceIpuRestartDMA|_sysbitFlush)"
+NAME = r"(?:func_(?:(?:PAL|US2)_)?(?:L[0-9]{2}_)?[0-9A-F]{8}|sceIpuRestartDMA|_sysbitFlush)"
+TAGS = {v["tag"]: k for k, v in levels.VERSIONS.items() if v["tag"]}      # PAL -> pal
 DEFINITION = re.compile(rf"^(?:[A-Za-z_][^;=#]*?\b)?({NAME})\s*\(")    # the type may be on the line before
 
 
-def check_catalogues(errors: list) -> set:
+def check_catalogues(errors: list, config: str = "config") -> set:
     names = set()
-    boot_file = ROOT / "config/boot/functions.tsv"
-    level_file = ROOT / "config/levels/functions.tsv"
+    boot_file = ROOT / config / "boot/functions.tsv"
+    level_file = ROOT / config / "levels/functions.tsv"
     seen = {}
     for n, line in enumerate(boot_file.read_text().splitlines(), 1):
         if not line.strip() or line.startswith("#"):
@@ -80,7 +84,13 @@ def check_catalogues(errors: list) -> set:
     return names
 
 
-def check_sources(known: set, errors: list) -> None:
+def release_of(name: str) -> str:
+    m = re.match(r"func_([A-Z0-9]+)_", name)
+    return TAGS.get(m.group(1), "us") if m else "us"
+
+
+def check_sources(known: dict, errors: list) -> None:
+    """KNOWN: version -> the names of its catalogues."""
     defined = {}
     for path in sorted((ROOT / "src").rglob("*.c")):
         text = path.read_text(encoding="utf-8", errors="replace")
@@ -94,10 +104,17 @@ def check_sources(known: set, errors: list) -> None:
     for name, where in sorted(defined.items()):
         if len(where) > 1:
             errors.append(f"{name} appears {len(where)} times: {', '.join(where)}")
-        if name not in known:
-            errors.append(f"{name} ({where[0]}) is in neither catalogue")
-    for name in sorted(known - set(defined)):
-        errors.append(f"{name} is in a catalogue but in no file of src/")
+        release = release_of(name)
+        top = where[0].split("/")[1]
+        if release != "us" and top != release:
+            errors.append(f"{name} ({where[0]}) is {release}'s own function: it belongs in src/{release}/")
+        if release == "us" and top in TAGS.values():
+            errors.append(f"{name} ({where[0]}) is v1.01's: one definition in src/ serves every release")
+        if name not in known.get(release, ()):
+            errors.append(f"{name} ({where[0]}) is in no catalogue of {release}")
+    for version, names in known.items():
+        for name in sorted(names - set(defined)):
+            errors.append(f"{name} is in a catalogue of {version} but in no file of src/")
     c = sum(1 for w in defined.values() if not w[0].endswith("(asm)"))
     print(f"{len(defined)} functions in src/: {c} in C, {len(defined) - c} as INCLUDE_ASM")
 
@@ -134,8 +151,9 @@ def check_hygiene(errors: list) -> None:
             errors.append(f"{f}: this directory belongs to the removed system (AGENTS.md)")
         if f.startswith("docs/") and FORBIDDEN_DOC.search(f):
             errors.append(f"{f}: no per-batch, evidence or campaign documents (AGENTS.md)")
-        if f.startswith("progress/") and f != "progress/report.json":
-            errors.append(f"{f}: progress/ holds only report.json, written by tools/progress.py")
+        reports = {v["report"] for v in levels.VERSIONS.values()}
+        if f.startswith("progress/") and f not in reports:
+            errors.append(f"{f}: progress/ holds only the releases' report.json, written by tools/progress.py")
         if path.is_file() and path.stat().st_size > MAX_BYTES and f != "assets/rac2-logo.png":
             errors.append(f"{f}: {path.stat().st_size} bytes; generated data stays out of git")
         if f.startswith("src/") and f.endswith((".c", ".h")):
@@ -149,8 +167,11 @@ def check_hygiene(errors: list) -> None:
 def main() -> int:
     errors: list = []
     check_hygiene(errors)
-    known = check_catalogues(errors)
-    print(f"{len(known)} catalogue names")
+    known = {}
+    for version, v in levels.VERSIONS.items():
+        if (ROOT / v["config"] / "boot/functions.tsv").is_file():
+            known[version] = check_catalogues(errors, v["config"])
+            print(f"{version}: {len(known[version])} catalogue names")
     check_sources(known, errors)
     if errors:
         print(f"\n{len(errors)} problem(s):", file=sys.stderr)

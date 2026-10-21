@@ -43,15 +43,17 @@ Decompilation progress is tracked live on **[openrac.dev](https://openrac.dev)**
 | Version | Region | Target ID | Code Matched | Functions Matched |
 |---|---|---|---|---|
 | v1.01 | USA | `SCUS_972.68` | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Code&measure=matched_code_percent)](https://bytematch.dev/OpenRAC/rac2-gc-decomp) | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Functions&measure=matched_functions)](https://bytematch.dev/OpenRAC/rac2-gc-decomp) |
+| v1.00 | Europe/Australia | `SCES_516.07` | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Code&measure=matched_code_percent&version=SCES_516.07)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCES_516.07) | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Functions&measure=matched_functions&version=SCES_516.07)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCES_516.07) |
+| v2.00 (Greatest Hits) | USA | `SCUS_972.68_v2` | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Code&measure=matched_code_percent&version=SCUS_972.68_v2)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCUS_972.68_v2) | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Functions&measure=matched_functions&version=SCUS_972.68_v2)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCUS_972.68_v2) |
 
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 2,016 of 3,134 | 340,672 of 1,046,952 bytes |
-| Levels | 2,129 of 5,467 | 336,592 of 4,482,204 bytes |
-| **Total** | 4,145 of 8,601 | 677,264 of 5,529,156 bytes (12.25%) |
+| Boot executable | 2,009 of 3,134 | 339,084 of 1,046,952 bytes |
+| Levels | 2,129 of 5,467 | 366,284 of 4,482,204 bytes |
+| **Total** | 4,138 of 8,601 | 705,368 of 5,529,156 bytes (12.76%) |
 
-The 27 levels hold 101,292 function placements; C covers 49,669 of them.
+The 27 levels hold 101,292 function placements; C covers 48,969 of them.
 307 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
 <!-- /progress -->
 
@@ -60,7 +62,9 @@ The 27 levels hold 101,292 function placements; C covers 49,669 of them.
 Every distinct function counts once: the boot executable's functions and the level functions
 that the boot does not also have. A function many levels share is one function, however many
 places it has. A function is C when its C links into a program that comes out equal to the
-retail one ([`progress/report.json`](progress/report.json), `tools/progress.py`).
+retail one ([`progress/report.json`](progress/report.json), `tools/progress.py`). The table is
+v1.01's; the PAL and v2.00 releases are built and counted the same way from the same C
+([docs/VERSIONS.md](docs/VERSIONS.md)).
 
 The report also gives the boot executable's data (383,391 bytes of initialised data, for the
 Data bar on [ByteMatch](https://bytematch.dev)). None of it is matched yet: the build places C
@@ -140,7 +144,7 @@ For the details:
 - [`docs/BUILDING.md`](docs/BUILDING.md) – the build, the toolchain, the container, CI
 - [`docs/LEVELS.md`](docs/LEVELS.md) – the 27 level programs and the function catalogue
 - [`docs/COMPILER-NOTES.md`](docs/COMPILER-NOTES.md) – the compiler and what was measured of it
-- [`docs/REGIONS.md`](docs/REGIONS.md) – the other releases, and why this one is the target
+- [`docs/VERSIONS.md`](docs/VERSIONS.md) – the three releases (v1.01, PAL, v2.00): their dumps, catalogues, builds and reports
 
 ---
 

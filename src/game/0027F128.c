@@ -449,15 +449,6 @@ ASM_FUNC("asm/game", func_00283EB0);
 
 ASM_FUNC("asm/game", func_00283EF0);
 
-
-void func_00284000(void) {
-    func_00124418();
-    if (D_001A7B90 != 0) D_001A7BB8 = 0;
-    if (*(s32 *)0x001a7bb8 != 0) func_001257D0(0,0,0x50,1);
-    else func_001257D0(0,1,D_001A7B90 != 0 ? 3 : 2,0);
-}
-
-
 INCLUDE_ASM("asm/game", func_00284088);
 
 INCLUDE_ASM("asm/game", func_00284268);
@@ -466,10 +457,6 @@ extern long long D_001A6D78;
 
 void func_00284E18(s32 a0, s32 a1, s32 a2) {
     D_001A6D78 = a0 | ((long long)a1 << 8) | ((long long)a2 << 16) | 0x80000000ULL;
-}
-
-void func_00284E40(void) {
-    func_00125A20(*(u8 **)0x001a742c,D_001A6480.c,D_001A6480.a,D_001A6480.b,D_001A6480.d,D_001A6480.e);
 }
 
 int func_00284E80(void)
