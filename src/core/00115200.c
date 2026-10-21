@@ -14,7 +14,6 @@ void **func_00115210(void)
     return &D_0013A308;
 }
 
-INCLUDE_ASM("asm/core", func_00115220);
 
 INCLUDE_ASM("asm/core", func_00115250);
 
@@ -34,7 +33,6 @@ INCLUDE_ASM("asm/core", func_001158F4);
 
 ASM_FUNC("asm/core", func_00115AC0);
 
-INCLUDE_ASM("asm/core", func_00115D38);
 
 INCLUDE_ASM("asm/core", func_00115E28);
 

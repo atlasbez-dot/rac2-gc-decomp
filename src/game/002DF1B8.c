@@ -6,7 +6,6 @@ int func_002DF1B8(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/game", func_002DF1C0);
 
 extern void *D_001F2854;
 extern char D_00259458[];
@@ -15,7 +14,6 @@ int func_002DF1D0(void) {
     return D_001F2854 == D_00259458;
 }
 
-INCLUDE_ASM("asm/game", func_002DF1F0);
 
 INCLUDE_ASM("asm/game", func_002DF1F8);
 

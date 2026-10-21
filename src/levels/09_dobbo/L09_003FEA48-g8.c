@@ -137,3 +137,39 @@ void func_L09_00404E58(char *a0) {
         *(s16 *)(s1 + 0x334) = func_002B3BA8(s0, *(s32 *)(s1 + 0x230), 0, 0, 16.0f, 0.0f);
     }
 }
+
+extern void func_L09_00402D50(void);
+extern void func_L09_00403100(char *a0, s32 a1);
+
+/* The same release as func_L09_00404E58, with this level's own calls: when the
+   resident mode word says 9 the record the sub-object holds is released, then the
+   record's update runs with the value func_002B0ED8 returned, and the sub-object's
+   effect is rebuilt from the sub-object's own index and position. */
+void func_L09_00403270(char *a0) {
+    char *s0 = a0;
+    char *s1 = *(char **)(s0 + 0x68);
+    s32 s2;
+    s16 idx;
+
+    if (*(u8 *)(s0 + 0x20) == 0) {
+        func_L09_00402D50();
+    }
+    if (*(u8 *)(s0 + 0x31) != 0) {
+        if (func_00282E48(s0 + 0x10, D_L09_001B9A00) < 48.0f) {
+            func_002A93B0(s0);
+            *(u8 *)(s0 + 0x6F) = 0x2D;
+        }
+    }
+    s2 = func_002B0ED8(s0, s1 + 0x50, 0);
+    if (D_001A79F0 == 9) {
+        idx = *(s16 *)(s1 + 0xC0);
+        if (idx != -1) {
+            if (func_L09_00326E90(D_L09_001B285C + (idx << 8)) == 0) {
+                D_L09_001A9040 = 0;
+            }
+            *(s16 *)(s1 + 0xC0) = -1;
+        }
+    }
+    func_L09_00403100(s0, s2);
+    func_002B3BA8(s0, *(s32 *)(s1 + 0x28C), 0, 0, *(f32 *)(s1 + 0x24C), 0.0f);
+}

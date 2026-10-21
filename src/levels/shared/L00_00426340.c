@@ -525,9 +525,7 @@ INCLUDE_ASM("asm/levels", func_L00_0042AD98);
 
 INCLUDE_ASM("asm/levels", func_L00_0042B038);
 
-INCLUDE_ASM("asm/levels", func_L00_0042B840);
 
-INCLUDE_ASM("asm/levels", func_L00_0042BA18);
 
 /* refreshes the object, installs the block at +0x30 and returns the object. */
 char *func_L00_0042BAD0(char *a0)
@@ -537,7 +535,6 @@ char *func_L00_0042BAD0(char *a0)
     return a0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0042BC30);
 
 char *func_L00_0042BCF8(char *a0)
 {
@@ -553,7 +550,6 @@ char *func_L00_0042BFF8(char *a0)
     return a0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0042C030);
 
 char *func_L00_0042C290(char *a0)
 {
@@ -562,7 +558,6 @@ char *func_L00_0042C290(char *a0)
     return a0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0042C2C8);
 
 /* Store the supplied unsigned 32-bit word at owner byte offset 0x 44. */
 void func_L00_0042C358(int param_1, unsigned int param_2)
@@ -578,7 +573,6 @@ void func_L00_0042C360(int param_1, unsigned int param_2)
   return;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0042C398);
 
 /* Store the supplied unsigned 32-bit word at owner byte offset 0x 40. */
 void func_L00_0042C4B8(int param_1, unsigned int param_2)
@@ -608,4 +602,3 @@ unsigned long func_L00_0042C6D8(unsigned long param_1)
   return param_1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0042C760);

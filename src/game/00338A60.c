@@ -55,7 +55,6 @@ void *func_00339008(char *a0)
     return a0;
 }
 
-INCLUDE_ASM("asm/game", func_00339070);
 
 INCLUDE_ASM("asm/game", func_00339078);
 

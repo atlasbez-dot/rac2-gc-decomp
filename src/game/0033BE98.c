@@ -69,7 +69,6 @@ char *func_0033C178(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033C1A8);
 
 
 typedef struct { int ids[2]; } SolTextPair;
@@ -103,4 +102,3 @@ char *func_0033C430(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033C460);

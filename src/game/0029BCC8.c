@@ -388,7 +388,6 @@ void func_0029CB20(void) {
         func_00341F38(D_001A8CFC + 0x3E430);
 }
 
-INCLUDE_ASM("asm/game", func_0029CB50);
 
 extern void func_0028A2F8(void);
 
@@ -468,7 +467,6 @@ void func_0029CE38(void)
     }
 }
 
-INCLUDE_ASM("asm/game", func_0029CE78);
 
 
 

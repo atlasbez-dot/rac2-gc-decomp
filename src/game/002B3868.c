@@ -71,7 +71,6 @@ int func_002B3B20(char *p, char *q, float f12, float f13)
 
 INCLUDE_ASM("asm/game", func_002B3BA8);
 
-INCLUDE_ASM("asm/game", func_002B4028);
 
 typedef struct {
     int reserved;
@@ -117,7 +116,6 @@ void func_002B4090(char *self, PoseVector128 *point, float x, float y, float z)
     func_002AB6D8((float *)work.matrix, (float *)(self + 0xF0));
 }
 
-INCLUDE_ASM("asm/game", func_002B41A0);
 
 INCLUDE_ASM("asm/game", func_002B41A8);
 
@@ -176,7 +174,6 @@ int func_002B4FF0(char *self, float *target, float amount)
     return func_002B50E0(self, target, angle);
 }
 
-INCLUDE_ASM("asm/game", func_002B50D8);
 
 INCLUDE_ASM("asm/game", func_002B50E0);
 

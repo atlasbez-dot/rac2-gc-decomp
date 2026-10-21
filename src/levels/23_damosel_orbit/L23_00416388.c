@@ -206,7 +206,6 @@ void func_L23_0041B668(char *arg0, float *arg1) {
 
 INCLUDE_ASM("asm/levels", func_L23_0041B6D8);
 
-INCLUDE_ASM("asm/levels", func_L23_0041B940);
 
 INCLUDE_ASM("asm/levels", func_L23_0041B9F0);
 

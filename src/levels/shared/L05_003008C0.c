@@ -18,7 +18,6 @@ void func_L05_00303000(int a0, int a1, int a2, int a3, int a4, int a5, int a6)
     func_L05_00302CE8(a0, a1, a2, a3, a4, a5, a6, step, D_L05_002A2DB0);
 }
 
-INCLUDE_ASM("asm/levels", func_L05_00304B40);
 
 extern int D_L05_00293D48[];
 
@@ -31,29 +30,20 @@ void func_L05_0030C930(int a0, int a1) {
 
 /* func_L05_00324DB8 is defined in L05_003008C0-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L05_00334358);
 
-INCLUDE_ASM("asm/levels", func_L05_00336630);
 
 INCLUDE_ASM("asm/levels", func_L05_00339078);
 
-INCLUDE_ASM("asm/levels", func_L05_00339EE8);
 
-INCLUDE_ASM("asm/levels", func_L05_0033C2E0);
 
-INCLUDE_ASM("asm/levels", func_L05_0033C5E8);
 
-INCLUDE_ASM("asm/levels", func_L05_0033C650);
 
 INCLUDE_ASM("asm/levels", func_L05_0033CD40);
 
 INCLUDE_ASM("asm/levels", func_L05_0033D3A0);
 
-INCLUDE_ASM("asm/levels", func_L05_0033DEE8);
 
-INCLUDE_ASM("asm/levels", func_L05_0033E228);
 
-INCLUDE_ASM("asm/levels", func_L05_0033E600);
 
 INCLUDE_ASM("asm/levels", func_L05_0033F4A8);
 

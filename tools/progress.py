@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 How much of the game's code is C: progress/report.json, in objdiff's report format (the one
-decomp.dev reads, as rac1-decomp's), and the table in README.md.
+ByteMatch reads, as rac1-decomp's), and the table in README.md.
 
   python3 tools/progress.py            # write both, after tools/build.py all (maintainers, on master)
   python3 tools/progress.py --check    # the report counts nothing that is not C; it may be behind

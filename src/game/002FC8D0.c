@@ -201,7 +201,6 @@ void func_002FCF90(int arg0) {
 
 INCLUDE_ASM("asm/game", func_002FCFC8);
 
-INCLUDE_ASM("asm/game", func_002FD1A0);
 
 INCLUDE_ASM("asm/game", func_002FD1B8);
 
@@ -367,7 +366,6 @@ void func_002FFFE0(void)
     func_0027DE50(0, D_001A6480[0xA9], 0, D_001A6480[0xA8], (v << 24) | 0xFFFFFF);
 }
 
-INCLUDE_ASM("asm/game", func_00300180);
 
 
 INCLUDE_ASM("asm/game", func_003001E0);
@@ -469,7 +467,6 @@ void func_00300330(void *a0) {
     }
 }
 
-INCLUDE_ASM("asm/game", func_003004A8);
 
 typedef struct {
     int padding;
@@ -517,4 +514,3 @@ s32 func_00300540(s32 a0) {
     return v;
 }
 
-INCLUDE_ASM("asm/game", func_00300598);

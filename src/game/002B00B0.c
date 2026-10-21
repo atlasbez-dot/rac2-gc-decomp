@@ -74,7 +74,6 @@ void func_002B00B0(QwenRecovery_00beefd949f6_AbiByte15 *param_1, float *output, 
     return;
 }
 
-INCLUDE_ASM("asm/game", func_002B00D0);
 
 /* If the linked global word is zero, stores (second_float_field - f) into the first object's float field; otherwise runs a three-call path over a 16-byte local buffer. */
 void func_002B00D8(void *p, float *a1, float *a2, float f)
@@ -96,7 +95,6 @@ void func_002B0158(char *object, float *first, float *second, float amount) {
 
 INCLUDE_ASM("asm/game", func_002B0178);
 
-INCLUDE_ASM("asm/game", func_002B0358);
 
 /* Returns a scaled length when a global flag is set, otherwise refreshes a bound data object and forwards the raw helper result. */
 float func_002B0360(char *p)
@@ -139,7 +137,6 @@ void func_002B0408(void *a0, void *a1, void *a2)
         func_00282AB0_1(a2, buf, 48);
 }
 
-INCLUDE_ASM("asm/game", func_002B04D8);
 
 extern void func_002AFDD8(char *a0, char *a1, char *a2, char *a3);
 extern float func_00283248(float a, float b);
@@ -155,13 +152,11 @@ float func_002B04E0(char *a0, float *src, char *third)
     return func_00283248(local[0], local[1]);
 }
 
-INCLUDE_ASM("asm/game", func_002B0518);
 
 INCLUDE_ASM("asm/game", func_002B0520);
 
 INCLUDE_ASM("asm/game", func_002B0668);
 
-INCLUDE_ASM("asm/game", func_002B08A0);
 
 /* Calls one float-conversion helper on (a0 %% a1) and again on a1, then returns 2*pi times the quotient minus pi. */
 float func_002B08A8(int a0, int a1)
@@ -182,7 +177,6 @@ void func_002B0910(int a0, int a1, int a2, int a3)
     func_00283D38(a2, a3, v * 0.5f + 0.5f);
 }
 
-INCLUDE_ASM("asm/game", func_002B0968);
 
 extern u8 D_001A7A47 __attribute__((sda));
 extern void func_002AEC48(void *a0, void *a1, int a2, float f12, float f13);
@@ -250,7 +244,6 @@ void func_002B0A68(char *self, int mask, int arg2,
     }
 }
 
-INCLUDE_ASM("asm/game", func_002B0C18);
 
 INCLUDE_ASM("asm/game", func_002B0C28);
 

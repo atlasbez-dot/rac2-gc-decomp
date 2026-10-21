@@ -136,10 +136,6 @@ void func_L02_0043FA98(u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L02_004547D0);
 
-INCLUDE_ASM("asm/levels", func_L02_00457068);
 
-INCLUDE_ASM("asm/levels", func_L02_0045B280);
 
-INCLUDE_ASM("asm/levels", func_L02_004692D0);
 
-INCLUDE_ASM("asm/levels", func_L02_00469748);

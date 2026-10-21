@@ -286,4 +286,3 @@ int func_001252E0(int arg0) {
     return r;
 }
 
-INCLUDE_ASM("asm/core", func_001253A4);

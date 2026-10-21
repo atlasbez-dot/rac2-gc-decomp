@@ -10,7 +10,6 @@ INCLUDE_ASM("asm/levels", func_L02_002EF968);
 
 INCLUDE_ASM("asm/levels", func_L02_002EFB60);
 
-INCLUDE_ASM("asm/levels", func_L02_002F1650);
 
 INCLUDE_ASM("asm/levels", func_L02_002F1FB8);
 
@@ -144,7 +143,6 @@ INCLUDE_ASM("asm/levels", func_L02_0032EDD8);
 
 INCLUDE_ASM("asm/levels", func_L02_0032EF10);
 
-INCLUDE_ASM("asm/levels", func_L02_0032F008);
 
 extern void *func_L00_0032C638(char *a0);
 extern int func_002B50E0(void *a0, void *a1, float f12);
@@ -344,7 +342,96 @@ INCLUDE_ASM("asm/levels", func_L02_00389F70);
 
 INCLUDE_ASM("asm/levels", func_L02_0038A008);
 
-INCLUDE_ASM("asm/levels", func_L02_0038BA28);
+/* Two fields of the resident record at 0x189E20; retail shares its base between them. */
+typedef struct {
+    unsigned char pad00[0x88];
+    float f88;
+    unsigned char pad8C[0x2294 - 0x8C];
+    int f2294;
+} View_00189E20;
+
+extern View_00189E20 D_00189E20;
+/* sda: the bare load `lui $v1 ; lw $v1,%lo($v1)` retail has twice; a plain extern keeps the %hi
+   in a saved register across the calls. */
+extern int D_001A79F0 __attribute__((sda));
+extern int D_L02_001CAA80;
+extern char D_L02_001BA500[];
+extern int D_L02_001B35B8 __attribute__((sda));
+extern int func_L00_00329520(void *a0, int a1);
+extern void func_002A7750(void *a0, int a1, int a2);
+extern void func_L02_0038BD00(unsigned char *a0, int a1);
+extern void func_L00_002E6CF0(void *a0, void *a1);
+extern void func_L02_0038C998(unsigned char *a0);
+extern void func_L02_0038DA00(void *arg0);
+
+/* State machine of the controller object that owns a group id list. On level 13 it retires
+   itself (+0x30 = 0xFF, bits 0 and 6 of +0x34 set, bit 12 cleared) once the resident float is
+   past 89 or the resident word is 0x74. State 0 runs func_L02_0038BD00; state 1 switches the
+   whole group off (+0x31 cleared, bit 0 of +0x34 set) when the record test passes, then runs
+   func_L02_0038C998 and queues func_L02_0038DA00; state 2 switches the group back on. */
+void func_L02_0038BA28(unsigned char *arg0) {
+    unsigned char *o = *(unsigned char **)(arg0 + 0x68);
+
+    if (D_001A79F0 == 13) {
+        if (89.0f < D_00189E20.f88 || D_00189E20.f2294 == 0x74) {
+            arg0[0x30] = 0xFF;
+            *(unsigned short *)(arg0 + 0x34) = (*(unsigned short *)(arg0 + 0x34) | 0x41) & 0xEFFF;
+            *(int *)(arg0 + 0x98) = 0;
+            return;
+        }
+        *(unsigned short *)(arg0 + 0x34) = (*(unsigned short *)(arg0 + 0x34) & 0xFFBE) | 0x1000;
+        *(int *)(arg0 + 0x98) = *(int *)(*(char **)(arg0 + 0x24) + 0x10);
+    }
+    if (*(unsigned short *)(arg0 + 0x34) & 2)
+        return;
+    if (D_L02_001CAA80 != 0)
+        return;
+    switch (arg0[0x20]) {
+    case 0:
+        func_L02_0038BD00(arg0, arg0[0x21]);
+        break;
+    case 1:
+        /* each walk has its own q and e: retail gives the two walks different registers */
+        if (*(int *)(o + 0xC) != -1 && func_L00_00329520(D_L02_001BA500, *(int *)(o + 0xC)) != 0) {
+            unsigned short *q;
+            unsigned char *e;
+
+            q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+            while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+                   ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+                e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+                if (e == 0)
+                    break;
+                e[0x31] = 0;
+                *(unsigned short *)(e + 0x34) |= 1;
+                q++;
+            }
+            func_002A7750(arg0, 2, -1);
+        }
+        func_L02_0038C998(arg0);
+        if (D_001A79F0 != 13 || !(89.0f < D_00189E20.f88))
+            func_L00_002E6CF0(func_L02_0038DA00, arg0);
+        break;
+    case 2:
+        if (func_L00_00329520(D_L02_001BA500, *(int *)(o + 0xC)) == 0) {
+            unsigned short *q;
+            unsigned char *e;
+
+            q = (unsigned short *)D_L02_001FC060[arg0[0x21]];
+            while (arg0[0x21] != 0xFF && arg0[0x21] <= D_L02_001B35B8 && q != 0 &&
+                   ((q != 0 && (short)q[-1] >= 0) || q == (unsigned short *)D_L02_001FC060[arg0[0x21]])) {
+                e = (unsigned char *)(D_L02_001B359C + ((*q & 0x7FFF) << 8));
+                if (e == 0)
+                    break;
+                e[0x31] = 1;
+                *(unsigned short *)(e + 0x34) &= 0xFFFE;
+                q++;
+            }
+            func_002A7750(arg0, 1, -1);
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L02_0038BD00);
 
@@ -394,7 +481,6 @@ extern void func_00282D60(void *buf, void *value, float scale);
 extern int func_00283DB8(void *buf, float value);
 extern void func_L00_002ECFE8(void *a0, void *a1, int a2, unsigned int a3,
                               float f12, float f13, float f14, int t0, int t1);
-extern int D_L02_001B35B8 __attribute__((sda));
 extern char *D_L02_001FBFC0[];
 extern int func_L02_002F1658(void);
 
@@ -782,7 +868,6 @@ void func_L02_003AA650(char *arg0) {
 }
 
 
-INCLUDE_ASM("asm/levels", func_L02_003B6548);
 
 INCLUDE_ASM("asm/levels", func_L02_003C0890);
 

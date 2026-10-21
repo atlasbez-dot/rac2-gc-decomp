@@ -185,7 +185,6 @@ void func_L01_002A9298(void) {
     func_002A8EE0(*(int *)(b + 0x1220), *(int *)(b + 0x2290));
 }
 
-INCLUDE_ASM("asm/levels", func_L01_002ABF90);
 
 INCLUDE_ASM("asm/levels", func_L01_002AE128);
 
@@ -236,11 +235,9 @@ void func_L01_002C98B8(void) {
         func_002BEB90(3, 1);
 }
 
-INCLUDE_ASM("asm/levels", func_L01_002E1150);
 
 INCLUDE_ASM("asm/levels", func_L01_002E1510);
 
-INCLUDE_ASM("asm/levels", func_L01_002E1670);
 
 INCLUDE_ASM("asm/levels", func_L01_002E1680);
 
@@ -248,7 +245,6 @@ INCLUDE_ASM("asm/levels", func_L01_002E2608);
 
 INCLUDE_ASM("asm/levels", func_L01_002EABA8);
 
-INCLUDE_ASM("asm/levels", func_L01_002F0E88);
 
 
 INCLUDE_ASM("asm/levels", func_L01_002F1588);
@@ -286,7 +282,6 @@ void func_L01_003128C0(char *p) {
     *(float *)(p + 0x74) = 0.2f;
 }
 
-INCLUDE_ASM("asm/levels", func_L01_003161F0);
 
 /* chain of four probes on the same object; the first that reports a hit picks the code */
 int func_L01_003165E8(char *a0, int a1, char *a2, char *a3, char *t0) {
@@ -337,11 +332,8 @@ void func_L01_0031BC68(int a0, int a1) {
     func_002E4600(a0, a1, v * 0.5f + 0.5f);
 }
 
-INCLUDE_ASM("asm/levels", func_L01_0031EF98);
 
-INCLUDE_ASM("asm/levels", func_L01_0031F080);
 
-INCLUDE_ASM("asm/levels", func_L01_003200C8);
 
 void func_L01_003208D0(void *a0, float *a1, int a2) {
     unsigned char *p = (unsigned char *)a0;
@@ -389,7 +381,6 @@ int func_L01_00322288(int a0, float f12) {
     return 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L01_00322358);
 
 INCLUDE_ASM("asm/levels", func_L01_00323310);
 
@@ -410,7 +401,6 @@ void func_L01_003242C8(char *dst, int x, int idx)
         func_00115DA8_2(dst, D_L01_001AA588, x);
 }
 
-INCLUDE_ASM("asm/levels", func_L01_00324408);
 
 INCLUDE_ASM("asm/levels", func_L01_00324410);
 
@@ -491,9 +481,7 @@ INCLUDE_ASM("asm/levels", func_L01_00337888);
 
 INCLUDE_ASM("asm/levels", func_L01_00337A60);
 
-INCLUDE_ASM("asm/levels", func_L01_00337B80);
 
-INCLUDE_ASM("asm/levels", func_L01_0034EA48);
 
 int func_L01_00355BA0(int index, int value) {
     char *p = D_00188660 + index * 0x70;

@@ -58,6 +58,17 @@ Correcting the second entry also groups it with Siberius's `003EBC90`, so the tw
 places share one definition. These corrections apply to level 00 only; regenerate
 the catalogue with `tools/levels.py catalogue`, rather than editing its rows.
 
+Two more kinds of row are measured from the retail bytes, not from a list of
+addresses. An extent whose words are only stack adjustments and nops is the linker's
+filler between two bodies, not a function, and leaves the catalogue: 257 level rows
+and 225 boot rows are such filler. The absence of a `jr $ra` does not decide this on
+its own - a body that ends in a trap or a tail call has no `jr $ra` and is still code
+(`func_00115E90` is matched C) - and neither does the arithmetic: `addu $t0,$t1,$t2`
+and `addiu $sp,$a0,16` are not filler, though the operands alone would say they
+were. A four-byte extent right after a body that ends with `jr $ra` and its delay
+slot is the word that body left behind: 25 level rows and 26 boot rows are such, and
+they leave the catalogue as well.
+
 ## The C
 
 The layout is rac1-decomp's: every function of both catalogues appears once in `src/`, in

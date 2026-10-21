@@ -245,7 +245,6 @@ void func_002C8F40(int *obj)
 
 INCLUDE_ASM("asm/game", func_002C9098);
 
-INCLUDE_ASM("asm/game", func_002C91E0);
 
 INCLUDE_ASM("asm/game", func_002C9218);
 
@@ -253,11 +252,9 @@ INCLUDE_ASM("asm/game", func_002C94C8);
 
 INCLUDE_ASM("asm/game", func_002C96F8);
 
-INCLUDE_ASM("asm/game", func_002C9820);
 
 INCLUDE_ASM("asm/game", func_002C9828);
 
-INCLUDE_ASM("asm/game", func_002C9A40);
 
 extern int D_001F2A30;
 

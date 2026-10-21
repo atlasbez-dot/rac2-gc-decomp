@@ -263,7 +263,6 @@ INCLUDE_ASM("asm/levels", func_L06_004649F0);
 
 INCLUDE_ASM("asm/levels", func_L06_00464F40);
 
-INCLUDE_ASM("asm/levels", func_L06_00471948);
 
 void func_L06_00478548(float a, float b)
 {
@@ -281,4 +280,3 @@ void func_L06_00478548(float a, float b)
     *(float *)(v + 0x48) = b;
 }
 
-INCLUDE_ASM("asm/levels", func_L06_00498EF8);

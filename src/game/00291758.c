@@ -43,7 +43,6 @@ INCLUDE_ASM("asm/game", func_00291788);
 
 INCLUDE_ASM("asm/game", func_00291850);
 
-INCLUDE_ASM("asm/game", func_00291CA0);
 
 INCLUDE_ASM("asm/game", func_00291CA8);
 
@@ -72,7 +71,6 @@ void func_002923C0(void *param)
 
 INCLUDE_ASM("asm/game", func_00292408);
 
-INCLUDE_ASM("asm/game", func_002925E0);
 
 INCLUDE_ASM("asm/game", func_002925F0);
 
@@ -170,15 +168,12 @@ INCLUDE_ASM("asm/game", func_002934F8);
 
 /* func_00293890 is in 00291758-g8.c. */
 
-INCLUDE_ASM("asm/game", func_002939B8);
 
 INCLUDE_ASM("asm/game", func_002939D0);
 
-INCLUDE_ASM("asm/game", func_00293A58);
 
 INCLUDE_ASM("asm/game", func_00293A60);
 
-INCLUDE_ASM("asm/game", func_00293CA0);
 
 int func_00293CA8(int index)
 {
@@ -216,7 +211,7 @@ void func_002940C0(void)
 }
 
 
-INCLUDE_ASM("asm/game", func_00294130);
+/* func_00294130 is matched in 00291758-g8.c (-G8 small data). */
 
 INCLUDE_ASM("asm/game", func_00294180);
 

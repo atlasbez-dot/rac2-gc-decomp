@@ -167,6 +167,9 @@ INCLUDE_ASM("asm/levels", func_L09_003FEF00);
 
 INCLUDE_ASM("asm/levels", func_L09_00402D50);
 
+/* func_L09_00403100: 208 bytes against retail's 212, the loop's index allocation differs
+   (this cc1 merges the address's shift with the loop test's shift and shifts in place).
+   Deposited in nonmatching/levels/func_L09_00403100.c. */
 INCLUDE_ASM("asm/levels", func_L09_00403100);
 
 void func_L09_0040B008(char *a0) {
@@ -188,6 +191,8 @@ void func_L09_0040B008(char *a0) {
     }
 }
 
+/* func_L09_00403270 reads small data through $gp, so it is defined in
+   L09_003FEA48-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L09_00403398);
 /* func_L09_00403700: 160 bytes against retail's 152, the guard comes out as `bnel`.

@@ -101,7 +101,6 @@ int func_00127040(void *arg0) {
 
 INCLUDE_ASM("asm/core", func_00127218);
 
-INCLUDE_ASM("asm/core", func_00127288);
 
 /* rac1-decomp src/core/00123168.c: func_00123650 */
 /*
@@ -135,7 +134,6 @@ int func_001272A8(void *arg0) {
 
 INCLUDE_ASM("asm/core", func_00127340);
 
-INCLUDE_ASM("asm/core", func_00127500);
 
 /* rac1-decomp src/core/001236F0.c: func_001238B0 */
 /* sceMcOpen(port, slot, fname, mode) (libmc): same RPC-wrapper shape as

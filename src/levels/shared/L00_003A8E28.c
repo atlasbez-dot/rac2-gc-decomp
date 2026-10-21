@@ -72,7 +72,6 @@ void func_L00_003AB618(char *a0, char *a1, char *a2)
 
 INCLUDE_ASM("asm/levels", func_L00_003AB6F0);
 
-INCLUDE_ASM("asm/levels", func_L00_003AB8B0);
 
 INCLUDE_ASM("asm/levels", func_L00_003AB8B8);
 

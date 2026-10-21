@@ -223,7 +223,6 @@ int func_001248F8(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/core", func_00124970);
 
 /* rac1-decomp src/core/001208E8.c: func_00120D28 */
 /* _sceCd_scmd_prechk (libcdvd.a cdvd000.o) */

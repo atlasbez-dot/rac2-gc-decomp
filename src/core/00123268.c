@@ -37,4 +37,3 @@ float func_00123298(double value) {
     return func_001234C0(parts.kind, parts.sign, parts.exponent, fraction);
 }
 
-INCLUDE_ASM("asm/core", func_001232EC);

@@ -96,7 +96,6 @@ INCLUDE_ASM("asm/game", func_0027BA68);
 
 INCLUDE_ASM("asm/game", func_0027BD70);
 
-INCLUDE_ASM("asm/game", func_0027C478);
 
 void func_0027C480(void) {
     extern void func_00284F40(int);
@@ -126,7 +125,6 @@ void func_0027C4A8(void)
     func_002859C8();
 }
 
-INCLUDE_ASM("asm/game", func_0027C510);
 
 void func_0027C520(void)
 {
@@ -279,19 +277,17 @@ INCLUDE_ASM("asm/game", func_0027D900);
 
 INCLUDE_ASM("asm/game", func_0027DB68);
 
-INCLUDE_ASM("asm/game", func_0027DDC0);
+/* func_0027DDC0 is in 0027B948-g8.c (-G8: retail re-materialises the address of the
+   packet pointer for every access, which only that flag reproduces). */
 
 INCLUDE_ASM("asm/game", func_0027DE50);
 
-INCLUDE_ASM("asm/game", func_0027E010);
 
 INCLUDE_ASM("asm/game", func_0027E018);
 
-INCLUDE_ASM("asm/game", func_0027E198);
 
 INCLUDE_ASM("asm/game", func_0027E1A0);
 
-INCLUDE_ASM("asm/game", func_0027E4A0);
 
 INCLUDE_ASM("asm/game", func_0027E4A8);
 
@@ -350,6 +346,5 @@ void func_0027ECC8(int x, int y, int z, int w, int v)
     func_0027DE50(x + 1, y - 3, w + 3, w + 5, v);
 }
 
-INCLUDE_ASM("asm/game", func_0027EE50);
 
 INCLUDE_ASM("asm/game", func_0027EE58);

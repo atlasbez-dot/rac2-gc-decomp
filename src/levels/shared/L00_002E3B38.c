@@ -22,6 +22,5 @@ int func_L00_002E3B38(int x)
 
 INCLUDE_ASM("asm/levels", func_L00_002E3BA0);
 
-INCLUDE_ASM("asm/levels", func_L00_002E3DB8);
 
 INCLUDE_ASM("asm/levels", func_L00_002E54E0);

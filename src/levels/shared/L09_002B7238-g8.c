@@ -58,6 +58,71 @@ void func_L09_003EAA18(char *object) {
     func_002B3BA8(object, *(int *)(frame + 0x354), 0, 0, 0.0f, 0.0f);
 }
 
+/* The walks below read the group count through $gp; the group table of id lists is absolute
+   and the entity base (the level's record table, D_L09_001B285C above through $gp) is the bare
+   `lui`/`lw` pair here, a second name sized over 8 bytes with `sda` in this -G8 unit. */
+extern int D_L09_001B2878 __attribute__((sda));
+
+extern unsigned char *D_L09_001B285C_1[3] __attribute__((sda));
+
+extern unsigned short *D_L09_001FB560[];
+
+/* Counts the class-0xD0F entities of the object's group whose private state has bit 0 of its
+   byte at +0x302 clear and the word a1 at +0x420; -1 when a1 is 0. */
+int func_L09_003F71C8(unsigned char *a0, int a1) {
+    unsigned short *p;
+    unsigned char *e;
+    unsigned char *s;
+    int n = 0;
+
+    if (a1 == 0)
+        return -1;
+    for (p = D_L09_001FB560[a0[0x21]];
+         a0[0x21] != 0xFF && a0[0x21] <= D_L09_001B2878 && p != 0 &&
+         ((p != 0 && (short)p[-1] >= 0) || p == D_L09_001FB560[a0[0x21]]);
+         p++) {
+        e = D_L09_001B285C_1[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        s = *(unsigned char **)(e + 0x68);
+        if (*(short *)(e + 0xAA) == 0xD0F) {
+            if (s != 0 && ((s[0x302] ^ 1) & 1)) {
+                if (*(int *)(s + 0x420) == a1)
+                    n++;
+            }
+        }
+    }
+    return n;
+}
+
+/* The largest word at +0x420 (0 at least) in the private states, whose byte at +0x302 is 0, of
+   the class-0xD0F entities of the object's group. */
+int func_L09_003F72A8(unsigned char *a0) {
+    unsigned short *p;
+    unsigned char *e;
+    unsigned char *s;
+    int best = 0;
+    int v;
+
+    for (p = D_L09_001FB560[a0[0x21]];
+         a0[0x21] != 0xFF && a0[0x21] <= D_L09_001B2878 && p != 0 &&
+         ((p != 0 && (short)p[-1] >= 0) || p == D_L09_001FB560[a0[0x21]]);
+         p++) {
+        e = D_L09_001B285C_1[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        s = *(unsigned char **)(e + 0x68);
+        if (*(short *)(e + 0xAA) == 0xD0F) {
+            if (s != 0 && s[0x302] == 0) {
+                v = *(int *)(s + 0x420);
+                if (v >= best)
+                    best = v;
+            }
+        }
+    }
+    return best;
+}
+
 /* Re-arms the frame's four spawn slots, bumps the object's counter and re-runs the stage. */
 void func_L09_003F8898(char *object) {
     char *frame = *(char **)(object + 0x68);

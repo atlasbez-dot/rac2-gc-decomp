@@ -15,6 +15,41 @@ typedef struct {
 extern NativeCallbackTimer D_L04_001B98E0;
 extern f32 D_L04_001B1C88 __attribute__((sda));
 
+/* The group count is read through $gp here; the group table and the resident word are
+   absolute, and the entity base (D_L03_001B2A1C in the -G0 sibling) is the bare `lui`/`lw` pair,
+   a second name sized over 8 bytes with `sda` in this -G8 unit. */
+extern int D_0018A15C __attribute__((nosda));
+
+extern int D_L03_001B2A38 __attribute__((sda));
+
+extern u8 *D_L03_001B2A1C_1[3] __attribute__((sda));
+
+extern unsigned short *D_L03_001FB5A0[];
+
+/* Answers 1 when the resident word at 0x18A15C equals the object's state word at +0x358, or
+   when the state of an entity of the object's group holds it at +0x198; 0 otherwise. */
+int func_L03_003C5CE8(u8 *a0) {
+    u8 *s = *(u8 **)(a0 + 0x68);
+    unsigned short *p;
+    u8 *e;
+
+    if (D_0018A15C == *(int *)(s + 0x358))
+        return 1;
+    if (a0[0x21] == 0xFF)
+        return 0;
+    for (p = D_L03_001FB5A0[a0[0x21]];
+         a0[0x21] != 0xFF && a0[0x21] <= D_L03_001B2A38 && p != 0 &&
+         ((p != 0 && (short)p[-1] >= 0) || p == D_L03_001FB5A0[a0[0x21]]);
+         p++) {
+        e = D_L03_001B2A1C_1[0] + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (*(int *)(*(u8 **)(e + 0x68) + 0x198) == *(int *)(s + 0x358))
+            return 1;
+    }
+    return 0;
+}
+
 typedef struct { u8 b[0x10]; } Local16;
 
 extern f32 D_L03_001B0344 __attribute__((sda));

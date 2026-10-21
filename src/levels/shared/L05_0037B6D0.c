@@ -201,7 +201,6 @@ void func_L05_0037D6E8(void)
     D_L05_002A1800[i].f14 = D_L05_002A1800[i].f10;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0037D768);
 
 INCLUDE_ASM("asm/levels", func_L05_0037D7D8);
 

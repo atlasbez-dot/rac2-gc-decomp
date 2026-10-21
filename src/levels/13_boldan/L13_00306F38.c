@@ -27,7 +27,6 @@ extern u8 D_00189E20[];
 
 INCLUDE_ASM("asm/levels", func_L13_00306F38);
 
-INCLUDE_ASM("asm/levels", func_L13_003383B8);
 
 INCLUDE_ASM("asm/levels", func_L13_0035E890);
 

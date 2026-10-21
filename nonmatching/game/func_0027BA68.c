@@ -1,0 +1,4 @@
+/* func_0027BA68 - 772 bytes, 28 places (the boot and every level).
+   Screened in wave 13 (worker g4): 25 call(s), 0 $gp-relative small-data access(es), 15 MMI lq/sq word(s), 23 64-bit daddu copy(ies), 4 float constant(s).
+   the body carries the MMI lq/sq words (0x78/0x7C/0x7E), which a mode(TI) local reaches, but this cc1 folds the constant offset into the lq/sq where retail materialises the pointer first; it also keeps 23 pointers in 64-bit variables, where retail copies them with daddu $d,$s,$zero and this cc1 sign-extends with dsll/dsra.
+   Not matched in wave 13 (worker g4): screening only; no C candidate was tested in this wave. */

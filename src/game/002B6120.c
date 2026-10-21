@@ -118,7 +118,6 @@ int func_002B6120(char *s1, char *s2)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002B6220);
 
 extern char *func_002B5D28(void *);
 
@@ -139,7 +138,6 @@ int func_002B6228(void *kind, void *raw_data, int count, int value)
 
 /* func_002B62A0 is matched in 002B6120-g8.c (-G8 small data). */
 
-INCLUDE_ASM("asm/game", func_002B62F8);
 
 extern float *D_001F1700[];
 extern int func_002A8AF0(float *, float *, int);
@@ -169,7 +167,6 @@ INCLUDE_ASM("asm/game", func_002B6480);
 
 INCLUDE_ASM("asm/game", func_002B65B8);
 
-INCLUDE_ASM("asm/game", func_002B6650);
 
 INCLUDE_ASM("asm/game", func_002B6658);
 
@@ -210,7 +207,6 @@ void func_002B67E0(int a0, int index) {
 
 INCLUDE_ASM("asm/game", func_002B6828);
 
-INCLUDE_ASM("asm/game", func_002B68C0);
 
 INCLUDE_ASM("asm/game", func_002B68C8);
 

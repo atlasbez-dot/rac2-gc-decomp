@@ -1,6 +1,6 @@
 #include "include_asm.h"
 
-extern void func_002FC560(unsigned int reg, unsigned long value);
+extern void func_002FC560(unsigned int reg, unsigned long long value);
 
 extern int D_001A72E0;
 
@@ -22,4 +22,24 @@ void func_0027DCE8(char *p)
     if (*(unsigned long long *)(p + 8) != 0) {
         func_002FC560(0x42, 0x8000000044ULL);
     }
+}
+
+extern char *ref_0027DDC0_00;
+
+extern char D_00138850[];
+
+/* Packs a colour into the GS register 1 and writes the matching packet. */
+void func_0027DDC0(int r, int g, int b, int a)
+{
+    unsigned long packed;
+
+    packed = (unsigned long)r | ((unsigned long)g << 8);
+    packed |= ((unsigned long)b << 16);
+    packed |= ((unsigned long)a << 24);
+    func_002FC560(1, packed);
+    *(int *)(ref_0027DDC0_00 + 0) = 0x30000014;
+    *(char **)(ref_0027DDC0_00 + 4) = D_00138850;
+    *(int *)(ref_0027DDC0_00 + 8) = 0;
+    *(int *)(ref_0027DDC0_00 + 12) = 0x50000014;
+    ref_0027DDC0_00 = ref_0027DDC0_00 + 16;
 }

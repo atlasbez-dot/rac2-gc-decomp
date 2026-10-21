@@ -313,7 +313,6 @@ INCLUDE_ASM("asm/game", func_00278CE0);
 
 ASM_FUNC("asm/game", func_00278E78);
 
-INCLUDE_ASM("asm/game", func_00278EA8);
 
 INCLUDE_ASM("asm/game", func_00278EB0);
 
@@ -352,7 +351,6 @@ void func_00279790(int p0, int p1, int p2, int p3, int p4, int p5,
     D_L04_001BCE48[idx].v[9] = p9;
 }
 
-INCLUDE_ASM("asm/game", func_00279808);
 
 void func_00279828(void)
 {
@@ -383,11 +381,9 @@ int func_00279988(void) {
 
 INCLUDE_ASM("asm/game", func_002799A8);
 
-INCLUDE_ASM("asm/game", func_00279B68);
 
 INCLUDE_ASM("asm/game", func_00279B70);
 
-INCLUDE_ASM("asm/game", func_00279BD0);
 
 INCLUDE_ASM("asm/game", func_00279BD8);
 

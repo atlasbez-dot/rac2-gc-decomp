@@ -350,7 +350,6 @@ void func_L00_003E9660(int unused, float *p, int n)
 
 INCLUDE_ASM("asm/levels", func_L00_003E9780);
 
-INCLUDE_ASM("asm/levels", func_L00_003E9928);
 
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
@@ -379,7 +378,6 @@ void func_L00_003E9B00(int p0, int p1, int p2, int p3, float v)
 
 INCLUDE_ASM("asm/levels", func_L00_003E9B90);
 
-INCLUDE_ASM("asm/levels", func_L00_003EA048);
 
 /* straight-line constant-store body (no calls, no branches, no loads) */
 void func_L00_003EA050(char *p)

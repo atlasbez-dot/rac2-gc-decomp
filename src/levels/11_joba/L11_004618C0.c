@@ -89,8 +89,5 @@ void func_L11_004885B8(unsigned char *a0) {
     *(unsigned short *)(a0 + 0x7E) = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_004A0CE0);
 
-INCLUDE_ASM("asm/levels", func_L11_004A6B50);
 
-INCLUDE_ASM("asm/levels", func_L11_004A8AB8);

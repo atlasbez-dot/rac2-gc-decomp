@@ -222,7 +222,6 @@ INCLUDE_ASM("asm/levels", func_L20_00444018);
 /* func_L20_00444088 is defined in L20_00444088-g8.c (it reaches a global through
    $gp and needs its own -fno-schedule-insns). */
 
-INCLUDE_ASM("asm/levels", func_L20_00444130);
 
 /* func_L20_00444138 reads a global through $gp: its near miss is in
    nonmatching/levels/func_L20_00444138.c and belongs in the -G8 sibling. */

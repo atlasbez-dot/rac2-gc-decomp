@@ -243,15 +243,11 @@ void func_L00_0031AD40(float *a0, float *a1, float *a2, float t)
     a0[2] = func_00283B98_5(a1[2], func_00283BE0_2(a2[2], a1[2]) * k);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0031AFF0);
 
-INCLUDE_ASM("asm/levels", func_L00_0031B398);
 
-INCLUDE_ASM("asm/levels", func_L00_0031B750);
 
 /* func_L00_0031B9F8 is matched in L00_0031B9F8.c (built with -g). */
 
-INCLUDE_ASM("asm/levels", func_L00_0031BC48);
 
 INCLUDE_ASM("asm/levels", func_L00_0031BDC0);
 
@@ -262,7 +258,6 @@ s32 func_L00_0031BE88(char *a0) {
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0031C0F8);
 
 INCLUDE_ASM("asm/levels", func_L00_0031C3D0);
 
@@ -276,11 +271,9 @@ void func_L00_0031C998(void)
     func_00283D38();
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0031CAC8);
 
 INCLUDE_ASM("asm/levels", func_L00_0031CDD0);
 
-INCLUDE_ASM("asm/levels", func_L00_0031D618);
 
 int func_L00_0031D620(int a0, int a1, float x) {
     return a0 + func_002EF250((float)(a1 - a0) * x);
@@ -288,7 +281,6 @@ int func_L00_0031D620(int a0, int a1, float x) {
 
 INCLUDE_ASM("asm/levels", func_L00_0031D670);
 
-INCLUDE_ASM("asm/levels", func_L00_0031D958);
 
 /* Blends three components of a vector into a second one: for every component that is
    negative the two vectors are mixed through a helper, scaled by the angle between them
@@ -318,7 +310,6 @@ void func_L00_0031EC88(V4TI_F36d8a248 *a0, V4TI_F36d8a248 *a1)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0031F1C0);
 
 int func_L00_0031F220(const unsigned char *entity) {
     if (entity == 0)
@@ -336,12 +327,10 @@ int func_L00_0031F2B0(const unsigned char *entity) {
 
 INCLUDE_ASM("asm/levels", func_L00_003200F8);
 
-INCLUDE_ASM("asm/levels", func_L00_00320460);
 
 /* func_L00_003206B8 only matches when this unit is built -G8 (its object table load comes
    out of $gp there), so its body lives in L00_00316F60-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L00_003207F8);
 
 INCLUDE_ASM("asm/levels", func_L00_00320B70);
 
@@ -349,7 +338,6 @@ INCLUDE_ASM("asm/levels", func_L00_00321878);
 
 INCLUDE_ASM("asm/levels", func_L00_00322428);
 
-INCLUDE_ASM("asm/levels", func_L00_00322A10);
 
 /* builds two 64-byte blocks from a 3-float vector and from a vector inside the caller object, combines them, then scales one block again from the same source vector */
 void func_L00_00322A18(u8 *a0, f32 a1, f32 a2, f32 a3) {
@@ -429,7 +417,6 @@ void func_L00_00322EC8(Rac2Native_5b4b17178a13f443_SmallSlotReset128Owner *owner
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00322F48);
 
 INCLUDE_ASM("asm/levels", func_L00_00323338);
 
@@ -490,7 +477,6 @@ INCLUDE_ASM("asm/levels", func_L00_00324D18);
 
 INCLUDE_ASM("asm/levels", func_L00_00324E48);
 
-INCLUDE_ASM("asm/levels", func_L00_00324F10);
 
 void func_L00_00324F18(char *a0, char *a1, float f12, float f13, float f14) {
     *(float *)(a1 + 0) = f12;
@@ -520,7 +506,6 @@ void func_L00_003253A0(u8 *a0)
     func_002B00D8(a0 + 0x10);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003255A0);
 
 void func_L00_00325600(void *a0, void *a1, void *a2) {
     int buf[4];
@@ -528,13 +513,11 @@ void func_L00_00325600(void *a0, void *a1, void *a2) {
     func_002B0408(a0, buf, a2);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00325760);
 
 INCLUDE_ASM("asm/levels", func_L00_00325AE8);
 
 INCLUDE_ASM("asm/levels", func_L00_00325CC0);
 
-INCLUDE_ASM("asm/levels", func_L00_00325FC0);
 
 /* stores a wrapped angle back into the caller field and forwards its [0,1] rescaled value (x*0.5+0.5) with two pointer arguments to a second callee */
 int func_L00_00325FC8(f32 *a0, s32 a1, s32 a2, f32 a3) {
@@ -548,9 +531,7 @@ void func_L00_00326048(char *a0, f32 *a1, s32 a2, s32 a3, f32 f) {
     *(int *)(a0 + 0x78) = func_L00_00325FC8(a1, a2, a3, f);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00326080);
 
-INCLUDE_ASM("asm/levels", func_L00_00326108);
 
 INCLUDE_ASM("asm/levels", func_L00_00326110);
 
@@ -615,6 +596,4 @@ INCLUDE_ASM("asm/levels", func_L00_0032A258);
 
 INCLUDE_ASM("asm/levels", func_L00_0032A530);
 
-INCLUDE_ASM("asm/levels", func_L00_0032AA68);
 
-INCLUDE_ASM("asm/levels", func_L00_0032B268);

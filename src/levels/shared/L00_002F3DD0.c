@@ -16,7 +16,6 @@ u32 func_L00_002F3DD0(s32 index) {
     return values.items[index];
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002F4018);
 
 /* Pass the supplied owner pointer to the measured owner initializer. */
 void func_L00_002F4180(void *owner)

@@ -56,6 +56,7 @@ python3 $T/pad_div_erratum_nops.py gas/config/tc-mips.c
 python3 $T/neutralise_div_dslot.py gcc
 python3 $T/pad_div_erratum_branch.py gas/config/tc-mips.c >/dev/null
 python3 $T/r5900_mfc1_interlock.py gas/config/tc-mips.c
+python3 $T/tidy_condjump_fallthru.py gcc/flow.c
 sha256sum --check --quiet <<'SUMS'
 8e6d97e725c1af7533d8b474e9b7a12fde95b0363eb4db99040c9e2596daba3a  gcc/config/mips/mips.c
 d43a3f2274e1ca640c1f877b9aa2a82b2e337298d7d0ebf7e5498fe91b3523f4  gcc/config/mips/mips.h

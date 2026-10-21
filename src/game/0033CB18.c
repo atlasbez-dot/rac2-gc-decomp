@@ -86,7 +86,6 @@ char *func_0033CD80(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033CDC0);
 
 
 
@@ -100,7 +99,6 @@ char *func_0033D440(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033D470);
 
 
 
@@ -158,7 +156,6 @@ char *func_0033D708(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033D738);
 
 
 
@@ -201,7 +198,6 @@ char *func_0033DAD0(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033DB00);
 
 
 
@@ -247,7 +243,6 @@ char *func_0033DD80(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033DDB0);
 
 
 
@@ -274,7 +269,6 @@ char *func_0033DF78(char *object)
     return object;
 }
 
-INCLUDE_ASM("asm/game", func_0033DFA8);
 
 
 
@@ -302,7 +296,6 @@ void* func_0033E170(void* param_1)
   return param_1;
 }
 
-INCLUDE_ASM("asm/game", func_0033E1A8);
 
 
 

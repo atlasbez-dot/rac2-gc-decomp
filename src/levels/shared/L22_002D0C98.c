@@ -56,9 +56,7 @@ void func_L22_00328220(u8 *a0, u8 *a1, u8 *a2, u8 *a3, f32 f12, f32 f13, f32 f14
     func_2F3A80(s0, s0, &buf);
 }
 
-INCLUDE_ASM("asm/levels", func_L22_0032F228);
 
-INCLUDE_ASM("asm/levels", func_L22_0032F2C0);
 
 INCLUDE_ASM("asm/levels", func_L22_003300E8);
 

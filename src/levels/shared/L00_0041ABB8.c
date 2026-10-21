@@ -80,7 +80,6 @@ INCLUDE_ASM("asm/levels", func_L00_0041AD40);
 
 INCLUDE_ASM("asm/levels", func_L00_0041AE28);
 
-INCLUDE_ASM("asm/levels", func_L00_0041AEF0);
 
 /* shared native body of family 5a97ab89858c */
 void func_L00_0041AEF8(char *p)
@@ -128,7 +127,6 @@ void func_L00_0041AF60(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0041AFD0);
 
 /* fills a local record with the level's fixed fields, measures two angles against the
    resident vector at D_0014C80, adds a quarter of the cross product of that vector with
@@ -276,7 +274,6 @@ int func_L00_004204A0(TI128 *src)
 
 INCLUDE_ASM("asm/levels", func_L00_00420638);
 
-INCLUDE_ASM("asm/levels", func_L00_00420780);
 
 INCLUDE_ASM("asm/levels", func_L00_004208C8);
 

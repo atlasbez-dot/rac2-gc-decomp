@@ -1,21 +1,41 @@
 /* func_L00_003B8420 (204 bytes, 4 places) -- NEAR MISS, not integrated.
-   Attach/detach probe for the sub-object at +0x68: queries the resident list
-   D_00189EA0 for the entry's id twice, and depending on the +0x28 flag and the
-   func_002A8508(+0x40, -1) result either allocates the +0x2C block through
-   func_L00_002D70A0(5), stamps +0x28 = 1 and runs func_L00_003B81D0, or frees the
-   +0x2C block through func_L00_002D7140 and clears +0x28.  Every call, argument
-   and flag store is identified and the tail is shared by two paths as in retail.
-   Two upstream shapes measured: the early-return spelling collapses retail's
-   two-step exit (beqz to the shared `beql $v0,$zero` epilogue test) into one
-   branch and is 196 bytes; the nested single-return spelling keeps retail's
-   structure but swaps the two callee-saved pointers (this cc1 gives s1 to the
-   0x00190000 constant and s2 to the parameter, retail the other way).  Needs the
-   allocation lever, not a new spelling. */
+
+   New measurement (wave 12, worker s4): the two-step exit is the whole difference.
+   Retail keeps a shared block that the two "v == 0" exits jump to, and that block
+   tests the value again (`beql $v0,$zero` into the epilogue) before falling
+   through into the "f28 != 0" path:
+
+       beqz $v0, zero, L1        ; the first probe failed
+       lw   $v0, 0x28($s0)
+       bnel $v0, zero, L2        ; the flag is set
+       ...
+       beql $v0, zero, L1        ; the second probe failed
+       ...
+   L1: beql $v0, zero, END      ; the shared exit test
+       ...
+
+   Every spelling measured collapses the two steps into one branch and gives 196
+   bytes: the nested single-return form, the same form with an explicit copy of
+   the parameter (`char *s1 = a0`), and two `goto` forms (one with the shared
+   label falling through into the "f28 != 0" path, one with it not).  What is
+   missing is a source shape in which the two "v == 0" exits reach a *common*
+   block that still tests the value - this cc1 folds the redundant test away.
+
+   The callee-saved allocation is also wrong: retail gives $s1 to the parameter
+   and $s2 to the 0x00190000 constant, this cc1 gives $s1 to the constant and
+   $s2 to the parameter.
+
+   Wave 12 (worker s4). */
 extern char D_00189EA0[];
+
 extern int func_002ACBC8(char *, int);
+
 extern int func_002A8508(int, int);
+
 extern void *func_L00_002D70A0(int);
+
 extern void func_L00_002D7140(void *);
+
 extern void func_L00_003B81D0(char *);
 
 void func_L00_003B8420(char *a0)

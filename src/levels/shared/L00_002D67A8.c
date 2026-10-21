@@ -121,7 +121,6 @@ u32 func_L00_002D68E8(void) {
     return D_0018C0B4;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002D68F8);
 
 extern struct Rac2Native_5f824a0e369ccf7b_src_record *D_L00_0025E120[];
 

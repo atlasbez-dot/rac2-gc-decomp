@@ -39,7 +39,6 @@ int func_002ED578(int a0, int *p0, int *p1, int *p2)
     return e;
 }
 
-INCLUDE_ASM("asm/game", func_002ED670);
 
 s32 func_002ED688(u8 *a0) {
  if((*(unsigned short *)(a0+0x34)&0x20)==0) return 0;

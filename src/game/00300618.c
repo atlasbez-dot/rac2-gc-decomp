@@ -387,7 +387,6 @@ void func_00305228(Owner_F9e2cd219 *self)
 
 INCLUDE_ASM("asm/game", func_00305310);
 
-INCLUDE_ASM("asm/game", func_00305408);
 
 void func_00305418(void) {
     func_00300330(D_00227DA0);
@@ -584,8 +583,6 @@ INCLUDE_ASM("asm/game", func_00307CC0);
 
 INCLUDE_ASM("asm/game", func_00307FC0);
 
-INCLUDE_ASM("asm/game", func_003083F8);
 
 INCLUDE_ASM("asm/game", func_00308408);
 
-INCLUDE_ASM("asm/game", func_003085C8);

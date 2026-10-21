@@ -1,0 +1,100 @@
+#include "include_asm.h"
+
+/* The 23-word descriptor func_00337210 takes, filled from the object: the defaults
+   first, then the object's own fields. The same shape as func_00344F98, in the -G8
+   unit where the small data comes out $gp-relative. */
+extern void func_00337210(int *);
+
+extern char D_001AA898[];
+
+extern int D_001AE4A0 __attribute__((sda));
+
+extern int D_001AE4A4 __attribute__((sda));
+
+extern int D_001AE4A8 __attribute__((sda));
+
+extern int D_001AE4B0 __attribute__((sda));
+
+extern int D_001AE4B8 __attribute__((sda));
+
+extern int D_001AE4C0 __attribute__((sda));
+
+extern int D_001AE4C8 __attribute__((sda));
+
+void func_003464D0(char *o)
+{
+    int f[23];
+
+    f[20] = 0;
+    f[14] = 1;
+    f[11] = 0;
+    f[13] = 0;
+    f[21] = 1;
+    f[19] = *(int *)(o + 0x494);
+    f[21] = ((*(int *)(o + 0x498) ^ 1) == 0);
+    f[3] = *(int *)(o + 0x48C);
+    f[4] = *(int *)(o + 0x490);
+    f[16] = (int)(o + 0x448);
+    f[9] = (int)&D_001AE4C8;
+    f[1] = D_001AE4A0;
+    f[2] = D_001AE4A4;
+    f[0] = (int)D_001AA898;
+    f[17] = (int)(o + 0x210);
+    f[10] = (int)(o + 0x130);
+    f[12] = (int)(o + 0x17C);
+    f[15] = (int)(o + 0x258);
+    f[18] = *(int *)(o + 0x400);
+    f[8] = (int)&D_001AE4C0;
+    f[7] = (int)&D_001AE4B8;
+    f[6] = (int)&D_001AE4B0;
+    f[5] = (int)&D_001AE4A8;
+    f[22] = 1;
+    func_00337210(f);
+}
+
+extern char D_001AA7D8[];
+
+extern int D_001AE470 __attribute__((sda));
+
+extern int D_001AE474 __attribute__((sda));
+
+extern int D_001AE478 __attribute__((sda));
+
+extern int D_001AE480 __attribute__((sda));
+
+extern int D_001AE488 __attribute__((sda));
+
+extern int D_001AE490 __attribute__((sda));
+
+extern int D_001AE498 __attribute__((sda));
+
+void func_003463C8(char *o)
+{
+    int f[23];
+
+    f[20] = 0;
+    f[11] = 0;
+    f[13] = 0;
+    f[21] = 1;
+    f[19] = *(int *)(o + 0x494);
+    f[21] = ((*(int *)(o + 0x498) ^ 3) == 0);
+    f[3] = *(int *)(o + 0x48C);
+    f[4] = *(int *)(o + 0x490);
+    f[16] = (int)(o + 0x448);
+    f[9] = (int)&D_001AE498;
+    f[14] = 3;
+    f[1] = D_001AE470;
+    f[2] = D_001AE474;
+    f[0] = (int)D_001AA7D8;
+    f[17] = (int)(o + 0x210);
+    f[10] = (int)(o + 0x130);
+    f[12] = (int)(o + 0x17C);
+    f[15] = (int)(o + 0x258);
+    f[18] = *(int *)(o + 0x400);
+    f[8] = (int)&D_001AE490;
+    f[7] = (int)&D_001AE488;
+    f[6] = (int)&D_001AE480;
+    f[5] = (int)&D_001AE478;
+    f[22] = 1;
+    func_00337210(f);
+}

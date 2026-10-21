@@ -229,7 +229,6 @@ INCLUDE_ASM("asm/levels", func_L07_0040E980);
 
 INCLUDE_ASM("asm/levels", func_L07_0040EC08);
 
-INCLUDE_ASM("asm/levels", func_L07_0040EFC0);
 
 extern void func_338D68(void *a, s32 b, void *c, void *d, s32 e, f32 f);
 

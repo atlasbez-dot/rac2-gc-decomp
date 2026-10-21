@@ -3,6 +3,29 @@
    the compare's load. Held back: a volatile used to force a reload is an artificial barrier (AGENTS.md).
    Needs a plain-C spelling of that reload. */
 
+/* Opus retry, 20 October 2026: no plain-C spelling found. What removes the reload:
+   - It is gcse's PRE, not cse. Patch 0016 makes the default the block-based lazy code motion in
+     lcm.c (pre_lcm, from ANTLOC and TRANSP only). The compare's load, in the block after
+     `if (ctl->flags38 & 4) return;`, is an anticipatable occurrence. The else path's stores to
+     ctl->vel[2] (0xA8 from the same base) are provably disjoint from 0x90. So the join's load is
+     "redundant": PRE inserts a fresh load at the end of the compare block (dump: "PRE/HOIST: end
+     of bb 22"), and cse2 then folds that load into g90's register.
+   - The join's load survives if any path from the compare to the join kills 0x90, or if the
+     compare's load is not an anticipatable occurrence. Measured: moving `g90 = ctl->f90;` above
+     the return check (after the calls, so not anticipatable) keeps retail's reload. Only that
+     first load's place differs: it stays before the bnez, where retail has it after, with g90 in
+     $f2 for $f0 (8 lines of the .s against 14).
+   - No change (14 lines): ctl->f90 everywhere with no local; a local copy of vel[2]; the
+     difference recomputed into a local before the call. Also no change: a second pointer
+     `c2 = ctl` for the final read, because gcse's copy propagation runs before PRE and merges it.
+     Worse: a `float *` to vel[2] for the stores (48 lines; cse1 folds it back to 0xA8(ctl)).
+   - Flags: -fno-gcse gives 74 lines, because retail needs PRE's copies of ctl+0xA0 and sp+0x10
+     ($s0/$s2, $s3). -fedge-lcm gives 176. -fno-edge-lm, -fno-edge-sm, -fno-cse-skip-blocks,
+     -fno-expensive-optimizations and -fno-strength-reduce change nothing.
+   - Unless the original stored or called something on that path that no longer shows, SN's PRE
+     probably kept this load where the reconstructed one does not: a compiler lever, not a
+     source shape. */
+
 /* The object (a0) and its controller state (a1); only the fields this function reads or writes. */
 typedef struct {
     char pad0[0x10];

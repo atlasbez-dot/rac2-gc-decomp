@@ -44,14 +44,12 @@ char *func_00341C90(char *p) {
     return p;
 }
 
-INCLUDE_ASM("asm/game", func_00341CD0);
 
 /* Measured target: byte-identical across all 27 levels. */
 void func_00341CD8(u8 *a0, s32 a1) { *(s32 *)(a0 + 0x8) = a1; }
 
 
 
-INCLUDE_ASM("asm/game", func_00341E50);
 
 extern void func_00341E90(char *);
 

@@ -83,7 +83,6 @@ char *func_0033F0A0(char *object)
 }
 
 
-INCLUDE_ASM("asm/game", func_0033F210);
 
 INCLUDE_ASM("asm/game", func_0033F218);
 

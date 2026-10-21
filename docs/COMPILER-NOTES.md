@@ -1193,9 +1193,13 @@ the libc region 0x1163B0-0x1178xx and the other quadword units), and two `-O0`-c
   keyword the callee is a real call and the body shrinks (`func_00123C28`: 252 bytes against 260).
 - **Unsigned spellings are load-bearing**: `-1u` gives the retail `lui`/`ori` pair where `-1` gives
   a single `addiu`, and a failure value compared as `0xFFFFFFFFu` is what `func_00115C90` needs.
-- **`mult rd,rs,rt` on the R5900 hides from the reader**: it is opcode 0x00 funct 0x18 *and* opcode
-  0x1C funct 0x18 (MULT1), and rabbitizer prints `.word # INVALID` for both, dropping the
-  destination. Three waves mistook live products for dead instructions.
+- **Decode the R5900 multiplication destination**: opcode 0x00 funct 0x18 is `mult`, and
+  opcode 0x1C funct 0x18 is `mult1`. Generic MIPS decoding can omit the GPR destination
+  or report an invalid instruction. Inspect `rd` (bits 15-11) and its uses before calling
+  the result dead; absence of `mflo` alone is insufficient. The current compiler emits
+  a three-operand `mult` for ordinary `return index * stride;`, without `mflo`.
+  [Six audited examples](https://github.com/OpenRAC/rac2-gc-decomp/issues/157#issuecomment-6305695078)
+  consume their GPR results in address calculations and provide no handwritten-assembly evidence.
 - **Two walls the source cannot move**, both measured repeatedly: this cc1 **CSEs symbol addresses**
   (`sym`, `sym+const`) into callee-saved registers and keeps them across calls where retail
   re-materialises a fresh `lui`/`addiu` (`func_00119AC0`, `func_00132C48`, `func_00130428`), and
@@ -1337,6 +1341,21 @@ above still hold; these are the additions.
   with the old and the new assembler, and the last (`src/game/002B5EF8.c`, built with `-g`)
   differs only in `.mdebug`; `func_002ED4B8` and `func_00290680` match at their 28 places with
   it.
+- **flow deletes a conditional jump to the next block, and the load that fed it.** The levels'
+  rotated id-list walks (entry tests, the body, the test chain again at the bottom) came out
+  with a dead `lh $v0,-0x2(...)` at each walk's entry, where retail has none: no level function
+  of the 7,765 keeps such a load. The jump pass before cse2 copies the walk's test in front of
+  the loop; cse2 folds the copy's `p == table[g]` test but leaves its jump, which leads only to
+  the next block; and only the jump pass after sched2 deletes it, without the `lh` that fed it.
+  This tree comes from the March 1999 trunk, whose `delete_unreachable_blocks` tidies only an
+  edge not marked fallthru. GCC fixed that on 8 April 1999 and limited it to plain jumps on 4
+  August 1999, as the GCC 2.95 branch has it. `transformers/tidy_condjump_fallthru.py` applies
+  that test, so flow2 deletes the jump and its life analysis the dead load. Measured on 20
+  October: the 762 files in `src/` compile to the same objects with the old and the new cc1
+  (the 105 SDK units through the unchanged SDK cc1 and each `as`). Of the 1,477 drafts in
+  `nonmatching/`, exactly the six rotated walks change, and each is then exact at every place:
+  `func_L02_003FD070`, `func_L02_003FC268`, `func_L02_003FC518`, `func_L02_003FD228`,
+  `func_L02_003CD4A8` and `func_L02_003CD298`.
 - **The temporary in the destination register**: retail's `lui $r,%hi(X)` / `lw $r,%lo(X)($r)`
   is a bare-symbol load the assembler expanded. In a `-G0` unit, `extern T X
   __attribute__((sda));` gives it (and stores through `$at`): `func_00343260`. In a `-G8` unit the

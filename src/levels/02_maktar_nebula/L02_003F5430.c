@@ -370,9 +370,106 @@ s32 func_L02_003FC0D0(char *a0, s32 a1) {
 
 INCLUDE_ASM("asm/levels", func_L02_003FC1B0);
 
-INCLUDE_ASM("asm/levels", func_L02_003FC268);
+extern char *D_L02_001B359C __attribute__((section(".sdata")));
+extern s32 D_L02_001B35B8[] __attribute__((sda));
+extern s16 func_L02_004024A0(char *);
+extern void func_L02_004024B0(char *);
+extern void func_L02_004024C0(char *);
 
-INCLUDE_ASM("asm/levels", func_L02_003FC518);
+#define GROUP(off) (*(s32 *)(state + (off)))
+#define FOR_EACH_ID(p, off) \
+    for (p = (u16 *)D_L02_001FC060[GROUP(off)]; \
+         (GROUP(off) & 0xFF) != 0xFF && GROUP(off) <= D_L02_001B35B8[0] && p != 0 && \
+         ((p != 0 && (s16)p[-1] >= 0) || p == (u16 *)D_L02_001FC060[GROUP(off)]); \
+         p++)
+
+/* Counts the entities of the object's group (state word 0x48) for which func_L02_004024A0 holds, then
+   sets (func_L02_004024B0) or clears (func_L02_004024C0) entities until the count equals A1. */
+void func_L02_003FC268(char *a0, s32 a1) {
+    char *state = *(char **)(a0 + 0x68);
+    u16 *p;
+    char *e;
+    s32 n = 0;
+
+    FOR_EACH_ID(p, 0x48) {
+        e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (func_L02_004024A0(e))
+            n++;
+    }
+    if (n < a1) {
+        FOR_EACH_ID(p, 0x48) {
+            e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (!func_L02_004024A0(e)) {
+                func_L02_004024B0(e);
+                n++;
+                if (n >= a1)
+                    break;
+            }
+        }
+    } else if (n > a1) {
+        FOR_EACH_ID(p, 0x48) {
+            e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (func_L02_004024A0(e)) {
+                func_L02_004024C0(e);
+                n--;
+                if (n <= a1)
+                    break;
+            }
+        }
+    }
+}
+
+extern s32 func_L02_003D7300(char *);
+extern void func_L02_003D7310(char *);
+extern void func_L02_003D7320(char *);
+
+/* Counts the entities of the object's group (state word 0x4C) for which func_L02_003D7300 holds, then
+   sets (func_L02_003D7310) or clears (func_L02_003D7320) entities until the count equals A1. */
+void func_L02_003FC518(char *a0, s32 a1) {
+    char *state = *(char **)(a0 + 0x68);
+    u16 *p;
+    char *e;
+    s32 n = 0;
+
+    FOR_EACH_ID(p, 0x4C) {
+        e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (func_L02_003D7300(e))
+            n++;
+    }
+    if (n < a1) {
+        FOR_EACH_ID(p, 0x4C) {
+            e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (!func_L02_003D7300(e)) {
+                func_L02_003D7310(e);
+                n++;
+                if (n >= a1)
+                    break;
+            }
+        }
+    } else if (n > a1) {
+        FOR_EACH_ID(p, 0x4C) {
+            e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (func_L02_003D7300(e)) {
+                func_L02_003D7320(e);
+                n--;
+                if (n <= a1)
+                    break;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003FC7C8);
 
@@ -395,9 +492,45 @@ s32 func_L02_003FD000(char *a0) {
     return r;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003FD070);
+extern void func_L02_003A6F78(char *);
 
-INCLUDE_ASM("asm/levels", func_L02_003FD228);
+/* Runs func_L02_003A6F78 on every entity of the object's two groups (state words 0xC8 and
+   0xC4); an empty group, or a group word of 0xFF, ends the function. */
+void func_L02_003FD070(char *a0) {
+    char *state = *(char **)(a0 + 0x68);
+    u16 *p;
+    u16 *q;
+    char *e;
+
+    if (GROUP(0xC8) == 0xFF)
+        return;
+    q = (u16 *)D_L02_001FC060[GROUP(0xC8)];
+    if (q == 0)
+        return;
+    for (p = q; (GROUP(0xC8) & 0xFF) != 0xFF && GROUP(0xC8) <= D_L02_001B35B8[0] && p != 0 &&
+                ((p != 0 && (s16)p[-1] >= 0) || p == (u16 *)D_L02_001FC060[GROUP(0xC8)]);
+         p++) {
+        e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        func_L02_003A6F78(e);
+    }
+    if (GROUP(0xC4) == 0xFF)
+        return;
+    q = (u16 *)D_L02_001FC060[GROUP(0xC4)];
+    if (q == 0)
+        return;
+    for (p = q; (GROUP(0xC4) & 0xFF) != 0xFF && GROUP(0xC4) <= D_L02_001B35B8[0] && p != 0 &&
+                ((p != 0 && (s16)p[-1] >= 0) || p == (u16 *)D_L02_001FC060[GROUP(0xC4)]);
+         p++) {
+        e = D_L02_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        func_L02_003A6F78(e);
+    }
+}
+
+/* func_L02_003FD228 is defined in L02_003F5430-g8.c (it reads its globals through $gp). */
 
 /* func_L02_003FD7C8 is defined in L02_003F5430-g8.c ($gp accesses). */
 
@@ -468,7 +601,6 @@ s32 func_L02_00400CC8(char *a0) {
     return r;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_00401298);
 
 INCLUDE_ASM("asm/levels", func_L02_00401638);
 

@@ -174,7 +174,6 @@ extern void ref_L09_003F8858_00(char *object, int value);
 
 INCLUDE_ASM("asm/levels", func_L09_002B7238);
 
-INCLUDE_ASM("asm/levels", func_L09_00325C58);
 
 INCLUDE_ASM("asm/levels", func_L09_00326E90);
 
@@ -416,9 +415,9 @@ void func_L09_003F7158(char *object)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003F71C8);
+/* func_L09_003F71C8 is defined in L09_002B7238-g8.c (it reads the group count through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L09_003F72A8);
+/* func_L09_003F72A8 is defined in L09_002B7238-g8.c (it reads the group count through $gp). */
 
 /* spawns one measured stage with the object's placement lifted by DY */
 INCLUDE_ASM("asm/levels", func_L09_003F7370);

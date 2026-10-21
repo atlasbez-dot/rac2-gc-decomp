@@ -143,7 +143,6 @@ void func_00336DB8(int *p, unsigned int a1, int a2, int a3)
     p[0] = a2;
 }
 
-INCLUDE_ASM("asm/game", func_00336E38);
 
 /* a bump/free-list allocator. `p` (the parameter, moved to `$a1`) is a six-word */
 void *func_00336E40(T *p)
@@ -200,7 +199,6 @@ void *func_00337BD8(char *object) {
 
 INCLUDE_ASM("asm/game", func_00337C10);
 
-INCLUDE_ASM("asm/game", func_00337E28);
 
 /* Initialises an object: two float stores through the pointer at +0, clears byte +423, stores an int at +440, calls a callee with (this+168, -1) storing its result at +468 and the address at +472, sets +432 to 1 and writes 1.0f through the pointer at +4. */
 void func_00337E30(char *p, int a1, int a2, float f12, float f13)

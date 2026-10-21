@@ -68,7 +68,6 @@ void func_00310C88(unsigned char *self)
     }
 }
 
-INCLUDE_ASM("asm/game", func_00310D70);
 
 void func_00310D78(char *o0, char *o1)
 {
@@ -102,7 +101,6 @@ INCLUDE_ASM("asm/game", func_00311F70);
 
 INCLUDE_ASM("asm/game", func_003120C8);
 
-INCLUDE_ASM("asm/game", func_003125F8);
 
 INCLUDE_ASM("asm/game", func_00312600);
 
@@ -110,21 +108,17 @@ int func_00312B58(Level16VendorMoby *moby) {
     return moby->state == 6;
 }
 
-INCLUDE_ASM("asm/game", func_00312B68);
 
 INCLUDE_ASM("asm/game", func_00312B70);
 
-INCLUDE_ASM("asm/game", func_00312D48);
 
 INCLUDE_ASM("asm/game", func_00312D58);
 
-INCLUDE_ASM("asm/game", func_00312E00);
 
 int func_00312E10(unsigned char *p) { return p[0x20] == 1; }
 
 INCLUDE_ASM("asm/game", func_00312E20);
 
-INCLUDE_ASM("asm/game", func_00312EA8);
 
 INCLUDE_ASM("asm/game", func_00312EB0);
 
@@ -164,13 +158,11 @@ INCLUDE_ASM("asm/game", func_00314E28);
 
 INCLUDE_ASM("asm/game", func_00314FD0);
 
-INCLUDE_ASM("asm/game", func_00315890);
 
 INCLUDE_ASM("asm/game", func_003158A8);
 
 INCLUDE_ASM("asm/game", func_003159D0);
 
-INCLUDE_ASM("asm/game", func_00315C50);
 
 INCLUDE_ASM("asm/game", func_00315C78);
 

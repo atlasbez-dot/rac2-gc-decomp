@@ -9,7 +9,6 @@ extern float func_002EE9C8(float, float);
 extern void func_002EE5F0(void *, void *, float);
 extern void func_002EE440(void *, void *, void *);
 
-INCLUDE_ASM("asm/levels", func_L26_002EC840);
 
 INCLUDE_ASM("asm/levels", func_L26_002FC8D8);
 

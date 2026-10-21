@@ -409,13 +409,11 @@ INCLUDE_ASM("asm/game", func_0032BE30);
 
 INCLUDE_ASM("asm/game", func_0032C2E8);
 
-INCLUDE_ASM("asm/game", func_0032C688);
 
 INCLUDE_ASM("asm/game", func_0032C700);
 
 INCLUDE_ASM("asm/game", func_0032CA40);
 
-INCLUDE_ASM("asm/game", func_0032D6F0);
 
 /* finds the first matching object pointer in thirty resident32-byte records or returns-1 */
 s32 func_0032D700(void *object) {
@@ -432,17 +430,14 @@ s32 func_0032D700(void *object) {
 
 INCLUDE_ASM("asm/game", func_0032D758);
 
-INCLUDE_ASM("asm/game", func_0032DA50);
 
 INCLUDE_ASM("asm/game", func_0032DA58);
 
 INCLUDE_ASM("asm/game", func_0032DD40);
 
-INCLUDE_ASM("asm/game", func_0032E4E8);
 
 INCLUDE_ASM("asm/game", func_0032E4F0);
 
-INCLUDE_ASM("asm/game", func_0032E568);
 
 INCLUDE_ASM("asm/game", func_0032E588);
 

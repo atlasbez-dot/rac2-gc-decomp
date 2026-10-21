@@ -6,8 +6,6 @@ INCLUDE_ASM("asm/levels", func_L01_002C1A70);
 
 INCLUDE_ASM("asm/levels", func_L01_002C37C8);
 
-INCLUDE_ASM("asm/levels", func_L01_002F2098);
-
 typedef int TI128 __attribute__((mode(TI)));
 
 extern int D_L01_001A79F0;
@@ -32,5 +30,7 @@ INCLUDE_ASM("asm/levels", func_L01_003042AC);
 INCLUDE_ASM("asm/levels", func_L01_00333FA8);
 
 INCLUDE_ASM("asm/levels", func_L01_0034B1C0);
+
+/* func_L01_002F2098 is defined in L01_002BEB90-g8.c (it needs a $gp-relative address). */
 
 /* func_L01_00378A80 is defined in L01_002BEB90-g8.c (this unit has no $gp access for it). */

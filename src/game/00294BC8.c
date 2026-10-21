@@ -207,7 +207,6 @@ int func_00295A10(int param_1)
 
 INCLUDE_ASM("asm/game", func_00295A80);
 
-INCLUDE_ASM("asm/game", func_00295BE0);
 
 void func_00295BE8(u8 *a0,u8 *a1,u8 *a2,u8 *a3) {
  s32 i=0;
@@ -316,7 +315,6 @@ void func_00297550(u8 *out,s32 index,u8 *base,short *offsets) {
     }
 }
 
-INCLUDE_ASM("asm/game", func_00297668);
 
 INCLUDE_ASM("asm/game", func_00297670);
 
@@ -360,7 +358,6 @@ void func_002979D8(char *dst, unsigned char *src)
     }
 }
 
-INCLUDE_ASM("asm/game", func_00297BA8);
 
 
 /* localized row40 textID10 firstpercent selector b formats signedmappedword80 with original decimalformatter; other selector formats original error string, preserve prefix/tail */
@@ -394,7 +391,6 @@ void func_00297E00(int index, unsigned char *output)
 }
 
 
-INCLUDE_ASM("asm/game", func_002980C8);
 
 INCLUDE_ASM("asm/game", func_002980D0);
 

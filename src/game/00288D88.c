@@ -65,7 +65,6 @@ int func_00288E18(int key, int selection)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_00288E98);
 
 typedef struct {
     int active;
@@ -148,7 +147,6 @@ func_0028A130(int param_1)
 
 INCLUDE_ASM("asm/game", func_0028A180);
 
-INCLUDE_ASM("asm/game", func_0028A270);
 
 INCLUDE_ASM("asm/game", func_0028A278);
 
@@ -156,7 +154,6 @@ INCLUDE_ASM("asm/game", func_0028A2F8);
 
 INCLUDE_ASM("asm/game", func_0028A670);
 
-INCLUDE_ASM("asm/game", func_0028AB18);
 
 INCLUDE_ASM("asm/game", func_0028AB20);
 
@@ -254,7 +251,6 @@ int func_0028B5D0(int key)
 }
 
 
-INCLUDE_ASM("asm/game", func_0028B6C0);
 
 /* findfirstmatchingkey among13records and writefield24 plusfield04 whenword68clear */
 void func_0028B6C8(int key, unsigned int value)
@@ -321,7 +317,6 @@ void func_0028BA50(HudElem *a0) { a0->unk7C = 0xD2; a0->unk48 = 0; a0->unk4A = 0
 
 INCLUDE_ASM("asm/game", func_0028BA88);
 
-INCLUDE_ASM("asm/game", func_0028BC58);
 
 extern void func_0029CCD8(int, int);
 extern void func_002B0CE0(int, int, int);
@@ -331,6 +326,5 @@ void func_0028BCA0(int arg) {
     func_002B0CE0(13, 0, 1);
 }
 
-INCLUDE_ASM("asm/game", func_0028BCD0);
 
 INCLUDE_ASM("asm/game", func_0028BCE8);

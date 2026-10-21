@@ -67,7 +67,6 @@ INCLUDE_ASM("asm/game", func_0034CEA0);
 
 INCLUDE_ASM("asm/game", func_0034DB98);
 
-INCLUDE_ASM("asm/game", func_0034DFD8);
 
 /* walks 26 consecutive 72-byte records calling one leaf per record, then calls four more leaves on fixed offsets of the same object and returns the object pointer */
 unsigned char *func_0034DFE0(unsigned char *a0)
@@ -162,7 +161,6 @@ void func_0034EC70(void)
     F0a76d85b_FUN_00279D18();
 }
 
-INCLUDE_ASM("asm/game", func_0034ECA8);
 
 INCLUDE_ASM("asm/game", func_0034ECB0);
 
@@ -225,7 +223,6 @@ s32 func_0034F898(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/game", func_0034F8B8);
 
 void func_0034F8C0(u8 *a0) {
     func_001338F0(*(s32 *)(a0+0x48), *(s32 *)(a0+0x4c) / 1024 * 1024,
