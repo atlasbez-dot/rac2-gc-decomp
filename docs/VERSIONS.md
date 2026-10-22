@@ -150,7 +150,7 @@ Matched, when this layout landed (the three reports from one build):
 
 | Version | Release | Functions | Boot code | Level code | Total code |
 | --- | --- | ---: | ---: | ---: | ---: |
-| `SCUS_972.68` | USA v1.01 | 4,142 of 8,601 | 339,508 of 1,046,952 | 366,536 of 4,482,204 | 706,044 of 5,529,156 (12.77%) |
+| `SCUS_972.68` | USA v1.01 | 4,253 of 8,601 | 345,788 of 1,046,952 | 386,840 of 4,482,204 | 732,628 of 5,529,156 (13.25%) |
 | `SCES_516.07` | Europe/Australia v1.00 | 3,552 of 8,693 | 281,324 of 1,056,500 | 263,020 of 4,650,756 | 544,344 of 5,707,256 (9.54%) |
 | `SCUS_972.68_v2` | USA v2.00 (Greatest Hits) | 3,944 of 8,655 | 303,780 of 1,050,472 | 361,200 of 4,532,644 | 664,980 of 5,583,116 (11.91%) |
 

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="790" viewBox="0 0 1200 790" role="img" aria-labelledby="title desc">
-<title id="title">RC2: 4,252 / 8,601 canonical functions (49.44%)</title>
+<title id="title">RC2: 4,253 / 8,601 canonical functions (49.45%)</title>
 <desc id="desc">Area represents code bytes. Orange is matched C or classified original assembly; dark is pending. Each canonical function is counted once, across boot and 27 overlays. Generated after 28 byte-identical program builds.</desc>
 <rect width="1200" height="790" fill="#0d1117"/>
-<text x="16" y="33" fill="#e8edf5" font-family="sans-serif" font-size="22">RC2: 4,252 / 8,601 canonical functions (49.44%)</text>
-<text x="16" y="61" fill="#a6adc8" font-family="sans-serif" font-size="14">Code: 13.24% matched. One function shared by many levels appears once.</text>
+<text x="16" y="33" fill="#e8edf5" font-family="sans-serif" font-size="22">RC2: 4,253 / 8,601 canonical functions (49.45%)</text>
+<text x="16" y="61" fill="#a6adc8" font-family="sans-serif" font-size="14">Code: 13.25% matched. One function shared by many levels appears once.</text>
 <rect x="13.000" y="101.000" width="78.270" height="60.114" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_L00_002BA7D8: 34316 bytes; pending</title></rect>
 <rect x="91.270" y="101.000" width="76.281" height="60.114" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_L13_002C5760: 33444 bytes; pending</title></rect>
 <rect x="167.552" y="101.000" width="66.282" height="60.114" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_L22_002D0C98: 29060 bytes; pending</title></rect>
@@ -5986,7 +5986,7 @@
 <rect x="1048.821" y="434.155" width="8.370" height="10.713" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_0030C188: 692 bytes; pending</title></rect>
 <rect x="1039.580" y="444.867" width="9.397" height="7.005" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_0030CAD0: 508 bytes; pending</title></rect>
 <rect x="1048.977" y="444.867" width="8.213" height="7.005" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_0030A188: 444 bytes; pending</title></rect>
-<rect x="1039.580" y="451.872" width="9.336" height="5.884" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_0030E700: 424 bytes; pending</title></rect>
+<rect x="1039.580" y="451.872" width="9.336" height="5.884" fill="#de812f" stroke="#0d1117" stroke-width="0.3"><title>func_0030E700: 424 bytes; matched</title></rect>
 <rect x="1039.580" y="457.756" width="9.336" height="5.829" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_0030DE88: 420 bytes; pending</title></rect>
 <rect x="1048.916" y="451.872" width="8.274" height="6.076" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_0030D430: 388 bytes; pending</title></rect>
 <rect x="1048.916" y="457.948" width="8.274" height="5.637" fill="#343941" stroke="#0d1117" stroke-width="0.3"><title>func_00308600: 360 bytes; pending</title></rect>
