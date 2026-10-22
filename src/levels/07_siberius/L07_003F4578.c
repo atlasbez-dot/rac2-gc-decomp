@@ -192,11 +192,7 @@ extern void func_00282CC0(u8 *a, u8 *b, u8 *c);
 INCLUDE_ASM("asm/levels", func_L07_003F8898);
 
 
-INCLUDE_ASM("asm/levels", func_L07_003F8AB0);
-
-extern void func_002E5CF8(s32 a, s32 b, u8 *c);
-
-extern void func_0029FCC0(u8 *a, s32 b, void *c);
+/* func_L07_003F8AB0 is defined in L07_003F4578-qcopy.c (this unit needs the grouped quadword copy). */
 
 extern void func_L07_003F43E0(u8 *a, u8 *b, void *c, void *d, f32 e);
 

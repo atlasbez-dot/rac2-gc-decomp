@@ -32,8 +32,6 @@ extern char ref_L00_00414350_00[];
 
 INCLUDE_ASM("asm/levels", func_L00_00412928);
 
-INCLUDE_ASM("asm/levels", func_L00_00412FF8);
-
 INCLUDE_ASM("asm/levels", func_L00_00413128);
 
 INCLUDE_ASM("asm/levels", func_L00_00413298);

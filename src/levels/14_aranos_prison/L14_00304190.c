@@ -94,7 +94,79 @@ INCLUDE_ASM("asm/levels", func_L14_003CB258);
 
 INCLUDE_ASM("asm/levels", func_L14_003CB4D8);
 
-INCLUDE_ASM("asm/levels", func_L14_003CB608);
+extern void func_00283698(void *dst, void *src);
+
+extern void func_00282CF0(void *dst, void *a, void *b);
+
+extern void func_002AFDD8(void *a, void *b, void *c, void *d);
+
+extern float func_00282C48(float a);
+
+extern void func_00283098(void *dst, void *a, void *mtx);
+
+extern void func_00282CC0(void *dst, void *a, void *b);
+
+extern void func_L14_003C9658(char *e, void *v);
+
+extern unsigned short *D_L14_001FB060[];
+
+extern unsigned char *D_L14_001B259C __attribute__((sda));
+
+extern int D_L14_001B25B8 __attribute__((sda));
+
+/* The twin of func_L14_003DF200 for the group word at +0x64: the same pass over the entities
+   of the owner's group (not the states 0xFE and 0xFD, not the class 0xA59, accepted by
+   func_L14_003C9548), with the box centred at -2.0 on the first axis: beyond 0.8 of it the
+   offset is pulled back to -1.5 or -2.5, beyond 0.8 on the second axis to +-0.5, and the entity
+   is handed the corrected world position (func_L14_003C9658). */
+void func_L14_003CB608(char *self) {
+    float mtx[16];
+    float off[4];
+    char *state = *(char **)(self + 0x68);
+    unsigned short *p;
+    unsigned char *e;
+    int clamped;
+
+    func_00283698(mtx, self + 0xC0);
+    for (p = D_L14_001FB060[*(int *)(state + 0x64)];
+         (*(int *)(state + 0x64) & 0xFF) != 0xFF && *(int *)(state + 0x64) <= D_L14_001B25B8 &&
+         p != 0 && ((p != 0 && (short)p[-1] >= 0) || p == D_L14_001FB060[*(int *)(state + 0x64)]);
+         p++) {
+        e = D_L14_001B259C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        if (e[0x20] != 0xFE) {
+            if (e[0x20] != 0xFD) {
+                if (*(short *)(e + 0xAA) != 0xA59) {
+                    if (func_L14_003C9548((char *)e) != 0) {
+                        func_00282CF0(off, e + 0x10, self + 0x10);
+                        clamped = 0;
+                        func_002AFDD8(self, off, off, mtx);
+                        if (func_00282C48(off[0] + 2.0f) > 0.8f) {
+                            clamped = 1;
+                            if (off[0] > -1.5f)
+                                off[0] = -1.5f;
+                            else if (off[0] < -2.5f)
+                                off[0] = -2.5f;
+                        }
+                        if (func_00282C48(off[1]) > 0.8f) {
+                            clamped = 1;
+                            if (off[1] > 0.5f)
+                                off[1] = 0.5f;
+                            else if (off[1] < -0.5f)
+                                off[1] = -0.5f;
+                        }
+                        if (clamped) {
+                            func_00283098(off, off, self + 0xC0);
+                            func_00282CC0(off, off, self + 0x10);
+                            func_L14_003C9658((char *)e, off);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L14_003CB868);
 
@@ -325,7 +397,104 @@ INCLUDE_ASM("asm/levels", func_L14_003E2980);
 INCLUDE_ASM("asm/levels", func_L14_003E4208);
 
 
-INCLUDE_ASM("asm/levels", func_L14_003E4BA0);
+extern int func_002B3868(char *self);
+extern int func_00282978(char *p);
+extern void func_L14_003E4EA0(char *self);
+extern void func_L14_003E5030(char *self);
+extern void func_L14_003E50B8(char *self);
+extern void func_L14_003E5190(char *self);
+extern void func_L14_003E51B0(char *self);
+extern void func_L14_003E5218(char *self);
+
+/* The key state of an object that steers a group (+0x14 the current key, +0x16 the key index,
+   +0x34 the key word). The last walk stores through this struct: cc1 then knows the store does
+   not touch the two level globals (a store through a cast pointer might), so loop.c moves their
+   loads and the constants out of the loop. That walk is spelled like the other two, with the
+   second `p != 0`: its test is too long for the first jump pass to copy in front of the loop,
+   and after loop.c has hoisted the invariants it is short enough for the second pass, which
+   copies it (retail's entry test ahead of the loop, the hoisted values before it). A cast store
+   instead leaves nothing to hoist and the walk stays in the `b test` form. */
+typedef struct {
+    unsigned char pad[0x14];
+    unsigned short cur;
+    unsigned short index;
+} L14Key;
+
+/* Steps the object by its state byte: 0 copies the six halfwords at +0x40 of its state into the
+   state of every class-0xB19 entity of its group and calls func_L14_003E5030; 1 and 2 test
+   func_002B3868 and call their handlers (the cases are in retail's block order, 0, 2, 1). Then,
+   while the key word (+0x34) is set: when func_00282978 has run down the key counter (+0x14)
+   the current key is reloaded from the key word and the key index of every class-0xB19 entity
+   of the group is cleared; finally the current key is copied into each of them. Two pointers:
+   the third walk has its own (one shared variable gives the other loops different registers). */
+void func_L14_003E4BA0(unsigned char *self)
+{
+    unsigned char *state = *(unsigned char **)(self + 0x68);
+    unsigned short *p;
+    unsigned short *q;
+    unsigned char *e;
+
+    switch (self[0x20]) {
+    case 0:
+        for (p = D_L14_001FB060[self[0x21]];
+             self[0x21] != 0xFF && self[0x21] <= D_L14_001B25B8 && p != 0 &&
+             ((p != 0 && (short)p[-1] >= 0) || p == D_L14_001FB060[self[0x21]]);
+             p++) {
+            e = D_L14_001B259C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (*(short *)(e + 0xAA) == 0xB19) {
+                unsigned char *d = *(unsigned char **)(e + 0x68);
+
+                *(unsigned short *)(d + 0x40) = *(unsigned short *)(state + 0x40);
+                *(unsigned short *)(d + 0x42) = *(unsigned short *)(state + 0x42);
+                *(unsigned short *)(d + 0x44) = *(unsigned short *)(state + 0x44);
+                *(unsigned short *)(d + 0x46) = *(unsigned short *)(state + 0x46);
+                *(unsigned short *)(d + 0x48) = *(unsigned short *)(state + 0x48);
+                *(unsigned short *)(d + 0x4A) = *(unsigned short *)(state + 0x4A);
+            }
+        }
+        func_L14_003E5030((char *)self);
+        break;
+    case 2:
+        if (func_002B3868((char *)self) != 0) {
+            func_L14_003E5218((char *)self);
+            func_L14_003E5190((char *)self);
+        }
+        break;
+    case 1:
+        if (func_002B3868((char *)self) != 0)
+            func_L14_003E51B0((char *)self);
+        func_L14_003E4EA0((char *)self);
+        break;
+    }
+    if (*(int *)(state + 0x34) != 0) {
+        if (func_00282978((char *)(state + 0x14)) != 0) {
+            *(unsigned short *)(state + 0x14) = *(unsigned short *)(state + 0x34);
+            for (p = D_L14_001FB060[self[0x21]];
+                 self[0x21] != 0xFF && self[0x21] <= D_L14_001B25B8 && p != 0 &&
+                 ((p != 0 && (short)p[-1] >= 0) || p == D_L14_001FB060[self[0x21]]);
+                 p++) {
+                e = D_L14_001B259C + ((*p & 0x7FFF) << 8);
+                if (e == 0)
+                    break;
+                if (*(short *)(e + 0xAA) == 0xB19)
+                    *(unsigned short *)(*(unsigned char **)(e + 0x68) + 0x16) = 0;
+            }
+        }
+        for (q = D_L14_001FB060[self[0x21]];
+             self[0x21] != 0xFF && self[0x21] <= D_L14_001B25B8 && q != 0 &&
+             ((q != 0 && (short)q[-1] >= 0) || q == D_L14_001FB060[self[0x21]]);
+             q++) {
+            e = D_L14_001B259C + ((*q & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (*(short *)(e + 0xAA) == 0xB19)
+                ((L14Key *)*(unsigned char **)(e + 0x68))->cur = ((L14Key *)state)->cur;
+        }
+    }
+    func_L14_003E50B8((char *)self);
+}
 
 /* func_L14_003E4EA0 is matched in L14_003E4EA0-g8.c (built with -g). */
 

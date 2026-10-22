@@ -31,16 +31,69 @@ is tracked.
 import gzip
 import hashlib
 import json
+import os
 import struct
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ISO = ROOT / "baserom/SCUS_972.68.iso"
-BOOT = ROOT / "baserom/SCUS_972.68"
-DUMP = ROOT / "baserom/levels"
-LEVELS = ROOT / "config/levels"
-CATALOGUE = LEVELS / "functions.tsv"
+
+# The three releases (docs/VERSIONS.md). "us" (USA v1.01) is the primary target: its paths are
+# the repository's original ones. The others keep their dumps, tables, build and report under
+# a directory of their own, and their own C under src/<version>/.
+VERSIONS = {
+    "us": {"id": "SCUS_972.68", "iso": "baserom/SCUS_972.68.iso", "boot": "SCUS_972.68",
+           "baserom": "baserom", "config": "config", "build": "build", "report": "progress/report.json",
+           "tag": "", "release": "USA v1.01"},
+    "pal": {"id": "SCES_516.07", "iso": "baserom/SCES_516.07.iso", "boot": "SCES_516.07",
+            "baserom": "baserom/pal", "config": "config/pal", "build": "build/pal",
+            "report": "progress/pal/report.json", "tag": "PAL", "release": "Europe/Australia v1.00"},
+    "us2": {"id": "SCUS_972.68_v2", "iso": "baserom/SCUS_972.68_v2.00.iso", "boot": "SCUS_972.68",
+            "baserom": "baserom/us2", "config": "config/us2", "build": "build/us2",
+            "report": "progress/us2/report.json", "tag": "US2", "release": "USA v2.00 (Greatest Hits)"},
+}
+VERSION = "us"
+
+
+def select(version: str) -> None:
+    """Point the module's paths and constants at VERSION's disc, dumps and tables."""
+    global VERSION, ISO, BOOT, DUMP, LEVELS, CATALOGUE, BOOT_FUNCTIONS, BOOT_PAIRS, LEVEL_BASE, GP
+    if version not in VERSIONS:
+        sys.exit(f"unknown version {version!r}: one of {', '.join(VERSIONS)}")
+    v = VERSIONS[version]
+    VERSION = version
+    ISO = ROOT / v["iso"]
+    BOOT = ROOT / v["baserom"] / v["boot"]
+    DUMP = ROOT / v["baserom"] / "levels"
+    LEVELS = ROOT / v["config"] / "levels"
+    CATALOGUE = LEVELS / "functions.tsv"
+    BOOT_FUNCTIONS = ROOT / v["config"] / "boot/functions.tsv"
+    BOOT_PAIRS = LEVELS / "boot_pairs.tsv"
+    LEVEL_BASE = LAYOUT[version]["level_base"]
+    GP = LAYOUT[version]["gp"]
+    os.environ["RAC2_VERSION"] = version
+
+
+def version_argument(argv: list[str] | None = None) -> str:
+    """Take `--version V` (or `--version=V`) out of ARGV (sys.argv by default) and select V;
+    without it, $RAC2_VERSION or "us"."""
+    argv = sys.argv if argv is None else argv
+    version = os.environ.get("RAC2_VERSION", "us")
+    for i, arg in enumerate(list(argv)):
+        if arg == "--version" and i + 1 < len(argv):
+            version = argv[i + 1]
+            del argv[i:i + 2]
+            break
+        if arg.startswith("--version="):
+            version = arg.split("=", 1)[1]
+            del argv[i]
+            break
+    select(version)
+    return version
+
+
+def build_dir() -> Path:
+    return ROOT / VERSIONS[VERSION]["build"]
 SECTION_NAMES = ("lit", "bss", "data", "vtbl", "camvtbl", "sndvtbl", "text")
 
 # The 27 levels: disc level number -> name.
@@ -103,11 +156,11 @@ def archives(iso: Iso) -> dict[int, int]:
 
 def program(iso: Iso, lba: int) -> dict:
     """The program in the level archive at LBA: {"entry", "sections": [{name, address, size,
-    type, data}]}."""
+    type, data}], "raw": the program's bytes as the archive stores them}."""
     head = iso.read(lba, 0x60)
     data_sector, _ = struct.unpack_from("<II", head, 0x10)
     slots = iso.read(lba, 0x60, data_sector * 2048)
-    at = data_sector * 2048 + struct.unpack_from("<I", slots, 0)[0]
+    start = at = data_sector * 2048 + struct.unpack_from("<I", slots, 0)[0]
     sections, entry = [], None
     while True:
         dest, size, kind, ep = struct.unpack("<4I", iso.read(lba, 16, at))
@@ -122,13 +175,44 @@ def program(iso: Iso, lba: int) -> dict:
         at += 16 + size
     if len(sections) != len(SECTION_NAMES):
         sys.exit(f"archive at {lba}: {len(sections)} sections, expected {len(SECTION_NAMES)}")
-    return {"entry": entry, "sections": sections}
+    return {"entry": entry, "sections": sections, "raw": iso.read(lba, at - start, start)}
+
+
+def pack_program(directory: Path) -> bytes:
+    """A dumped level (manifest.json and its sections' files) in the archive's format again:
+    the bytes `dump` checks against the disc. A .bss has no file: its bytes are zero."""
+    m = json.loads((directory / "manifest.json").read_text())
+    out = b""
+    for s in m["sections"]:
+        body = (directory / f"{s['name']}.bin").read_bytes() if s["type"] != 8 else bytes(s["size"])
+        out += struct.pack("<4I", s["address"], s["size"], s["type"], m["entry"]) + body
+    return out
+
+
+PROGRAMS = ROOT / "config/programs.tsv"
+
+
+def read_programs() -> dict[tuple[str, str], tuple[str, int, int]]:
+    """(version, program) -> (SHA-1 as the disc stores it, size, entry point)."""
+    out = {}
+    if PROGRAMS.is_file():
+        for line in PROGRAMS.read_text().splitlines():
+            if line and not line.startswith("#"):
+                version, prog, sha1, size, entry = line.split("\t")
+                out[(version, prog)] = (sha1, int(size), int(entry, 16))
+    return out
 
 
 def dump() -> None:
+    """Write the boot executable and every level's program of the selected version, check
+    that each level converts back to the bytes the disc stores, and record their SHA-1s in
+    config/programs.tsv (or, with --check, compare them with the recorded ones)."""
     iso = Iso(ISO)
-    lba, size = iso.find("SCUS_972.68")
-    BOOT.write_bytes(iso.read(lba, size))
+    lba, size = iso.find(VERSIONS[VERSION]["boot"])
+    boot = iso.read(lba, size)
+    BOOT.parent.mkdir(parents=True, exist_ok=True)
+    BOOT.write_bytes(boot)
+    rows = {"boot": (hashlib.sha1(boot).hexdigest(), len(boot), struct.unpack_from("<I", boot, 0x18)[0])}
     for number, at in sorted(archives(iso).items()):
         p = program(iso, at)
         d = DUMP / level_dir(number)
@@ -139,7 +223,38 @@ def dump() -> None:
                 (d / f"{s['name']}.bin").write_bytes(s["data"])
             manifest["sections"].append({k: s[k] for k in ("name", "address", "size", "type")})
         (d / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
-    print(f"wrote {BOOT.relative_to(ROOT)} and {len(NAMES)} levels to {DUMP.relative_to(ROOT)}")
+        if pack_program(d) != p["raw"]:
+            sys.exit(f"{level_dir(number)}: the dump does not convert back to the disc's bytes")
+        rows[level_dir(number)] = (hashlib.sha1(p["raw"]).hexdigest(), len(p["raw"]), p["entry"])
+    print(f"wrote {BOOT.relative_to(ROOT)} and {len(NAMES)} levels to {DUMP.relative_to(ROOT)}; "
+          f"every level converts back to the disc's bytes")
+    known = read_programs()
+    mine = {k[1]: v for k, v in known.items() if k[0] == VERSION}
+    if mine and mine != rows:
+        bad = sorted(k for k in rows if mine.get(k) != rows[k])
+        sys.exit(f"differs from config/programs.tsv: {', '.join(bad)}")
+    if not mine:
+        known.update({(VERSION, k): v for k, v in rows.items()})
+        order = list(VERSIONS)
+        PROGRAMS.write_text("# version\tprogram\tsha1 (as the disc stores it)\tsize\tentry -- tools/levels.py dump\n" +
+                            "".join(f"{v}\t{k}\t{s}\t{n}\t{e:08X}\n" for (v, k), (s, n, e)
+                                    in sorted(known.items(), key=lambda r: (order.index(r[0][0]), r[0][1]))))
+        print(f"recorded {len(rows)} programs in {PROGRAMS.relative_to(ROOT)}")
+    else:
+        print(f"all {len(rows)} programs equal config/programs.tsv")
+
+
+def check() -> None:
+    """The dumps in baserom/ against config/programs.tsv, without the disc image."""
+    known = {k[1]: v for k, v in read_programs().items() if k[0] == VERSION}
+    bad = []
+    for prog, (sha1, size, entry) in sorted(known.items()):
+        data = BOOT.read_bytes() if prog == "boot" else pack_program(DUMP / prog)
+        if hashlib.sha1(data).hexdigest() != sha1:
+            bad.append(prog)
+    if bad or not known:
+        sys.exit(f"{VERSION}: {len(bad)} dumps differ from config/programs.tsv: {', '.join(bad) or 'none recorded'}")
+    print(f"{VERSION}: all {len(known)} dumps equal config/programs.tsv")
 
 
 # Link-dependent instruction fields.
@@ -156,8 +271,16 @@ def trim(b: bytes) -> bytes:
     return b
 
 
+# Measured from each disc's boot executable: where a level's program starts (its .lit, over
+# the boot's memory) and the $gp every program of the disc shares.
+LAYOUT = {
+    "us": {"level_base": 0x1A7C80, "gp": 0x001AEFF0},
+    "pal": {"level_base": 0x1A7D00, "gp": 0x001AF070},
+    "us2": {"level_base": 0x1A7C80, "gp": 0x001AEFF0},
+}
 LEVEL_BASE = 0x1A7C80          # a level's program replaces the boot's memory from here
-BOOT_HI = LEVEL_BASE >> 16      # an address half below this points into memory every program shares
+GP = 0x001AEFF0
+BOOT_HI = 0x1A                  # an address half below this points into memory every program shares
 
 
 def identity(b: bytes, address: int = 0) -> bytes:
@@ -214,12 +337,48 @@ def identity(b: bytes, address: int = 0) -> bytes:
     return struct.pack(f"<{len(out)}I", *out)
 
 
+def cross_identity(b: bytes) -> bytes:
+    """One function's words with only what the linker fills in masked, to compare two releases
+    (tools/carry.py): their memory is laid out differently, so every address is masked, the
+    resident ones too, but nothing else. Masked: jump targets, the high half of an address
+    (a lui of 0x10..0x1FF), $gp-relative offsets, and the low half of an address: the offset
+    of a load, store or add on a register holding a high half (the lui's, or a sum with it).
+    A register that already holds a whole address (an addiu of a high half) is a pointer:
+    the offsets on it are fields and are compared, as are all constants and stack slots."""
+    w = words(trim(b))
+    high, grew = set(), True
+    while grew:
+        grew = False
+        for x in w:
+            op, rs, rt, rd = x >> 26, (x >> 21) & 31, (x >> 16) & 31, (x >> 11) & 31
+            new = None
+            if op == 0x0F and 0x10 <= x & 0xFFFF < 0x200:
+                new = rt
+            elif op == 0 and x & 0x3F in (0x21, 0x2D, 0x25) and (rs in high or rt in high):
+                new = rd
+            if new and new not in high:
+                high.add(new)
+                grew = True
+    out = []
+    for x in w:
+        op, rs, rt, imm = x >> 26, (x >> 21) & 31, (x >> 16) & 31, x & 0xFFFF
+        if op in (2, 3):
+            x &= 0xFC000000
+        elif op == 0x0F:
+            if 0x10 <= imm < 0x200:
+                x &= 0xFFFF0000
+        elif rs == 28 and op >= 8:
+            x &= 0xFFFF0000
+        elif rs in high and (op in MEM or op in (0x09, 0x0D, 0x19)):
+            x &= 0xFFFF0000
+        out.append(x)
+    return struct.pack(f"<{len(out)}I", *out)
+
+
 def fingerprint(b: bytes, address: int = 0) -> str:
     return hashlib.sha1(identity(b, address)).hexdigest()[:16]
 
 
-BOOT_FUNCTIONS = ROOT / "config/boot/functions.tsv"
-BOOT_PAIRS = ROOT / "config/levels/boot_pairs.tsv"
 
 # The level's data/vtables point past these trailing instructions of the
 # preceding bodies. Preserve each extent's end; the prefix remains assembly.
@@ -472,8 +631,12 @@ def catalogue() -> None:
           ", ".join(f"{count[k]} {k} ({size[k]} bytes)" for k in count))
 
 
+select(os.environ.get("RAC2_VERSION", "us"))
+
+
 def main() -> None:
-    commands = {"dump": dump, "catalogue": catalogue}
+    version_argument()
+    commands = {"dump": dump, "catalogue": catalogue, "check": check}
     if len(sys.argv) < 2 or sys.argv[1] not in commands:
         sys.exit(__doc__)
     commands[sys.argv[1]]()

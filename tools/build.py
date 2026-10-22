@@ -8,6 +8,7 @@ Build the game's programs and compare them with the retail ones.
   python3 tools/build.py all              # the boot and all 27
   python3 tools/build.py all --jobs 12    # that many programs at once (default: half the cores, at most 8)
   python3 tools/build.py all --strict     # release check: also reject any C falling back to assembly
+  python3 tools/build.py all --version pal  # another release (pal, us2): build/<version>/, docs/VERSIONS.md
 
 Each program is disassembled with splat into build/<program>/asm/, converted for SN
 ProDG 2.0's assembler (tools/expand_asm.py) and assembled with it; the C in src/ is
@@ -40,6 +41,11 @@ import elf  # noqa: E402
 import levels  # noqa: E402
 
 BUILD = ROOT / "build"
+
+
+def out_dir() -> Path:
+    """build/ for v1.01, build/<version>/ for another release (C objects stay in build/obj/)."""
+    return BUILD if levels.VERSION == "us" else BUILD / levels.VERSION
 SN = ROOT / "toolchain/sn-prodg-2.0/ee/bin"
 JOBS = os.cpu_count() or 4
 
@@ -152,8 +158,11 @@ def adapt_linker(directory: Path, renamed: dict) -> None:
 
 def asm_names(text: str) -> str:
     """splat's names in the assembly with their own prefixes, f_ and d_, so that no assembly
-    symbol has the name of a C one (C names its functions func_ and its data D_)."""
-    return re.sub(r"\b(func|D)_([0-9A-F]{8})\b", lambda m: ("f_" if m.group(1) == "func" else "d_") + m.group(2), text)
+    symbol has the name of a C one (C names its functions func_ and its data D_). In another
+    release splat's names are that release's addresses, which C names (v1.01's) can share
+    with other values, so its shorter D_XXXXXX names are renamed too."""
+    digits = "{8}" if levels.VERSION == "us" else "{6,8}"
+    return re.sub(rf"\b(func|D)_([0-9A-F]{digits})\b", lambda m: ("f_" if m.group(1) == "func" else "d_") + m.group(2), text)
 
 
 def undefined_symbols(directory: Path, extra: dict[str, int] | None = None,
@@ -172,7 +181,7 @@ def undefined_symbols(directory: Path, extra: dict[str, int] | None = None,
     used, defined = set(), set()
     for source in (directory / "asm_pp").rglob("*.s"):
         text = source.read_text()
-        used.update(re.findall(r"\b[df]_[0-9A-F]{8}\b", text))
+        used.update(re.findall(r"\b[df]_[0-9A-F]{6,8}\b", text))
         defined.update(re.findall(r"^\s*(\w+):", text, re.MULTILINE))
     for symbol in used - defined:
         values[symbol] = "0x" + symbol[2:]
@@ -188,8 +197,8 @@ def undefined_symbols(directory: Path, extra: dict[str, int] | None = None,
 
 COMPILER = ROOT / "build/compiler/tools"
 DEFAULT_FLAGS = "-O2 -G0 -ffunction-sections"
-GP = 0x001AEFF0                        # the boot's and every level's $gp
-LEVEL_BASE = 0x001A7C80                # a level's program replaces the boot's memory from here
+# The boot's and every level's $gp, and where a level's program replaces the boot's memory:
+# levels.GP and levels.LEVEL_BASE, the selected release's.
 INSTRUCTION = re.compile(r"/\*\s+[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})\s+[0-9A-Fa-f]{8}\s*\*/")
 TEXT_HEADER = '.set noat\n.set noreorder\n.section .text, "ax"\n'
 
@@ -295,12 +304,15 @@ def program_functions(name: str) -> dict[str, list[tuple[int, int]]]:
 
 def sources_for(name: str) -> list[Path]:
     """The C a program links: the boot's (src/core/, src/game/) and the levels' shared C, since
-    each program holds copies of functions of the others, and a level's own."""
+    each program holds copies of functions of the others, and a level's own. Another release
+    links the same C (the functions its catalogue names), and its own from src/<version>/."""
     found = []
-    for d in ("src/core", "src/game", "src/levels/shared"):
-        found += sorted((ROOT / d).rglob("*.c"))
-    if name != "boot":
-        found += sorted((ROOT / "src/levels" / name).rglob("*.c"))
+    roots = [ROOT / "src"] + ([ROOT / "src" / levels.VERSION] if levels.VERSION != "us" else [])
+    for root in roots:
+        for d in ("core", "game", "levels/shared"):
+            found += sorted((root / d).rglob("*.c"))
+        if name != "boot":
+            found += sorted((root / "levels" / name).rglob("*.c"))
     return found
 
 
@@ -337,13 +349,15 @@ class Placement:
         address its name states."""
         if symbol in self.functions and len(self.functions[symbol]) == 1:
             return self.functions[symbol][0][0]
+        if levels.VERSION != "us":
+            return None          # names state v1.01's addresses: another release's are read
         if re.fullmatch(r"func_L\d\d_([0-9A-F]{8})", symbol) or symbol.startswith("r1_"):
             return None          # r1_: a name carried from rac1, its rac2 value read from the bytes
         m = re.fullmatch(r"(?:D|f)_L(\d\d)_([0-9A-F]{8})", symbol)
         if m:        # data or code of level NN: there at its address, elsewhere where it reads
             return int(m.group(2), 16) if self.name[:2] == m.group(1) else None
         address = address_in_name(symbol)
-        if address is not None and self.name != "boot" and address >= LEVEL_BASE:
+        if address is not None and self.name != "boot" and address >= levels.LEVEL_BASE:
             # a boot address in the memory a level replaces: the level has its own copy there
             return None
         return address
@@ -401,7 +415,7 @@ class Placement:
             elif kind == elf.R_MIPS_GPREL16:
                 if (mine ^ theirs) & 0xFFFF0000:
                     return {}, f"gp access at +{at:#x} differs"
-                err = agree(symbol, GP + sext(theirs & 0xFFFF) - sext(mine & 0xFFFF))
+                err = agree(symbol, levels.GP + sext(theirs & 0xFFFF) - sext(mine & 0xFFFF))
             elif kind == elf.R_MIPS_32:
                 err = agree(symbol, theirs - mine)
             else:
@@ -540,7 +554,7 @@ def level_reference(number: int) -> Path:
     """The level's program as an executable, from its sections in baserom/levels/."""
     d = levels.DUMP / levels.level_dir(number)
     m = json.loads((d / "manifest.json").read_text())
-    path = BUILD / "reference" / f"{levels.level_dir(number)}.elf"
+    path = out_dir() / "reference" / f"{levels.level_dir(number)}.elf"
     if path.is_file() and path.stat().st_mtime >= max(f.stat().st_mtime for f in d.iterdir()):
         return path           # current: tools/check.py runs side by side must not rewrite it
     sections = [{"name": "." + s["name"] if s["name"] in ("text", "data", "bss") else s["name"],
@@ -556,7 +570,7 @@ def level_reference(number: int) -> Path:
 
 def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int, int]:
     """Build program NAME; returns (C functions placed, their bytes)."""
-    directory = BUILD / name
+    directory = out_dir() / name
     if directory.exists():
         shutil.rmtree(directory)
     renamed = splat_config(reference, directory, "program")
@@ -616,7 +630,7 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
         (directory / "config/rac2.ld").write_text(script)
         for sym, (a, n, o, sec) in placement.placed.items():
             aliases[f"f_{a:08X}"] = sym
-        extra["_gp"] = GP
+        extra["_gp"] = levels.GP
 
     def assemble(source: Path) -> Path:
         out = directory / "build/asm" / (source.relative_to(directory / "asm_pp").as_posix() + ".o")
@@ -634,7 +648,8 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
         directory, directory / "link.log")
     same, why = elf.compare_loads(reference, out)
     c_bytes = sum(v[1] for v in placement.placed.values())
-    print(f"{name}: {'OK' if same else 'DIFFERS'}: {why}; {len(placement.placed)} C functions ({c_bytes} bytes)"
+    label = name if levels.VERSION == "us" else f"{levels.VERSION} {name}"
+    print(f"{label}: {'OK' if same else 'DIFFERS'}: {why}; {len(placement.placed)} C functions ({c_bytes} bytes)"
           + (f", {len(placement.differ)} do not match" if placement.differ else ""))
     for sym, why_not in placement.differ:
         print(f"  {sym}: {why_not}")
@@ -650,6 +665,7 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
 
 
 def main() -> None:
+    version = levels.version_argument()
     strict = "--strict" in sys.argv[1:]
     args = [arg for arg in sys.argv[1:] if arg != "--strict"]
     if args == ["boot"]:
@@ -663,7 +679,8 @@ def main() -> None:
         programs = ([["boot"]] if args[0] == "all" else []) + [["level", str(n)] for n in sorted(levels.NAMES)]
 
         def one(program: list[str]) -> tuple[int, str]:
-            done = subprocess.run([sys.executable, __file__, *program, *(["--strict"] if strict else [])],
+            done = subprocess.run([sys.executable, __file__, *program, "--version", version,
+                                   *(["--strict"] if strict else [])],
                                   capture_output=True, text=True)
             return done.returncode, (done.stdout + done.stderr).rstrip()
 

@@ -169,6 +169,7 @@ INCLUDE_ASM("asm/levels", func_L09_003F04D0);
 
 INCLUDE_ASM("asm/levels", func_L09_003F6820);
 
+/* func_L09_003F69A0 is defined in L09_002F8BA0-g8.c (it reads a global through $gp). */
 
 /* func_L09_003F6AB8 lives in the -g8.c brother: it loads a global through $gp. */
 

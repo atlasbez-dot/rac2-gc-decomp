@@ -115,7 +115,7 @@ void func_L06_003F4908(char *a0)
 
 INCLUDE_ASM("asm/levels", func_L06_003FB050);
 
-INCLUDE_ASM("asm/levels", func_L06_003FDA08);
+/* func_L06_003FDA08 is matched in L06_0033BDC0-g8.c (it takes the $gp addresses of small-data objects). */
 
 INCLUDE_ASM("asm/levels", func_L06_003FDEB8);
 

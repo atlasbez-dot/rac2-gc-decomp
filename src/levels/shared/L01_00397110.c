@@ -180,5 +180,3 @@ void func_L01_004480C8(void *a0)
 {
     func_002A6CF0(&ref_L01_004480C8_00, a0);
 }
-
-INCLUDE_ASM("asm/levels", func_L01_00417090);

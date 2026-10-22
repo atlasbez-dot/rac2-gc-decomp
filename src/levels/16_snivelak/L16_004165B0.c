@@ -82,36 +82,6 @@ extern char D_00189E20[];
 extern void func_00315728(char *, char *, s32, char *, f32);
 extern void func_00315948(char *, char *);
 
-/* next frame: arms the object once the shared render state names it, then hands its box to the collision pass */
-void func_L16_0041C6A0(char *arg0) {
-    char buf[0x30];
-    char v[0x10];
-    char *q;
-    char *p;
-
-    if (*(u8 *)(arg0 + 0x20) == 0) {
-        *(u8 *)(arg0 + 0x20) = 1;
-        *(u8 *)(arg0 + 0x31) = 0;
-        *(u16 *)(arg0 + 0x34) |= 1;
-    }
-    if (*(u8 *)(arg0 + 0x20) != 1)
-        return;
-    q = D_00189E20;
-    p = *(char **)(q + 0x33C);
-    if (p == 0 || p != arg0)
-        return;
-    if (*(s32 *)(q + 0x340) == 0)
-        return;
-    *(s32 *)(v + 0) = 0;
-    *(f32 *)(v + 4) = 1.0f;
-    *(s32 *)(v + 8) = 0;
-    *(f32 *)(v + 0xC) = 1.0f;
-    func_002E7788(v, v, 10.0f);
-    func_00315728(buf, arg0, 1, v, (f32)(*(s32 *)0x001A7A00 * 200));
-    *(u16 *)(buf + 0x1A) = *(u16 *)(arg0 + 0xAA);
-    func_00315948(*(char **)(q + 0x2290), buf);
-}
-
 INCLUDE_ASM("asm/levels", func_L16_0041C7A0);
 
 INCLUDE_ASM("asm/levels", func_L16_0041C990);

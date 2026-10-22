@@ -44,6 +44,17 @@ INCLUDE_ASM("asm/levels", func_L02_004164A8);
 INCLUDE_ASM("asm/levels", func_L02_00416720);
 
 /* True when the record is in state 1 and its sub-object holds a cleared origin. */
+int func_L02_00416800(void *arg0) {
+    int var_a2;
+    void *temp_a1;
+
+    var_a2 = 0;
+    temp_a1 = *(void **)((unsigned char *)arg0 + 0x68);
+    if (((*(unsigned char *)((unsigned char *)arg0 + 0x20)) == 1) && ((*(int *)temp_a1) == 0) && ((*(float *)((unsigned char *)temp_a1 + 4)) == 0.0f)) {
+        var_a2 = 1;
+    }
+    return var_a2;
+}
 
 INCLUDE_ASM("asm/levels", func_L02_00421860);
 
@@ -105,7 +116,7 @@ void func_L02_0042ED48(u8 *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_0042EDD0);
+/* func_L02_0042EDD0 is matched in L02_0042EDD0-g8.c (built with -frac2-no-annulled-wide-stores -frac2-zero-ti-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L02_0043F4C8);
 

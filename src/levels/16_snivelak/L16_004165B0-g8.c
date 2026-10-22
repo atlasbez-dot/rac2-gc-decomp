@@ -1,11 +1,13 @@
 #include "include_asm.h"
 
 typedef unsigned char u8;
+typedef unsigned short u16;
 typedef signed int s32;
 typedef unsigned int u32;
 typedef float f32;
 
 extern char *D_L16_001B2B1C __attribute__((sda));
+extern char *D_L16_001B2B1C_2;
 extern char D_00189EA0[];
 extern s32 func_00319BE8(char *, s32);
 
@@ -20,7 +22,7 @@ void func_L16_00418D28(char *arg0) {
     if (*(u8 *)(arg0 + 0x20) != 1)
         return;
 
-    p = (*(s32 *)st << 8) + *(char **)0x001B2B1C;
+    p = (*(s32 *)st << 8) + D_L16_001B2B1C_2;
     if (p != 0) {
         x = *(u8 *)(p + 0x20);
         if (x != 0xFE) {
@@ -199,4 +201,40 @@ void func_L16_0041ECF8(char *self, f32 spin) {
         func_00282CF0(buf3, buf2, buf1);
         func_00282CF0(e + 0x10, e + 0x10, buf3);
     }
+}
+
+extern s32 D_001A7A00;
+extern void func_002E7788(char *, char *, f32);
+extern char D_00189E20[];
+extern void func_00315728(char *, char *, s32, char *, f32);
+extern void func_00315948(char *, char *);
+
+/* next frame: arms the object once the shared render state names it, then hands its box to the collision pass */
+void func_L16_0041C6A0(char *arg0) {
+    char buf[0x30];
+    char v[0x10];
+    char *q;
+    char *p;
+
+    if (*(u8 *)(arg0 + 0x20) == 0) {
+        *(u8 *)(arg0 + 0x20) = 1;
+        *(u8 *)(arg0 + 0x31) = 0;
+        *(u16 *)(arg0 + 0x34) |= 1;
+    }
+    if (*(u8 *)(arg0 + 0x20) != 1)
+        return;
+    q = D_00189E20;
+    p = *(char **)(q + 0x33C);
+    if (p == 0 || p != arg0)
+        return;
+    if (*(s32 *)(q + 0x340) == 0)
+        return;
+    *(s32 *)(v + 0) = 0;
+    *(f32 *)(v + 4) = 1.0f;
+    *(s32 *)(v + 8) = 0;
+    *(f32 *)(v + 0xC) = 1.0f;
+    func_002E7788(v, v, 10.0f);
+    func_00315728(buf, arg0, 1, v, (f32)(D_001A7A00 * 200));
+    *(u16 *)(buf + 0x1A) = *(u16 *)(arg0 + 0xAA);
+    func_00315948(*(char **)(q + 0x2290), buf);
 }

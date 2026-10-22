@@ -619,7 +619,35 @@ INCLUDE_ASM("asm/game", func_002C4B50);
 
 INCLUDE_ASM("asm/game", func_002C4D18);
 
-INCLUDE_ASM("asm/game", func_002C4F08);
+void func_002C4F08(char *self)
+{
+    char *motion = self + 0x20;
+    float len;
+    float f;
+
+    *(unsigned char *)(self + 8) = *(unsigned char *)(self + 8) + *(unsigned char *)(motion + 0x12);
+    func_00282CC0_17(self + 0x10, self + 0x10, motion);
+    *(float *)(motion + 8) = *(float *)(motion + 8) - 3.0000000260770320892334e-03f;
+    len = func_00282E20(motion);
+    /* Preserve both retail operations: floating-point rounding means subtracting
+       and adding 1.0f cannot generally be simplified away. */
+    f = len * 9.7000002861022949218750e-01f - 1.0f + 1.0f;
+    f = f / len;
+    *(float *)(self + 0x20) = *(float *)(self + 0x20) * f;
+    *(float *)(motion + 4) = *(float *)(motion + 4) * f;
+    if (func_00282978((short *)(self + 0xA)) == 0) {
+        f = *(float *)(self + 0xC) + *(float *)(motion + 0x14) * 2.0f;
+        *(float *)(self + 0xC) = f;
+        if (f < 15000.0f)
+            *(float *)(self + 0xC) = 15000.0f;
+    } else {
+        if (func_002A8860(self + 4, *(int *)(motion + 0x1C)) != 0) {
+            *(int *)(self + 0xC) = 0;
+            func_002B9180(self);
+        }
+    }
+}
+
 
 
 
@@ -658,6 +686,7 @@ INCLUDE_ASM("asm/game", func_002C5B70);
 
 INCLUDE_ASM("asm/game", func_002C5D00);
 
+/* func_002C6360 is in the -G8 sibling (its two globals are read through $gp). */
 
 INCLUDE_ASM("asm/game", func_002C64D8);
 

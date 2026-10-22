@@ -1,95 +1,82 @@
-/* func_L00_003E7650 (268 bytes, 27 places) -- NEAR MISS, not integrated.
-   state: 260 bytes against retail's 268; the body, the calls and the store
-   order are retail's, but the frame is eight bytes short and two float
-   constants sit in the wrong registers.
-   check.py (00_aranos_tutorial), with the source below:
-     003E7674  addiu $a0, $zero, 0xC07  |  addiu $a0, $zero, 0xC07
-     003E7678  jal   func_000000       |  sd    $ra, 0x28($sp)
-     003E767C  addiu $a0, $zero, 0xC07 |  swc1  $f21, 0x38($sp)
-     003E7680  daddu $s1, $v0, $zero   |  jal   func_3100D8
-     003E7684  beqz  $s1, ...          |  swc1  $f20, 0x30($sp)
-     003E7688  addiu $v1, $zero, 0xFF  |  daddu $s1, $v0, $zero
-     003E768C  addiu $v0, $zero, 0xFF  |  beqz  $s1, ...
-     003E7690  sh    $v1, 0x32($s1)    |  addiu $v0, $zero, 0xFF
-     003E7694  sb    $v0, 0x30($s1)    |  lw    $s0, 0x68($s1)
-     003E7698  sb    $zero, 0x20($s1)  |  sb    $v0, 0x30($s1)
-     003E769C  lw    $s0, 0x68($s1)    |  addiu $v1, $s1, 0x10
-     003E76A0  lq    $v0, 0x0($s2)     |  sh    $v0, 0x32($s1)
-     003E76A4  lui   $at, 0x3C23       |  sb    $zero, 0x20($s1)
-     003E76B0  sq    $v0, 0x10($s1)    |  lq    $v0, 0x0($s2)
-     003E76B4  lui   $at, 0x3D56       |  sq    $v0, 0x0($v1)
-     003E76B8  ori   $at, $at, 0x8464  |  lq    $v0, 0x0($s3)
-   Three measured differences:
-   1. The two float constants 0x3D567752 (0.052359886f) and 0x3DD67752
-      (0.104719773f) are materialised into the callee-saved $f20 and $f21 in
-      retail and re-materialised into $f12/$f13 at each call in this cc1.  The
-      frame follows: 0x40 bytes with $f20/$f21 against 0x30 without.  A float
-      local at function scope that is used across a call does take a
-      callee-saved register (the matched func_002ACB48 keeps `negative` in
-      $f20), but a local initialised with a literal is folded away by the
-      tree level, and what is left is a constant that this cc1 rematerialises.
-      The retail source's two bounds are therefore not literals in this cc1's
-      view, yet retail materialises them with lui/ori, so they are constants
-      that retail keeps in a register.  Spelling not found.
-   2. The destination of the first 16-byte copy is retail's
-      `addiu $v1, $s1, 0x10` + `sq $v0, 0x0($v1)`; this cc1 folds the offset
-      into the store and gives `sq $v0, 0x10($s1)`.  The same body with a
-      plain-pointer destination (the matched func_002A8C00) does give the
-      `sq $v0, 0x0($reg)` form, so the pointer has to reach the store as a
-      register; every spelling measured here folds the offset.
-   3. The two 0xFF stores (byte 0x30 and halfword 0x32) come out in two
-      registers and in the wrong order; retail keeps one $v0 for both and
-      stores the byte first.  The matched func_00310960 writes the same two
-      fields the same way and is a copy of the same idiom.
+/* func_L00_003E7650 - 268 bytes, 27 places, level 00_aranos_tutorial, retail at
+   0x003E7650.  NEAR MISS, not integrated.
 
-   The rest of the body is retail's: the `if (obj != 0) { ... } return obj;`
-   shape (the branch goes to the one exit where $v0 = obj), the two `lq`/`sq`
-   copies, the 0.01f store in the delay slot of the first random call, the
-   second random call's result stored in the delay slot of the next call, and
-   the child record's five stores. */
+   The candidate below is retail's size exactly (268 bytes) and its instruction
+   sequence word for word, with two instructions in the wrong place: retail
+   keeps the two 16-byte copies next to each other
 
-extern int func_0029EFD0(int id);
+     003E76A8  lq $v0, 0x0($s2)      003E76B0  lq $v0, 0x0($s3)
+     003E76AC  sq $v0, 0x0($v1)      003E76B4  sq $v0, 0x0($s0)
 
-extern float func_002A7878(float a, float b);
+   while this build puts the two float constants (0x052359886 and 0x10471977)
+   between them and the second copy after them:
 
-extern int func_002FED90(void *obj, int zero, float f12, float f13, float f14);
+     003E76A8  lq $v0, 0x0($s2)
+     003E76AC  lui $at, 0x3D56 ...    003E76B8  lq $v0, 0x0($s3)
+     ... 0x3DD67752 ...              003E76BC  sq $v0, 0x0($s0)
 
-extern void func_002A0F48(void *obj);
+   Everything else is retail's: the 0xC07-byte allocation, the 0xFF/0xFF/0
+   header stores through one register, the two `lq`/`sq` copies (the 16-byte
+   ones need the `mode(TI)` type and the `-frac2-qcopy` file profile, see
+   config/cflags.txt), the two calls to func_002A7878 with 0.052359886 and
+   0.10471977 (the constants are 2 ulp above pi/60 and 2*pi/60), the three
+   floats of func_002FED90 (1.0, 1.0, 1.0) and the single exit.
+
+   What was measured: the file's RTL has the copies before the constants
+   (the front end's order is right), and the second flow pass (jump2) moves
+   the two constant sets in front of the second copy, so the copy cannot come
+   back.  Ten source shapes were tried - the constants inline, as two
+   variables, as two assignments, the 0x01f store before, between and after
+   the copies, the two copies in the other order, the destinations through
+   pointer variables, a `volatile` copy, `-fno-schedule-insns`,
+   `-fno-schedule-insns2` and `-fno-gcse` - and every one of them leaves the
+   two constant loads between the two copies.  The pointer register of the
+   first copy ($v1) and the two argument registers of the second call
+   ($f13 then $f14) also move.
+
+   Next idea: a source shape where the constant pseudos are not shared by the
+   two calls (so the second flow pass has nothing to move), or a compiler-side
+   look at what jump2 does with the two identical calls. */
 
 typedef int TI128 __attribute__((mode(TI)));
 
-/* Creates an object of type 0xC07, fills its identity fields, copies two 16-byte blocks
-   into it, then sets up the child record through three helpers. */
-void *func_L00_003E7650(void *a0, void *a1, void *a2)
-{
-    char *obj;
-    char *sub;
-    char *dst;
-    float r1;
-    float r2;
-    int r3;
-    float lo = 0.05235988646745682f;
-    float hi = 0.10471977293491364f;
+extern char *func_0029EFD0(int size);
 
-    obj = (char *)func_0029EFD0(0xC07);
-    if (obj != 0) {
-        sub = *(char **)(obj + 0x68);
-        *(unsigned char *)(obj + 0x30) = 0xFF;
-        *(unsigned short *)(obj + 0x32) = 0xFF;
-        *(unsigned char *)(obj + 0x20) = 0;
-        dst = obj + 0x10;
-        *(volatile TI128 *)dst = *(TI128 *)a1;
-        *(volatile TI128 *)sub = *(TI128 *)a2;
-        *(float *)(obj + 0x2C) = 0.01f;
-        r1 = func_002A7878(lo, hi);
-        *(float *)(sub + 0x10) = r1;
-        r2 = func_002A7878(lo, hi);
-        *(int *)(sub + 0x30) = (int)a0;
-        *(int *)(sub + 0x18) = 0;
-        *(float *)(sub + 0x14) = r2;
-        r3 = func_002FED90(obj, 0, 1.0f, 1.0f, 1.0f);
-        *(int *)(sub + 0x34) = r3;
-        func_002A0F48(obj);
+extern float func_002A7878(float lo, float hi);
+
+extern int func_002FED90(char *object, int a, float b, float c, float d);
+
+extern void func_002A0F48(char *object);
+
+char *func_L00_003E7650(int a0, TI128 *a1, TI128 *a2)
+{
+    char *p;
+    char *s0;
+    float r;
+    float lo;
+    float hi;
+
+    p = func_0029EFD0(0xC07);
+    if (p != 0) {
+        short v = 0xFF;
+
+        s0 = *(char **)(p + 0x68);
+        *(short *)(p + 0x32) = v;
+        *(char *)(p + 0x30) = v;
+        *(char *)(p + 0x20) = 0;
+        *(TI128 *)(p + 0x10) = *a1;
+        *(TI128 *)s0 = *a2;
+        *(float *)(p + 0x2C) = 0.01f;
+        lo = 0.052359886f;
+        hi = 0.10471977f;
+        r = func_002A7878(lo, hi);
+        *(float *)(s0 + 0x10) = r;
+        r = func_002A7878(lo, hi);
+        *(float *)(s0 + 0x14) = r;
+        *(int *)(s0 + 0x30) = a0;
+        *(int *)(s0 + 0x18) = 0;
+        *(int *)(s0 + 0x34) = func_002FED90(p, 0, 1.0f, 1.0f, 1.0f);
+        func_002A0F48(p);
     }
-    return obj;
+    return p;
 }

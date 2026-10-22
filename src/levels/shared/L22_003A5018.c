@@ -70,7 +70,41 @@ extern int func_002A77E0(int a0);
 
 extern void func_L22_003A64E8(u8 *a0, int a1, int a2);
 
-INCLUDE_ASM("asm/levels", func_L22_003A64E8);
+/* Arm one animation slot in the range [a1, a2]: a random slot of the range is
+ * tried first and the next one after it, wrapping around, until a free slot
+ * is found; when every slot of the range is taken, the range is cleared and
+ * the last slot tried is armed.
+ *
+ * The mask lives in the controller at +0x4E0 of the object at +0x68.
+ */
+void func_L22_003A64E8(u8 *a0, int a1, int a2) {
+    u8 *ctl = *(u8 **)(a0 + 0x68);
+    int count;
+    int rem;
+    int i;
+
+    if (a2 < a1)
+        return;
+    count = a2 - a1 + 1;
+    rem = func_002A77E0(count);
+    for (i = 0; i < count; i++) {
+        int idx = a1 + rem;
+        if (((*(int *)(ctl + 0x4E0) >> idx) ^ 1) & 1) {
+            func_L22_003A6470(a0, idx);
+            return;
+        }
+        rem = (rem + 1) % count;
+    }
+    i = 0;
+    if (count > 0) {
+        int m = *(int *)(ctl + 0x4E0);
+        for (; i < count; i++) {
+            m &= ~(1 << (a1 + i));
+        }
+        *(int *)(ctl + 0x4E0) = m;
+    }
+    func_L22_003A6470(a0, a1 + rem);
+}
 
 /* A three-label switch, the third one sharing the default's body: with only two cases cc1
  * emits a comparison chain, and the third label is what makes it build the decision tree
@@ -166,11 +200,12 @@ INCLUDE_ASM("asm/levels", func_L22_003F52D8);
 
 INCLUDE_ASM("asm/levels", func_L22_003F54B8);
 
-INCLUDE_ASM("asm/levels", func_L22_003F5580);
+/* func_L22_003F5580 is in L22_003A5018-g8.c: it reaches the level's scale factor
+ * through $gp, which this -G0 unit cannot produce. */
 
 INCLUDE_ASM("asm/levels", func_L22_003F5688);
 
-INCLUDE_ASM("asm/levels", func_L22_003F58F8);
+/* func_L22_003F58F8 is defined in L22_003A5018-g8.c (it reads $gp data outside a delay slot). */
 
 INCLUDE_ASM("asm/levels", func_L22_003F85A0);
 

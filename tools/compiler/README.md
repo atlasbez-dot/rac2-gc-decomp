@@ -75,6 +75,36 @@ Qualify every function in an opted-in unit; address formation alone does not
 settle allocation or scheduling. The recipe requires the authored copy controls
 and RTL-contract tests, including volatile accesses and integer/FPU branches.
 
+`qcopy_barrier.py` adds `-frac2-qcopy-barrier`, which matters only together with
+`-frac2-qcopy` and is enabled only for qualified files in `config/cflags.txt`. Both
+schedulers then give the grouped copy the dependences, cost and unit of a volatile asm,
+through the block `-frac2-zero-ti-barrier` uses for the clear, so independent instructions
+stay on their side of the copy, as they do around retail's copy, most likely an inline-asm
+macro. Instructions, operands, register-allocation inputs and memory flags are unchanged,
+and `-fno-rac2-qcopy-barrier` disables it again. Without the switch no object of `src/`
+changes; forced on in the eight `-frac2-qcopy` units, it changes none of their objects.
+Twelve functions (59 places) are the measured witnesses, each a unit of its own with both
+switches (docs/COMPILER-NOTES.md). It models only the schedulers' view of such an asm:
+jump2, for one, still deletes a redundant register move across the copy, which a volatile
+asm keeps. `tests/test_qcopy_barrier.py` covers the selector, the default/disabled
+equality, and authored copies among neighbours, calls, branches and volatile accesses.
+
+`zero_ti_por.py` adds `-frac2-zero-ti-por`, enabled only for qualified files in
+`config/cflags.txt`. `rac2_fold_zero_ti_store` then leaves a quadword zero store to `0($sp)`
+alone: the zero keeps its `por $rX,$zero,$zero` and the store its register source, as plain C
+compiles without the fold, while a store through any other register still folds to `sq $zero`.
+Retail clears 396 quadwords with `sq $zero,0(reg)` (263 functions), which the fold models, but
+it also stores a `por`-materialised zero at displacement 0 183 times in 153 functions, always to
+`0($sp)` and never through another register; 82 of the `sq $zero` stores are to `0($sp)` too,
+so the address alone does not decide it and a unit says that its stack clears are plain C.
+`-fno-rac2-zero-ti-por` disables it again. Without the switch no object of `src/` changes;
+forced on everywhere, it changes only the four units whose functions retail clears `0($sp)`
+with `sq $zero`. Five functions are the measured witnesses, each a unit of its own
+(docs/COMPILER-NOTES.md). `tests/test_zero_ti_por.py` covers the transformer's anchors, the
+default/disabled equality, and authored zero stores to the stack, through pointers, to a global
+and in loops, a function with both kinds, nonzero displacements, shared and live zeros and the
+function-value fold.
+
 `hazard_labels.py` adds `-frac2-hazard-labels`, enabled only for qualified files in
 `config/cflags.txt`. cc1 then writes `.set rac2_hazard_labels` at the top of its output, and
 gas keeps a code label in front of the coprocessor hazard `nop` it inserts after the label
@@ -85,6 +115,19 @@ branch targets, and SN ProDG 2.0's `Ps2EeAs` keeps it there for forward, backwar
 output changes. `src/levels/18_damosel/L18_004308F0.c` and `src/levels/shared/L02_00411530.c`
 are the measured witnesses; forcing the switch on every unit changes only the `.mdebug` of
 one `-g` unit. `tests/test_hazard_labels.py` covers the fixed cases and the controls.
+
+`no_annulled_wide_stores.py` adds `-frac2-no-annulled-wide-stores`, enabled only for qualified
+files in `config/cflags.txt`. When reorg fills the delay slot of a conditional branch from the
+branch's target (`fill_slots_from_thread`, `steal_delay_list_from_target` in `reorg.c`), a store
+wider than 32 bits (`sd`, `sq`) no longer goes into the annulled slot of a branch-likely, and
+the search of that thread stops at it. `optimize_skip`, which annuls the one instruction a branch
+skips, is unchanged. In retail's compiled code the annulled slots hold 2,895 stores and none is
+wider than 32 bits, while the other slots hold 547 `sq` and 497 `sd` (docs/COMPILER-NOTES.md).
+Without the switch the output is unchanged, and forcing it on every other game-compiler unit
+of `src/` changes no object. `src/levels/23_damosel_orbit/L23_00422668.c` (with
+`-frac2-qcopy`) and `src/levels/shared/L02_0042EDD0-g8.c` (with `-frac2-zero-ti-barrier`)
+are the measured witnesses. `tests/test_no_annulled_wide_stores.py` covers both paths and the
+controls.
 
 Patch `0052` also preserves the original sign-extending expansion for the isolated
 64-bit sign bit and a sign bit followed by a contiguous low run of at least 32
@@ -115,6 +158,6 @@ are rejected, and the tests exercise actual argument transport for both
 frontends, default/explicit profiles, invalid values and unchanged controls.
 
 `build.sh` stops unless `mips.c`, `mips.h`, `mips.md`, `toplev.c`, `flags.h`,
-`haifa-sched.c`, `gcse.c`, `flow.c` and `tc-mips.c` hash as it
+`haifa-sched.c`, `gcse.c`, `flow.c`, `reorg.c` and `tc-mips.c` hash as it
 lists. The binaries' own hashes depend on the build host and path, so check a compiler by its
 output: `tools/build.py` compiles every matched function to the retail bytes.

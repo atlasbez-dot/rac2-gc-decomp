@@ -100,9 +100,44 @@ s32 func_L08_00425518(s32 a0) {
 
 INCLUDE_ASM("asm/levels", func_L08_00425568);
 
+extern f32 func_002A7878(f32, f32);
+extern f32 func_00283180(f32);
+extern f32 func_00283198(f32);
+extern void func_00282CC0(void *, void *, void *);
+extern void func_00282CF0(void *, void *, void *);
+extern void func_00282F20(void *, void *, f32);
+extern char D_00189EA0[];
+
+/* Near miss: nonmatching/levels/func_L08_00425628.c - the two 16-byte copies keep
+   their addresses in registers in retail and are folded into the lq/sq displacement
+   here. */
 INCLUDE_ASM("asm/levels", func_L08_00425628);
 
-INCLUDE_ASM("asm/levels", func_L08_004257A0);
+extern void func_L08_00425628(char *);
+
+/* The swing angle is folded into the moby's frame and the subobject is ticked. */
+void func_L08_004257A0(char *a0) {
+    char *s0 = *(char **)(a0 + 0x68);
+    f32 local[4];
+    f32 f21 = -3.1415927f;
+    f32 f20 = 3.1415927f;
+    f32 t;
+
+    t = func_002A7878(f21, f20);
+    *(f32 *)(s0 + 0x180) = func_00283180(t) * (f32)*(u8 *)(s0 + 0x20F);
+    t = func_002A7878(f21, f20);
+    *(f32 *)(s0 + 0x184) = func_00283198(t) * (f32)*(u8 *)(s0 + 0x20F);
+    *(f32 *)(s0 + 0x188) = 0.0f;
+    func_00282CC0(s0 + 0x180, s0 + 0x180, s0 + 0x170);
+    *(f32 *)(s0 + 0x188) = *(f32 *)(s0 + 0x188) + 6.5f;
+    if (*(s16 *)(s0 + 0x1B6) != 0) {
+        func_00282CF0(local, s0 + 0x180, (void *)D_00189EA0);
+        *(s32 *)&local[2] = 0;
+        func_00282F20(local, local, 3.0f);
+        func_00282CC0(s0 + 0x180, s0 + 0x180, local);
+    }
+    func_L08_00425628(a0);
+}
 
 extern void func_00282CF0(void *, void *, void *);
 extern void func_00282CC0(void *, void *, void *);
@@ -218,8 +253,6 @@ INCLUDE_ASM("asm/levels", func_L08_004262C0);
 
 INCLUDE_ASM("asm/levels", func_L08_00426730);
 
-INCLUDE_ASM("asm/levels", func_L08_004290E8);
-
 INCLUDE_ASM("asm/levels", func_L08_00429238);
 
 INCLUDE_ASM("asm/levels", func_L08_00429350);
@@ -229,6 +262,10 @@ extern s32 D_L08_001B39E0[];
 extern s32 D_L08_001B39F0[];
 extern s32 D_L08_001B3A30[];
 extern void func_00291450(s32 a0);
+
+/* Near miss: nonmatching/levels/func_L08_004290E8.c - the first test's branch and
+   the callee-saved allocation differ. */
+INCLUDE_ASM("asm/levels", func_L08_004290E8);
 
 /* Near miss: nonmatching/levels/func_L08_00429408.c - the address materialisation order
    in the prologue differs (0x1B39E0 / 0x1B39A0 / 0x1B3A30 are grouped differently). */

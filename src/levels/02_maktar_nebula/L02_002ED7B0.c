@@ -87,13 +87,14 @@ extern int func_002E5CF8(int, int, char *);
 
 /* Stores the quadword the caller passes into the record at +0xF0. */
 /* func_L02_003CADA8 is a near miss: nonmatching/levels/func_L02_003CADA8.c */
-INCLUDE_ASM("asm/levels", func_L02_003CADA8);
+/* func_L02_003CADA8 is matched in L02_003CADA8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 /* Stores the quadword the caller passes into the record at +0xB0. */
 /* func_L02_003D01F0 is a near miss: nonmatching/levels/func_L02_003D01F0.c */
-INCLUDE_ASM("asm/levels", func_L02_003D01F0);
+/* func_L02_003D01F0 is matched in L02_003D01F0.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
-int func_L02_003D1880(char *arg0) {
+/* Callers also supply a candidate pointer; this predicate only inspects arg0. */
+int func_L02_003D1880(char *arg0, void *candidate) {
     int v = 0;
     if (*(int *)(*(char **)(arg0 + 0x68) + 0x2E4) != 0) {
         unsigned char c = *(unsigned char *)(arg0 + 0x20);
@@ -213,7 +214,7 @@ void func_L02_002ED7B0(int flag, float limit) {
 
 INCLUDE_ASM("asm/levels", func_L02_002F2B88);
 
-INCLUDE_ASM("asm/levels", func_L02_003007D8);
+/* func_L02_003007D8 is matched in L02_003007D8-g8.c (built with -G8 and -g). */
 
 typedef struct {
     u8 pad00[0x34];
@@ -273,7 +274,7 @@ void func_L02_00300CE8(void) {
         func_L00_002E6CF0(func_L02_003007D8, 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L02_0033C760);
+/* func_L02_0033C760 is matched in L02_0033C760.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L02_0033C8B8);
 
@@ -333,7 +334,28 @@ INCLUDE_ASM("asm/levels", func_L02_003D0238);
 
 INCLUDE_ASM("asm/levels", func_L02_003D0408);
 
-INCLUDE_ASM("asm/levels", func_L02_003D10F0);
+extern int func_00283CF0(float);
+
+extern float func_002A7878(float, float);
+
+extern float func_00282E48(void *, void *);
+
+extern void func_002A93B0(char *);
+
+extern void *func_002A9640(char *, int, int);
+
+extern void func_002B0ED8(char *, char *, int);
+
+extern void func_L02_003D1FA0(char *, int);
+
+extern void func_L02_003D2488(char *, int, int);
+
+extern void func_L02_003D1998(char *);
+
+extern char D_L02_001BA500;
+
+extern int func_002A77E0(int);
+
 
 extern float func_00282E80(char *, char *);
 extern float func_00283248(float, float);
@@ -474,33 +496,6 @@ void func_L02_003D2248(char *arg0, int arg1) {
         func_316180(arg0, &a, &b, &c);
         func_316150(*(char **)(p + 0x2E4), a, b, c);
     }
-}
-
-/* Rebuilds the actor's shared effect record after the sub-object has gone. */
-void func_L02_003D2390(char *self) {
-    char *state = *(char **)(self + 0x68);
-
-    if (*(char **)(state + 0x2E4) != 0) {
-        TI128 pos = *(TI128 *)(*(char **)(state + 0x2E4) + 0x10);
-
-        func_L02_003D1ED0(self, &pos);
-    }
-    if (*(short *)(state + 0x2F6) == 1)
-        func_3FC1B0(*(char **)(self + 0xB8), 0x9CA);
-    *(short *)(state + 0x2F6) = 0;
-    *(int *)(state + 0x2E0) = 0;
-    if (*(unsigned char *)(state + 0x291) != 0) {
-        *(unsigned char *)(state + 0x292) = 0;
-        *(float *)(state + 0x2B0) = *(float *)(state + 0x2B4) = *(float *)(state + 0x2B8) = 1.0f;
-        func_315348(self, state + 0x290);
-        func_2F1CC8(state + 0x290, 0, 0x40);
-    }
-    func_31E3C0(self, 0, 0, 3);
-    func_316220(self);
-    func_31E6A0(self, 1, 0);
-    *(unsigned char *)(self + 0x31) = 0;
-    *(int *)(self + 0x98) = 0;
-    *(unsigned short *)(self + 0x34) = (*(unsigned short *)(self + 0x34) & 0xEFFF) | 0x47;
 }
 
 extern void func_00282A60(char *, int, int);

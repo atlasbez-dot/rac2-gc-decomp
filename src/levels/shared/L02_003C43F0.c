@@ -95,6 +95,13 @@ extern long long func_0027C878(char *);
 
 extern float func_00282E80(void *, void *);
 
+extern int func_002ACBC8(void *, int);
+
+/* The level's three trigger boxes and the point they hold. */
+extern char D_L02_001AFEA0[];
+
+extern char D_00189EA0[];
+
 extern void func_00283410(float *, float *);
 
 extern void func_00280B90(char *, float *, int);
@@ -210,7 +217,9 @@ void func_L02_003C46E0(struct Outer *p)
 }
 
 /* Clears the sub-object flags of three inline pointer arrays, turns a frame counter into a
-   rotation, and pushes each element's 128-bit block one object forward. */
+   rotation, and pushes each element's 128-bit block one object forward.
+   The C is in nonmatching/levels/func_L02_003C4848.c: it needs the -frac2-qcopy unit and
+   the counter increment of the second and third loop still lands in the loop header. */
 INCLUDE_ASM("asm/levels", func_L02_003C4848);
 
 INCLUDE_ASM("asm/levels", func_L02_003C49A0);
@@ -237,10 +246,48 @@ void func_L02_003C4E18(char *a0)
 
 INCLUDE_ASM("asm/levels", func_L02_003C4ED8);
 
-INCLUDE_ASM("asm/levels", func_L02_003C5098);
+/* The level's three trigger boxes, each a lower and an upper bound, and the point they hold:
+   the point has to lie inside every box. */
+struct L02Box {
+    float lo;
+    float hi;
+};
+
+struct L02Boxes {
+    struct L02Box b[3];
+};
+
+struct L02Vec {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+int func_L02_003C5098(char *a0)
+{
+    struct L02Boxes box;
+    struct L02Vec vec;
+    void *sub;
+    float f0;
+
+    box = *(struct L02Boxes *)D_L02_001AFEA0;
+    sub = *(void **)(a0 + 0x68);
+    f0 = func_00282E80(a0 + 0x10, D_00189EA0);
+    if (f0 > 24.0f)
+        return 0;
+    if (*(int *)((char *)sub + 4) != -1)
+        return func_002ACBC8(D_00189EA0, *(int *)((char *)sub + 4));
+    func_00282CF0((float *)&vec, (float *)D_00189EA0, (float *)(a0 + 0x10));
+    func_002AFDD8((unsigned char *)a0, (unsigned char *)&vec, (unsigned char *)&vec, 0);
+    if (vec.x >= box.b[0].lo && vec.x <= box.b[0].hi &&
+        vec.y >= box.b[1].lo && vec.y <= box.b[1].hi &&
+        vec.z >= box.b[2].lo && vec.z <= box.b[2].hi)
+        return 1;
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L02_003C51F8);
 
+/* The C is in nonmatching/levels/func_L02_003C5438.c: the matrix address still takes a
+   sixth callee-saved register instead of being rematerialized at both call sites. */
 INCLUDE_ASM("asm/levels", func_L02_003C5438);
 
 INCLUDE_ASM("asm/levels", func_L02_003C9D78);
@@ -261,7 +308,6 @@ INCLUDE_ASM("asm/levels", func_L02_003CCFE8);
 
 
 extern int D_L02_001B35B8 __attribute__((sda));
-extern char D_00189EA0[];
 extern float func_00282E48(void *, void *);
 
 struct L02NearObject {

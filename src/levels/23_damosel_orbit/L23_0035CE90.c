@@ -70,7 +70,7 @@ void func_L23_003C0028(char *arg0) {
 
 /* func_L23_003C00D0 is matched in L23_003C00D0.c (built with -g). */
 
-INCLUDE_ASM("asm/levels", func_L23_003C01F8);
+/* func_L23_003C01F8 is matched in L23_003C01F8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L23_003C02C8);
 
@@ -316,7 +316,7 @@ void func_L23_003C1AB0(int arg0) {
 }
 
 
-INCLUDE_ASM("asm/levels", func_L23_003C1B58);
+/* func_L23_003C1B58 is matched in L23_003C1B58.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L23_003C1E88);
 

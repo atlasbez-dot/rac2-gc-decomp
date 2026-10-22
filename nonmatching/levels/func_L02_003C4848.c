@@ -1,59 +1,142 @@
-/* func_L02_003C4848 - 344 bytes, 8 place(s), level 02_maktar_nebula (also 03_endako,
-   04_barlow, 09_dobbo, 12_todano, 17_smolg, 20_yeedil, 30_insomniac_museum),
-   retail at 0x003c4848. Not matched in wave 14: 328 bytes against the retail's 344.
-   The first of the three loops matches the retail instruction for instruction
-   (the guard, the reload of the array element, the flag word, the loop's `slt`
-   and both delay slots). What is left is in the second and third loops: this cc1
-   puts the array pointer in $a1 and the counter in $a2 where the retail uses $a2
-   and $t0, it keeps the sub-block pointer in $v0 where the retail uses $a0, it
-   increments the counter early instead of in the branch's delay slot, and it
-   folds the two quadword copy addresses into the `lq`/`sq` offsets where the
-   retail materialises them (`lw $a1,0x18($a0) ; addiu $a1,$a1,0x10 ; lq $v0,0($a1)`).
-   The float constants (0x3C888889 and 0x3D088889, one ulp above 1/60 and 1/30)
-   and the `mode(TI)` copy pattern are the retail's. What would unblock it: the
-   source expression tree of the second and third loop, so this cc1 picks the same
-   registers and keeps the quadword addresses in registers. */
+/* func_L02_003C4848 (344 bytes, 8 places) -- NEAR MISS, not integrated.
+   state: the three loops match retail word for word, except that cc1 hoists the second
+   and third loop's counter increment into the loop header, so two instructions per loop
+   differ and the body is 340 bytes against retail's 344:
 
-#include "include_asm.h"
+     003C48E4  addiu       $t0, $t0, 0x1    | lw          $a0, 0x68($v0)   <- ours
+     003C4920  addiu       $t0, $t0, 0x1    | addiu       $t0, $t0, 0x1   <- retail
+
+   The first loop (which holds a branch) keeps retail's bottom increment; the two loops
+   without a branch get the header increment. What is left is a source spelling that
+   keeps the increment at the bottom of the second and third loop.
+
+   What is measured and right:
+   - the 128-bit copy is retail's `lq`/`sq` pair with register addresses (the address is
+     computed with `addiu` into a register and the lq/sq use offset 0). This cc1 emits
+     the displacement form (`lq $v0,0x10($a0)`) unless the unit is built with
+     -frac2-qcopy, the grouped copy the project's compiler adds for that (see
+     tools/compiler/transformers/qcopy_pattern.py and the -frac2-qcopy unit
+     src/levels/20_yeedil/L20_0039E158.c). This unit therefore needs -frac2-qcopy, and
+     since the flag is per file it needs a unit of its own (the shared file also holds
+     func_L02_003D1820, whose retail copies use the displacement form).
+   - the constants are 1/60 (0x3C888889) for the second loop and 1/30 (0x3D088889) for
+     the third: this cc1 folds `1.0f/60.0f` and `1.0f/30.0f` to exactly those bits.
+   - the reload of the list element (`lw $v1,0x0($a2)`) before the copy's `sq` comes
+     from reading the array element again in the source, not from a local pointer:
+     `*(TI128 *)((char *)parent->f20[j] + 0x10) = *(TI128 *)((char *)sub->f18 + 0x10);`
+     with the array element read again gives retail's reload and its register choice.
+
+   Tried and not enough: three loop variables instead of two (the second and third loop
+   share one, as retail does); the increment at the end of the body instead of in the
+   for statement; the angle computed first, last or in place; the copy with the
+   destination through a local pointer instead of the array element; -fno-schedule-insns
+   (which changes the register allocation and does not restore the increment);
+   -fno-schedule-insns2 (the same). */
 
 typedef int TI128 __attribute__((mode(TI)));
 
-void func_L02_003C4848(char *a0)
-{
-    char *a3 = *(char **)(a0 + 0x68);
-    char *s1;
-    char *s2;
-    char *s3;
-    char *r;
-    int i1, i2, i3;
+struct L02ListObj {
+    char pad0[0x34];
+    unsigned short f34;
+    char pad1[0x32];
+    void *f68;
+};
 
-    *(int *)(a3 + 0x130) = 0x3C;
-    for (i1 = 0; i1 < *(int *)(a3 + 0x118); i1++) {
-        char **arr = (char **)(a3 + 0xC0);
-        s1 = *(char **)(*(char **)(arr + i1) + 0x68);
-        *(int *)(s1 + 0x14) = *(int *)(s1 + 0x18);
-        *(int *)(s1 + 0x4) = 0;
-        *(int *)(s1 + 0x8) = 0;
-        r = *(char **)(s1 + 0x1C);
-        if (r != 0)
-            *(unsigned short *)(r + 0x34) |= 0x41;
-        *(unsigned short *)(*(char **)(arr + i1) + 0x34) &= 0xFFBE;
+struct L02ListSub {
+    char pad0[4];
+    int f04;
+    int f08;
+    char pad1[8];
+    int f14;
+    int f18;
+    struct L02ListObj *f1C;
+};
+
+struct L02TurnSub {
+    char pad0[0x0C];
+    float f0C;
+    float f10;
+    int f14;
+    void *f18;
+};
+
+struct L02TurnObj {
+    char pad0[0x10];
+    char pad1[0x58];
+    struct L02TurnSub *f68;
+};
+
+struct L02SpinSub {
+    char pad0[4];
+    float f04;
+    int f08;
+    float f0C;
+    void *f10;
+};
+
+struct L02SpinObj {
+    char pad0[0x10];
+    char pad1[0x58];
+    struct L02SpinSub *f68;
+};
+
+struct L02Parent {
+    char pad0[8];
+    int f08;
+    char pad1[0x14];
+    struct L02TurnObj *f20[20];
+    struct L02SpinObj *f70[20];
+    struct L02ListObj *fC0[20];
+    int f110;
+    int f114;
+    int f118;
+    int f11C;
+    char pad2[0x10];
+    int f130;
+};
+
+struct L02Arg {
+    char pad0[0x68];
+    struct L02Parent *f68;
+};
+
+void func_L02_003C4848(struct L02Arg *arg)
+{
+    struct L02Parent *parent = arg->f68;
+    int i;
+    int j;
+
+    parent->f130 = 0x3C;
+    for (i = 0; i < parent->f118; i++) {
+        struct L02ListObj *obj = parent->fC0[i];
+        struct L02ListSub *sub = obj->f68;
+
+        sub->f04 = 0;
+        sub->f14 = sub->f18;
+        sub->f08 = 0;
+        if (sub->f1C != 0)
+            sub->f1C->f34 |= 0x41;
+        parent->fC0[i]->f34 &= 0xFFBE;
     }
-    for (i2 = 0; i2 < *(int *)(a3 + 0x110); i2++) {
-        char **arr = (char **)(a3 + 0x20);
-        s2 = *(char **)(*(char **)(arr + i2) + 0x68);
-        *(int *)(s2 + 0x14) = 0;
-        *(int *)(a3 + 0x11C) = 0;
-        *(float *)(s2 + 0x10) = (float)*(int *)(a3 + 0x8) * 0.016666667f;
-        *(float *)(s2 + 0xC) = -1.0f;
-        *(TI128 *)(*(char **)(arr + i2) + 0x10) = *(TI128 *)(*(char **)(s2 + 0x18) + 0x10);
+    for (j = 0; j < parent->f110; j++) {
+        struct L02TurnObj *obj = parent->f20[j];
+        struct L02TurnSub *sub = obj->f68;
+        float angle;
+
+        sub->f14 = 0;
+        parent->f11C = 0;
+        angle = (float)parent->f08 * (1.0f / 60.0f);
+        sub->f0C = -1.0f;
+        sub->f10 = angle;
+        *(TI128 *)((char *)parent->f20[j] + 0x10) = *(TI128 *)((char *)sub->f18 + 0x10);
     }
-    for (i3 = 0; i3 < *(int *)(a3 + 0x114); i3++) {
-        char **arr = (char **)(a3 + 0x70);
-        s3 = *(char **)(*(char **)(arr + i3) + 0x68);
-        *(int *)(s3 + 0x8) = 0;
-        *(float *)(s3 + 0x4) = 0.033333335f;
-        *(float *)(s3 + 0xC) = -1.0f;
-        *(TI128 *)(*(char **)(arr + i3) + 0x10) = *(TI128 *)(*(char **)(s3 + 0x10) + 0x10);
+    for (j = 0; j < parent->f114; j++) {
+        struct L02SpinObj *obj = parent->f70[j];
+        struct L02SpinSub *sub = obj->f68;
+
+        sub->f08 = 0;
+        sub->f04 = 1.0f / 30.0f;
+        sub->f0C = -1.0f;
+        *(TI128 *)((char *)parent->f70[j] + 0x10) = *(TI128 *)((char *)sub->f10 + 0x10);
     }
 }

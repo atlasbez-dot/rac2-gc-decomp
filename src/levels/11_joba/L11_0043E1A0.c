@@ -65,9 +65,10 @@ void func_L11_004401C0(u8 *obj) {
     *(s32 *)(state + 0x170) = 0;
 }
 
+/* func_L11_00440238 lives in L11_00440238-g8.c (its source unit has the retail small-data view). */
 INCLUDE_ASM("asm/levels", func_L11_00440360);
 
-INCLUDE_ASM("asm/levels", func_L11_00440790);
+/* func_L11_00440790 lives in L11_00440238-g8.c (its source unit has the retail small-data view). */
 
 /* Finds the class entry the identifier names and hands it to that class's handler. */
 extern u8 *D_L11_001FC420[];
@@ -165,7 +166,7 @@ extern void func_L11_003F3098(u8 *);
 
 INCLUDE_ASM("asm/levels", func_L11_004411C8);
 
-INCLUDE_ASM("asm/levels", func_L11_00441350);
+/* func_L11_00441350 lives below, after the id-list macros it uses. */
 
 INCLUDE_ASM("asm/levels", func_L11_004417A0);
 
@@ -356,6 +357,127 @@ void func_L11_00441D08(u8 *object, s32 count) {
                 n--;
                 if (n <= count)
                     break;
+            }
+        }
+    }
+}
+
+extern float func_L02_002F21C0(void *, void *);
+extern char D_00189EA0[];
+
+/* Over the entities of the object's group (state word 0xC0): first resets the "armed" halfword
+   (1 -> 0) of the state of every entity of the four measured classes and reports its class to
+   func_L11_00441978. Then, twice: picks the entity of those classes (state byte not 0xFE or 0xFD
+   and at least 4, halfword not 1) that func_L02_002F21C0 puts nearest to D_00189EA0, and arms
+   its halfword when func_L11_00441868 consumes the class's counter. */
+void func_L11_00441350(u8 *object) {
+    u8 *state = *(u8 **)(object + 0x68);
+    u16 *p;
+    u8 *e;
+    u8 *best;
+    f32 best_d;
+    f32 d;
+    s32 i;
+    s32 v;
+
+    FOR_EACH_ID(p, 0xC0) {
+        e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+        if (e == 0)
+            break;
+        switch (*(s16 *)(e + 0xAA)) {
+        case 0xD98:
+            if (*(s16 *)(*(u8 **)(e + 0x68) + 0x366) == 1) {
+                *(s16 *)(*(u8 **)(e + 0x68) + 0x366) = 0;
+                func_L11_00441978(object, *(s16 *)(e + 0xAA));
+            }
+            break;
+        case 0xDCF:
+            if (*(s16 *)(*(u8 **)(e + 0x68) + 0x4CA) == 1) {
+                *(s16 *)(*(u8 **)(e + 0x68) + 0x4CA) = 0;
+                func_L11_00441978(object, *(s16 *)(e + 0xAA));
+            }
+            break;
+        case 0xDF9:
+            if (*(s16 *)(*(u8 **)(e + 0x68) + 0x256) == 1) {
+                *(s16 *)(*(u8 **)(e + 0x68) + 0x256) = 0;
+                func_L11_00441978(object, *(s16 *)(e + 0xAA));
+            }
+            break;
+        case 0xD37:
+            if (*(s16 *)(*(u8 **)(e + 0x68) + 0x282) == 1) {
+                *(s16 *)(*(u8 **)(e + 0x68) + 0x282) = 0;
+                func_L11_00441978(object, *(s16 *)(e + 0xAA));
+            }
+            break;
+        }
+    }
+
+    for (i = 0; i < 2; i++) {
+        best = 0;
+        best_d = 10000.0f;
+        FOR_EACH_ID(p, 0xC0) {
+            e = D_L11_001B359C + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            v = -1;
+            switch (*(s16 *)(e + 0xAA)) {
+            case 0xD98:
+                v = *(s16 *)(*(u8 **)(e + 0x68) + 0x366);
+                break;
+            case 0xDCF:
+                v = *(s16 *)(*(u8 **)(e + 0x68) + 0x4CA);
+                break;
+            case 0xDF9:
+                v = *(s16 *)(*(u8 **)(e + 0x68) + 0x256);
+                break;
+            case 0xD37:
+                v = *(s16 *)(*(u8 **)(e + 0x68) + 0x282);
+                break;
+            }
+            /* Retail tests the entity again after the switch and reads its class a second time as
+               an unsigned halfword: both are needed for the same words. */
+            if (e == 0)
+                continue;
+            if (e[0x20] == 0xFE)
+                continue;
+            if (e[0x20] == 0xFD)
+                continue;
+            if ((s16)*(u16 *)(e + 0xAA) != 0xD98 && (s16)*(u16 *)(e + 0xAA) != 0xDCF &&
+                (s16)*(u16 *)(e + 0xAA) != 0xDF9 && (s16)*(u16 *)(e + 0xAA) != 0xD37)
+                continue;
+            if (v == 1)
+                continue;
+            if (e[0x20] < 4)
+                continue;
+            if (best == 0) {
+                best = e;
+                best_d = func_L02_002F21C0(best + 0x10, D_00189EA0);
+            } else {
+                d = func_L02_002F21C0(e + 0x10, D_00189EA0);
+                if (d < best_d) {
+                    best = e;
+                    best_d = d;
+                }
+            }
+        }
+        if (best != 0) {
+            switch (*(s16 *)(best + 0xAA)) {
+            case 0xD98:
+                if (func_L11_00441868(object, 0xD98))
+                    *(s16 *)(*(u8 **)(best + 0x68) + 0x366) = 1;
+                break;
+            case 0xDCF:
+                if (func_L11_00441868(object, 0xDCF))
+                    *(s16 *)(*(u8 **)(best + 0x68) + 0x4CA) = 1;
+                break;
+            case 0xDF9:
+                if (func_L11_00441868(object, 0xDF9))
+                    *(s16 *)(*(u8 **)(best + 0x68) + 0x256) = 1;
+                break;
+            case 0xD37:
+                if (func_L11_00441868(object, 0xD37))
+                    *(s16 *)(*(u8 **)(best + 0x68) + 0x282) = 1;
+                break;
             }
         }
     }

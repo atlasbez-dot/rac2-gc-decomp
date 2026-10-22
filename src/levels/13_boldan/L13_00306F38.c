@@ -185,7 +185,120 @@ INCLUDE_ASM("asm/levels", func_L13_0041E170);
 
 INCLUDE_ASM("asm/levels", func_L13_0041F8B8);
 
-INCLUDE_ASM("asm/levels", func_L13_00422CB8);
+/* The object's five states, state 0 to 4. The dispatch reads the level's own jump table
+   (the five-word table in the level's data at 0x2ADD00); `cases` only keeps the labels alive. */
+extern void *D_L13_002ADD00[];
+extern u8 D_00188660[];
+extern u8 D_L13_001B1C20[];
+extern u8 D_L13_001B1C48[];
+extern u16 *D_L13_001FB420[];
+extern s32 D_L13_001B2938 __attribute__((sda));
+extern void func_0026FEB8(void *);
+extern void func_0029F338(void *);
+extern void func_002A7750(u8 *, s32, s32);
+extern s32 func_002ACBC8(u8 *, s32);
+extern s32 func_002B3868(u8 *);
+extern void func_002E59F8(s32);
+extern s32 func_L00_0035F5A0(s32, s32, u8 *);
+extern s32 func_00282948(u8 *);
+
+void func_L13_00422CB8(u8 *a0) {
+    static void *cases[5] = {&&c0, &&c1, &&done, &&c3, &&c4};
+    u8 *state = *(u8 **)(a0 + 0x68);
+    u16 *p;
+    u8 *e;
+    u8 *slot;
+    s32 idx;
+    s32 id;
+    u32 sel;
+
+    sel = a0[0x20];
+    if (sel < 5)
+        goto *D_L13_002ADD00[sel];
+    goto done;
+c0:
+    *(s32 *)(state + 0x2C) = -1;
+    if (D_L13_001FB420[*(s32 *)state] == 0) {
+        func_0026FEB8(D_L13_001B1C20);
+        func_0029F338(a0);
+        return;
+    }
+    if (*(s32 *)(state + 4) == -1) {
+        func_0026FEB8(D_L13_001B1C48);
+        func_0029F338(a0);
+        return;
+    }
+    *(s32 *)(state + 0x18) = 0;
+    *(s32 *)(state + 0x14) = 0;
+    *(s32 *)(state + 0x24) = *(s32 *)(state + 8);
+    *(s32 *)(state + 0x28) = *(s32 *)(state + 0xC);
+    func_002A7750(a0, 1, -1);
+    goto done;
+c1:
+    if (func_002ACBC8((u8 *)D_00189EA0, *(s32 *)(state + 0x10)) != 0)
+        func_002A7750(a0, 3, -1);
+    idx = *(s32 *)(state + 0x2C);
+    if (idx != -1) {
+        slot = D_00188660 + idx * 0x70;
+        if (*(u8 **)(slot + 0x88) == a0 && slot[0x74] != 0)
+            func_002E59F8(idx);
+    }
+    *(s32 *)(state + 0x2C) = -1;
+    goto done;
+c3:
+    func_002B3868(a0);
+    id = *(s32 *)(state + 0x2C);
+    if (id == -1 || *(u8 **)((slot = D_00188660 + id * 0x70) + 0x88) != a0 || slot[0x74] == 0)
+        *(s32 *)(state + 0x2C) = func_L00_0035F5A0(0x13, 4, a0);
+    if (func_00282948(state + 0x24) != 0 && *(s32 *)(state + 0x14) == 0) {
+        for (p = D_L13_001FB420[*(s32 *)state];
+             (*(s32 *)state & 0xFF) != 0xFF && *(s32 *)state <= D_L13_001B2938 && p != 0 &&
+             ((p != 0 && (s16)p[-1] >= 0) || p == D_L13_001FB420[*(s32 *)state]);
+             p++) {
+            e = (u8 *)D_L13_001B291C[0] + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (*(s16 *)(e + 0xAA) == 0xEE7)
+                *(s32 *)(*(u8 **)(e + 0x68) + 0x628) = 1;
+        }
+        *(s32 *)(state + 0x14) = 1;
+    }
+    if (func_00282948(state + 0x28) != 0 && *(s32 *)(state + 0x18) == 0) {
+        *(s32 *)(*(u8 **)((u8 *)D_L13_001B291C[0] + (*(s32 *)(state + 4) << 8) + 0x68) + 0x3C) = 1;
+        *(s32 *)(state + 0x18) = 1;
+    }
+    if (*(s32 *)(state + 0x18) != 0 && *(s32 *)(state + 0x14) != 0) {
+        *(s32 *)(state + 0x28) = *(s32 *)(state + 0x1C);
+        *(s32 *)(state + 0x24) = *(s32 *)(state + 0x20);
+        func_002A7750(a0, 4, -1);
+    }
+    goto done;
+c4:
+    if (func_00282948(state + 0x24) != 0 && *(s32 *)(state + 0x14) != 0) {
+        for (p = D_L13_001FB420[*(s32 *)state];
+             (*(s32 *)state & 0xFF) != 0xFF && *(s32 *)state <= D_L13_001B2938 && p != 0 &&
+             ((p != 0 && (s16)p[-1] >= 0) || p == D_L13_001FB420[*(s32 *)state]);
+             p++) {
+            e = (u8 *)D_L13_001B291C[0] + ((*p & 0x7FFF) << 8);
+            if (e == 0)
+                break;
+            if (*(s16 *)(e + 0xAA) == 0xEE7)
+                *(s32 *)(*(u8 **)(e + 0x68) + 0x628) = 0;
+        }
+        *(s32 *)(state + 0x14) = 0;
+    }
+    if (func_00282948(state + 0x28) != 0 && *(s32 *)(state + 0x18) != 0) {
+        *(s32 *)(*(u8 **)((u8 *)D_L13_001B291C[0] + (*(s32 *)(state + 4) << 8) + 0x68) + 0x3C) = 0;
+        *(s32 *)(state + 0x18) = 0;
+    }
+    if (*(s32 *)(state + 0x18) == 0 && *(s32 *)(state + 0x14) == 0) {
+        *(s32 *)(state + 0x24) = *(s32 *)(state + 8);
+        *(s32 *)(state + 0x28) = *(s32 *)(state + 0xC);
+        func_002A7750(a0, 1, -1);
+    }
+done:
+    return;
+}
 
 INCLUDE_ASM("asm/levels", func_L13_004230B0);
 

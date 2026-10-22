@@ -26,43 +26,6 @@ INCLUDE_ASM("asm/levels", func_L04_00410518);
 
 INCLUDE_ASM("asm/levels", func_L04_00410788);
 
-/* shared native body of family 8c88be3bc489ab9e */
-int func_L04_00410E48(int a0, int a1, float f12)
-{
-    int a2 = 0;
-
-    if (*(int *)0x001A79F0 != 11) goto end;
-
-    if (a0 == -1) {
-        if (a1 >= 166) {
-            if (a1 < 187) {
-                if (f12 < 520.2f) {
-                    a2 = 1;
-                    goto end;
-                }
-            }
-        }
-    }
-
-    if (a0 == 2) {
-        if ((unsigned)(a1 - 1) < 6) {
-            if (f12 < 537.0f) {
-                a2 = 1;
-                goto end;
-            }
-        }
-        if ((unsigned)(a1 - 35) < 13) {
-            if (f12 < 534.0f) {
-                a2 = 1;
-                goto end;
-            }
-        }
-    }
-
-end:
-    return a2;
-}
-
 /* Scans the 0x20 slots at +0x110 of the state block for the first whose stored id the
    matcher accepts, and records its index in +0x270. */
 void func_L04_00410F10(u8 *arg0) {
@@ -89,7 +52,22 @@ INCLUDE_ASM("asm/levels", func_L04_00412308);
 
 INCLUDE_ASM("asm/levels", func_L04_00412C58);
 
-/* func_L04_00412E38 is a near miss: nonmatching/levels/func_L04_00412E38.c */
+float func_00283180(float);
+float func_00283198(float);
+float func_00283B98(float, float);
+
+void func_L04_00412E38(void *arg0, void *arg1, float fparg0, float fparg1) {
+    float temp_f0;
+    float temp_f1;
+    float temp_f20;
+
+    temp_f0 = func_00283B98((*(float *)((unsigned char *)arg1 + 0x38C)), fparg0);
+    *(float *)((unsigned char *)arg1 + 0x38C) = temp_f0;
+    temp_f20 = func_00283180(temp_f0) * fparg1;
+    temp_f1 = (*(float *)((unsigned char *)arg0 + 0xF4)) + (func_00283198((*(float *)((unsigned char *)arg1 + 0x38C))) * fparg1);
+    *(float *)((unsigned char *)arg0 + 0xF0) = (float) ((*(float *)((unsigned char *)arg0 + 0xF0)) + temp_f20);
+    *(float *)((unsigned char *)arg0 + 0xF4) = temp_f1;
+}
 
 INCLUDE_ASM("asm/levels", func_L04_00412EC0);
 

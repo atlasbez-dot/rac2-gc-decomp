@@ -157,7 +157,45 @@ INCLUDE_ASM("asm/levels", func_L03_003E2EC8);
 
 INCLUDE_ASM("asm/levels", func_L03_003E3018);
 
-INCLUDE_ASM("asm/levels", func_L03_003E3308);
+extern u32 D_0024A7B0;
+
+extern s32 ref_L03_003E3750_00(u8 *, u32);
+
+/* Copies the six values the record's own row of the shared table holds into the
+   record's list, skipping the ones the record does not take, and ends the list
+   with 255. */
+void func_L03_003E3308(u8 *a0) {
+    u32 rec = *(u32 *)(a0 + 0x68);
+    u32 v = *(u32 *)((u8 *)&D_0024A7B0 + *(short *)(rec + 0x50) * 24);
+    s32 count = 0;
+    u32 n = 0;
+    u32 ok;
+
+    if (v != 255) {
+        u32 flags = rec + 0x20;
+        u32 list = rec + 0x40;
+
+        do {
+            if (*(short *)(rec + 0x64) == 0 &&
+                v == *(u8 *)(*(short *)(rec + 0x62) + flags + 1)) {
+                ok = 1;
+            } else if (ref_L03_003E3750_00(a0, v)) {
+                ok = 1;
+            } else {
+                ok = 0;
+            }
+            if (ok) {
+                *(u8 *)(list + n) = v;
+                n++;
+            }
+            count++;
+            if (count >= 6)
+                break;
+            v = *(u32 *)((u8 *)&D_0024A7B0 + count * 4 + *(short *)(rec + 0x50) * 24);
+        } while (v != 255);
+    }
+    *(u8 *)(rec + n + 0x40) = 255;
+}
 
 INCLUDE_ASM("asm/levels", func_L03_003E3430);
 

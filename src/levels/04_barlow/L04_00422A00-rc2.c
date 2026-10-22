@@ -23,6 +23,7 @@
  */
 #include "common.h"
 
+extern volatile s32 D_001A7344[] __attribute__((sda));
 extern void ref_L04_00422A00_00(void *dest, s32 *position, void *table);
 extern f32 ref_L04_00422A00_01(void *work, void *table);
 extern void ref_L04_00422A00_02(s32 *position, s32 *x, s32 *y);
@@ -50,7 +51,7 @@ f32 func_L04_00422A00(void *arg0) {
     if (work.x < 0 ||
         work.x >= D_001A7340 - 0x10 ||
         work.y < 0 ||
-        work.y >= *(s32 *)0x1A7344 - 8 ||
+        work.y >= D_001A7344[0] - 8 ||
         !(temp_f20 > 0.0f) ||
         ref_L04_00422A00_03(-1, (u16)work.x, (u16)work.y, 0x10, 8, 0, &ref_L04_00422A00_04) == -1) {
         ref_L04_00422A00_04 = -1.0f;
