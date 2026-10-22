@@ -24,6 +24,7 @@
  */
 #include "common.h"
 
+extern s32 D_001A7288 __attribute__((sda));
 extern s32  D_001B1888[] __attribute__((sda));
 
 extern s32 func_0029D4D0();
@@ -36,7 +37,7 @@ void func_00292B20(s32 arg0, s32 arg1) {
 
     temp_a1 = (arg1 + 0xF) & 0xFFFFFFF0;
     if (temp_a1 != 0) {
-        temp_a0 = *(s32 *)0x1A7288;
+        temp_a0 = D_001A7288;
         tmp1 = temp_a0 + (arg0 * 8);
         func_0029D4D0((*(s32 *)((char *)(tmp1) + (0x20))) + temp_a0, temp_a1);
     }

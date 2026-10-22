@@ -24,6 +24,7 @@
  */
 #include "common.h"
 
+extern volatile s32 D_001A7344;
 extern void ref_L00_00382BF0_00(void *, s32, s8 *);
 extern f32 ref_L00_00382BF0_01(void *, s8 *);
 extern void ref_L00_00382BF0_02(s32, s32 *, s32 *);
@@ -43,7 +44,7 @@ f32 func_L00_00382BF0(void *arg0) {
     ref_L00_00382BF0_00(buf, temp_s1, ref_L00_00382BF0_05);
     temp_f20 = ref_L00_00382BF0_01(buf, ref_L00_00382BF0_05 + 0x230);
     ref_L00_00382BF0_02(temp_s1, &sp10, &sp14);
-    if ((sp10 < 0) || (sp10 >= (D_001A7340 - 0x10)) || (sp14 < 0) || (sp14 >= (*(s32 *)0x1A7344 - 8)) || !(temp_f20 > 0.0f) || (ref_L00_00382BF0_03(-1, (u16) sp10, (u16) sp14, 0x10, 8, 0, &ref_L00_00382BF0_04) == -1)) {
+    if ((sp10 < 0) || (sp10 >= (D_001A7340 - 0x10)) || (sp14 < 0) || (sp14 >= (D_001A7344 - 8)) || !(temp_f20 > 0.0f) || (ref_L00_00382BF0_03(-1, (u16) sp10, (u16) sp14, 0x10, 8, 0, &ref_L00_00382BF0_04) == -1)) {
         ref_L00_00382BF0_04 = -1.0f;
     }
     return ref_L00_00382BF0_04;
