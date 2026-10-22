@@ -1933,3 +1933,5 @@ not remeasurements with later compiler changes or proof of semantic correctness.
 | [`func_0034EB20`](game/func_0034EB20.c) | 188 | Near miss: the body matches; only the order of the four callee-saved registers in the prologue differs. |
 | [`func_00350190`](game/func_00350190.c) | 76 | Near miss: 68 of 76 bytes match; the retail ends in `sync`/`ei`, two privileged instructions this compiler cannot emit. |
 | [`func_00350378`](game/func_00350378.c) | 228 | Near miss: the shape matches; the register allocation of the object pointer and the 0xD9100 constant differs. |
+| [`func_L11_00452450`](levels/func_L11_00452450.c) | 956 | Exact size, 85% aligned similarity: 28 regions differ, register allocation and scheduling; G8, goes in `L11_004465F8-g8.c`. |
+| [`func_L00_0040CCA0`](levels/func_L00_0040CCA0.c) | 952 | Exact size, 82% aligned similarity: 33 regions differ, register allocation and scheduling. |
