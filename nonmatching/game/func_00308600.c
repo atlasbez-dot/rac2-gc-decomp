@@ -1,40 +1,52 @@
-#include "include_asm.h"
-
+/* Retained near miss: 356 bytes versus 360 retail bytes; 0/28 places match.
+ * Trial profile: -O2 -G0 -ffunction-sections -frac2-qcopy
+ *                -frac2-qcopy-barrier -fno-gcse.
+ * The copy profiles reproduce both grouped transfers. Disabling GCSE and
+ * initializing the bounds after the copies restores the saved f20/f21 values
+ * and 0x50-byte frame. Initial field stores still share one 255 constant where
+ * retail materializes two, and saved integer-register allocation differs.
+ * A short third argument only reaches 360 by adding unwanted sign extension;
+ * it is not a match. Typed fields and scheduler/CSE toggles did not fix this.
+ * Reopen with evidence for the original field types or constant lifetimes.
+ */
 typedef int TI128 __attribute__((mode(TI)));
 
-extern char *func_0029EFD0(int);
-extern int func_002A0488(char *, int, int, int);
+extern unsigned char *func_0029EFD0(int);
+extern int func_002A0488(void *, int, int, int);
 extern float func_002A7878(float, float);
-extern void func_002A0F48(char *);
+extern void func_002A0F48(void *);
 
-char *func_00308600(char *a0, char *a1, int a2, int a3, int t0)
+unsigned char *func_00308600(char *position, char *vector, int count, int mode, int flag)
 {
-    char *p = func_0029EFD0(0x7A);
-    char *e;
-    float lo = 0.1047197729f;
-    float hi = 0.2094395458f;
+    unsigned char *p = func_0029EFD0(0x7A);
+    char *state;
+    float lo;
+    float hi;
 
-    if (p == 0)
-        return p;
-    p[0x31] = 1;
-    p[0x23] = (char)0x80;
-    *(short *)(p + 0x32) = 0xFF;
-    e = *(char **)(p + 0x68);
-    p[0x30] = func_002A0488(p, 0x7F, 0x7F, 0x7F);
-    *(TI128 *)(p + 0x10) = *(TI128 *)a0;
-    *(TI128 *)e = *(TI128 *)a1;
-    *(float *)(e + 0x10) = func_002A7878(lo, hi);
-    *(float *)(e + 0x14) = func_002A7878(lo, hi);
-    *(short *)(e + 0x18) = (short)a2;
-    *(short *)(e + 0x1A) = (short)a2;
-    if (a3 == 2) {
-        a3 = 1;
-        *(int *)(e + 0x20) = a3;
+    if (p != 0) {
+        p[0x31] = 1;
+        p[0x23] = 0x80;
+        *(short *)(p + 0x32) = 0xFF;
+        state = *(char **)(p + 0x68);
+        p[0x30] = 0xFF;
+        func_002A0488(p, 0x7F, 0x7F, 0x7F);
+        *(TI128 *)(p + 0x10) = *(TI128 *)position;
+        *(TI128 *)state = *(TI128 *)vector;
+        lo = 0.1047197729f;
+        hi = 0.2094395458f;
+        *(float *)(state + 0x10) = func_002A7878(lo, hi);
+        *(float *)(state + 0x14) = func_002A7878(lo, hi);
+        *(short *)(state + 0x18) = (short)count;
+        *(short *)(state + 0x1A) = (short)count;
+        if (mode == 2) {
+            mode = 1;
+            *(int *)(state + 0x20) = mode;
+        }
+        if (mode == 0)
+            *(float *)(p + 0x2C) *= func_002A7878(0.5f, 0.75f);
+        *(float *)(state + 0x1C) = *(float *)(p + 0x2C);
+        p[0xBC] = (unsigned char)(mode | (flag << 1));
+        func_002A0F48(p);
     }
-    if (a3 == 0)
-        *(float *)(p + 0x2C) = *(float *)(p + 0x2C) * func_002A7878(0.5f, 0.75f);
-    *(float *)(e + 0x1C) = *(float *)(p + 0x2C);
-    func_002A0F48(p);
-    p[0xBC] = (char)(a3 | (t0 << 1));
     return p;
 }

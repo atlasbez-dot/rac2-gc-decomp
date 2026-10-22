@@ -167,6 +167,17 @@ void func_L18_003F72D8(BatchA_A18_u8 *a0, BatchA_A18_u8 *a1) {
                       *(float *)(a1 + 0x4) - *(float *)(a0 + 0x14));
 }
 
+int func_L18_003F7320(void *arg0) {
+    int var_a2;
+    void *temp_a1;
+
+    var_a2 = 0;
+    temp_a1 = *(void **)((unsigned char *)arg0 + 0x68);
+    if (((unsigned short) (*(unsigned short *)((unsigned char *)arg0 + 0x96)) >= 0xF1U) || ((*(short *)((unsigned char *)temp_a1 + 0x294)) >= (*(short *)((unsigned char *)temp_a1 + 0x2A4)))) {
+        var_a2 = 1;
+    }
+    return var_a2;
+}
 
 extern float func_00308AD0(BatchA_A18_u8 *a0, BatchA_A18_u8 *a1);
 extern BatchA_A18_s32 func_L18_003F8E40(BatchA_A18_u8 *s);

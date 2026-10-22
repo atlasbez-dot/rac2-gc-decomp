@@ -49,11 +49,11 @@ Decompilation progress is tracked live on **[openrac.dev](https://openrac.dev)**
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 2,028 of 3,134 | 345,364 of 1,046,952 bytes |
-| Levels | 2,224 of 5,467 | 386,840 of 4,482,204 bytes |
-| **Total** | 4,252 of 8,601 | 732,204 of 5,529,156 bytes (13.24%) |
+| Boot executable | 2,010 of 3,134 | 339,508 of 1,046,952 bytes |
+| Levels | 2,132 of 5,467 | 366,536 of 4,482,204 bytes |
+| **Total** | 4,142 of 8,601 | 706,044 of 5,529,156 bytes (12.77%) |
 
-The 27 levels hold 101,292 function placements; C covers 50,117 of them.
+The 27 levels hold 101,292 function placements; C covers 49,003 of them.
 307 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
 <!-- /progress -->
 
@@ -198,9 +198,9 @@ researching engine quirks, or improving documentation:
   function, and how a wave is spread over the workers.
 - `python3 tools/todo.py` sorts the functions still to match into buckets, and
   `tools/check.py func_XXXXXXXX --diff` shows a draft beside retail in seconds.
-- The shared matching blockers are collected in
-  [issue #157](https://github.com/OpenRAC/rac2-gc-decomp/issues/157); contributors coordinate
-  their scopes in [issue #152](https://github.com/OpenRAC/rac2-gc-decomp/issues/152).
+- Everyone can improve the [shared matching blockers](docs/MATCHING-BLOCKERS.md) through a
+  pull request, with discussion in the relevant PR. Coordinate scopes in
+  [issue #152](https://github.com/OpenRAC/rac2-gc-decomp/issues/152).
 - Join our **[Discord Community](https://discord.gg/Sfd2B54PDG)** to discuss progress, ask
   questions, and collaborate!
 

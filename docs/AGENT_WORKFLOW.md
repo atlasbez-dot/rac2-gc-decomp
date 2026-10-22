@@ -135,9 +135,12 @@ The lead, for each finished worker:
 4. commits (one function or one family per commit, the report in its own commit) and opens the
    pull request as AGENTS.md describes, with the build output in it.
 
-Lasting knowledge a worker found (a compiler habit, a pattern that keeps coming back) goes into
-docs/COMPILER-NOTES.md. Nothing else is written down per wave: no wave logs, lot documents or
-registers.
+Shared blockers, measured attempts and reopening conditions go into
+[MATCHING-BLOCKERS.md](MATCHING-BLOCKERS.md). Every contributor can improve an existing entry
+through a PR; there is no per-person ownership. Settled compiler mechanisms belong in
+[COMPILER-NOTES.md](COMPILER-NOTES.md), linked from the relevant blocker rather than duplicated.
+Discuss findings in the relevant PR; issue #157 is historical provenance only. No wave logs,
+lot documents or separate registers.
 
 ## Cost sense
 

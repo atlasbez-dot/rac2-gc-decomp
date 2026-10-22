@@ -455,12 +455,10 @@ src/game/002BF390-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections 
 src/game/00273B70-rc2.c	-O2 -G4 -ffunction-sections -fno-builtin
 src/game/002B7380-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/14_aranos_prison/L14_00427210-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L02_00416800-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_003FE8D0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/shared/L00_002F6B90-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_002F46C8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/13_boldan/L13_004267B0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
-src/levels/shared/L04_00412E38-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L09_003F7C50-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L06_003E4F08-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/11_joba/L11_0030ED58-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
@@ -504,7 +502,6 @@ src/levels/10_hrugis_cloud/L10_004174C8-rc2.c	-O2 -G8 -ffunction-sections -fno-b
 src/levels/shared/L03_00408068-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/levels/16_snivelak/L16_0041EBE8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/14_aranos_prison/L14_003E4A40-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L18_003F7320-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L00_002D3248-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L18_00426E00-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L01_00367F78-rc2.c	-O2 -G8 -fno-sched-interblock -ffunction-sections -fno-builtin

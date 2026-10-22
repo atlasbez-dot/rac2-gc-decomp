@@ -52,7 +52,22 @@ INCLUDE_ASM("asm/levels", func_L04_00412308);
 
 INCLUDE_ASM("asm/levels", func_L04_00412C58);
 
-/* func_L04_00412E38 is a near miss: nonmatching/levels/func_L04_00412E38.c */
+float func_00283180(float);
+float func_00283198(float);
+float func_00283B98(float, float);
+
+void func_L04_00412E38(void *arg0, void *arg1, float fparg0, float fparg1) {
+    float temp_f0;
+    float temp_f1;
+    float temp_f20;
+
+    temp_f0 = func_00283B98((*(float *)((unsigned char *)arg1 + 0x38C)), fparg0);
+    *(float *)((unsigned char *)arg1 + 0x38C) = temp_f0;
+    temp_f20 = func_00283180(temp_f0) * fparg1;
+    temp_f1 = (*(float *)((unsigned char *)arg0 + 0xF4)) + (func_00283198((*(float *)((unsigned char *)arg1 + 0x38C))) * fparg1);
+    *(float *)((unsigned char *)arg0 + 0xF0) = (float) ((*(float *)((unsigned char *)arg0 + 0xF0)) + temp_f20);
+    *(float *)((unsigned char *)arg0 + 0xF4) = temp_f1;
+}
 
 INCLUDE_ASM("asm/levels", func_L04_00412EC0);
 
