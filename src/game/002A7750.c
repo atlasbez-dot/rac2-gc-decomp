@@ -20,8 +20,6 @@ extern f32 func_002A7878_10(f32, f32);
 
 extern void func_002AF000_2(s32, f32, f32, f32);
 
-extern float Fc3394786_FUN_002A7878(void);
-
 extern float Fc3394786_FUN_002A7940(void);
 
 extern float Fc3394786_FUN_00283180(float);
@@ -182,9 +180,9 @@ void func_002A7988(s32 a0, f32 a1, f32 a2) {
     func_002AF000_2(a0, z, x, y);
 }
 
-void func_002A7A00(float *out)
+void func_002A7A00(float *out, float low, float high)
 {
-    float back = Fc3394786_FUN_002A7878();
+    float back = func_002A7878(low, high);
     float a = Fc3394786_FUN_002A7940();
     float b = Fc3394786_FUN_002A7940();
     float value;

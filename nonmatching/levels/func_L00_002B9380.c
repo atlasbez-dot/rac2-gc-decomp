@@ -1,3 +1,8 @@
+/* Retained plain-C attempt: 340/340 bytes; first difference +0xb0.
+ * us: 0/27, pal: name absent, us2: 0/27.
+ * Profile: -O2 -G0 -ffunction-sections -g.
+ * The truthful func_002AA898 prototype still exchanges argument setup; -g does not improve the retained attempt. Next: independent argument-evaluation evidence.
+ */
 /* func_L00_002B9380: 340-byte candidate, 340-byte retail extent, 0 of 27 placements.
  * Rechecked with the current qualified compiler after correcting func_002AA898's
  * prototype to (position, velocity, direction, target, acceleration, damping, limit).

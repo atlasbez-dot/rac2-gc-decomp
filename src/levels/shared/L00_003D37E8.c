@@ -65,7 +65,7 @@ INCLUDE_ASM("asm/levels", func_L00_003D40D8);
 
 INCLUDE_ASM("asm/levels", func_L00_003D4548);
 
-INCLUDE_ASM("asm/levels", func_L00_003D4958);
+
 
 INCLUDE_ASM("asm/levels", func_L00_003D4A20);
 
@@ -136,7 +136,7 @@ void func_L00_003DA2B0(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003DB0A8);
+
 
 INCLUDE_ASM("asm/levels", func_L00_003DB118);
 

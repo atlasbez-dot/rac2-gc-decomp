@@ -34,11 +34,36 @@ INCLUDE_ASM("asm/levels", func_L00_00412928);
 
 INCLUDE_ASM("asm/levels", func_L00_00413128);
 
-INCLUDE_ASM("asm/levels", func_L00_00413298);
+/* Clear both entry tables and reset the record state. */
+void func_L00_00413298(char *object)
+{
+    char *state = *(char **)(object + 0x68);
+    int i;
+
+    for (i = 0; i < 10; i++) {
+        *(int *)(*(char **)(state + 0) + i * 16 + 0) = 0;
+        *(int *)(*(char **)(state + 0) + i * 16 + 4) = 0;
+        *(int *)(*(char **)(state + 0) + i * 16 + 8) = 0;
+        *(float *)(*(char **)(state + 0) + i * 16 + 12) = 1.0f;
+    }
+
+    for (i = 0; i < 20; i++) {
+        *(int *)(*(char **)(state + 4) + i * 16 + 0) = 0;
+        *(int *)(*(char **)(state + 4) + i * 16 + 4) = 0;
+        *(int *)(*(char **)(state + 4) + i * 16 + 8) = 0;
+        *(float *)(*(char **)(state + 4) + i * 16 + 12) = 1.0f;
+    }
+
+    *(int *)(state + 0xC) = 0;
+    *(short *)(state + 0x1C) = 6;
+    *(int *)(state + 0x10) = 0;
+    *(int *)(state + 0x14) = 0;
+    *(int *)(state + 0x8) = 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_00413358);
 
-INCLUDE_ASM("asm/levels", func_L00_00413870);
+
 
 INCLUDE_ASM("asm/levels", func_L00_00413918);
 
@@ -182,7 +207,7 @@ void func_L00_00419B58(char *object)
 
 INCLUDE_ASM("asm/levels", func_L00_00419C98);
 
-INCLUDE_ASM("asm/levels", func_L00_0041A490);
+/* func_L00_0041A490 is defined in L00_0041A490-dbg.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_0041A500);
 

@@ -55,23 +55,27 @@ def code(*w):
 
 class LevelExtents(unittest.TestCase):
     def test_proven_entries_preserve_end_and_replay(self):
-        cases = ((0x354DE8, 288, 0x354DF8),
-                 (0x3D54A8, 4432, 0x3D54B0),
-                 (0x40EA98, 1548, 0x40EAA0))
-        for address, size, entry in cases:
+        cases = ((0, 0x354DE8, 288, 0x354DF8),
+                 (0, 0x3D54A8, 4432, 0x3D54B0),
+                 (0, 0x40EA98, 1548, 0x40EAA0),
+                 (23, 0x4277B0, 52, 0x4277B8))
+        for number, address, size, entry in cases:
             with self.subTest(address=address):
-                new_address, new_size = levels.level_extent(0, address, size)
+                new_address, new_size = levels.level_extent(number, address, size)
                 self.assertEqual(new_address, entry)
                 self.assertEqual(new_address + new_size, address + size)
-                self.assertEqual(levels.level_extent(0, new_address, new_size),
+                self.assertEqual(levels.level_extent(number, new_address, new_size),
                                  (new_address, new_size))
 
     def test_same_address_in_another_level_is_unchanged(self):
         self.assertEqual(levels.level_extent(7, 0x3D54A8, 4432), (0x3D54A8, 4432))
+        self.assertEqual(levels.level_extent(10, 0x4277B0, 52), (0x4277B0, 52))
 
     def test_invalid_corrected_extent_is_rejected(self):
         with self.assertRaises(ValueError):
             levels.level_extent(0, 0x354DE8, 16)
+        with self.assertRaises(ValueError):
+            levels.level_extent(23, 0x4277B0, 8)
 
 
 class Filler(unittest.TestCase):

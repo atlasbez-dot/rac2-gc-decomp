@@ -1,3 +1,13 @@
+/* Nonmatching: 212 bytes versus 208; USA 0/27 placements.
+ * Profile: -O2 -G0 -ffunction-sections -mno-split-addresses.
+ * +0x60: the first part agrees through the GP byte store; the mode branch hoists the settings base and arguments and has one extra instruction. Reopen with a measured settings-object layout. */
+extern int D_L00_001A8A44;
+extern float D_L00_001B1984, D_L00_001B1988, D_L00_001B198C, D_L00_001B1990;
+extern unsigned char D_L00_001B1980, D_L00_001B1981, D_L00_001B1982 __attribute__((sda));
+extern float D_L00_001B2500, D_L00_001B2408;
+extern int D_L00_001B1EB4, D_L00_001B20C0, D_L00_001B255C;
+extern int D_L00_001BD2C0[];
+extern void func_00284E18(int,int,int);
 /* Publishes the third-level object's transform and flags into the level's own globals, then,
  * in the second mode, publishes five more constants and calls the boot helper with three
  * words of the 0x1BD2C0 array. */
@@ -28,6 +38,6 @@ void func_L00_00390F28(char *object, int mode)
         D_L00_001B1EB4 = 960;
         D_L00_001B20C0 = 0x1F4000;
         D_L00_001B255C = 960;
-        func_00284E18(D_L00_001BD2C0[0x8F], D_L00_001BD2C0[0x90], D_L00_001BD2C0[0x91]);
+        func_00284E18(((int *)(char *)D_L00_001BD2C0)[0x8F], ((int *)(char *)D_L00_001BD2C0)[0x90], ((int *)(char *)D_L00_001BD2C0)[0x91]);
     }
 }

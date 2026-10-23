@@ -40,9 +40,7 @@ void func_L00_002A5368(void) {
    sub-object walks and a 1.0f stamp (near miss: nonmatching/levels/func_L00_002A53B8.c) */
 /* func_L00_002A53B8 is matched in L00_002A53B8.c (built with -fno-schedule-insns). */
 
-/* func_L00_002A5480 (one-shot delay timer, needs a -G8 unit for its $gp read) is a
-   near miss: nonmatching/levels/func_L00_002A5480.c */
-INCLUDE_ASM("asm/levels", func_L00_002A5480);
+/* func_L00_002A5480 is built in its G8 unit. */
 
 INCLUDE_ASM("asm/levels", func_L00_002A5518);
 

@@ -1,31 +1,9 @@
-/* func_L00_003B8420 (204 bytes, 4 places) -- NEAR MISS, not integrated.
-
-   New measurement (wave 12, worker s4): the two-step exit is the whole difference.
-   Retail keeps a shared block that the two "v == 0" exits jump to, and that block
-   tests the value again (`beql $v0,$zero` into the epilogue) before falling
-   through into the "f28 != 0" path:
-
-       beqz $v0, zero, L1        ; the first probe failed
-       lw   $v0, 0x28($s0)
-       bnel $v0, zero, L2        ; the flag is set
-       ...
-       beql $v0, zero, L1        ; the second probe failed
-       ...
-   L1: beql $v0, zero, END      ; the shared exit test
-       ...
-
-   Every spelling measured collapses the two steps into one branch and gives 196
-   bytes: the nested single-return form, the same form with an explicit copy of
-   the parameter (`char *s1 = a0`), and two `goto` forms (one with the shared
-   label falling through into the "f28 != 0" path, one with it not).  What is
-   missing is a source shape in which the two "v == 0" exits reach a *common*
-   block that still tests the value - this cc1 folds the redundant test away.
-
-   The callee-saved allocation is also wrong: retail gives $s1 to the parameter
-   and $s2 to the 0x00190000 constant, this cc1 gives $s1 to the constant and
-   $s2 to the parameter.
-
-   Wave 12 (worker s4). */
+/* Retained C reconstruction, 2026-10-23. Not linked or counted.
+   Profile: -O2 -G0 -ffunction-sections
+   USA: 196/204 bytes, 0/4 placements; size differs from retail.
+   us: 0/4, pal: absent, us2: 0/4.
+   Revisit the two-step shared-exit test and saved-pointer allocation.
+*/
 extern char D_00189EA0[];
 
 extern int func_002ACBC8(char *, int);

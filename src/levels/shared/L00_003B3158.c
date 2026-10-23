@@ -148,7 +148,7 @@ void func_L00_003B7190(float *a0, float *a1)
 
 INCLUDE_ASM("asm/levels", func_L00_003B72B0);
 
-INCLUDE_ASM("asm/levels", func_L00_003B7410);
+/* func_L00_003B7410 is defined in L00_003B7410-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003B74A8);
 

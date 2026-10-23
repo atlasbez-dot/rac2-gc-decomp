@@ -200,7 +200,7 @@ void func_L00_0037F7E8(void)
     func_002F52B8();
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0037FA90);
+/* func_L00_0037FA90 is defined in L00_0037FA90-qcopy.c. */
 
 typedef struct {
     char *entry[64][4];
@@ -297,13 +297,11 @@ INCLUDE_ASM("asm/levels", func_L00_00384678);
 
 /* func_L00_00384C20 is matched in L00_00384C20.c (built with -fno-strength-reduce). */
 
-INCLUDE_ASM("asm/levels", func_L00_00384CA8);
+/* func_L00_00384CA8 is defined in L00_00384CA8-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_00384D40);
 
 INCLUDE_ASM("asm/levels", func_L00_00384E08);
-
-INCLUDE_ASM("asm/levels", func_L00_00384F28);
 
 INCLUDE_ASM("asm/levels", func_L00_00385040);
 
@@ -313,7 +311,7 @@ INCLUDE_ASM("asm/levels", func_L00_003852A0);
 
 INCLUDE_ASM("asm/levels", func_L00_00385370);
 
-INCLUDE_ASM("asm/levels", func_L00_00387370);
+/* func_L00_00387370 is defined in L00_00387370-g8-qcopy.c. */
 
 /* Family 6eb4f363e5305bed: seed body at func_L00_00387408. */
 void func_L00_00387408(char *object)
@@ -583,8 +581,6 @@ INCLUDE_ASM("asm/levels", func_L00_0038ADD0);
 
 INCLUDE_ASM("asm/levels", func_L00_0038B208);
 
-INCLUDE_ASM("asm/levels", func_L00_0038B6F8);
-
 extern void *D_L00_001BF218;
 
 extern void *ref_L00_0038B848_00(void *arg);
@@ -740,7 +736,6 @@ void func_L00_0038BE70(char *object)
 
 INCLUDE_ASM("asm/levels", func_L00_0038BF18);
 
-
 /* Dispatches on a byte mode at object+32: mode 0 updates two float angles from a linked node and runs a follow-up call; mode 1 refreshes a 16-byte block and a node copy then calls a final update. */
 void func_L00_0038D468(char *object)
 {
@@ -777,5 +772,3 @@ INCLUDE_ASM("asm/levels", func_L00_0038D650);
 INCLUDE_ASM("asm/levels", func_L00_0038DE70);
 
 INCLUDE_ASM("asm/levels", func_L00_0038E880);
-
-INCLUDE_ASM("asm/levels", func_L00_0038F020);

@@ -1,3 +1,6 @@
+/* Nonmatching: 116 bytes versus 116; USA 0/27 placements.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * +0x4: the two prologue high-half bases are allocated in the reverse order; the remaining low halves and loop agree. Source initialization/declaration changes tied; disabling sched2 regressed. Reopen on an address-base lifetime hypothesis. */
 #include "include_asm.h"
 
 /* Functions of L00_0038F178.c whose float constants the retail build reached through $gp. */
@@ -18,12 +21,10 @@ extern float D_L00_001AF470 __attribute__((sda));
 
 void func_L00_0039F300(void)
 {
-    char *q;
-    char *p;
+    char *q = D_L00_0023A6F0;
+    char *p = D_L00_0023A670;
     int i;
 
-    p = D_L00_0023A670;
-    q = D_L00_0023A6F0;
     for (i = 7; i >= 0; i--) {
         func_002ACEC0(p, p, q, D_L00_001AF448);
         q += 0x10;

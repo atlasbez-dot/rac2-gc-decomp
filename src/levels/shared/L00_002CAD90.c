@@ -6,7 +6,7 @@ extern void func_002A7470(void *, int, int, int);
 
 extern char D_00189E20_36[];
 
-INCLUDE_ASM("asm/levels", func_L00_002CAD90);
+
 
 INCLUDE_ASM("asm/levels", func_L00_002CAF20);
 
@@ -46,6 +46,6 @@ void func_L00_002D1AE8(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002D1B70);
 
-INCLUDE_ASM("asm/levels", func_L00_002D1C40);
+
 
 INCLUDE_ASM("asm/levels", func_L00_002D1DA0);

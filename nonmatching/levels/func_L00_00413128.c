@@ -1,73 +1,61 @@
+/* Retained plain-C near miss; measured 23 October 2026, USA v1.01.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 360/364 bytes, 0/27 placements. The complete child position/scale and indexed
+ * release paths replace the old incomplete 208-byte body. Address formation,
+ * child-byte join and index argument register differ; no linked credit. Reopen with
+ * typed resident context and table layouts.
+ */
 #include "include_asm.h"
-
-extern void func_00310440(char *);
-extern void func_L00_00414018(void);
-
-typedef struct { unsigned int a, b, c, d; } Vec4u32;
-extern char D_L00_001B8DC0[];
-extern char *func_003100D8(int);
-extern void func_00282CF0(void *, void *, void *);
-extern void func_00282F20(void *, void *, float);
-extern void func_002AFFD8(void *, void *, int);
-extern void func_00282DD8(void *, void *, void *);
-
-extern char D_L00_0025A920[];
-extern void func_L00_00417868(char *, char *);
-extern float func_31A7C0(float, float);
-extern void func_00281EB8(char *, int, int, int, float, float, float);
-
-extern char D_001A6480[];
-extern void func_002FC560(int, int);
-extern void func_0027DE50(int, int, int, int, int);
-extern void func_L00_00415210(char *, int, int, float, float, float, float, float);
-
-extern char D_L00_0025B98C[];
-extern int func_00282948(void *);
-extern void func_L00_004173B0(char *);
-extern float func_002A7940(void *);
-extern void func_002AF000(void *, float, float, float);
-extern void func_00282CC0(void *, void *, void *);
-extern int func_002761F8(void *, void *, int, void *, int);
-extern void func_L00_00417A40(char *, void *, int);
-extern void func_L00_00417D70(char *);
-extern void func_L00_00417218(char *);
-extern void func_L00_00417700(char *);
-
-extern char D_0018C190[];
-extern char D_L00_00189EA0[];
+typedef int TI128 __attribute__((mode(TI)));
+extern char D_00189E20[];
+extern char D_00188660[];
 extern int func_00282978(void *);
+extern void func_0029F338(char *);
 extern void func_00282D30(void *, void *, float);
 extern void func_00282CC0(void *, void *, void *);
+extern float *func_002AB1F0(char *);
+extern void func_L00_00414018(char *);
 extern void func_L00_00413358(char *);
-extern int func_002AB1F0(void *);
+extern void func_002E59F8(int);
 
-int func_L00_00413128(char *object)
+void func_L00_00413128(char *object)
 {
     char *state = *(char **)(object + 0x68);
+    char local[32];
     char *child;
-    char local[0x10];
-    int code;
-
+    int code, index;
+    float *value;
     if (func_00282978(state + 0x1E) != 0) {
-        func_00310440(object);
-        return -1;
+        func_0029F338(object);
+        return;
     }
-
-    func_00282D30(local, D_0018C190, 0.75f);
-    func_00282CC0(object + 0x10, D_L00_00189EA0 + 0x80, local);
+    func_00282D30(local, *(char **)(D_00189E20 + 0x2290) + 0xE0, 0.75f);
+    func_00282CC0(object + 0x10, D_00189E20 + 0x80, local);
     child = *(char **)(state + 0x20);
     if (child != 0) {
         code = *(unsigned char *)(child + 0x20);
-        if (code == 0xFE || code == 0xFD)
+        if (code == 254 || code == 253)
             *(char **)(state + 0x20) = 0;
-        else if (code == 0)
-            func_002AB1F0(child);
+        child = *(char **)(state + 0x20);
+        if (child != 0) {
+            *(TI128 *)(state + 0x30) = *(TI128 *)(child + 0x10);
+            value = func_002AB1F0(child);
+            if (value != 0) {
+                func_00282D30(local + 16, *(char **)(state + 0x20) + 0xE0, value[4]);
+                func_00282CC0(state + 0x30, state + 0x30, local + 16);
+            }
+        }
     }
-
     if (*(unsigned char *)(object + 0x20) == 1) {
-        func_L00_00414018();
+        func_L00_00414018(object);
         func_L00_00413358(object);
+    } else {
+        index = *(int *)(state + 0x18);
+        if (index >= 0) {
+            if (index != -1 && *(char **)(D_00188660 + index * 112 + 0x88) == object &&
+                *(unsigned char *)(D_00188660 + index * 112 + 0x74) != 0)
+                func_002E59F8(index);
+            *(int *)(state + 0x18) = -1;
+        }
     }
-
-    return -1;
 }

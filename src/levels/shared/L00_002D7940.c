@@ -110,7 +110,7 @@ int func_L00_002D9D48(int key) {
     return i;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002D9D98);
+
 
 INCLUDE_ASM("asm/levels", func_L00_002D9E80);
 

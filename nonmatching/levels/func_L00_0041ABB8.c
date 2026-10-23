@@ -1,14 +1,29 @@
-/* func_L00_0041ABB8 - 228 bytes, 27 place(s), level 00_aranos_tutorial,
-   retail at 0x0041abb8. Screened with tools/w10_screen.py: 2 call(s)
-   [func_002FEE50@0041AC0C, func_002FED90@0041AC28]; data addresses
-   materialised [-]; float constants [0x3f800000]; $gp-relative small data:
-   no   saves: -; callee-saved registers saved [-]; words plain C cannot
-   emit [LQ/SQ 78A20000@0x0034, LQ/SQ 7E020000@0x0038, LQ/SQ
-   78C20000@0x0040, LQ/SQ 7C620000@0x0044]. Head: addiu $sp, $sp, -0x30 ; sd
-   $s0, 0x0($sp) ; sd $s2, 0x10($sp) ; sd $s3, 0x18($sp) ; daddu $s2, $a0,
-   $zero ; sd $ra, 0x20($sp). Not matched in this wave: the 128-bit copy
-   needs an `lq`/`sq` pair; plain C reaches it only through a `mode(TI)`
-   local, and this cc1 folds the destination offset into the `sq` where
-   retail materialises the pointer first. What would unblock it: the exact
-   source expression tree, so this cc1 picks the same registers in the same
-   order. */
+/* Retained C reconstruction: 224/228 bytes.
+   Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+   0/27 in us, pal and us2. Complete C replaces the comment-only screen; both quadword copies are reachable. The table-pointer load is hoisted into the prologue and the fourth argument move fills a branch slot, losing one instruction.
+   Reopen only with new source/type/lifetime evidence; bounded scheduling/profile variants did not close it. */
+
+#include "include_asm.h"
+typedef int Quad __attribute__((mode(TI)));
+extern char *D_L00_001B144C __attribute__((sda));
+extern void func_002FEE50(int);
+extern int func_002FED90(void *, void *, float, float, float);
+void func_L00_0041ABB8(char *self, Quad *first, Quad *second, int value)
+{
+    char *state = *(char **)(self + 0x68);
+    char *slot = *(int *)(state + 0x3C) * 0x40 + D_L00_001B144C;
+    *(Quad *)slot = *first;
+    *(Quad *)(slot + 0x10) = *second;
+    if (*(int *)(slot + 0x38) >= 0) func_002FEE50(*(int *)(slot + 0x38));
+    *(int *)(slot + 0x38) = func_002FED90(self, slot, 1.0f, 1.0f, 1.0f);
+    *(int *)(slot + 0x30) = value;
+    *(int *)(slot + 0x34) = 0;
+    *(int *)(state + 0x48) = *(int *)(state + 0x3C);
+    *(int *)(state + 0x3C) += 1;
+    if (*(int *)(state + 0x3C) >= 35) {
+        *(int *)(state + 0x3C) = 0;
+        *(int *)(state + 0x40) = 1;
+    } else if (*(int *)(state + 0x40) != 1) {
+        *(int *)(state + 0x44) += 1;
+    }
+}

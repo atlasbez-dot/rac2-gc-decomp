@@ -1,42 +1,6 @@
-/* Current qualification, 21 October 2026: -O2 -G0 -ffunction-sections
-   -frac2-qcopy produces 380/380 bytes, but 0/19 placements match. The copies
-   now materialize their addresses; the object pointer and following constants
-   still receive different registers/order. Keep the meaningful C below as a
-   starting point. The older measurements describe the preceding compiler. */
-
-/* func_L00_002A6008 - 380 bytes, 19 places, level 00_aranos_tutorial at 0x002A6008.
-   Wave 13 s4: 0 of 19 places match; the candidate is 356 bytes and every
-   instruction of the body except six is exact.  The frame (0xB0), the four
-   saved registers ($s0/$s1/$s2/$ra at 0x90/0x98/0xA0/0xA8), the resident
-   layout (the object pointer at 0x1860, the second record at 0x90 with the
-   float at 0x98 inside it, the pointer at 0x2290 and the mode word at 0x2294),
-   the scratch (0x90 bytes, the record at 0x30, the two matrices at 0x40 and
-   0x50), the branch shape (bnel, the two beqz guards, the bne on the mode
-   word, the beq/beqz on the flag byte and the two calls to func_002A7470)
-   and every call site are retail's own words.
-   The six missing words are the materialisation of the four 128-bit copy
-   addresses and of the two hoisted constants:
-     retail: addiu $a0,$a2,0x10 ; addiu $v1,$s2,0x80 ; lq $v0,0($v1) ;
-             sq $v0,0($a0) ; addiu $a0,$a2,0xF0 ; addiu $v1,$s2,0x90 ;
-             lq $v0,0($v1) ; sq $v0,0($a0)
-     here:   lq $v1,0x80($s2) ; sq $v1,0x10($a2) ; lq $v0,0x90($s2) ;
-             sq $v0,0xF0($a2)
-   and the third copy, retail `addiu $a1,$sp,0x30 ; addiu $v1,$a0,0x10 ;
-   lq $v0,0($a1) ; sq $v0,0($v1)` against here `lq $v0,0x30($sp) ;
-   sq $v0,0x10($v1)`.  Retail keeps every 128-bit address in a register and
-   uses a zero offset; this cc1 folds the constant offset into the lq/sq.
-   Measured with tools/s4_probe.py (private): a mode(TI) copy through a
-   pointer variable, a one-member struct copy, a 16-byte struct assignment,
-   an aligned(16) struct, a mode(TI) type based on int/long/float/char/short,
-   memcpy and memmove of 16 bytes, a volatile destination, the address used
-   twice, a variable offset, a 64-bit (s8) pointer cast, an inlined helper
-   (static and __inline__) and the SDK compiler all give the folded form or
-   a call; only a plain pointer with no offset (retail's own shape in the
-   matched func_002A8C00) or a symbol address comes out materialised.  The
-   same wall is recorded for func_L00_002A5CB0 and func_L00_002A5840, and
-   in the repository for func_L00_00326620, func_L00_0032A1A8 and
-   func_L18_003FC9B8.  What would unblock it: the original source
-   expression tree, so this cc1 keeps the two addresses in registers. */
+/* Retained C, not matched.
+   Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+   380/380 bytes; 0/19 USA and US2, first mismatch +0x4c; canonical name absent from PAL catalogue. Qualified qcopy/barrier materializes all copies, but second destination, constant and later object-pointer allocation still differ. Three fresh formulations; no new compiler mechanism. */
 
 typedef unsigned char u8;
 

@@ -640,7 +640,6 @@ u32 func_L00_002ADFD0(u8 *object,u32 value) {
     return value;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002ADFE8);
 
 
 float func_L00_002AE070(int a0)
