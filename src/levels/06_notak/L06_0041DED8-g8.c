@@ -203,3 +203,51 @@ void func_L06_00444300(L06Obj *self)
         }
     }
 }
+
+/* The level's three turn angles, in degrees (37, 41 and 70); the step below turns them into
+   radians per frame. The first one is read through $gp, the other two absolutely. */
+extern float D_L06_001B18D0 __attribute__((sda));
+extern float D_L06_001B18D4;
+extern float D_L06_001B18D8;
+
+extern float func_32E5D0(float, float);
+extern void func_32DE28(void *, void *);
+extern void func_32DA88(void *, void *, void *);
+extern void func_32D650(char *, char *, float);
+extern void func_32D5C8(char *, char *, char *);
+extern void func_L03_0042B868(u8 *, void *, void *);
+
+/* Turns the owner's three angles by the level's step, then walks the owner's eight records:
+   each gets a fresh object, scaled and blended against the owner's own axes. `axes` is the
+   scratch area func_32DE28 fills; its first vector is the one the objects are given. */
+void func_L06_004577B0(char *a0)
+{
+    float axes[12];
+    float v0[4];
+    float v1[4];
+    char *s0 = *(char **)(a0 + 0x68);
+    char *s3 = s0 + 0xA0;
+    char *s2 = s0 + 0x80;
+    char *s4 = a0 + 0x10;
+    float step = 0.000290888245f;
+    float one = 1.0f;
+    float two = 2.0f;
+    int i;
+
+    *(float *)(s0 + 0x120) = func_32E5D0(*(float *)(s0 + 0x120), D_L06_001B18D0 * step);
+    *(float *)(s0 + 0x124) = func_32E5D0(*(float *)(s0 + 0x124), D_L06_001B18D4 * step);
+    *(float *)(s0 + 0x128) = func_32E5D0(*(float *)(s0 + 0x128), D_L06_001B18D8 * step);
+    func_32DE28(axes, s0 + 0x120);
+    for (i = 7; i >= 0; i--) {
+        func_32DA88(v0, s3, axes);
+        s3 += 0x10;
+        func_32D650((char *)v0, (char *)v0, 3.0f);
+        func_32D650((char *)v1, (char *)v0, 3.3333335f);
+        func_32D5C8((char *)v0, (char *)v0, s4);
+        func_32D5C8((char *)v1, (char *)v1, s4);
+        v0[3] = one;
+        v1[3] = two;
+        func_L03_0042B868(*(u8 **)s2, v0, v1);
+        s2 += 4;
+    }
+}

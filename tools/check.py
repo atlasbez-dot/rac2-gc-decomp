@@ -39,7 +39,7 @@ def disassemble(data: bytes, address: int) -> list[str]:
     return out
 
 
-def main() -> None:
+def main() -> int:
     levels.version_argument()
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if len(args) != 1:
@@ -81,7 +81,8 @@ def main() -> None:
                 print(f"  {address + 4 * k:08X}  {a:<40} {'  ' if a == b else '| '}{b}")
             diff = False          # once is enough
     print(f"{name}: {ok} of {len(programs)} places match ({source.relative_to(ROOT)})")
+    return 0 if ok == len(programs) else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

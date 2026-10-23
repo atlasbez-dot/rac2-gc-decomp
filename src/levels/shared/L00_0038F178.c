@@ -145,7 +145,6 @@ void func_L00_00391310(char *arg0, char *arg1)
     D_L00_001B9080 = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00391398);
 
 INCLUDE_ASM("asm/levels", func_L00_003914E0);
 

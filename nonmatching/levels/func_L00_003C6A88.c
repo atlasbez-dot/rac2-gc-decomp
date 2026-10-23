@@ -1,3 +1,16 @@
+/* func_L00_003C6A88, 268 bytes, 27 places.  ABANDON - the worker's whole-file draft, still a
+   draft (wave 8 w8-03).
+   The record needs a -G8 unit: retail's words are $gp-relative at +0x3A10, +0x3A20,
+   +0x1004, +0x100C and +0x1010, and the float constant it divides by is at +0xFB4.
+   Three of the draft's global names are the wrong words: retail clears the three floats at
+   $gp+0x1004, $gp+0x100C and $gp+0x1010, not D_L00_001AFFF4, D_L00_001AFFFC and
+   D_L00_001B0000, and the rate goes to the $gp+0x3A20 word while $gp+0x3A10 is cleared.
+   The rate is the $gp float at +0xFB4 divided by func_002EF240(12) (`div.s $f1,$f1,$f0`),
+   and the helper is called with -rate (`neg.s $f12,$f1`).  The two 16-byte copies are the
+   group pattern `lq $v0,0($inner)` / `sq $v0,0($dst)` (opcode 0x1E and 0x1F), not an
+   lqd pair.  The first loop runs eleven times over a 0x10 stride and the second three times
+   over a 0x10 stride. */
+
 extern float D_L00_001AFFF4 __attribute__((sda));
 extern float D_L00_001AFFFC __attribute__((sda));
 extern float D_L00_001B0000 __attribute__((sda));

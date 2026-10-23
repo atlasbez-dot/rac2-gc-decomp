@@ -58,6 +58,15 @@ Correcting the second entry also groups it with Siberius's `003EBC90`, so the tw
 places share one definition. These corrections apply to level 00 only; regenerate
 the catalogue with `tools/levels.py catalogue`, rather than editing its rows.
 
+Level 23 has another measured entry correction: `004277B0` to `004277B8`,
+referenced by the data pointer at `002ABE40`. Its 44-byte two-call wrapper ends
+at `004277E4`; the eight skipped bytes remain assembly. The preceding return
+at `004277A4` already restores its own frame in its delay slot, so the positive
+stack adjustment at `004277B0` is a separate residue. Regenerating v1.01's
+catalogue and carrying it with `tools/carry.py --version us2` gives the same
+canonical wrapper at v2.00's `00428CB8`, with its end also unchanged. PAL keeps
+its separate version-specific wrapper and catalogue entry.
+
 Two more kinds of row are measured from the retail bytes, not from a list of
 addresses. An extent whose words are only stack adjustments and nops is the linker's
 filler between two bodies, not a function, and leaves the catalogue: 257 level rows

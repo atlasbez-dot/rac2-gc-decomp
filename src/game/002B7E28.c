@@ -530,7 +530,6 @@ void func_002BD398(OBJ_F3c007b59 *o)
 
 INCLUDE_ASM("asm/game", func_002BD500);
 
-INCLUDE_ASM("asm/game", func_002BD5B0);
 
 INCLUDE_ASM("asm/game", func_002BD8B0);
 

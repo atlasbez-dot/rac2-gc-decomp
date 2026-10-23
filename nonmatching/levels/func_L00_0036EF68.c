@@ -20,10 +20,18 @@
  * What still differs (12 bytes):
  *  - this cc1 copies the block pointer with `daddu $t1,$a0,$zero` (a 64-bit
  *    copy) and then uses $t1 for every field access, where retail keeps the
- *    pointer in $a0 and loads into $at/$v0/$v1; the copy appears with a
- *    struct pointer, with an int * and with a char * parameter alike;
+ *    pointer in $a0 and loads into $at/$v0/$v1;
  *  - the shifts of the arguments land in $t3/$t4 instead of in place, and the
  *    schedule of the first part is one load short of retail's.
+ *
+ * Wave 8 re-measured the candidate (236 bytes against retail's 248): the
+ * whole register plan is different, not one spelling of it - ours copies the
+ * pointer into $t1, shifts the three arguments into $t3/$t4/$t2, keeps the
+ * mask in $v0 and reloads the three words through $t1; retail keeps the
+ * pointer in $a0, shifts the arguments in place in $a1/$a2/$a3, holds the
+ * mask in $t1 and the loaded words in $at/$v0/$v1.  Getting there needs the
+ * pointer to stay in $a0 (no 64-bit copy) and the arguments to be shifted
+ * where they are.
  */
 extern unsigned int ref_L00_0036EF68_00 __attribute__((sda));
 

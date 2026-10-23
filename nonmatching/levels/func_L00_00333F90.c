@@ -1,5 +1,21 @@
 /* func_L00_00333F90 (276 bytes, 27 places) - best attempt, NOT MATCHED.
  *
+ * Re-measured on 22 October 2026 with the compiler rebuilt from the current sources and
+ * the quadword-copy profile (-frac2-qcopy -frac2-qcopy-barrier): difference (a) is GONE,
+ * the two copies now keep their addresses in registers exactly as retail does, as for
+ * func_L00_00338D28 and func_L00_0033BA68. What is left is the multiply and, with it,
+ * twelve bytes:
+ *   - retail computes `func_002A77E0(6) * 6` with the R5900 three-operand multiply in
+ *     place (`mult $v0,$v0,$a0`, the destination is the multiplicand, the constant 6 is
+ *     materialised twice in $a0), then adds 0x40 and ORs 0x78404000 in $v0; this cc1 puts
+ *     the product in a temporary register and moves it, and never reaches the same size.
+ *     Tried: the product in its own statement, the operands swapped, the expression
+ *     written inline in the store - all give the same 264 bytes.
+ *   - retail keeps the second argument in $s1 and reuses that register for `obj + 0x20`
+ *   - the byte the record's second flag byte takes is read from a per-level address:
+ *     0x001FE98C in level 00 and another one in every other level, so the C needs a
+ *     per-level symbol (ref_L00_00333F90_00) rather than D_L00_001FE98C.
+ *
  * tools/check.py func_L00_00333F90 --diff:
  *   "00_aranos_tutorial: 272 bytes, expected 276" and the same for the other 26 places.
  *

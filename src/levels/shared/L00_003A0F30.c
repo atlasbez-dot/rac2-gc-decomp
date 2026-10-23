@@ -54,7 +54,7 @@ INCLUDE_ASM("asm/levels", func_L00_003A0F30);
 
 INCLUDE_ASM("asm/levels", func_L00_003A1580);
 
-INCLUDE_ASM("asm/levels", func_L00_003A1F68);
+
 
 INCLUDE_ASM("asm/levels", func_L00_003A2018);
 
@@ -87,7 +87,7 @@ void func_L00_003A2138(int unused, float *p, int n)
 INCLUDE_ASM("asm/levels", func_L00_003A2258);
 
 
-INCLUDE_ASM("asm/levels", func_L00_003A2408);
+
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L00_003A2570(Vec16_Fc936841d *object, int index)
@@ -225,7 +225,7 @@ void func_L00_003A8060(char *obj, char *arg)
     func_00282DD8(obj + 224, other, base);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003A80F8);
+
 
 INCLUDE_ASM("asm/levels", func_L00_003A8238);
 

@@ -118,7 +118,7 @@ extern f32 func_002A7878(f32, f32);
 
 extern s32 func_002A77E0(s32);
 
-extern f32 func_002A7A00(f32 *, f32, f32);
+extern void func_002A7A00(f32 *, f32, f32);
 
 extern void func_00282CC0(void *, void *, void *);
 

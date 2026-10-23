@@ -386,6 +386,7 @@ LEVEL_ENTRY_OFFSETS = {
     (0, 0x00354DE8): 16,  # data pointer at 0x00287070 -> 0x00354DF8
     (0, 0x003D54A8): 8,   # vtbl pointer at 0x002A3370 -> 0x003D54B0
     (0, 0x0040EA98): 8,   # vtbl pointer at 0x002A3718 -> 0x0040EAA0
+    (23, 0x004277B0): 8,  # data pointer at 0x002ABE40 -> 0x004277B8; end unchanged
 }
 
 

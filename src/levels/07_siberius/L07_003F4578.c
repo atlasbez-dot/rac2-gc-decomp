@@ -263,7 +263,44 @@ void func_L07_003FF618(u8 *a0)
 
 INCLUDE_ASM("asm/levels", func_L07_004080E0);
 
-INCLUDE_ASM("asm/levels", func_L07_00408338);
+extern void func_310D80(void *a, f32 b, f32 c);
+
+extern f32 func_2E4280(f32 a);
+
+extern f32 func_310B30(f32 a, f32 b);
+
+extern void func_31AFD8(void *a, void *b, f32 c, f32 d, f32 e);
+
+extern void func_335848(void *a, void *b, s32 c);
+
+/* The two shared level floats; `sda` gives the retail's `lui %hi ; swc1 %lo($at)` form. */
+extern f32 D_L07_001AA698 __attribute__((sda));
+
+extern f32 D_L07_001B3198 __attribute__((sda));
+
+/* Runs the object's own 200 steps: each step advances the shared record's third
+   float, then the three angles are computed and handed to the shared passes. */
+void func_L07_00408338(u8 *a0)
+{
+    f32 v[4];
+    f32 buf[4];
+    s32 i;
+    f32 f14;
+    f32 f20;
+    f32 f21;
+
+    D_L07_001B3198 = D_L07_001AA698;
+    D_L07_001AA698 = 0.99f;
+    for (i = 0xC7; i >= 0; i--) {
+        func_310D80(buf, 1.0f / 60.0f, 0.23333335f);
+        buf[2] = func_2E4280(buf[2]) + 1.0f / 12.0f;
+        f21 = func_310B30(-5.0f, 5.0f);
+        f20 = func_310B30(-5.0f, 5.0f);
+        f14 = func_310B30(10.0f, 25.0f);
+        func_31AFD8(a0, v, f21, f20, f14);
+        func_335848(v, buf, 0x1E0);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L07_0040E198);
 
@@ -296,8 +333,6 @@ void func_L07_0040EFC8(s32 *a0, f32 *a1, f32 a, f32 b)
 }
 
 INCLUDE_ASM("asm/levels", func_L07_0040F0D0);
-
-INCLUDE_ASM("asm/levels", func_L07_0040F468);
 
 /* The object's state record up to its three group words (-1 means none). Indexing the array
    member is the spelling that gives retail's address arithmetic (the +0x94 base as a sum of its

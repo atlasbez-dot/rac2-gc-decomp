@@ -20,7 +20,14 @@
  * for loop or a while loop, p++ or p = p + 1). The earlier deposit of this body
  * also called func_L00_00403C30 with an argument, which does not compile: the
  * function takes none.
- */
+ * Measured since (wave 8): the retail's q++ comes before its p++ in the source
+ * (the store's pointer is the one the loop advances first, the read's pointer is
+ * advanced in the branch's delay slot) and the two statements swapped do not
+ * change the allocation; the argument and pointer types (`int **` against
+ * `char **`, the parameter against `int *`) do not either; the opt-in
+ * quadword-copy profile does not apply (the body has no 16-byte copy) and
+ * -mastra-keep-frame-order changes nothing.  The wall is the allocation, not a
+ * spelling. */
 
 extern int D_L00_001B2C30[] __attribute__((sda));
 

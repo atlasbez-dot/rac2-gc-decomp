@@ -52,6 +52,7 @@ extern void func_L06_003DDCA8();
 extern int func_32D238(char *);
 extern int func_35A620(int);
 extern void func_35A270(char *, int, int, int);
+extern void *D_L06_002E1F00[];
 extern char *func_31B0D0(char *, int, int, int, float, float, char *, char *, char *,
                          int);
 extern char D_L06_001A8F20[];
@@ -257,6 +258,63 @@ INCLUDE_ASM("asm/levels", func_L06_00420740);
 
 INCLUDE_ASM("asm/levels", func_L06_00420AE8);
 
+/* The object runs through five states. The dispatch reads the level's own jump table (five
+   words in the level's data at 0x2E1F00); `cases` only keeps the labels alive. */
+void func_L06_0042B868(char *a0)
+{
+    static void *cases[5] = {&&c0, &&c1, &&c2, &&c3, &&c4};
+    char *s0 = a0;
+    char *s1;
+    unsigned int sel;
+
+    sel = *(unsigned char *)(s0 + 0x20);
+    s1 = *(char **)(s0 + 0x68);
+    if (sel < 5)
+        goto *D_L06_002E1F00[sel];
+    goto done;
+c0:
+    *(unsigned char *)(s0 + 0x20) = 1;
+    *(int *)s1 = 0x5DC;
+    goto done;
+c1:
+    if (*(unsigned char *)(s0 + 0xBC) == 0)
+        goto done;
+    *(unsigned char *)(s0 + 0x20) = 2;
+    if (*(unsigned char *)(s0 + 0x43) != 1)
+        func_35A270(s0, 1, 0, 0);
+    *(int *)(s0 + 0x98) = 0;
+    goto done;
+c2:
+    if ((*(unsigned char *)(s0 + 0x60) & 2) == 0)
+        goto done;
+    *(unsigned char *)(s0 + 0x20) = 3;
+    if (*(unsigned char *)(s0 + 0x43) == 2)
+        goto done;
+    func_35A270(s0, 2, 0, 0);
+    goto done;
+c3:
+    if (func_32D238(s1) == 0)
+        goto done;
+    *(unsigned char *)(s0 + 0x20) = 4;
+    if (*(unsigned char *)(s0 + 0x43) == 3)
+        goto done;
+    func_35A270(s0, 3, 0, 0);
+    goto done;
+c4:
+    if ((*(unsigned char *)(s0 + 0x60) & 2) == 0)
+        goto done;
+    *(unsigned char *)(s0 + 0x20) = 1;
+    if (*(unsigned char *)(s0 + 0x43) == 0)
+        goto tail;
+    func_35A270(s0, 0, 0, 0);
+tail:
+    *(int *)(s0 + 0x98) = *(int *)(*(int *)(s0 + 0x24) + 0x10);
+    *(int *)s1 = 0x5DC;
+    func_35B810(*(unsigned char *)(s0 + 0x21), 0);
+    goto done;
+done:
+    return;
+}
 
 INCLUDE_ASM("asm/levels", func_L06_00430318);
 
@@ -386,7 +444,7 @@ INCLUDE_ASM("asm/levels", func_L06_00457270);
 INCLUDE_ASM("asm/levels", func_L06_004573E8);
 
 
-INCLUDE_ASM("asm/levels", func_L06_004577B0);
+/* func_L06_004577B0 lives in L06_0041DED8-g8.c: it reads its first angle through $gp. */
 
 
 

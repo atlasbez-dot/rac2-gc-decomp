@@ -1,13 +1,39 @@
-/* func_L00_0032D208 - 260 bytes, 27 place(s), level 00_aranos_tutorial,
-   retail at 0x0032d208. Screened with tools/w10_screen.py: 7 call(s)
-   [0x132858@0032D244, 0x133230@0032D258, 0x132028@0032D260,
-   0x132828@0032D27C, 0x132028@0032D288, 0x132318@0032D2DC,
-   0x132828@0032D2E8]; data addresses materialised [0x190000, 0x150000,
-   0xffff0000]; float constants [-]; $gp-relative small data: no   saves: -;
-   callee-saved registers saved [-]; words plain C cannot emit [-]. Head:
-   addiu $sp, $sp, -0x30 ; sd $s3, 0x18($sp) ; lui $s3, 0x19 ; sd $s0,
-   0x0($sp) ; sd $s1, 0x8($sp) ; addiu $v0, $s3, -0x79A0. Not matched in
-   this wave: the body is straight-line code whose register allocation and
-   the materialisation of its constant addresses have to be reproduced word
-   for word. What would unblock it: the exact source expression tree, so
-   this cc1 picks the same registers in the same order. */
+/* Retained plain-C attempt: 248/260 bytes; first difference +0x4.
+ * us: 0/27, pal: 0/27, us2: 0/27.
+ * Profile: -O2 -G0 -ffunction-sections -g.
+ * The -g source reproduces the polling-loop padding, but resident high-half reuse and entry/address copies differ. Both calls reach actual resident entry 00132828, currently inside the incorrectly prefixed catalogue row func_00132818. Resolve that boundary independently before linking this draft.
+ */
+extern char D_00188660[];
+extern char D_0014B540[];
+extern void func_00132858(int handle);
+extern void func_00133230(void);
+extern int func_00132028(void);
+extern void func_00132828(void);
+extern int func_00132318(int address, int mode);
+void func_L00_0032D208(int index)
+{
+    char *base = D_00188660;
+    int *handle = (int *)(base + 0x17a4);
+    int i = 2;
+    int address;
+    do {
+        i--;
+        if (*handle != 0) {
+            func_00132858(*handle);
+            *handle = 0;
+        }
+        handle++;
+    } while (i >= 0);
+    func_00133230();
+    while (func_00132028() != 0) { }
+    func_00132828();
+    while (func_00132028() != 0) { }
+    address = *(int *)(D_0014B540 + 0x52e0 + index * 8);
+    if (address != 0) {
+        address += *(int *)(D_0014B540 + 0x529c);
+        handle = (int *)(base + 0x17a0) + index + 1;
+        *handle = -1;
+        *handle = func_00132318(address, 0);
+    }
+    func_00132828();
+}

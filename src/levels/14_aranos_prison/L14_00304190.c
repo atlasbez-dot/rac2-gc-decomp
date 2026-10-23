@@ -190,7 +190,40 @@ int func_L14_003DE2D8(char *arg0) {
     return count;
 }
 
-INCLUDE_ASM("asm/levels", func_L14_003DE360);
+extern void func_328340(void *dst, void *src, void *mtx, float f);
+extern float func_324F78(float a, float b, float c);
+
+/* The object is placed in the world: the group's two matrices are copied and turned by the
+   angle, the object's own matrix is rebuilt from them, and the three floats it keeps are
+   cleared. The first call takes the object's own matrix as its second argument, but the
+   compiler overwrites it with the local buffer before the call, so the callee sees the
+   buffer (as retail does). */
+void func_L14_003DE360(char *self, float f) {
+    char buf[16];
+    char *s0 = *(char **)(self + 0x68);
+    char *mB0 = s0 + 0xB0;
+    char *mC0 = s0 + 0xC0;
+    char *m10 = self + 0x10;
+    char *mD0 = self + 0xD0;
+    char *mE0 = self + 0xE0;
+    float f0;
+    float zero;
+
+    func_2F5C68(buf, m10, mB0);
+    func_328340(buf, buf, mC0, f);
+    f0 = *(float *)(s0 + 0x80) + f;
+    *(float *)(s0 + 0x80) = f0;
+    func_2F5F18(buf, buf,
+                func_324F78(*(float *)(s0 + 0x84), *(float *)(s0 + 0x88), f0 * 0.63661977f));
+    func_2F5C38(m10, mB0, buf);
+    func_2F5F18(mD0, mC0, 1.0f);
+    func_2F5F18(mE0, buf, -1.0f);
+    func_2F5D68(self + 0xC0, mE0, mD0);
+    zero = 0.0f;
+    *(float *)(self + 0xEC) = zero;
+    *(float *)(self + 0xDC) = zero;
+    *(float *)(self + 0xCC) = zero;
+}
 
 void func_L14_003DE488(char *arg0) {
     char **p = (char **)(*(int *)(arg0 + 0x68) + 0xE0);
@@ -396,6 +429,53 @@ INCLUDE_ASM("asm/levels", func_L14_003E2980);
 
 INCLUDE_ASM("asm/levels", func_L14_003E4208);
 
+extern char D_00188660[];
+extern int func_332310(char *self);
+extern int func_369AD0(int a0, int a1, char *a2);
+extern int func_3697D0(int a0);
+extern float func_2F6CC8(float a0, float a1);
+
+/* The object steers a group of entities: by its state byte it either leaves the group
+   (state 0), asks whether the group is free and hands itself over if it is (state 1) or
+   turns (state 2).  In the turning state it takes an entry from the ring of the group's own
+   entries (D_00188660, 0x70 bytes each) - a new one when the entry it holds is not its
+   own or is free - and turns half a degree; at the end it releases the entry it holds
+   when the entry is its own and in use, and forgets it either way. */
+void func_L14_003E4A40(char *self) {
+    char *state = *(char **)(self + 0x68);
+    char *e1;
+    char *e2;
+    int idx;
+
+    switch (*(unsigned char *)(self + 0x20)) {
+    case 0:
+        func_321F58(self, 1, -1);
+        *(int *)state = -1;
+        break;
+    case 1:
+        if (func_332310(self) != 0) {
+            func_321F58(self, 2, -1);
+        }
+        break;
+    case 2:
+        if (*(float *)(self + 0xF0) > -1.5707964f) {
+            e1 = D_00188660 + *(int *)state * 0x70;
+            if (*(int *)(e1 + 0x88) != (int)self || *(unsigned char *)(e1 + 0x74) == 0) {
+                *(int *)state = func_369AD0(0, 4, self);
+            }
+            *(float *)(self + 0xF0) = func_2F6CC8(*(float *)(self + 0xF0), 0.0087266471f);
+        }
+        idx = *(int *)state;
+        if (idx != -1) {
+            e2 = D_00188660 + idx * 0x70;
+            if (*(int *)(e2 + 0x88) == (int)self && *(unsigned char *)(e2 + 0x74) != 0) {
+                func_3697D0(idx);
+            }
+        }
+        *(int *)state = -1;
+        break;
+    }
+}
 
 extern int func_002B3868(char *self);
 extern int func_00282978(char *p);

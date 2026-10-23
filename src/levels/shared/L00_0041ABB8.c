@@ -398,7 +398,6 @@ int func_L00_004204A0(TI128 *src)
     return func_2DB350(&local, 0.0f) != 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00420638);
 
 
 INCLUDE_ASM("asm/levels", func_L00_004208C8);
@@ -418,7 +417,6 @@ void func_L00_004219D8(char *a0, float *a1, float *a2,
     a1[2] = func_002702C8_1(p + 66, a1[2], a2[2], f12, f13, f14);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00421A98);
 
 INCLUDE_ASM("asm/levels", func_L00_00421C50);
 

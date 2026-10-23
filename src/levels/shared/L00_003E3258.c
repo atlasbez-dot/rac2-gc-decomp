@@ -199,11 +199,11 @@ void func_L00_003E4948(void)
 
 INCLUDE_ASM("asm/levels", func_L00_003E4968);
 
-INCLUDE_ASM("asm/levels", func_L00_003E4B80);
+/* func_L00_003E4B80 is defined in L00_003E4B80-g.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003E4BF0);
 
-INCLUDE_ASM("asm/levels", func_L00_003E51C0);
+/* func_L00_003E51C0 is defined in L00_003E51C0-g8.c. */
 
 void func_L00_003E5328(void)
 {
@@ -222,7 +222,7 @@ INCLUDE_ASM("asm/levels", func_L00_003E5340);
 
 #include "common.h"
 
-INCLUDE_ASM("asm/levels", func_L00_003E5650);
+/* func_L00_003E5650 is defined in L00_003E5650-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003E5710);
 
@@ -331,7 +331,7 @@ void func_L00_003E7050(char *p, float scale)
 /* func_L00_003E70B8 is defined in L00_003E70B8.c. */
 INCLUDE_ASM("asm/levels", func_L00_003E7270);
 
-INCLUDE_ASM("asm/levels", func_L00_003E7650);
+/* func_L00_003E7650 is defined in L00_003E7650-qcopy.c. */
 
 void func_L00_003E7760(void)
 {
@@ -359,7 +359,7 @@ INCLUDE_ASM("asm/levels", func_L00_003E8180);
 
 INCLUDE_ASM("asm/levels", func_L00_003E8A98);
 
-INCLUDE_ASM("asm/levels", func_L00_003E9490);
+/* func_L00_003E9490 is defined in L00_003E9490-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003E9540);
 

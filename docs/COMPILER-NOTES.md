@@ -149,6 +149,43 @@ the **register save area**: `sp+0x50` in a 0x80 frame with two named arguments, 
 `(8 - named_count) * 8` bytes. Witnesses: `src/core/0011E0D8.c`, `func_00115CF0`,
 `func_00115D48`, `func_00115DA8`. Do not use this to explain an ordinary -O0 shim.
 
+### Habits of large bodies
+
+Observations from eleven passes each over two unmatched bodies,
+`func_L11_0042F018` (10,312 bytes) and `func_L04_002E7C08` (14,304 bytes), whose
+records and block maps are in `nonmatching/levels/`
+([#288](https://github.com/OpenRAC/rac2-decomp/pull/288)). They are source-shape
+observations, not qualified rules:
+
+- The frame size follows from allocation: locals, the 8-byte GPR slots, then the
+  FPR slots, each block rounded to 16. A body that keeps one more value across a
+  call gets a bigger frame; reproduce the prologue by keeping retail's values live,
+  not by choosing a size.
+- Local allocation ranks values by `QTY_CMP_PRI`, `floor_log2(refs) * refs * size /
+  live length`, ties by pseudo number: the shortest dense ranges are placed first.
+- Retail's split `%hi`/`%lo` address comes from casting the global's name to a
+  struct (`((Actor *)D_00189E20)->field`): one `lui` kept in a callee-saved
+  register and an `addiu %lo` at each use. A pointer variable gives the same shape;
+  a per-case `p = &D` gave 264 `lui`. The anchor's register moves when the body
+  around it changes (four extra calls moved it).
+- A value passed as a call's argument does not live across that call, which keeps
+  it in `$f0` rather than `$f20`. Splitting a multi-definition local gives each part
+  its own live range.
+- Reload can give a call result inside a compound expression another variable's
+  stack slot: `f = func(0.2f, 0.9f) * 0.2f` multiplied the reloaded value, two
+  statements multiplied `$f0`.
+- `if (cond) goto Lelse;` lays the body out as the fall-through. `if (a || b)` as
+  one condition got its second test inverted; two separate `if` blocks gave
+  retail's two branch-likelys to the same block.
+- `idx--` gives retail's `addiu` plus `movn` where `idx = -1` materializes a
+  constant; an unsigned comparison turns that `-1` into a separate `lui`/`ori`.
+- Check struct offsets against retail rather than inheriting them: in these
+  bodies padding was four bytes out from 0xAA0 and two from 0x1492.
+- `__builtin_expect` does nothing on MIPS here (the expect optab is empty); a
+  branch-likely comes only from reorg's heuristics.
+- Switch bodies are emitted in source order and jump-table gaps take the default
+  label, so the source switch needs a default.
+
 ## Symbols, addresses and small data
 
 Use catalogue function identities, resident `D_XXXXXXXX` below the selected level
@@ -224,6 +261,17 @@ The original twelve witnesses total 3,616 bytes at 59 places: `func_002B5E48`,
 `func_L23_00418DC0`, `func_L23_004256F0`, `func_L23_0041D0A0`,
 `func_L26_003D4930`. Named destination pointers and the point where the second
 copy's address is taken remain source requirements in two cases.
+
+`func_L20_0039C448` (248 bytes) and `func_L20_0043D470` (100 bytes), one place each
+in level 20, are exact together in `L20_0039C448-qcopy.c` with qcopy and the barrier
+([#291](https://github.com/OpenRAC/rac2-decomp/pull/291)). Qcopy alone fixed the
+first body's load but left its saves in this cc1's ascending order where retail has
+`sd $s0; sd $s2; sd $s1`; the barrier fixed both. In the second body, qcopy also
+produced retail's float register order (8.0f in `$f1`, 2.5f in `$f0`), which its
+record had blamed on the allocator itself: the copy's address registers change the
+allocator's inputs. A residue that looks like a compiler difference can be the
+profile's. Of level 20's 3,978 functions, 359 have retail's `addiu` plus
+zero-displacement `lq`/`sq` shape.
 
 This models the schedulers, not every optimizer effect of inline assembly. Incoming
 links retain producer latencies; interblock motion sees a store; jump2 can remove a

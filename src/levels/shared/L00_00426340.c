@@ -114,8 +114,6 @@ void func_L00_00426340(int object)
 
 INCLUDE_ASM("asm/levels", func_L00_004263A8);
 
-INCLUDE_ASM("asm/levels", func_L00_004263B8);
-
 void func_L00_00426478(void)
 {
 }
@@ -491,7 +489,33 @@ INCLUDE_ASM("asm/levels", func_L00_00429CE8);
 
 INCLUDE_ASM("asm/levels", func_L00_00429F68);
 
-INCLUDE_ASM("asm/levels", func_L00_0042A460);
+extern int D_L00_001A8F00 __attribute__((sda));
+
+extern int func_L00_00429CE8(char *);
+
+extern void func_L00_00429F68(char *);
+
+/* Looks the owner's table entry up (index half-word at +0x84, 0x20 bytes per entry, the
+   entry's own pointer at +0x1C) and clears its flag half-word at +0x26 and its word at
+   +0x20, but only when the entry is still idle, the global gate allows it and the extra
+   check accepts the owner. */
+int func_L00_0042A460(char *a0)
+{
+    char *p = *(char **)(D_L00_001B1844 + *(short *)(a0 + 0x84) * 0x20 + 0x1C);
+
+    if (*(short *)(p + 0x26) != 0) {
+        return 0;
+    }
+    if (D_L00_001A8F00 != 0) {
+        if (func_L00_00429CE8(a0) != 0) {
+            *(short *)(p + 0x26) = 0;
+            *(int *)(p + 0x20) = 0;
+            return 0;
+        }
+    }
+    func_L00_00429F68(a0);
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_0042A4E8);
 

@@ -203,7 +203,7 @@ INCLUDE_ASM("asm/levels", func_L00_003EF560);
 
 extern int func_00283DB8(char *local, float value);
 
-INCLUDE_ASM("asm/levels", func_L00_003EFA00);
+/* func_L00_003EFA00 is in L00_003EFA00-qcopy.c (its own file: the quadword-copy profile). */
 
 INCLUDE_ASM("asm/levels", func_L00_003EFA98);
 
@@ -614,7 +614,7 @@ void func_L00_003F3160(char *obj)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F34D8);
+/* func_L00_003F34D8 is in L00_003F34D8-qcopy.c (its own file: the quadword-copy profile). */
 
 INCLUDE_ASM("asm/levels", func_L00_003F3518);
 

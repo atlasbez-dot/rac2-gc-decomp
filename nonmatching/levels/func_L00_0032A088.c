@@ -25,7 +25,21 @@
 
    What would unblock it: a source shape in which the table's address is a
    value (not a constant address) at the point of the sum, so that this cc1
-   keeps the pointer operand first. */
+   keeps the pointer operand first.
+
+   Wave 8 (agent w8-08) re-measured the swap and could not move it: the
+   pointer-first spelling does NOT come from a pointer PARAMETER. A static
+   helper whose base is a parameter (`static u8 *entry_of(u8 *base, s32
+   index) { return base + index * 0xA430; }`, inlined) still emits
+   `addu $2,$6,$4` (product first) for the helper itself; casting the table
+   to an integer (`(u32)D + index * 0xA430`), writing the sum in the other
+   source order (`index * 0xA430 + D`) and using a sized array give the same
+   `addu $2,$5,$6` (product + base). So the rule "the pointer first only when
+   the pointer is a parameter" does not hold here: every spelling measured
+   puts the *multiply result* first and the table second, and the retail
+   puts the table first. The `mult $a1,$a1,$v0` and the payload sum
+   (`addu $v0,$a1,$v0`, product first) are the retail's own, so the entry sum
+   is the odd one out in retail too. */
 
 typedef int s32;
 typedef unsigned char u8;

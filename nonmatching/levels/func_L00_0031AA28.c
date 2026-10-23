@@ -34,7 +34,15 @@
      float argument first in the signature).  They all give the same instruction
      sequence; the five FPRs above move as a block.
    Next idea: a source shape that raises the pressure by one at the point where p1.x is
-   read, so that the allocator has to take f2 for t^3 before p1.x. */
+   read, so that the allocator has to take f2 for t^3 before p1.x.
+
+   Wave 8 (agent w8-08): the `-frac2-qcopy` profile (the grouped quad-copy pattern, which
+   is what retail's `lq $v0,0($a1)` / `sq $v0,0($a0)` pairs are) MOVES the five FPRs
+   without reaching retail's order: with that flag the copy's own vector-register clobber
+   changes the pressure and the allocation becomes f2=p1.x, f3=t^3, f4=p3.x, f5=p0.x,
+   f6=t^2 against retail's f2=t^3, f3=p2.x, f4=p1.x, f5=t^2, f6=p0.x (before the flag it
+   was the five-value rotation this note records). So the permutation is a property of the
+   allocator and not of the copies: the profile only moves it. */
 
 typedef int V4TI __attribute__((mode(TI)));
 

@@ -1,15 +1,36 @@
-/* func_L00_0038D530 - 284 bytes, 27 place(s), level 00_aranos_tutorial,
-   retail at 0x0038d530. Screened with tools/w10_screen.py: 6 call(s)
-   [func_0029EFD0@0038D558, func_002A7878@0038D5CC, func_002A7878@0038D5DC,
-   func_002A7878@0038D5EC, func_002A0F48@0038D5FC, func_002FED90@0038D618];
-   data addresses materialised [0xc0490000, 0x40490000]; float constants
-   [0x3f800000]; $gp-relative small data: no   saves: -; callee-saved
-   registers saved [-]; words plain C cannot emit [LQ/SQ 7A420000@0x005c,
-   LQ/SQ 7CA20000@0x0060, LQ/SQ 7A620000@0x0064, LQ/SQ 7E020000@0x0068].
-   Head: addiu $sp, $sp, -0x40 ; sd $s2, 0x10($sp) ; sd $s3, 0x18($sp) ;
-   daddu $s2, $a0, $zero ; sd $s1, 0x8($sp) ; daddu $s3, $a1, $zero. Not
-   matched in this wave: the 128-bit copy needs an `lq`/`sq` pair; plain C
-   reaches it only through a `mode(TI)` local, and this cc1 folds the
-   destination offset into the `sq` where retail materialises the pointer
-   first. What would unblock it: the exact source expression tree, so this
-   cc1 picks the same registers in the same order. */
+#include "include_asm.h"
+typedef unsigned int Quad __attribute__((mode(TI)));
+typedef union { Quad bits; float f[4]; } Vector;
+
+extern char *func_0029EFD0(int);
+extern float func_002A7878(float, float);
+extern void func_002A0F48(void *);
+extern int func_002FED90(void *, void *, float, float, float);
+
+
+char *func_L00_0038D530(Quad *position, Quad *direction)
+{
+    unsigned char *object = (unsigned char *)func_0029EFD0(0x79);
+    if (object) {
+        char *data;
+        Quad *destination;
+        object[0x30] = 0xFF;
+        *(short *)(object + 0x32) = 0x1FF;
+        destination = (Quad *)(object + 0x10);
+        object[0x31] = 1;
+        data = *(char **)(object + 0x68);
+        object[0x20] = 0;
+        *destination = *position;
+        *(Quad *)data = *direction;
+        *(int *)(data + 0x14) = 0;
+        *(int *)(data + 0x10) = 30;
+        *(int *)(data + 0x18) = 300;
+        *(float *)(object + 0xF0) = func_002A7878(-3.1415927410125732f, 3.1415927410125732f);
+        *(float *)(object + 0xF4) = func_002A7878(-3.1415927410125732f, 3.1415927410125732f);
+        *(float *)(object + 0xF8) = func_002A7878(-3.1415927410125732f, 3.1415927410125732f);
+        *(int *)(object + 0xFC) = 0;
+        func_002A0F48(object);
+        *(int *)(data + 0x1C) = func_002FED90(object, 0, 1.0f, 1.0f, 1.0f);
+    }
+    return object;
+}

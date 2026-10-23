@@ -66,8 +66,8 @@ INCLUDE_ASM("asm/levels", func_L00_003FFBA0);
 
 INCLUDE_ASM("asm/levels", func_L00_004003F0);
 
-INCLUDE_ASM("asm/levels", func_L00_004005B0);
-
+/* func_L00_004005B0 is matched in L00_004005B0-g8.c (a -G8 unit built with -frac2-qcopy
+   -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L00_00400F30);
 
@@ -144,8 +144,8 @@ extern void func_00310440(char *arg);
 extern void func_L00_00404168(char *arg);
 extern void func_L00_00403F90(char *arg, void *p);
 
-INCLUDE_ASM("asm/levels", func_L00_00403D58);
-
+/* func_L00_00403D58 is matched in L00_003FFA70-qcopy.c (built with -frac2-qcopy
+   -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L00_00403F90);
 
@@ -162,8 +162,8 @@ extern void func_00310440(char *arg);
 extern int func_002DE4B0(void *a, void *b, int c, void *d, int e);
 extern void func_0035F450(int a, int b, void *c, int d);
 
-INCLUDE_ASM("asm/levels", func_L00_00404DD8);
-
+/* func_L00_00404DD8 is matched in L00_003FFA70-qcopy.c (built with -frac2-qcopy
+   -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L00_00404ED8);
 

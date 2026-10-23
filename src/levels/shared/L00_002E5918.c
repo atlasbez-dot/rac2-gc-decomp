@@ -276,6 +276,9 @@ INCLUDE_ASM("asm/levels", func_L00_002EDD28);
 
 INCLUDE_ASM("asm/levels", func_L00_002EDD38);
 
+/* func_L00_002EE050 (the two-argument float maximum) is matched in its own
+   unit, src/levels/shared/L00_002EE050.c: it needs the -O1 -ffast-math
+   profile, which changes the other bodies of this file. */
 
 INCLUDE_ASM("asm/levels", func_L00_002EE058);
 

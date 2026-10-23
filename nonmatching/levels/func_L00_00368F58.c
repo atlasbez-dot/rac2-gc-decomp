@@ -19,6 +19,15 @@
  *    this candidate's division is five below;
  *  - the six 0.0f constant is loaded late in retail (between the base load and
  *    the first multiply) and early here.
+ *
+ * Wave 8 re-measured both with more spellings:
+ *  - the two nops are not a hazard pad this cc1 can be talked into emitting:
+ *    it emits none at that distance in any of the spellings tried, so they
+ *    are part of retail's schedule and not something the source can ask for;
+ *  - the 1.0f lands in $f5 here against retail's $f2.  Naming the 1.0f in a
+ *    local moves it to $f2, but then the 4.0f is materialised too early and
+ *    the whole float schedule changes; keeping the 4.0f late (as retail has
+ *    it) keeps the 1.0f in $f5.  The two wants fight each other.
  */
 extern float D_001BD370;
 

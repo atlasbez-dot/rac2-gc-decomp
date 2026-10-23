@@ -109,7 +109,8 @@ INCLUDE_ASM("asm/levels", func_L07_003E61E0);
 
 INCLUDE_ASM("asm/levels", func_L07_003E69B8);
 
-INCLUDE_ASM("asm/levels", func_L07_003E6E00);
+/* func_L07_003E6E00 is in the sibling file L07_00389EB8-qcopy.c: its body
+   copies a 16-byte vector, which needs the grouped-copy profile. */
 
 /* Sets the +0x2D0 word of every entity of the object's group state to 1. */
 void func_L07_003E6F40(unsigned char *arg0)
@@ -132,7 +133,50 @@ void func_L07_003E6F40(unsigned char *arg0)
 
 INCLUDE_ASM("asm/levels", func_L07_003E6FE8);
 
-INCLUDE_ASM("asm/levels", func_L07_003E7240);
+/* The 16-byte vector the object keeps. */
+typedef int TI128 __attribute__((mode(TI)));
+
+extern void func_00325D30(char *, char *);
+
+extern void func_002A6C58(char *, int, int);
+
+extern void func_00283098(TI128 *, TI128 *, char *);
+
+extern void func_00282CC0(TI128 *, TI128 *, char *);
+
+extern void func_0032C700(TI128 *, int, int, int, int, int, int, int, float, float, int, int, int,
+                          int);
+
+extern void func_002E5CF8(int, int, char *);
+
+extern void func_00282F20(TI128 *, TI128 *, float);
+
+extern void func_002B0A68(char *, int, TI128 *, float, float, float, float, int);
+
+/* Arm the object's mode, then set up its position and hand it to the launcher.
+   func_002B0A68's integer mask is its last parameter, and this compiler sets the
+   arguments up in parameter order: the mask's store then comes after the four
+   float copies, in the call's delay slot, as the retail has it. */
+void func_L07_003E7240(char *arg)
+{
+    char *o;
+    TI128 v[1];
+    TI128 w;
+
+    o = *(char **)(arg + 0x68);
+    *(unsigned short *)(arg + 0x34) = (*(unsigned short *)(arg + 0x34) | 0x41) & 0xEFFF;
+    *(int *)(arg + 0x98) = 0;
+    func_00325D30(arg, o + 0x330);
+    func_002A6C58(arg, 0, 3);
+    v[0] = 0;
+    ((float *)v)[2] = 0.75f;
+    func_00283098(v, v, arg + 0xC0);
+    func_00282CC0(v, v, arg + 0x10);
+    func_0032C700(v, 0, 25, 20, 20, 20, 45, 1, 0.6f, 20.0f, 1, 0, 0, *(int *)(o + 0x338));
+    func_002E5CF8(6, 0, arg);
+    func_00282F20(&w, o + 0x1C0, 0.05000000447034836f);
+    func_002B0A68(arg, 1016, &w, 3.0f, 6.0f, 3.0f, 6.0f, 255);
+}
 
 extern void func_002A7750(int, int, int);
 

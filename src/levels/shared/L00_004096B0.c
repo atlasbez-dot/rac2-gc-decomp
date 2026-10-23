@@ -62,6 +62,14 @@ extern void func_00282CF0_9(char *local, char *first, char *second);
 
 extern void func_00282CC0_15(char *target, char *first, char *local);
 
+extern void func_002AFFD8(char *a0, void *a1, int a2);
+
+extern void func_00282D30(void *a0, void *a1, float f12);
+
+extern void func_L00_00411F48(char *a0);
+
+extern char ref_L00_004117B8_00[];
+
 #ifndef RAC2_T_VEC16_FC936841D
 #define RAC2_T_VEC16_FC936841D
 typedef struct {
@@ -121,7 +129,24 @@ INCLUDE_ASM("asm/levels", func_L00_00410508);
 
 INCLUDE_ASM("asm/levels", func_L00_00410690);
 
-INCLUDE_ASM("asm/levels", func_L00_00410840);
+/* Reads the halfword at +0x1A of the object's node and grades it: 4 at or above 90, 3 above 60,
+   2 above 30, else 1. The two lower bounds stay in variables, which is what keeps them in
+   registers instead of an immediate compare. */
+int func_L00_00410840(char *object)
+{
+    int value = *(short *)(*(int *)(object + 0x68) + 0x1A);
+    int upper = 0x3C;
+    int lower = 0x1E;
+    int result = 1;
+
+    if (value >= 0x5A)
+        result = 4;
+    else if (upper < value)
+        result = 3;
+    else if (lower < value)
+        result = 2;
+    return result;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_00410888);
 
@@ -157,6 +182,33 @@ void func_L00_004110D8(Obj_F23626ad8 *p)
 
 /* func_L00_004115E8 is defined in L00_004096B0-g8.c. */
 
+/* Walks the thirty records of the level's block and, for every record whose +0x18 pointer is
+   set, folds it into a sixteen-byte buffer: the record's own transform, then the scale of its
+   +0x0C word, then its first three words added to the buffer. The block's address differs
+   from level to level, so it takes a per-level name. */
+void func_L00_004117B8(char *a0)
+{
+    char *s0 = ref_L00_004117B8_00;
+    char *s2 = a0;
+    char *p;
+    float buf[4];
+    int i;
+
+    for (i = 0x1D; i >= 0; i--) {
+        if (*(char **)(s0 + 0x18) != 0) {
+            p = *(char **)(s0 + 0x18);
+            func_002AFFD8(p + 0x10, buf, 1);
+            p = *(char **)(s0 + 0x18);
+            func_00282D30(buf, buf, *(float *)(p + 0xC) * 0.0008300250046886504f);
+            p = *(char **)(s0 + 0x18);
+            buf[0] += *(float *)(p + 0) * 0.0009764999849721789f;
+            buf[1] += *(float *)(p + 4) * 0.0009764999849721789f;
+            buf[2] += *(float *)(p + 8) * 0.0009764999849721789f;
+        }
+        s0 = s0 + 0x30;
+    }
+    func_L00_00411F48(s2);
+}
 
 INCLUDE_ASM("asm/levels", func_L00_004118A8);
 

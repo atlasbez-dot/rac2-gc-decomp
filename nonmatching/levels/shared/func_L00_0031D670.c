@@ -15,7 +15,19 @@
    store one call later. Measured with ~15 spellings (named f32* locals for both / one /
    none, cast-at-each-use - which ICEs cc1 in convert_move -, a union with a mode(TI)
    member, f32[4] arrays, one f32[8] buffer, a V4 struct, a named destination local, and
-   both pointer declaration orders): the body never moves. */
+   both pointer declaration orders): the body never moves.
+
+   Wave 8 (agent w8-08) confirms the 152-byte size and the same single difference with
+   ~10 more spellings: the retail's `daddu $s0,$a0,$zero` (the destination) sits in the
+   prologue and `addiu $s1,$sp,0x10` (the right operand's address) in the first call's
+   delay slot, while every candidate gives the right operand $s0 (defined early, right
+   after the copies) and the destination $s1 (defined in that delay slot). Nothing moves
+   it: a named `float *o = (float *)out;` is folded back into the parameter, and the
+   destination pointer is used once per component (four references) while the local
+   pointer has four plus its definition, so the allocator prefers it. What is needed is
+   a source where the destination pointer's pseudo is created BEFORE the local's, with
+   the local still forced into a register - the `float *o = (float *)out;` form has to
+   survive the folding. */
 
 typedef float f32;
 typedef unsigned int u128 __attribute__((mode(TI)));

@@ -1,3 +1,8 @@
+/* Retained plain-C attempt: 152/160 bytes; first difference +0x4.
+ * us: 0/27, pal: 0/27, us2: 0/27.
+ * Profile: -O2 -G0 -ffunction-sections -g.
+ * The ring scan still lacks two retained copies; -g does not improve the existing 152-byte attempt. Next: independent bound/base lifetime evidence.
+ */
 /* func_L00_0032EF10 (160 bytes, 27 places, shared, default profile -O2 -G0)
    -- measured 0 of 27: candidate is 152 bytes, two instructions short.
 

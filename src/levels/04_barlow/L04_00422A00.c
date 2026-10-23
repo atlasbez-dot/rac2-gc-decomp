@@ -68,7 +68,8 @@ void func_L04_0042BF58(u8 *a0) {
 INCLUDE_ASM("asm/levels", func_L04_00434BB0);
 INCLUDE_ASM("asm/levels", func_L04_004389C0);
 INCLUDE_ASM("asm/levels", func_L04_00438B50);
-INCLUDE_ASM("asm/levels", func_L04_00439870);
+/* func_L04_00439870 is defined in L04_00422A00-g8.c (this unit's -G8 profile gives the
+   retail's address forms). */
 INCLUDE_ASM("asm/levels", func_L04_00439950);
 extern void func_40A090(int a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, u8 *a5);
 
@@ -140,6 +141,51 @@ INCLUDE_ASM("asm/levels", func_L04_0044BC90);
 INCLUDE_ASM("asm/levels", func_L04_0044C598);
 INCLUDE_ASM("asm/levels", func_L04_0044D0C0);
 INCLUDE_ASM("asm/levels", func_L04_0044D428);
+extern void func_30E9D8(void *a0);
+extern f32 func_30F468(f32 a, f32 b);
+extern f32 func_30FE88(f32 a, f32 b);
+extern f32 func_30FE40(f32 a, f32 b);
+
+/* Counts the object up, turns it towards the hero and keeps the turn inside
+   a sixty degree limit, then hands the result to the frame helpers. */
+void func_L04_0044D6A0(u8 *a0) {
+    u8 *s1 = *(u8 **)(a0 + 0x68);
+    u8 *v0;
+    f32 f0, f1, f12, f13, lim;
+
+    func_340BB8(a0, s1 + 0x50);
+    func_30E9D8(s1 + 0x2FC);
+    func_30EA08(s1 + 0x302);
+    if (*(u16 *)(a0 + 0x96) <= 0xFFFE)
+        *(u16 *)(a0 + 0x96) = *(u16 *)(a0 + 0x96) + 1;
+    if (a0[0x95] == 2) {
+        v0 = *(u8 **)(s1 + 0x250);
+        f12 = *(f32 *)(v0 + 0x10) - *(f32 *)(a0 + 0x10);
+        f13 = *(f32 *)(v0 + 0x14) - *(f32 *)(a0 + 0x14);
+        lim = 1.047197699546814f;
+        f0 = func_30F468(f12, f13);
+        f0 = func_30FE88(f0, *(f32 *)(a0 + 0xF8));
+        if (lim < f0) {
+            f0 = lim;
+        } else {
+            f1 = -lim;
+            if (f0 < f1)
+                f0 = f1;
+        }
+        if (*(u16 *)(a0 + 0x34) & 0x8000)
+            f0 = -f0;
+        f0 = func_30FE40(f0, *(f32 *)(s1 + 0x2C8));
+        *(f32 *)(s1 + 0x2C8) = f0;
+        if (lim < f0) {
+            *(f32 *)(s1 + 0x2C8) = lim;
+        } else {
+            f1 = -lim;
+            if (f0 < f1)
+                *(f32 *)(s1 + 0x2C8) = f1;
+        }
+    }
+    func_348708(a0, s1 + 0x260, 1, 1, 2.5f);
+}
 INCLUDE_ASM("asm/levels", func_L04_0044D860);
 
 /* subtracts the sub-structure's field from the owner's timer and reports it */

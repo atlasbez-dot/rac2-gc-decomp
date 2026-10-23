@@ -182,6 +182,15 @@ typedef struct L13State {
     int f24C;
 } L13State;
 
+/* The per-entity state: the index at 0x2C0, the kind at 0x2C4 and the partner kind at 0x2CC. */
+typedef struct L13EntState {
+    u8 pad0[0x2C0];
+    s32 f2C0;
+    s32 f2C4;
+    u8 pad1[4];
+    s32 f2CC;
+} L13EntState;
+
 extern u16 *D_L13_001FB420[];
 extern u8 *D_L13_001B291C __attribute__((section(".sdata")));
 extern int D_L13_001B2938 __attribute__((section(".sdata")));
@@ -215,7 +224,54 @@ void func_L13_0040A540(u8 *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L13_0040A638);
+/* Compares the kind at +0x2C4 of the object's state with the kind the pointed-at entity's
+   state carries (+0x2CC for a 0xEA3 entity, +0x2C4 for a 0xEA4 one): 1 when the second is the
+   successor of the first in 0,1,2, 0 when it is the predecessor, and 2 otherwise. */
+s32 func_L13_0040A638(u8 *a0)
+{
+    L13EntState *st = *(L13EntState **)(a0 + 0x68);
+    u8 *e = D_L13_001B291C + (st->f2C0 << 8);
+    s32 kind = *(s16 *)(e + 0xAA);
+    s32 y, x;
+
+    if (kind == 0xEA3) {
+        y = st->f2C4;
+        x = ((L13EntState *)*(u8 **)(e + 0x68))->f2CC;
+    } else if (kind == 0xEA4) {
+        y = st->f2C4;
+        x = ((L13EntState *)*(u8 **)(e + 0x68))->f2C4;
+    } else {
+        x = st->f2C4;
+        y = x;
+    }
+    if (y == x)
+        return 2;
+    if (y == 0) {
+        if (x == 1)
+            return 1;
+    }
+    if (y == 1) {
+        if (x == 2)
+            return 1;
+    }
+    if (y == 2) {
+        if (x == 0)
+            return 1;
+    }
+    if (y == 0) {
+        if (x == 2)
+            return 0;
+    }
+    if (y == 1) {
+        if (x == 0)
+            return 0;
+    }
+    if (y == 2) {
+        if (x == 1)
+            return 0;
+    }
+    return 2;
+}
 
 INCLUDE_ASM("asm/levels", func_L13_0040A720);
 

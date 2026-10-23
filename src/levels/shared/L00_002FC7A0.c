@@ -273,7 +273,32 @@ INCLUDE_ASM("asm/levels", func_L00_00300618);
 
 /* func_L00_003032F0 is matched in L00_003032F0.c (built with -fno-gcse). */
 
-INCLUDE_ASM("asm/levels", func_L00_00303388);
+extern unsigned char D_L00_001C9340[];
+
+extern int func_00283D80(void *, void *, void *);
+
+/* Walks the level's sixteen-byte table entries downwards and returns the one-based
+   index of the first entry the shared test accepts, zero when none does. */
+int func_L00_00303388(unsigned char *object)
+{
+    unsigned char *data = D_L00_001C9340;
+    int i = *(int *)(data + 0xC) - 1;
+
+    if (i >= 0) {
+        unsigned char *table = data + 0x20;
+        unsigned char *p = table + (i << 4);
+        unsigned char *q = table + ((i << 4) + 0x20);
+
+        do {
+            if (func_00283D80(object, p, q) != 0)
+                return i + 1;
+            q -= 0x10;
+            p -= 0x10;
+            i--;
+        } while (i >= 0);
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_00303418);
 

@@ -1,3 +1,8 @@
+/* Retained plain-C attempt: 180/184 bytes; first difference +0x8.
+ * us: 0/27, pal: name absent, us2: 0/27.
+ * Profile: -O2 -G0 -ffunction-sections -g.
+ * The base/walker copy is still coalesced; -g does not improve the existing 180-byte attempt. Next: independent base/walker lifetime evidence.
+ */
 /* func_L00_002B9CA8 (184 bytes, 27 places, shared, default profile -O2 -G0)
    -- measured 0 of 27: candidate is 180 bytes, ONE instruction short.
 

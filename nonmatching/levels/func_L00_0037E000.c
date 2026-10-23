@@ -1,20 +1,6 @@
-/* func_L00_0037E000 (192 bytes, 27 places) - best attempt, NOT MATCHED.
- *
- * Docker-free ruler (scratch/wslcmp.py): "00_aranos_tutorial: 176 bytes, expected 192".
- * The record walk (32 x 0x10 at 0x231340), the key test on the second word, the state tests
- * 0xFE/0xFD on the object's byte 0x20, the 0x1000 bit of its halfword 0x34 and the
- * func_00282948(record + 8) tail are all understood, and the `||` chain with a single
- * `entry->field04 = 0` is the right sense.  Residue:
- *   (a) this cc1 runs the loop DOWNWARDS (`addiu $s1,$zero,0x1F` / `addiu $s1,$s1,-0x1`,
- *       `bne`) where retail counts UP (`daddu $s1,$zero,$zero` / `addiu $s1,$s1,0x1`,
- *       `bnel`), which by itself accounts for the missing instructions;
- *   (b) retail keeps the record pointer in $a0 for the store (`sw $zero,0x4($a0)`, with
- *       `daddu $a0,$s0,$zero` before the first beql), mine stores off $s0;
- *   (c) the 0x1000 test is `beql` here with the store annulled, retail uses `beqz`.
- *
- * To retake: a loop form this cc1 keeps ascending - the descending countdown is the whole
- * 16-byte gap.
- */
+/* Retained C, not matched.
+   Profile: -O2 -G0 -ffunction-sections -fno-strength-reduce.
+   180/192 bytes; 0/27 on USA/PAL/US2. Signed ascending counter retained with -fno-strength-reduce; pointer alias/store allocation and three branch words still differ. Unsigned ascending and nested-guard forms were also measured. */
 
 typedef unsigned char u8;
 typedef unsigned int u32;

@@ -1,9 +1,9 @@
 /* func_L03_003E4588 (near miss, level 03 endako, 244 bytes at 8 places).
  *
- * Checked in the original -G8 unit (src/levels/shared/L03_003C5B28-g8.c): the
+ * Checked in the -G8 sibling (src/levels/shared/L03_003C5B28-g8.c): the
  * candidate is 228 bytes against retail's 244.  The branch structure, the
  * $gp words and floats, the three arms and the two calls are in place; what
- * is missing is retail's spill of the two selected words:
+ * is missing is retail's spill of the selected word pair:
  *
  *   - retail keeps the selected pair on the stack (sw $v0,0($sp) in the arm,
  *     sw $v1,4($sp) in the common tail) and reloads them for the lookup call
@@ -17,6 +17,10 @@
  * pair in memory but stops the two identical arms from being merged, and the
  * volatile pair keeps the second store in the arm instead of the common tail
  * (the project rejects an artificial volatile qualifier anyway).
+ *
+ * Re-measured on 22 October 2026 with the project's rebuilt compiler (the
+ * one that carries -frac2-qcopy, -mno-split-addresses and the other opt-in
+ * switches): the candidate is still 228 bytes, with the same two residuals.
  */
 
 typedef unsigned char u8;

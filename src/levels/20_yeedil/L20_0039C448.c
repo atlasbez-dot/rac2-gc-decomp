@@ -28,7 +28,7 @@ extern char *D_L20_001B2F9C __attribute__((sda));
 
 extern float D_L20_0023E670[];
 
-INCLUDE_ASM("asm/levels", func_L20_0039C448);
+/* func_L20_0039C448 is defined in L20_0039C448-qcopy.c (its copy needs the grouped-copy profile). */
 
 extern char *func_0029EFD0(int);
 
@@ -357,6 +357,6 @@ s32 func_L20_00435178(char *arg0, s32 arg1) {
 
 /* func_L20_004395B0 is in L20_0039C448-g8.c (it reads three floats through $gp); its
    near miss is in nonmatching/levels/func_L20_004395B0.c. */
-INCLUDE_ASM("asm/levels", func_L20_0043D470);
+/* func_L20_0043D470 is defined in L20_0039C448-qcopy.c (its copy needs the grouped-copy profile). */
 
 INCLUDE_ASM("asm/levels", func_L20_0043D4D8);

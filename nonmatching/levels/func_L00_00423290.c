@@ -1,20 +1,31 @@
-/* func_L00_00423290 - 360 bytes, 27 place(s), level 00_aranos_tutorial (and every
-   other level), retail at 0x00423290. Not matched in wave 14: 340 bytes against the
-   retail's 360. The frame (0x60), the seven saved registers, the guard, the twelve
-   calls with their argument lists, the float constant (-1.0) and the call order are
-   the retail's. What is left is the register allocation and the address
-   materialisation:
-     - the retail keeps the hero's facing direction in $s0 and takes the hero's
-       position 0x240 below it with a separate `addiu $s0,$s0,-0x240`; this cc1 folds
-       the -0x240 into the `lq` offset (and a plain `D_00189EA0` symbol gives two
-       `lui` pairs instead of one);
-     - the retail keeps the object in $s2, its +0x60 in $s1 and copies them with a
-       `daddu $s2,$s1,$zero`; this cc1 allocates $s0/$s1/$s2 differently;
-     - the retail materialises the three copy destinations (`addiu $v1,$s2,0xC0 ;
-       sq $v0,0($v1)`) where this cc1 folds the offset into the `sq`.
-   The `mode(TI)` copy through two pointer variables is the pattern that reproduces
-   retail's `lq`/`sq` pair. What would unblock it: the source expression tree, so
-   this cc1 picks the same registers and keeps the copy addresses in registers. */
+/* func_L00_00423290 - NOT MATCHED, best attempt - 360 bytes expected, 27 places.
+ * last check.py line: "func_L00_00423290: 0 of 27 places match (src/levels/shared/L00_004224D0.c)"
+ * with "00_aranos_tutorial: 356 bytes, expected 360" - the body is 356 bytes of the
+ * retail's 360, in a unit built with the opt-in quadword-copy profile
+ * (-frac2-qcopy -frac2-qcopy-barrier, config/cflags.txt).
+ *
+ * What the profile fixed: the five 16-byte copies.  Without it this cc1 folds the
+ * constant offset into the `sq` and the body is 340 bytes; with it the grouped copy
+ * through register addresses gives retail's
+ *
+ *   addiu $v1, $s2, 0xC0 ; lq $v0, 0($s1) ; sq $v0, 0($v1)
+ *
+ * exactly, and the barrier keeps the instructions around the copy on their own side
+ * of it.  All five copies and the twelve calls now sit where the retail has them.
+ *
+ * What is left is one register swap and the four bytes that follow from it: the
+ * retail keeps the object in $s2 and its +0x60 in $s1, and copies the object with
+ * `daddu $s2, $s1, $zero` before it reuses $s1 for the +0x60; this cc1 keeps the
+ * object in $s1 and puts the +0x60 in $s2, with no copy.  The retail's copy is
+ * also what makes the frame 0x60 and the saved registers seven; ours has the same
+ * seven.  Measured: the copy of the object in the source (an explicit `base = obj`)
+ * is folded back by the front end, the order of the five derived pointers
+ * (obj+0x60, obj+0xB0, obj+0xF0, obj+0x160) does not change the allocation, and
+ * neither does the order of the two copies.  What would unblock it: the source
+ * expression tree that keeps the object in two registers at once.
+ *
+ * The first copy's destination is the object's +0x60 (the retail's `sq $v0, 0($s1)`
+ * with $s1 = obj+0x60), not the +0x160; the deposit below says so. */
 
 #include "include_asm.h"
 
@@ -63,7 +74,7 @@ void func_L00_00423290(char *a0)
     func_00282D30(buf0, hero, -1.0f);
     /* The hero's position, 0x240 below the facing direction the call above uses. */
     hero = hero - 0x240;
-    *(V4_F0fba48d3 *)v160 = *(V4_F0fba48d3 *)hero;
+    *(V4_F0fba48d3 *)v60 = *(V4_F0fba48d3 *)hero;
     dst = (V4_F0fba48d3 *)(obj + 0xC0);
     *dst = *(V4_F0fba48d3 *)v60;
     func_00282D30(obj + 0x70, buf0, func_00282DB0_1(v60, buf0));

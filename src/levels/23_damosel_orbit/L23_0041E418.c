@@ -93,7 +93,13 @@ INCLUDE_ASM("asm/levels", func_L23_00426248);
 
 INCLUDE_ASM("asm/levels", func_L23_004265D0);
 
-INCLUDE_ASM("asm/levels", func_L23_004277B0);
+extern void func_L23_004277E8(u8 *);
+extern void func_L23_004278B0(u8 *);
+
+void func_L23_004277B8(u8 *arg0) {
+    func_L23_004277E8(arg0);
+    func_L23_004278B0(arg0);
+}
 
 /* func_L23_004277E8 is matched in L23_0041E418-g8.c */
 

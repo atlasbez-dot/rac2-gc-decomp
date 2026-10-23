@@ -170,9 +170,9 @@ int func_L00_002C3A78(void)
     return result;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002C3BB0);
+/* func_L00_002C3BB0 is built in its dedicated copy-profile unit. */
 
-INCLUDE_ASM("asm/levels", func_L00_002C3E18);
+/* func_L00_002C3E18 is built in its dedicated G8/copy-profile unit. */
 
 INCLUDE_ASM("asm/levels", func_L00_002C40C0);
 
@@ -346,6 +346,6 @@ void func_L00_002CA478(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002CA4E0);
 
-INCLUDE_ASM("asm/levels", func_L00_002CA898);
+/* func_L00_002CA898 is built in its dedicated block-order-profile unit. */
 
 INCLUDE_ASM("asm/levels", func_L00_002CAB08);

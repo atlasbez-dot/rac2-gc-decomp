@@ -25,6 +25,19 @@
  *  - the third argument of func_0027FB40 is a long, so the 0x80F0F0F0 colour
  *    comes out as `ori; dsll; ori`.
  *
+ * Wave 8 re-measured the one remaining difference with ten more spellings
+ * (int/char/short/void/unsigned base, `index*16` against `index<<4`, the
+ * constant first, the address in a local, a 16-byte record array): the order
+ * of the two operands follows the *kind* of the base, not the source.  A
+ * runtime base (a parameter, or the block pointer read through a pointer
+ * variable) gives `addu $2,$4,$2` / `addu $2,$3,$2` - base first, exactly
+ * retail's shape - while a constant base (the symbol's address) goes through
+ * the address pattern and gives `addu $2,$2,$4`, the index first.  Both the
+ * game cc1 and the SDK's ee cc1 do the same.  So the retail's compiler kept
+ * the materialised constant in a register for the add, and this cc1 folds the
+ * address into the address pattern instead; the source cannot ask for the
+ * difference, it depends on the base being a value in a register.
+ *
  * The file lives in src/levels/shared/L00_00358D98-g8.c; the candidate needs
  * that -G8 unit, so it cannot stay in the plain unit.
  */
