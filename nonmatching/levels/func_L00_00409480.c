@@ -19,6 +19,13 @@
  * groupings of the expression give the same reassociated tree, so the order is
  * a property of the compiler's fold, not of the source. The single expression
  * (rather than four statements) is what puts the value in $a2 instead of $v1.
+ * Measured since (wave 8): the left-associative tree IS reachable - at -O1 this
+ * cc1 emits `or $s1,$s1,$v0 ; or $s1,$s1,$v1 ; or $s1,$s1,$a2` exactly like the
+ * retail - but at -O1 the whole body is scheduled differently (the `subu` and the
+ * argument moves move), so -O1 is not a route.  At -O2 neither -fno-gcse nor
+ * -fno-expensive-optimizations nor -O3 changes the tree, and the four
+ * statements give 216 bytes with the argument moves in another order.  The
+ * fold is a property of the -O2 profile.
  */
 
 extern int func_002EF250(float x);

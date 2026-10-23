@@ -68,10 +68,72 @@ void func_L04_002FB920(void) {
     r1_D_0012FCF0 = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L04_0030C4C0);
+typedef int L04Quad __attribute__((mode(TI)));
+
+/* the record the level's spawner builds: flag bytes, a halfword, a float,
+   two sixteen-byte blocks and the fields that follow them */
+typedef struct {
+    u8  field00;
+    u8  field01;
+    u8  field02;
+    u8  field03;
+    u8  pad04[4];
+    u8  field08;
+    u8  field09;
+    u16 field0A;
+    f32 field0C;
+    L04Quad field10;
+    L04Quad field20;
+    f32 field30;
+    f32 field34;
+    u16 field38;
+} L04Record;
+
+/* the second half of the record, at +0x20 */
+typedef struct {
+    u8  pad00[0xC];
+    u32 field0C;
+    f32 field10;
+    f32 field14;
+    u16 field18;
+} L04RecordTail;
+
+/* the record the level's other spawner builds: the same flag bytes, a word
+   and a colour, then a sixteen-byte block and the fields that follow it */
+typedef struct {
+    u8  field00;
+    u8  field01;
+    u8  field02;
+    u8  field03;
+    u32 field04;
+    u8  field08;
+    u8  field09;
+    u16 field0A;
+    u32 field0C;
+    L04Quad field10;
+    u8  pad20[0xC];
+    f32 field2C;
+    L04Quad field30;
+} L04Spawned;
+
+/* the block at +0x30: a sixteen-byte vector and the float inside its last word */
+typedef struct {
+    L04Quad v;
+} L04Vector;
+
+extern void *func_002B9030(s32 kind);
+extern s32 func_00283CF0(f32 value);
+extern s32 func_002A77E0(s32 limit);
+extern void func_00282F20(f32 *dst, f32 *a, f32 len);
+extern void func_00282CF0(f32 *dst, f32 *a, f32 *b);
+
+/* the level's pointer to the byte the record carries in its second flag byte */
+extern u32 ref_L04_00362768_00;
+extern u32 ref_L04_00362940_00;
+
+/* func_L04_0030C4C0 is matched in L04_0030C4C0.c (built with -frac2-qcopy and -g). */
 
 INCLUDE_ASM("asm/levels", func_L04_0030C948);
-
 
 INCLUDE_ASM("asm/levels", func_L04_0030EDE0);
 
@@ -157,7 +219,6 @@ void func_L04_0033CB88(char *p)
 INCLUDE_ASM("asm/levels", func_L04_0033CC00);
 
 INCLUDE_ASM("asm/levels", func_L04_0033D0C0);
-
 
 extern s32 func_002A8600(u32 *out, s32 kind, s32 arg2, s32 arg3);
 extern s32 func_002A86E8(u32 *out, u32 value, s32 arg2, s32 arg3);
@@ -255,7 +316,6 @@ void func_L04_00347AB8(void *a0, void *a1, void *a2, void *a3, f32 f1, f32 f2, f
     *(f32 *)((u8 *)a1 + 8) = v;
 }
 
-
 INCLUDE_ASM("asm/levels", func_L04_003524D0);
 
 INCLUDE_ASM("asm/levels", func_L04_00358868);
@@ -264,9 +324,56 @@ INCLUDE_ASM("asm/levels", func_L04_00358AE8);
 
 INCLUDE_ASM("asm/levels", func_L04_0035F3E0);
 
-INCLUDE_ASM("asm/levels", func_L04_00362768);
+void *func_L04_00362768(void *a0, void *a1, u32 a2, f32 f3) {
+    L04Record *p = (L04Record *)(u32)func_002B9030(0x5E);
+    L04RecordTail *q;
+    L04Quad t;
 
-INCLUDE_ASM("asm/levels", func_L04_00362940);
+    if ((u32)p != 0) {
+        p->field10 = *(L04Quad *)a0;
+        q = (L04RecordTail *)((u8 *)p + 0x20);
+        p->field09 = (u8)(func_00283CF0(2.0f) + 0x40);
+        p->field03 = 0x48;
+        p->field01 = 0;
+        p->field02 = *(u8 *)ref_L04_00362768_00;
+        p->field0C = f3 * 105000.0f;
+        p->field08 = (u8)func_002A77E0(0xFF);
+        p->field0A = (u16)a2;
+        t = *(L04Quad *)a1;
+        p->field20 = t;
+        q->field0C = 0;
+        q->field10 = 0.5f;
+        q->field14 = f3;
+        q->field18 = (u16)(func_002A77E0(2) - 1);
+    }
+    return (u32)p;
+}
+
+void *func_L04_00362940(void *a0, void *a1, u32 a2, f32 f3) {
+    L04Spawned *p = (L04Spawned *)(u32)func_002B9030(0x5F);
+    L04Vector *q;
+    f32 v[4];
+
+    if ((u32)p != 0) {
+        p->field04 = 0x7F003CFF;
+        p->field0C = 0x7F003CFF;
+        p->field09 = (u8)(func_00283CF0(2.0f) + 0x20);
+        p->field03 = 0x48;
+        p->field01 = 3;
+        q = (L04Vector *)((u8 *)p + 0x30);
+        p->field02 = *(u8 *)ref_L04_00362940_00;
+        q->v = *(L04Quad *)a1;
+        *(f32 *)((u8 *)q + 0xC) = f3;
+        p->field10 = *(L04Quad *)a0;
+        func_00282F20(v, (f32 *)q, 0.5f);
+        func_00282CF0((f32 *)((u8 *)p + 0x20), (f32 *)a0, v);
+        p->field0A = (u16)a2;
+        *(f32 *)((u8 *)p + 0x1C) = 0.005f;
+        p->field08 = (u8)(*(u8 *)&p->field0A - 5);
+        p->field2C = 1.0f;
+    }
+    return (u32)p;
+}
 
 INCLUDE_ASM("asm/levels", func_L04_00362A50);
 
@@ -275,7 +382,6 @@ INCLUDE_ASM("asm/levels", func_L04_00363690);
 /* func_L04_00363CA0 is matched in L04_00363CA0.c (built with -frac2-qcopy). */
 
 INCLUDE_ASM("asm/levels", func_L04_00365300);
-
 
 INCLUDE_ASM("asm/levels", func_L04_00378838);
 
@@ -420,7 +526,6 @@ INCLUDE_ASM("asm/levels", func_L04_003A0CE8);
 
 INCLUDE_ASM("asm/levels", func_L04_003A0FC8);
 
-
 INCLUDE_ASM("asm/levels", func_L04_003A1240);
 
 INCLUDE_ASM("asm/levels", func_L04_003A14B8);
@@ -437,7 +542,6 @@ INCLUDE_ASM("asm/levels", func_L04_003A1578);
 INCLUDE_ASM("asm/levels", func_L04_003A15C0);
 
 INCLUDE_ASM("asm/levels", func_L04_003A1868);
-
 
 void func_L04_003A1A48(u8 *dst, u16 *src, s32 count) {
     if (count <= 0)

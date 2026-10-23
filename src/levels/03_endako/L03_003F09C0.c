@@ -245,7 +245,8 @@ void func_L03_003F71E0(u8 *a0, s32 a1) {
     *(s32 *)(a3 + 0x40C) = sel;
 }
 
-INCLUDE_ASM("asm/levels", func_L03_004198B0);
+/* func_L03_004198B0 lives in L03_003F09C0-g8.c (it reaches D_L03_001A8F00
+ * through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L03_00419CA0);
 
@@ -343,7 +344,8 @@ void func_L03_0041F008(u8 *entity, u32 value) {
 
 INCLUDE_ASM("asm/levels", func_L03_0041F048);
 
-INCLUDE_ASM("asm/levels", func_L03_0041F090);
+/* func_L03_0041F090 lives in L03_003F09C0-g8.c (it reaches D_L03_001B1C00
+ * and D_L03_001B1C04 through $gp). */
 
 INCLUDE_ASM("asm/levels", func_L03_0041F178);
 

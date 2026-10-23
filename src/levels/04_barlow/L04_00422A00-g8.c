@@ -102,6 +102,51 @@ extern void func_002ABBB8(void *o, void *a, void *b, f32 f0, f32 f1, s32 i0, s32
                           s32 i7, s32 i8);
 extern void func_0029F338(void *a0);
 
+extern s32 D_L04_001A8F00;
+extern u8 D_001A7A40;
+extern u8 D_L04_001B1DE0;
+extern u8 D_L04_001B1DE1;
+extern f32 D_L04_001B1E00;
+extern f32 D_L04_001B1E04;
+extern f32 D_L04_001B1E08;
+extern void func_3325E0(void *a0, void *a1, void *a2);
+
+/* func_L04_004389C0 needs this unit's -G8 profile (it reads D_001A79F0 through
+   $gp); its C is retained in nonmatching/levels/func_L04_004389C0.c. */
+
+/* The level's list of live objects: the count is at +0x44 and the entries at +0x18C. */
+typedef struct {
+    u8 pad00[0x44];
+    s16 count;
+    u8 pad46[0x18C - 0x46];
+    u32 *entries[16];
+} L04Base004;
+
+extern L04Base004 D_L04_001BD380;
+
+/* Walks the level's list of objects and, for the one with the object's own id, asks the
+   level's helper to clear it and sets the level's three timers. */
+void func_L04_00439870(u8 *arg) {
+    u32 *elem;
+    s32 i;
+
+    if (D_L04_001A8F00 == 2) {
+        if (D_001A7A40 != 0) {
+            for (i = 0; i < D_L04_001BD380.count; i++) {
+                elem = D_L04_001BD380.entries[i];
+                if (*(s16 *)((u8 *)elem + 0xAA) == *(s16 *)(arg + 0xAA)) {
+                    if (D_L04_001B1DE1 == 0) {
+                        func_3325E0(elem, 0, &D_L04_001B1DE0);
+                        D_L04_001B1E00 = 2.75f;
+                        D_L04_001B1E04 = 2.75f;
+                        D_L04_001B1E08 = 2.75f;
+                    }
+                }
+            }
+        }
+    }
+}
+
 /* State 0 arms the object and moves it to state 1; state 1 moves to state 2 once func_002A9640
    finds a match while the state word is clear; state 2 makes the three func_002ABBB8 calls,
    sets bit 2 of byte +0x1E of every entity of the group at +4 and calls func_0029F338. */

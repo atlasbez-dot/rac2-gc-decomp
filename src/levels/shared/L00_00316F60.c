@@ -591,7 +591,7 @@ void func_L00_0032A0E8(void) {
     } while ((s32)current < (s32)end);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0032A1A8);
+/* func_L00_0032A1A8 is matched in L00_0032A1A8.c (built with -frac2-qcopy). */
 
 INCLUDE_ASM("asm/levels", func_L00_0032A258);
 

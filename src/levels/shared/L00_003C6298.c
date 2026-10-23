@@ -55,6 +55,16 @@ extern int func_002E5CF8(int index, int value, void *object);
 
 extern char D_00189EA0[];
 
+extern int func_0027C878(int);
+
+extern float func_00283248(float, float);
+
+extern void func_00283410(void *, void *);
+
+extern void func_00280B90(void *, void *, int);
+
+extern void ref_L00_003CC030_00(char *);
+
 /* Measured partial layouts; original type and game roles are unknown. */
 
 #ifndef RAC2_T_VEC16_FC936841D
@@ -155,6 +165,51 @@ void func_L00_003CBE28(char *p, float scale)
     func_00282D30_2(p + 48, p + 48, scale);
 }
 
+/* Sets the render state of a position: resets a work record, takes the two aim angles from the
+   level's float table, copies the position and the scale into the record and hands it to the
+   level's draw helper. The first call goes to a neighbour that has two identical copies in
+   some levels, so its target is a per-level name. */
+void func_L00_003CC030(char *position, int color, float scale, char *resource, float alpha, int mode, int flag)
+{
+    unsigned char work[0xE0];
+    unsigned int rgba;
+    unsigned long long mode_bits;
+    float first_angle;
+    float second_angle;
+    float distance;
+
+    ref_L00_003CC030_00((char *)work);
+    *(long long *)(work + 0x78) = func_0027C878(mode);
+
+    mode_bits = ((unsigned long long)flag << 2) | 0x0000008000000040ULL;
+    *(long long *)(work + 0x88) = mode_bits;
+    *(long long *)(work + 0x80) = 0x0000FF9000000260ULL;
+
+    rgba = (unsigned int)color + ((unsigned int)resource << 24);
+    *(int *)(work + 0x4C) = rgba;
+    *(int *)(work + 0x48) = rgba;
+    *(int *)(work + 0x44) = rgba;
+    *(int *)(work + 0x40) = rgba;
+    *(long long *)(work + 0x70) = 0;
+
+    *(int *)(work + 0xDC) = 0;
+    first_angle = func_00283248(D_L00_001B8C80.x_140 - *(float *)(position + 0),
+                                D_L00_001B8C80.y_144 - *(float *)(position + 4));
+    *(float *)(work + 0xD8) = first_angle;
+
+    distance = func_00282E80(position, &D_L00_001B8C80.x_140);
+    second_angle = func_00283248(distance, D_L00_001B8C80.z_148 - *(float *)(position + 8));
+    *(float *)(work + 0xD0) = alpha;
+    *(float *)(work + 0xD4) = -second_angle;
+
+    func_00283410(work + 0x90, work + 0xD0);
+    *(float *)(work + 0xC0) = *(float *)(position + 0);
+    *(float *)(work + 0xC4) = *(float *)(position + 4);
+    *(float *)(work + 0xC8) = *(float *)(position + 8);
+    *(float *)(work + 0xCC) = 1.0f;
+    func_L00_003CBE28((char *)work, scale);
+    func_00280B90(work, work + 0x90, 0);
+}
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L00_003CC6D8(Vec16_Fc936841d *object, int index)

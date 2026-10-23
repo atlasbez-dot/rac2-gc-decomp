@@ -280,7 +280,40 @@ INCLUDE_ASM("asm/levels", func_L05_003CFF90);
 
 INCLUDE_ASM("asm/levels", func_L05_003D02C8);
 
-INCLUDE_ASM("asm/levels", func_L05_003D0320);
+extern int D_L05_00221D10[];
+
+extern char *D_L05_001B2614 __attribute__((sda));
+
+extern void func_37AEC0(char *, int);
+
+extern float func_332C18(void);
+
+extern void func_33B330(void *, float, float, float);
+
+/* Gives the object its reach: the table's entry for the object's id picks the record, and
+ * the record takes the cone the object was given. */
+void func_L05_003D0320(char *obj)
+{
+    char *sub = *(char **)(obj + 0x68);
+    char *table;
+    float a, b, c;
+
+    *(unsigned char *)(obj + 0x20) = 1;
+    *(unsigned short *)(obj + 0x34) = *(unsigned short *)(obj + 0x34) | 0x100;
+    *(int *)(func_379CA0(obj) + 0x148) = 1;
+    func_37AEC0(obj, 1);
+    table = D_L05_001B2614 + D_L05_00221D10[0] * 128;
+    *(int *)(sub + 0x1BC) = -1;
+    *(int *)(sub + 0x1C0) = -1;
+    *(float *)(sub + 0x180) = 1.0f;
+    *(int *)(sub + 0x1B8) = 0;
+    *(float *)(obj + 0x2C) = 0.06f;
+    a = func_332B50(0.0f, *(float *)table);
+    b = func_332C18();
+    c = func_332C18();
+    func_33B330(obj + 0x10, a, b, c);
+    func_306630(obj + 0x10, table + 0x30, obj + 0x10);
+}
 
 INCLUDE_ASM("asm/levels", func_L05_003D0538);
 

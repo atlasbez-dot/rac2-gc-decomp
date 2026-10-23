@@ -103,7 +103,10 @@ void func_L11_00425A50(char *object)
 extern char *D_L11_001FC420[] __attribute__((sda));
 extern int D_L11_001B359C __attribute__((sda));
 
-/* walks the object's linked entry list and bumps the hit counters on the two kinds it watches */
+/* func_L11_00425AF8: 228 bytes against retail's 228, and every branch target is
+   retail's; the kind byte and the 0xFF constant land in $v0/$v1 the other way round,
+   and retail's three annulling branches (bltzl/bltzl/bnel) come out as plain ones.
+   Deposited in nonmatching/levels/func_L11_00425AF8.c. */
 INCLUDE_ASM("asm/levels", func_L11_00425AF8);
 
 extern char *func_0032F000(char *p, int a1, int a2);

@@ -132,14 +132,54 @@ void func_L02_00329C48(void *arg0, TI128 *arg1) {
 
 INCLUDE_ASM("asm/levels", func_L02_0032B468);
 
-extern void func_L02_0032E3B0(void *a0, void *a1);
+extern int func_L02_0032E3B0(void *a0, float *a1, int a2);
 
-/* Forward the call with the second pointer advanced by one record. */
+/* The shared lookup takes the record index as a third argument; the retail wrapper hands it
+   only two, so the call goes through a two-parameter prototype. */
 void func_L02_0032E390(void *a0, void *a1) {
-    func_L02_0032E3B0(a0, (char *)a1 + 0x10);
+    ((int (*)(void *, void *))func_L02_0032E3B0)(a0, (char *)a1 + 0x10);
 }
 
-INCLUDE_ASM("asm/levels", func_L02_0032E3B0);
+extern void func_00283410(float *matrix, float *quat);
+extern void func_00283698(void *dst, void *src);
+extern void func_00282CF0(float *out, const float *a, const float *b);
+extern float func_00283248(float a, float b);
+
+int func_L02_0032E3B0(void *object, float *target, int index) {
+    float quat[4];
+    float vec[4];
+    float mat[16];
+    float best;
+    int count;
+    short *p;
+    char *entity;
+
+    if (index == -1) {
+        index = (int)(unsigned char)*(char *)((char *)object + 0x21);
+        if (index == -1)
+            return 0;
+    }
+    best = 0.0f;
+    count = 0;
+    func_00282C88(quat);
+    quat[2] = func_00283248(target[0] - *(float *)((char *)object + 0x10),
+                                   target[1] - *(float *)((char *)object + 0x14));
+    func_00283410(mat, quat);
+    func_00283698(mat, mat);
+    p = (short *)D_L02_001FC060[index];
+    do {
+        entity = D_L02_001B359C + ((*(unsigned short *)p & 0x7FFF) << 8);
+        if (entity[0x20] >= 0 && entity != (char *)object) {
+            func_00282CF0(vec, (float *)(entity + 0x10), (float *)((char *)object + 0x10));
+            func_00283098(vec, vec, mat);
+            if (best < vec[1])
+                count--;
+            else
+                count++;
+        }
+    } while (*p++ >= 0);
+    return count;
+}
 
 INCLUDE_ASM("asm/levels", func_L02_0032E508);
 

@@ -183,3 +183,63 @@ INCLUDE_ASM("asm/levels", func_L07_003F6CF0);
 
 /* Feeds the four 0xA8 ids to the shared geometry pass. */
 INCLUDE_ASM("asm/levels", func_L07_0040F6B8);
+
+extern f32 func_2E49C8(f32 a, f32 b);
+
+extern f32 func_2E5360(f32 a, f32 b);
+
+extern void func_3144F0(void *a0, void *a1, f32 a2, f32 a3, f32 a4, f32 a5, s32 a6);
+
+/* The two level floats the scaling uses; the pointers are reached absolutely. */
+extern f32 D_L07_001B17D4 __attribute__((sda));
+
+extern f32 D_L07_001B17D8 __attribute__((sda));
+
+extern u8 *D_L07_001B9250 __attribute__((nosda));
+
+extern u8 *D_L07_001ADAAC __attribute__((nosda));
+
+extern u8 D_L07_001B31A9;
+
+/* Steers the object's two angles: the yaw toward the argument, the pitch from the shared
+   record, and the two scaled fields of the state record. */
+void func_L07_0040F468(u8 *a0)
+{
+    u8 *s0;
+    u8 *s1;
+    u8 *s2;
+    u8 *v1;
+    u8 *v0;
+    f32 *p;
+    f32 t;
+    f32 r;
+    f32 q;
+    f32 f20;
+    f32 f21;
+    f32 f22;
+
+    v1 = D_L07_001B9250;
+    if (*(s16 *)(v1 + 0x86) != 0) {
+        return;
+    }
+    v0 = D_L07_001ADAAC;
+    if (v0 == 0) {
+        return;
+    }
+    f22 = 3.14159274f;
+    s0 = *(u8 **)(v1 + 0x70);
+    s1 = *(u8 **)(a0 + 0x68);
+    p = (f32 *)(s0 + 0x160);
+    r = func_2E5318(*(f32 *)(v0 + 0xF8), f22);
+    s2 = s0 + 0x1C0;
+    q = func_2E49C8(p[0], p[1]);
+    t = func_2E5360(r, q);
+    f21 = D_L07_001B17D4 * 0.0000048481375f;
+    f20 = D_L07_001B17D8 * 0.000290888245f;
+    if (D_L07_001B31A9 == 0) {
+        t = func_2E5318(t, f22);
+    }
+    func_3144F0(&t, s1 + 0x1A8, 0.0f, f21, f21, f20, 0);
+    *(f32 *)(s2 + 0x1C) = 1.0f;
+    *(f32 *)(s2 + 0x14) = -*(f32 *)(s1 + 0x1A8);
+}

@@ -1,5 +1,19 @@
 /* from src/levels/shared/L00_003F8E08-g8.c: C that compiles close to the retail's bytes
-   but does not match; needs a -G8 unit (the body reads level data through $gp). */
+   but does not match; needs a -G8 unit (the body reads level data through $gp).
+
+   Measured in wave 8: with the opt-in quadword-copy profile
+   (-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier) the body is 208
+   bytes against the retail's 212 (204 in the default -G0 profile).  What is left is
+   the address of the two globals and the register of the product:
+     retail: lui $a0,0x14 ; lbu $v0,-0x6A7F($a0)          (the byte at 0x00139581)
+             lui $v1,0x26 ; addiu $v1,$v1,0x2570 ; mult $v0,$a1 ; addu $v0,$v0,$v1
+     ours:   lui $v1,%hi(D_00139581) ; addiu %lo ; lbu $t0,0(%v0)
+             lui $v0,%hi(D_L00_00262570) ; addiu %lo ; mult $t0,$a0 ; addu $v0,$v0,$t0
+   so the retail loads the boot's byte through the one-register form (the %hi in a
+   register, the %lo as the displacement) and keeps the table's base in a register of
+   its own, while this cc1 materialises the full address of both globals and puts the
+   product in $t0.  The two globals are declared as arrays here; a scalar declaration
+   is the next thing to try. */
 
 /* The body: the object keeps a pointer to a table of 0xE0-byte records at +0x68; the
    record the boot's byte at 0x00139581 picks supplies one float; the new object is

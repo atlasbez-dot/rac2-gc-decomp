@@ -160,7 +160,47 @@ INCLUDE_ASM("asm/levels", func_L08_003D3E00);
 
 INCLUDE_ASM("asm/levels", func_L08_003D3EF8);
 
-INCLUDE_ASM("asm/levels", func_L08_003D7E68);
+extern f32 func_3279B8(void);
+
+extern f32 func_3278F0(f32, f32);
+
+extern int func_327898(int, int);
+
+extern f32 func_2FA3C8(f32);
+
+extern f32 func_2FA3E0(f32);
+
+extern void func_347A38(void *, int, int, f32, f32, int);
+
+/* five draws of a random point around the object: a random angle and radius,
+   the object's own position added, and the height the driver reads as the
+   third component; each point goes to func_347A38 */
+void func_L08_003D7E68(void *arg0) {
+    f32 vec[4];
+    f32 t;
+    f32 f20, f21, f22, f23;
+    void *s3;
+    int count;
+    int i;
+
+    s3 = *(void **)((char *)arg0 + 0x68);
+    i = 4;
+    do {
+        i--;
+        f20 = func_3279B8();
+        f21 = func_3278F0(0.0f, 0.8f);
+        f23 = func_3278F0(0.0f, 3.5f);
+        f22 = func_3278F0(3.5f, 8.7f);
+        count = func_327898(100, 180);
+        vec[0] = func_2FA3C8(f20) * f21;
+        t = func_2FA3E0(f20) * f21;
+        vec[2] = 0.0f;
+        vec[1] = t;
+        func_2F9DF0(vec, vec, (f32 *)((char *)arg0 + 0x10));
+        vec[2] = *(f32 *)((char *)s3 + 0x434) + 0.025f;
+        func_347A38(vec, 0x38002028, 0x2020, f23, f22, count);
+    } while (i >= 0);
+}
 
 INCLUDE_ASM("asm/levels", func_L08_003D7FB8);
 

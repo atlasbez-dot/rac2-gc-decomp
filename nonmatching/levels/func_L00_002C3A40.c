@@ -1,17 +1,39 @@
 /* func_L00_002C3A40 (56 bytes, 27 places) -- NEAR MISS, not integrated.
-   state: the whole function is `s0 = 0xC` before the call, `if (state == 2) s0 = 0`,
-   `return s0`, but this cc1 if-converts the conditional assignment: every shape below
-   compiles to 40-44 bytes with `xori/movz` instead of retail's
-     002C3A4C  jal  func_2C3A78
-     002C3A50  addiu $s0,$zero,0xC     <- in the jal delay slot
-     002C3A58  addiu $v0,$zero,0x2
-     002C3A5C  beql $v1,$v0, . + 4 + (0x1 << 2)
-     002C3A60  daddu $s0,$zero,$zero   <- the conditional assignment in the slot
-     002C3A64  daddu $v0,$s0,$zero
-   Six shapes tried in one call, all 40 or 44 bytes: `int result = 0xC;` before the call
-   with `if (func() == 2) result = 0;`, the if/else form, the ternary, the early-return
-   form, a switch on the state, and the state latched into a local first. The SDK 2.9-ee
-   profile (no movz patterns) is the obvious next idea but no level file uses it and the
-   compiler is not provisioned in this worker's volume.
-   Retail keeps the value in a callee-saved register across the call, which is what the
-   source must force; `movz` means cc1 proved the constant rematerialisable. */
+   Wave 8 w8-10: the if-conversion wall of wave 5 w12 is confirmed and the retail's
+   shape is now fully decoded.
+
+   The retail body is: `s0 = 12` materialised in the `jal` delay slot, then
+   `if (result == 2) s0 = 0;` and `return s0`. The conditional assignment sits in the
+   delay slot of a branch-likely `beql $v1,$v0` (the state is compared with 2 held in
+   $v0), and the slot's `daddu $s0,$zero,$zero` runs on the taken path (an integer
+   branch-likely executes its slot when the branch is TAKEN). So the C is
+   `int r = 12; if (f() == 2) r = 0; return r;` with the value held in a callee-saved
+   register across the call.
+
+   Measured here (four source forms, all 40 or 44 bytes):
+   - `int r = 12; if (f() == 2) r = 0; return r;` -> 44 bytes;
+   - the same with the result latched in a local first -> 44 bytes;
+   - the two-goto/two-return spelling of section 16 of docs/MATCHING-BLOCKERS.md ->
+     40 bytes;
+   - every form goes through the if-conversion: `xori $v0,$v0,0x2` + `movz $v1,$zero,$v0`,
+     the value 12 rematerialised after the call, no $s0 and no frame.
+   The branch-likely form is reachable from ordinary C (see the matched
+   func_L23_0042AC70, whose `beql` carries the epilogue restore in its slot), so the
+   wall is the if-conversion, not the branch-likely: the assignment has to survive as a
+   branch for the constant 12 to stay in a callee-saved register across the call.
+
+   What would unblock it: a source shape that keeps the 12 in a register across the
+   call AND keeps the conditional assignment as a branch - a memory destination keeps
+   the branch (section 3) but the retail's destination is a register, and this cc1 has
+   no option to turn the if-conversion off. */
+
+extern int func_L00_002C3A78(void);
+
+int func_L00_002C3A40(void)
+{
+    int r = 12;
+
+    if (func_L00_002C3A78() == 2)
+        r = 0;
+    return r;
+}

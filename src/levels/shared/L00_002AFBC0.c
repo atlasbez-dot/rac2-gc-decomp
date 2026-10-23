@@ -189,6 +189,35 @@ extern D00189E20_Overlay D_00189E20;
 
 extern void func_002AA2E8(float *, float, float);
 
+/* The level's own dispatch table: 31 absolute code addresses, five of them (the cases
+ * 14, 26, 27, 43 and 44) pointing at the arm that writes the two shorts and the rest at
+ * the return.  It lives in the level's data, so it is named by its address. */
+extern void *D_L00_002A00A0[31];
+
+/* Dispatches on the argument through the level's table: the five listed cases write
+ * 0x46 at +0x1FC and 3 at +0x24F4 of the resident block, the other twenty-six and every
+ * argument out of the range only return. */
+void func_L00_002B1308(int a0)
+{
+    /* Keeps the two arms alive: the addresses land in the discarded .data. */
+    static void *cases[31] = {
+        &&arm, &&ret, &&ret, &&ret, &&ret, &&ret, &&ret, &&ret,
+        &&ret, &&ret, &&ret, &&ret, &&arm, &&arm, &&ret, &&ret,
+        &&ret, &&ret, &&ret, &&ret, &&ret, &&ret, &&ret, &&ret,
+        &&ret, &&ret, &&ret, &&ret, &&ret, &&arm, &&arm
+    };
+
+    if ((unsigned int)(a0 - 14) < 31) {
+        goto *D_L00_002A00A0[a0 - 14];
+    } else {
+        goto ret;
+    }
+arm:
+    D_00189E20.b = 3;
+    D_00189E20.a = 0x46;
+ret:
+    return;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_002B1350);
 

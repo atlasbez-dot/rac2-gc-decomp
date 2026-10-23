@@ -1,11 +1,32 @@
-/* func_L00_003B0AB0, 108 bytes, 27 placements.
-   Nearest: 26 of 27 instructions byte-identical and size exact (108).
-   Last line of tools/check.py: "00_aranos_tutorial: instruction at +0x0 differs"
-   Remaining difference: the byte index travels in $a3 and the loaded tag in $a2
-   (retail: index in $a2, tag in $v0), which flips `bnel $v0,$a2` into
-   `bnel $a2,$a3`.  Writing the comparison as `c == s->f17` instead moves the
-   index to $a2 and the tag to $v0 (registers right) but flips the branch back
-   to `bnel $a2,$v0`; the two spellings trade one difference for the other. */
+/* func_L00_003B0AB0 - NON MATCHEE (wave 8, agent w8-09).
+ *
+ * Nearest: 26 of 27 instructions byte-identical and size exact (108).
+ * Last line of tools/check.py: "00_aranos_tutorial: instruction at +0x48 differs"
+ *
+ * The only difference is the operand order of the branch: retail compares the
+ * loaded tag in $v0 with the index in $a2 (`bnel $v0,$a2`), this cc1 compares
+ * the index in $a2 with the tag in $v0 (`bnel $a2,$v0`).  Everything else -
+ * `andi $a2,$a0,0xFF`, the three-operand `mult $v1,$a2,$v1` (the R5900
+ * three-register multiply: $v1 = index * 0x1C), the four absolute
+ * materialisations of 0x0023BB78 and the call to func_32FC10 with
+ * (object, &object->f20, index) - reproduces.
+ *
+ * Measured: this cc1 emits the comparison in source order and gives the
+ * first operand of the comparison the $a2 argument register.  So
+ *
+ *   - `c == s->f17`  -> index in $a2, tag in $v0, branch `bnel $a2,$v0`
+ *                       (the registers are right, the branch order is not);
+ *   - `s->f17 == c`  -> tag in $a2, index in $a3, branch `bnel $a2,$a3`
+ *                       (the branch order is right, the registers are not, and
+ *                       the call then passes the tag in $a2 instead of the
+ *                       index, so the body is also wrong).
+ *
+ * The `&&` spelling, the byte-pointer spelling of the tag, a local copy of the
+ * tag, a prototyped callee and the natural order all give the same two
+ * results.  The blocker is the allocator, not the spelling: the index has to
+ * stay in $a2 (it is the third call argument) while the comparison has to name
+ * the tag first.
+ */
 
 typedef struct SUB_3B0AB0 {
     char pad0[0x17];

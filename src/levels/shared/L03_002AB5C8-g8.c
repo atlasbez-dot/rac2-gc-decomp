@@ -326,3 +326,54 @@ join:
         }
     }
 }
+
+extern float func_00282DF0(float *);
+
+extern float func_00283248(float, float);
+
+extern float func_00283B98(float, float);
+
+/* The level's own copies of the helpers this function calls, at another address in every level
+   that has them. */
+extern void ref_L03_003C4240_00(unsigned char *, float);
+
+extern void ref_L03_003C4240_01(unsigned char *, void *, int, float, float, float);
+
+extern int ref_L03_003C4240_02(void *, void *, void *);
+
+extern void ref_L03_003C4240_03(void *, void *);
+
+/* Two level constants read through $gp: they sit in the resident image at another address in
+   every level that has this function. */
+extern float ref_L03_003C4240_04 __attribute__((sda));
+
+extern float ref_L03_003C4240_05 __attribute__((sda));
+
+/* Turns the object with its state: it stops when the state has no time left, otherwise it
+   spreads the turn over the frame and lets the state and the object react to it. */
+void func_L03_003C4240(unsigned char *a0) {
+    unsigned char *s1 = *(unsigned char **)(a0 + 0x68);
+    unsigned char *v;
+    float f;
+    float g;
+
+    f = func_00282DF0((float *)(s1 + 0x1B0));
+    if (f <= 0.0f)
+        return;
+    g = func_00282DF0((float *)(s1 + 0x1B0));
+    if (g > 0.016666668f) {
+        f = func_00283248(*(float *)(s1 + 0x1B0), *(float *)(s1 + 0x1B4));
+        f = func_00283B98(f, 3.14159274f);
+        ref_L03_003C4240_00(a0, f);
+    }
+    ref_L03_003C4240_01(a0, a0 + 0x10, 0x10, *(float *)(a0 + 0xF8),
+                        ref_L03_003C4240_05 * 0.016666668f,
+                        ref_L03_003C4240_04 * 0.00027777778f);
+    ref_L03_003C4240_02(*(void **)(s1 + 0x220), a0 + 0x10, s1 + 0x368);
+    v = *(unsigned char **)(s1 + 0x194);
+    if (v != 0) {
+        if (*(short *)(v + 0xAA) == 0x940 || *(short *)(v + 0xAA) == 0x93C ||
+            *(short *)(v + 0xAA) == 0x964)
+            ref_L03_003C4240_03(*(unsigned char **)(s1 + 0x194), a0 + 0x10);
+    }
+}

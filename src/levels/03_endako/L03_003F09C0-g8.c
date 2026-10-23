@@ -3,6 +3,7 @@
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
+typedef signed short s16;
 typedef signed int s32;
 typedef float f32;
 
@@ -31,6 +32,14 @@ extern void func_002B0990(void *entity, float *target, float f, int a, int b);
 
 /* The level's own float, reached through $gp. */
 extern float D_L03_001B1BF0 __attribute__((sda));
+
+/* Two more of the level's floats, at +0x2C10 and +0x2C14 from $gp. */
+extern f32 D_L03_001B1C00 __attribute__((sda));
+extern f32 D_L03_001B1C04 __attribute__((sda));
+
+extern void func_002AB650(u8 *a0);
+extern s32 func_002B38B8();
+extern void func_L00_003294F0(unsigned char *entity, int enabled);
 
 /* What the engine builds a particle from: two words, then two floats. */
 typedef struct {
@@ -212,4 +221,108 @@ void func_L03_0041DFA8(u8 *entity) {
     }
     if (entity[0x31] != 0)
         func_002B0990(entity, (float *)(state + 0x360), 2.5f, 5, 1);
+}
+
+/* Sets the entity up for a shot: the state's own counter, its two blend rates and the
+ * frame the shot was prepared on. */
+s32 func_L03_0041F090(u8 *entity) {
+    u8 *state = *(u8 **)(entity + 0x68);
+    f32 f0;
+    f32 f1;
+    s32 v0;
+
+    if (*(s32 *)(state + 0x284) == -1) return 0;
+    if (entity[0x20] != 9) return 0;
+
+    if (func_002B38B8() == 0) {
+        entity[0xA8] = 0xFF;
+        f1 = D_L03_001B1C00 * 0.00027777778450399637f;
+        f0 = D_L03_001B1C04 * 0.016666668f;
+        v0 = *(s16 *)(state + 0x24);
+        *(u16 *)(state + 0x98) = 0;
+        *(f32 *)(state + 0x138) = f0;
+        *(f32 *)(state + 0x33C) = 6.0f;
+        *(f32 *)(state + 0x134) = f1;
+        *(f32 *)(state + 0x130) = f1;
+        *(f32 *)(state + 0x20) = (f32)v0;
+        entity[0xA8] = 0xFF;
+        *(u32 *)(entity + 0x98) = *(u32 *)(*(u8 **)(entity + 0x24) + 0x10);
+        func_002AB650(entity);
+        func_L00_003294F0(entity, 1);
+        return 1;
+    }
+    return 0;
+}
+
+/* The level's own runtime block: two counters the engine writes and the two
+ * pointers it keeps. */
+typedef struct {
+    u8 pad00[0x30];
+    s32 field30;
+    s32 field34;
+    u8 pad38[0x158];
+    u8 *field190;
+    u8 *field194;
+} L03Block;
+
+extern L03Block D_L03_001BD680;
+
+/* The level's mode word, reached through $gp. */
+extern s32 D_L03_001A8F00 __attribute__((sda));
+
+extern void func_3133D0(u8 *a0, s32 a1, s32 a2, s32 a3);
+extern s32 func_3240F0(u8 *a0);
+extern void func_324138(u8 *a0, s32 a1);
+
+void func_L03_004198B0(u8 *entity) {
+    u8 *state = *(u8 **)(entity + 0x68);
+    s32 old, next, base, rem;
+    s32 arg1, arg2, arg3;
+
+    switch (entity[0x20]) {
+    case 0:
+        entity[0x30] = 0xFF;
+        entity[0x20] = 1;
+        return;
+    case 1: {
+        s32 mode = D_L03_001A8F00;
+
+        if (mode == 2) {
+            if (D_L03_001BD680.field30 == 5) {
+                if (D_L03_001BD680.field34 < 10) {
+                    *(u16 *)(D_L03_001BD680.field194 + 0x7C) = 0x3F;
+                }
+            }
+            if (D_L03_001BD680.field30 == 7) {
+                u8 *obj = D_L03_001BD680.field190;
+                if (D_L03_001BD680.field34 < 0x427) goto other;
+                if (D_L03_001BD680.field34 >= 0x471) goto other;
+                old = *(s32 *)state;
+                next = old + 1;
+                *(s32 *)state = next;
+                base = (next > -1) ? next : old + 4;
+                base = (base >> 2) << 2;
+                rem = next - base;
+                if (rem < 3) {
+                    arg1 = 0;
+                    arg2 = 0;
+                    arg3 = 0;
+                } else {
+                    arg1 = 0xB0;
+                    arg2 = 0xB0;
+                    arg3 = 0xF0;
+                }
+                func_3133D0(obj, arg1, arg2, arg3);
+                return;
+            other:
+                if (D_L03_001BD680.field34 < 0x44C) {
+                    *(s32 *)(state + 4) = func_3240F0(obj);
+                } else {
+                    func_324138(obj, *(s32 *)(state + 4));
+                }
+            }
+        }
+        return;
+    }
+    }
 }

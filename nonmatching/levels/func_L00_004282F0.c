@@ -1,22 +1,37 @@
-/* func_L00_004282F0 (216 bytes, 27 places) - only the TI128 copy's two `addiu` are left.
- * Measured with scratch/wslcmp.py: "00_aranos_tutorial: 208 bytes, expected 216"; the same
- * body with `&D` on unsized arrays measured 220.  `check.py` not run (the size is wrong).
+/* func_L00_004282F0 (216 bytes, 27 places) - the TI128 destination wall is CROSSED with
+ * -frac2-qcopy and the flags -G8, but the prologue and the schedule still differ.
  *
- * Everything else reproduces retail word for word, and two of the three fixes are measured:
- * (a) the three $gp arguments (`addiu $a1,$gp,0x25F0` / 0x2608 / 0x2620) need SIZE on the
- * objects - an incomplete `extern u8 D[]` goes out `lui`+`addiu` and costs one word each,
- * a sized 8-byte object with `sda` reaches the bare GPREL16 addiu;
- * (b) the 0x001B8F10 store is fine as a literal (its low half has bit 15 clear, which is the
- * case the sixth wave says the literal serves);
- * (c) the calls, their argument registers and the `mov.s $f12,$f20` placement all match.
- * The residue is `*(TI128 *)(p+0xB0) = *(TI128 *)(p+0x80);`: retail materialises both
- * pointers (`addiu $a0,$s0,0xB0` then `addiu $v1,$s0,0x80`) and copies with
- * `lq $v0,0x0($v1)` / `sq $v0,0x0($a0)`; this cc1 folds the two displacements into the
- * lq/sq (`lq $v0,0x80($s0)` / `sq $v0,0xB0($s0)`), 2 words short.  Naming both addresses
- * through pointer locals (`u8 *dst = p + 0xB0; u8 *src = p + 0x80;`) did not stop the fold.
- * To land it: a spelling that keeps the two pointer computations alive (worker 02's TI128
- * destination finding, confirmed here on a 27-place row).
- */
+ * Measured with scratch/wslcmp.py, flags "-O2 -G8 -ffunction-sections -frac2-qcopy":
+ * "00_aranos_tutorial: instruction at +0xc differs" - the size is EXACT (216 bytes / 54
+ * instructions) and every instruction of the body is the right one; only the registers
+ * and the order of a few instructions differ.
+ *
+ * What -frac2-qcopy buys: the quadword copy now materialises BOTH pointers and copies
+ * at offset 0, like retail:
+ *     addiu $a0, $s0, 0xB0 ; addiu $v1, $s0, 0x80 ; lq $v0,0($v1) ; sq $v0,0($a0)
+ * Without it this cc1 folds both displacements into the lq/sq (measured 208 bytes); the
+ * switch is in the master cc1, -frac2-qcopy-barrier is NOT (rejected).
+ *
+ * Two fixes measured on the way (both kept below):
+ *  - the three $gp arguments need SIZE on the objects: an incomplete `extern u8 D[]`
+ *    goes out `lui $a1,0x0 ; addiu $a1,$a1,0x0` and costs a word each, a sized 8-byte
+ *    object with `sda` reaches the bare GPREL16 addiu. That is why this row needs -G8.
+ *  - 0x001B8F10 is the literal case: the retail holds `lui $v0,0x1C` and uses the low
+ *    half as the displacement of the store.
+ *
+ * The residue, in the order it appears:
+ *  - the prologue's save order: retail `sd $s0 / sd $s2 / sd $s1 / sd $ra`, this cc1
+ *    `sd $s0 / sd $s1 / sd $s2 / sd $ra` (the registers themselves are the same);
+ *  - the materialisation of the constant address: retail `lui $v0,0x1C` and
+ *    `sh $zero,-0x70F0($v0)` in the delay slot of the call, this cc1 `lui $at,0x1C`,
+ *    the store before the call and $at instead of $v0;
+ *  - `mtc1 $zero,$f20` (the 0.0f of the blend weight): retail sets it after the copy
+ *    (+0x58), this cc1 sets it right after the first call (+0x14);
+ *  - the copy itself sits after the first call's argument setup here, before it there.
+ *
+ * Merging the argument and the sub-object into ONE C variable (so that the retail's
+ * reuse of $s0 is reproduced) was measured too: it permutes the callee-saved registers
+ * (param $s2, sub $s1 here against param $s1, sub $s2) and does not fix the schedule. */
 typedef unsigned char u8;
 typedef signed short s16;
 typedef float f32;

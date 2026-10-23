@@ -31,6 +31,15 @@
  * the base re-derived inside the body, the walk pointer as `int *` against byte offsets,
  * with/without the `if (count > 0)` guard (the guard must go - retail stores the base
  * unconditionally, in the `blez` delay slot).
+ *
+ * Wave 8 re-measurement with the line above (the default profile gives 200 bytes, not 192):
+ * the size is exact and the residual is three register differences, not one.  The first
+ * block's base lands in `$v0` instead of `$v1` and its publish is materialised whole
+ * instead of split (retail `lui $v0,0x1C ; sw $v1,-0xE00($v0)`, the low half of 0x1BFF200
+ * fits the signed displacement); the second block publishes the base before the count
+ * test instead of in the `blez` delay slot; the third block's counter lands in `$a2`
+ * instead of `$a0`.  The order of the count read and the publish is the lever to try next:
+ * retail reads the count first and lets the scheduler drop the publish into the delay slot.
  */
 
 typedef unsigned char u8;

@@ -274,7 +274,6 @@ void func_L00_002D3208(void) {
 }
 
 
-
 /* The matrix the level state keeps 0x90 bytes in; the state itself is 0x90 below it. */
 extern char D_00189EB0[];
 

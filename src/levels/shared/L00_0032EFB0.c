@@ -82,7 +82,7 @@ void func_L00_00336548(char *p)
 
 INCLUDE_ASM("asm/levels", func_L00_00338AE0);
 
-INCLUDE_ASM("asm/levels", func_L00_00338D28);
+/* func_L00_00338D28 is matched in L00_00338D28.c (built with -frac2-qcopy). */
 
 /* Updates a record: calls two helpers on the sub-object at +0x20 (float argument 0.975f), advances the float at +0x0C by 14700.0f, adds the byte at +0x30 into the byte at +0x08, then adds 0xFE000000 to the word at +0x04 and calls a third helper when the result is negative. */
 void func_L00_00338DF8(char *a0)
@@ -104,7 +104,7 @@ void func_L00_00338DF8(char *a0)
 
 INCLUDE_ASM("asm/levels", func_L00_0033AA40);
 
-INCLUDE_ASM("asm/levels", func_L00_0033BA68);
+/* func_L00_0033BA68 is matched in L00_0033BA68.c (built with -frac2-qcopy). */
 
 INCLUDE_ASM("asm/levels", func_L00_0033C0D0);
 

@@ -9,6 +9,14 @@
    +0x14: the constant and address materialisation around the eight-argument call is what is
    left. Note the two stores in the third branch are `*(int *)(p + 0x2C) = a2 - 1` and
    `*(int *)(p + 0x28) = a2 - 1`, both recomputed rather than shared.
-   What would unblock it: the emitted order of the a3 address and the f13-f15 constants. */
+   What would unblock it: the emitted order of the a3 address and the f13-f15 constants.
+
+   Wave 8 w8-03, new: retail's nonzero-argument branch writes the node's +0x34, +0x2C and
+   +0x28 through $s0 without ever loading it - the `lw $s0,0x68($s1)` sits in the zero
+   argument path only, after the `bnez $a2` - so the row reads an undefined $s0 there and
+   no C spelling of a loaded node reproduces it.  A transcription that loads the node in
+   both branches is 236 bytes, twenty over.  The zero-argument path's eight-argument call
+   takes a0 = the first argument, a1 = the second, a2 = node[0x0], a3 = 0x001B8F20,
+   f12 = node[0x8], f13 = 2.0f, f14 = 5.0f and f15 = 0.6f (0x3F19999A). */
 
 #include "include_asm.h"

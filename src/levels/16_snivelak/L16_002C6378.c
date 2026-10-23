@@ -27,7 +27,8 @@ INCLUDE_ASM("asm/levels", func_L16_002D2D10);
 
 INCLUDE_ASM("asm/levels", func_L16_002F60B8);
 
-INCLUDE_ASM("asm/levels", func_L16_00317C90);
+/* func_L16_00317C90 is in the sibling file L16_00317C90.c: it needs the -g profile, whose
+   line labels let the assembler reproduce the padding before its division. */
 
 /* runs the readiness helper once when the handle is in state 1 with flag 2 set */
 void func_L16_003AA0C8(u8 *arg0) {
@@ -40,6 +41,11 @@ INCLUDE_ASM("asm/levels", func_L16_003AA108);
 
 INCLUDE_ASM("asm/levels", func_L16_003AA3F0);
 
+/* func_L16_003D6D00: 368 bytes against retail's 364; the prologue, the frame layout
+   and every branch target from +0x44 on are retail's, but the byte test comes out
+   as the annulling `bnel` (which repeats the pointer load) instead of retail's plain
+   `bnez`, and the pointer and the base land in $s0/$s2 instead of $s2/$s1.
+   Deposited in nonmatching/levels/func_L16_003D6D00.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_003E6E08);
 

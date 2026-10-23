@@ -80,8 +80,6 @@ void func_L00_003BAAD0(void)
 
 INCLUDE_ASM("asm/levels", func_L00_003BAC30);
 
-INCLUDE_ASM("asm/levels", func_L00_003BB080);
-
 INCLUDE_ASM("asm/levels", func_L00_003BB1F8);
 
 extern void func_002FC560(unsigned int reg, unsigned long value);
@@ -275,8 +273,6 @@ extern char D_0023F060[];
 /* Near miss: nonmatching/levels/func_L00_003BCDC0.c - every instruction present but the
    loop test is `sltu` here against retail's `slt`, and the base is derived from the end
    pointer instead of being materialised on its own. */
-
-INCLUDE_ASM("asm/levels", func_L00_003BCE28);
 
 INCLUDE_ASM("asm/levels", func_L00_003BCF88);
 

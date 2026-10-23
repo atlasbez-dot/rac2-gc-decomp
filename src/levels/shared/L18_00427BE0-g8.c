@@ -60,3 +60,37 @@ void func_L18_0043E938(u8 *obj) {
 
 /* hands the two sampled buffers and the measured flag pair to the shared placement. */
 extern s32 func_L01_003120A8(void *, void *, void *, s32, f32, f32, s32, s32, s32);
+
+/* The state's banner timer: the shared helper refits the object's height against the
+   state's own rise, and the two ends of the countdown are eased into the frame rate. */
+extern f32 D_L18_001B1C50 __attribute__((sda));
+
+extern f32 D_L18_001B1C54[] __attribute__((sda));
+
+extern s32 D_L18_001B1C58 __attribute__((sda));
+
+extern f32 D_L18_001B1C5C __attribute__((sda));
+
+extern void func_002820A0(void);
+
+extern f32 func_002AA140(f32, f32, f32);
+
+extern s32 func_00283CF0(f32);
+
+extern void func_L18_00307C60(void *, void *, s32, s32, f32, f32, f32);
+
+void func_L18_0043E9B0(u8 *obj) {
+    u8 *state;
+    f32 t;
+    s32 n;
+
+    func_002820A0();
+    state = *(u8 **)(obj + 0x68);
+    t = func_002AA140(D_L18_001B1C50, D_L18_001B1C54[0], *(f32 *)(state + 0x158));
+    if (*(f32 *)(state + 0x158) < 0.1f) {
+        n = func_00283CF0((f32)D_L18_001B1C58 * *(f32 *)(state + 0x158) * 10.0f);
+    } else {
+        n = func_00283CF0((f32)D_L18_001B1C58 * (1.0f - *(f32 *)(state + 0x158)));
+    }
+    func_L18_00307C60(obj + 0x10, obj + 0xC0, n, 0, t, D_L18_001B1C5C, 0.08f);
+}
