@@ -11,7 +11,7 @@ INCLUDE_ASM("asm/levels", func_L06_0037E6B0);
 
 INCLUDE_ASM("asm/levels", func_L06_00396268);
 
-INCLUDE_ASM("asm/levels", func_L06_003C5ED8);
+/* func_L06_003C5ED8 is in L06_003C5ED8.c. */
 
 INCLUDE_ASM("asm/levels", func_L06_003D0AC8);
 
@@ -121,7 +121,7 @@ INCLUDE_ASM("asm/levels", func_L06_003FDEB8);
 
 INCLUDE_ASM("asm/levels", func_L06_003FE178);
 
-INCLUDE_ASM("asm/levels", func_L06_00400498);
+/* func_L06_00400498 is in L06_00400498-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L06_004012B0);
 

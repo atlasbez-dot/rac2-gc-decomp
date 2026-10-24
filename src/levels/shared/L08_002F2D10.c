@@ -220,7 +220,7 @@ INCLUDE_ASM("asm/levels", func_L08_003B2F70);
 
 INCLUDE_ASM("asm/levels", func_L08_003C5940);
 
-INCLUDE_ASM("asm/levels", func_L08_003C63F0);
+/* Defined in L08_003C63F0-g8.c. */
 
 
 INCLUDE_ASM("asm/levels", func_L08_003C66F0);
@@ -239,7 +239,7 @@ extern void func_002A0F48();
 
 INCLUDE_ASM("asm/levels", func_L08_003CD600);
 
-INCLUDE_ASM("asm/levels", func_L08_003CD648);
+/* Defined in L08_003CD648.c. */
 
 INCLUDE_ASM("asm/levels", func_L08_003CD6C8);
 
@@ -250,4 +250,3 @@ INCLUDE_ASM("asm/levels", func_L08_003CDB38);
 INCLUDE_ASM("asm/levels", func_L08_003CDB78);
 
 INCLUDE_ASM("asm/levels", func_L08_003CDF98);
-

@@ -48,7 +48,7 @@ f32 func_L16_00416EB8(char *arg0) {
     return *(f32 *)(*(char **)(arg0 + 0x68) + 0x78);
 }
 
-INCLUDE_ASM("asm/levels", func_L16_00416EC8);
+/* func_L16_00416EC8 uses its dedicated quadword-copy and G16 profile. */
 
 INCLUDE_ASM("asm/levels", func_L16_00416FB0);
 

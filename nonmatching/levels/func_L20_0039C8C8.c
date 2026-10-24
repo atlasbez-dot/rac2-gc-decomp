@@ -1,3 +1,13 @@
+/* Readable C reconstruction, measured2026-10-23.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * us: 0/1, us2: 0/1, pal: not carried.
+ * 828 versus836 bytes; float/register allocation and particle call scheduling differ.
+ * Tried: Full readable emitter sequence with verified BDCE8 four FP and C16C0 five FP inputs.
+ * Reopen: A source lifetime or expression-order remedy with the complete helper ABI retained.
+ * Historical notes below are preserved; their copy-wall claims are superseded
+ * by the current qualified copy profiles. No handwritten-assembly inference.
+ */
+
 /* Not matched (worker 06, level-20 wave of 2026-10-20): not attempted
    in depth.
 
@@ -51,3 +61,59 @@
    This body belongs in the `-G8` unit?  No: it reaches no global through
    `$gp`.
    ------------------------------------------------------------------ */
+
+typedef int Quadword __attribute__((mode(TI)));
+typedef union { Quadword q; float f[4]; } Vector;
+extern Vector D_L20_001B9FC0;
+extern Vector D_0018A0E0;
+extern void func_00282CF0(void *, const void *, const void *);
+extern void func_00282D30(void *, const void *, float);
+extern float func_00283248(float, float);
+extern float func_002A7878(float, float);
+extern float func_002A78D8(float, float);
+extern int func_00283CF0(float);
+extern float func_00283CE0(int);
+extern float func_00283B98(float, float);
+extern void func_002AF000(float *, float, float, float);
+extern unsigned char *func_002BDCE8(void *, int, void *, unsigned int, int, float, float, float, float);
+extern unsigned char *func_002C16C0(void *, void *, int, int, int, int, float, float, float, float, float);
+
+void func_L20_0039C8C8(Vector *point) {
+    Vector delta, velocity, position;
+    unsigned char *particle;
+    int count = 19;
+    int lifetime;
+    float heading, size, speed, pitch, yaw;
+    func_00282CF0(&delta, &D_L20_001B9FC0, point);
+    heading = func_00283248(delta.f[0], delta.f[1]);
+    do {
+        speed = func_002A7878(0.2f, 3.0f);
+        func_00282D30(&velocity, &D_0018A0E0, -(speed * 0.016666668f));
+        lifetime = func_00283CF0(func_002A78D8(1.0f, 2.0f));
+        size = func_002A7878(0.3f, 0.75f) * 210000.0f;
+        position.f[0] = point->f[0] + func_002A78D8(0.0f, 0.2f);
+        position.f[1] = point->f[1] + func_002A78D8(0.0f, 0.2f);
+        position.f[2] = point->f[2] + func_002A78D8(0.0f, 0.2f);
+        particle = func_002BDCE8(&position, lifetime, &velocity, 0x7F202020, 0, 0.0f, 1.0f, 1.01f, size);
+        if (particle) {
+            *(short *)(particle + 10) = 90;
+            particle[3] = 0x44;
+            particle[9] = func_00283CF0(4.0f) + 0x40;
+            *(float *)(particle + 0x3C) = func_00283CE0(5);
+            *(int *)(particle + 0x24) = 3;
+            particle[0x2A] = 0x30;
+            particle[0x2B] = particle[10];
+        }
+        --count;
+        speed = func_002A7878(1.0f, 2.0f);
+        pitch = func_002A7878(0.0f, 1.3962636f);
+        yaw = func_00283B98(heading, func_002A78D8(0.0f, 1.3962636f));
+        func_002AF000(velocity.f, speed * 0.016666668f, yaw, pitch);
+        position.f[0] = point->f[0] + func_002A78D8(0.0f, 0.1f);
+        position.f[1] = point->f[1] + func_002A78D8(0.0f, 0.1f);
+        position.f[2] = point->f[2] + func_002A78D8(0.0f, 0.1f);
+        size = func_002A7878(0.1f, 0.5f);
+        func_002C16C0(&position, &velocity, 30, 127, 0x7F7F7F, lifetime,
+                      size * 210000.0f, 500.0f, 1.0f, 0.0f, 0.0f);
+    } while (count >= 0);
+}

@@ -89,7 +89,7 @@ INCLUDE_ASM("asm/levels", func_L01_003DCE70);
 
 INCLUDE_ASM("asm/levels", func_L01_003DCF40);
 
-INCLUDE_ASM("asm/levels", func_L01_003DD3A0);
+/* func_L01_003DD3A0 is in L01_003DD3A0.c. */
 
 /* func_L01_003DD6A8 */
 extern void func_002AB8C0(void *, void *);
@@ -160,7 +160,7 @@ INCLUDE_ASM("asm/levels", func_L01_00416A50);
 
 INCLUDE_ASM("asm/levels", func_L01_00416C08);
 
-INCLUDE_ASM("asm/levels", func_L01_00416E78);
+/* func_L01_00416E78 is in L01_00416E78-camera.c. */
 
 INCLUDE_ASM("asm/levels", func_L01_004171C8);
 

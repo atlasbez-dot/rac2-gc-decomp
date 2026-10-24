@@ -1,20 +1,107 @@
-/* func_L00_00387CA8 - 580 bytes, 27 place(s), level 00_aranos_tutorial,
-   retail at 0x00387ca8. Screened with tools/w10_screen.py: 16 call(s)
-   [func_0029EFD0@00387CDC, func_002833F0@00387D50, func_002FE8D8@00387D5C,
-   func_00282F20@00387D70, func_00282DD8@00387D84, func_00282DB0@00387D90,
-   func_00283198@00387DA8, func_00282D30@00387DB8, func_00283180@00387DC0,
-   func_00283958@00387DD4, func_00283738@00387DE4, func_00282C88@00387E30,
-   func_002FEC78@00387E6C, func_0029F338@00387E7C, func_002FED90@00387E9C,
-   func_002A0F48@00387EB0]; data addresses materialised [0x190000, 0x140000,
-   0x3cd60000]; float constants [0x3f400000, 0x3f800000, 0x3f000000,
-   0x260000]; $gp-relative small data: no   saves: -; callee-saved registers
-   saved [-]; words plain C cannot emit [LQ/SQ 7A220000@0x007c, LQ/SQ
-   7E020000@0x0080, LQ/SQ 7A420000@0x0084, LQ/SQ 7EA20000@0x0088, LQ/SQ
-   7A620000@0x0198, LQ/SQ 7C620000@0x019c, LQ/SQ 7A620000@0x01a4, LQ/SQ
-   7C820000@0x01a8]. Head: addiu $sp, $sp, -0xC0 ; sd $s1, 0x78($sp) ; sd
-   $s2, 0x80($sp) ; daddu $s1, $a0, $zero ; sd $s6, 0xA0($sp) ; daddu $s2,
-   $a1, $zero. Not matched in this wave: the 128-bit copy needs an `lq`/`sq`
-   pair; plain C reaches it only through a `mode(TI)` local, and this cc1
-   folds the destination offset into the `sq` where retail materialises the
-   pointer first. What would unblock it: the exact source expression tree,
-   so this cc1 picks the same registers in the same order. */
+/*
+ * Retained handwritten near miss; historical evidence only.
+ * No linked-image equality or complete retail semantics is established.
+ * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * Reported final C / retail: 580 / 580 bytes; size equality is not a match.
+ * us: 0/27 placements.
+ * us2: 0/27 placements.
+ * pal: absent from catalogue (not a match).
+ * Residual: 00_aranos_tutorial: instruction at +0x48 differs
+ * Reopening condition: A faithful field/lifetime model explaining remaining stack, register or scheduling differences; no arbitrary padding/barriers.
+ * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ */
+
+/* Historical manual summary: The earlier automatic screen is superseded by the current manual reconstruction. Vector-copy address lifetime and allocation require independent evidence. The original map is retained privately; no extracted instruction, opcode, address or generated table is reproduced here. */
+
+/*
+ * Nonmatching manual reconstruction; retail size 580 bytes.
+ * Final US check: 00_aranos_tutorial: instruction at +0x48 differs.
+ * Reproduce at src/levels/shared/L00_00387CA8.c with:
+ * -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Full body retained after bounded source/API/layout trials; no matching bytes
+ * are claimed. Reopen when a truthful field or lifetime model explains the
+ * remaining stack, register and scheduling differences.
+ * US/US2/PAL coverage and catalogue absence are recorded in the private result.
+ */
+#include "common.h"
+typedef int Quadword __attribute__((mode(TI)));
+typedef union { Quadword bits; float f[4]; } Vector4;
+#define FIELD(type,p,off) (*(type *)((char *)(p)+(off)))
+extern void func_00282CF0(void *,void *,void *);
+extern void func_00282CC0(void *,void *,void *);
+extern void func_00282D30(void *,void *,float);
+extern float func_00282DB0(void *,void *);
+extern float func_00282DF0(void *);
+extern float func_00282C48(float);
+extern float func_00283C80(float,float);
+extern float func_00283C28(float);
+extern float func_00283180(float);
+extern float func_002A7878(float,float);
+extern float func_002A78D8(float,float);
+extern float func_002A7940(void);
+extern int func_002A77E0(int);
+extern void func_002AF000(float *,float,float,float);
+extern char *func_002C2210(void *,int,unsigned int,int,int,void *,int,float,float,float);
+extern char *func_0029EFD0(int);
+extern void func_002B37E8(void *,void *);
+extern void func_002A7398(signed char *,int,int);
+extern void func_002AEC18(void *,int);
+extern void func_002833F0(void *,void *);
+extern void func_002FE8D8(void *,void *);
+extern void func_00282F20(void *,void *,float);
+extern void func_00282DD8(void *,void *,void *);
+extern float func_00283198(float);
+extern void func_00283958(void *,void *);
+extern void func_00283738(void *,void *,void *);
+extern void func_00282C88(void *);
+extern int func_002FEC78(unsigned char *,unsigned int);
+extern int func_002FED90(void *,void *,float,float,float);
+extern void func_0029F338(void *);
+extern void func_002A0F48(void *);
+extern char *D_0018C0B0;
+extern int D_L00_001AEFA8 __attribute__((sda));
+extern int D_L00_001AEF48 __attribute__((sda));
+extern unsigned char D_00139591;
+extern unsigned char D_L00_00262570[][224];
+char *func_L00_00387CA8(Vector4 *position,Vector4 *velocity)
+{
+    Vector4 direction, forward, quaternion, axis;
+    Vector4 rotation[3];
+    char *object=func_0029EFD0(0x1366),*work;
+    float angle;
+    int initialState=255;
+    if(!object) return 0;
+    FIELD(float,object,0x2C)*=0.75f;
+    FIELD(unsigned char,object,0x30)=initialState;
+    FIELD(unsigned short,object,0x34)|=0x100;
+    work=FIELD(char *,object,0x68);
+    FIELD(unsigned short,object,0x32)=initialState; FIELD(unsigned char,object,0x20)=0;
+    FIELD(Quadword,object,0x10)=position->bits;
+    FIELD(Quadword,work,0)=velocity->bits;
+    func_002833F0(object+0xC0,D_0018C0B0+0xF0);
+    func_002FE8D8(object+0x10,&direction);
+    func_00282F20(&forward,object+0xE0,1);
+    func_00282DD8(&axis,&forward,&direction);
+    angle=func_00282DB0(&forward,&direction)*0.5f;
+    func_00282D30(&quaternion,&axis,func_00283198(angle));
+    quaternion.f[3]=func_00283180(angle);
+    func_00283958(&quaternion,rotation);
+    func_00283738(object+0xC0,rotation,object+0xC0);
+    FIELD(void *,work,0x68)=0;
+    FIELD(int,work,0x64)=0; FIELD(int,work,0x50)=0; FIELD(int,work,0x44)=0;
+    FIELD(int,work,0x60)=FIELD(int,D_L00_00262570[D_00139591],0x58);
+    FIELD(short,work,0x4C)=1; FIELD(int,work,0x40)=D_L00_001AEF48;
+    func_00282C88(work+0x10);
+    FIELD(float,work,0x10)=1;
+    FIELD(Quadword,work,0x30)=FIELD(Quadword,work,0x10);
+    FIELD(Quadword,work,0x20)=FIELD(Quadword,work,0x10);
+    FIELD(float,work,0x58)=0.026179943f;
+
+    FIELD(int,work,0x48)=func_002FEC78((unsigned char *)object,0);
+    if(FIELD(int,work,0x48)==-1) { func_0029F338(object); return 0; }
+    FIELD(unsigned char,work,0x4F)=func_002FED90(object,0,1,1,1);
+    FIELD(signed char,work,0x4E)=-1; FIELD(int,work,0x70)=0;
+    func_002A0F48(object);
+    return object;
+}

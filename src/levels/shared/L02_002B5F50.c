@@ -224,11 +224,11 @@ int func_L02_00331440(void *a0, void *a1, int a2, float f12, float f13, float f1
 extern void func_00282CF0(float *out, const float *a, const float *b);
 extern int func_L02_00332668(char *arg0, char *arg1);
 
-void func_L02_00332630(char *arg0, void *arg1) {
+int func_L02_00332630(char *arg0, void *arg1) {
     int tmp[4];
 
     func_00282CF0((float *)tmp, (const float *)arg1, (const float *)(arg0 + 0x10));
-    func_L02_00332668(arg0, tmp);
+    return func_L02_00332668(arg0, (char *)tmp);
 }
 
 extern int D_L02_001A8FF0 __attribute__((sda));

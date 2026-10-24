@@ -53,6 +53,22 @@
  *
  * The body needs a -G8 unit (one global is reached through $gp), so it belongs in
  * 002EEB00-g8.c.
+ *
+ * 24 October 2026 update (new measurement, source retained below):
+ * A -G8 sibling form that declares the four resident addresses absolutely
+ * (D_001B21B4/B8/C4/E0/E4 as `nosda`, D_001B21E8 as `sda`, D_001BAED4 plain)
+ * compiles to 108/108 bytes, retail's size and store order, and keeps retail's
+ * loop rotation and delay-slot store. In that form the remaining differences
+ * are the same two: retail puts 0xFFFF in $a0 and 0xFF in $v1; this source the
+ * reverse, with the cursor in $a3 rather than $a1. Writing the byte store
+ * through a signed `char *` turns 0xFF into `addiu -1`, so the byte must be
+ * `unsigned char` and the halfword `unsigned short`/0xFFFF. Reversing the
+ * three stores makes the constants agree but changes the store order. Hoisting
+ * the constants into locals moves their materialisation before the null test
+ * and gives 112 bytes. A -G0 -mno-split-addresses unit is also 112 bytes with
+ * the back edge no longer rotated; qcopy is irrelevant to this body. These
+ * nine measured forms do not move the two loop-invariant constants or the
+ * cursor allocation, so the 112-byte retained body below is kept unchanged.
  */
 
 extern int ref_L00_002F0FA0_00;

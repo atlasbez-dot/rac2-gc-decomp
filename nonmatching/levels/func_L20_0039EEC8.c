@@ -1,3 +1,13 @@
+/* Readable C reconstruction, measured2026-10-23.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * us: 0/1, us2: 0/1, pal: not carried.
+ * 876 versus836 bytes; common vector/history addresses and initialization-loop scheduling differ.
+ * Tried: Measured8-by25 history vectors and8 normals; copy/barrier and explicit assembler G8 trials.
+ * Reopen: A truthful vector/global addressing and loop scheduling remedy.
+ * Historical notes below are preserved; their copy-wall claims are superseded
+ * by the current qualified copy profiles. No handwritten-assembly inference.
+ */
+
 /* Not matched (worker 05, level-20 wave 5, 2026-10-21).
 
    The body is 836 bytes with a frame of 0x60 and four 128-bit copies:
@@ -37,3 +47,72 @@
    (src/levels/20_yeedil/L20_0039C448.c).  The gp offset is -0x2B0, that is
    the level-20 address 0x001AED40, the float 6.0f (0x40C00000); the C name
    is D_L20_001AED40 and it needs __attribute__((sda)). */
+
+typedef int Quadword __attribute__((mode(TI)));
+typedef union { Quadword q; float f[4]; } Vector;
+extern unsigned char *func_0029EFD0(int);
+extern void func_00283360(float *);
+extern void func_00282F20(void *, const void *, float);
+extern void func_00282CC0(void *, const void *, const void *);
+extern void func_00282CF0(void *, const void *, const void *);
+extern void func_00282DD8(void *, const void *, const void *);
+extern unsigned int D_L20_001AEDA0 __attribute__((nosda));
+extern float D_L20_001AED40;
+extern int D_L20_001B3870[8];
+extern int D_L20_001B3890[8];
+extern short D_L20_001B38B0[10];
+extern float D_L20_001B3904 __attribute__((nosda));
+extern Vector D_L20_00234880[8][25];
+extern Vector D_L20_00235500[8];
+
+unsigned char *func_L20_0039EEC8(int owner, const Vector *position) {
+    unsigned char *object = func_0029EFD0(0x1316);
+    unsigned char *state;
+    Vector *x, *y, *z;
+    int i;
+    if (object) {
+        *(Quadword *)(object + 0x10) = position->q;
+        x = (Vector *)(object + 0xC0);
+        y = (Vector *)(object + 0xD0);
+        z = (Vector *)(object + 0xE0);
+        func_00283360((float *)x);
+        state = *(unsigned char **)(object + 0x68);
+        object[0x30] = 255;
+        *(int *)(object + 0xB8) = owner;
+        *(int *)state = 5;
+        *(int *)(state + 0x14) = 0;
+        *(int *)(state + 0x10) = 0;
+        *(unsigned int *)(state + 4) = D_L20_001AEDA0 & 0xFFFFFF;
+        for (i = 7; i >= 0; --i) D_L20_001B3870[i] = 0;
+        func_00282F20(&D_L20_00234880[0][0], x, D_L20_001AED40);
+        D_L20_00235500[0].q = z->q;
+        func_00282F20(&D_L20_00234880[1][0], y, D_L20_001AED40);
+        D_L20_00235500[1].q = x->q;
+        func_00282F20(&D_L20_00234880[2][0], z, D_L20_001AED40);
+        D_L20_00235500[2].q = y->q;
+        func_00282CC0(&D_L20_00234880[3][0], x, z);
+        func_00282F20(&D_L20_00234880[3][0], &D_L20_00234880[3][0], D_L20_001AED40);
+        func_00282DD8(&D_L20_00235500[3], &D_L20_00234880[3][0], y);
+        func_00282F20(&D_L20_00235500[3], &D_L20_00235500[3], 1.0f);
+        func_00282CC0(&D_L20_00234880[4][0], x, y);
+        func_00282F20(&D_L20_00234880[4][0], &D_L20_00234880[4][0], D_L20_001AED40);
+        func_00282DD8(&D_L20_00235500[4], &D_L20_00234880[4][0], z);
+        func_00282F20(&D_L20_00235500[4], &D_L20_00235500[4], 1.0f);
+        func_00282CF0(&D_L20_00234880[5][0], y, z);
+        func_00282F20(&D_L20_00234880[5][0], &D_L20_00234880[5][0], D_L20_001AED40);
+        func_00282DD8(&D_L20_00235500[5], &D_L20_00234880[5][0], x);
+        func_00282F20(&D_L20_00235500[5], &D_L20_00235500[5], 1.0f);
+        func_00282CF0(&D_L20_00234880[6][0], x, z);
+        func_00282F20(&D_L20_00234880[6][0], &D_L20_00234880[6][0], D_L20_001AED40);
+        func_00282DD8(&D_L20_00235500[6], &D_L20_00234880[6][0], y);
+        func_00282F20(&D_L20_00235500[6], &D_L20_00235500[6], 1.0f);
+        func_00282CF0(&D_L20_00234880[7][0], x, y);
+        func_00282F20(&D_L20_00234880[7][0], &D_L20_00234880[7][0], D_L20_001AED40);
+        func_00282DD8(&D_L20_00235500[7], &D_L20_00234880[7][0], z);
+        func_00282F20(&D_L20_00235500[7], &D_L20_00235500[7], 1.0f);
+        for (i = 7; i >= 0; --i) D_L20_001B3890[i] = 0;
+        for (i = 9; i >= 0; --i) D_L20_001B38B0[i] = 0;
+        D_L20_001B3904 = 1.0f;
+    }
+    return object;
+}

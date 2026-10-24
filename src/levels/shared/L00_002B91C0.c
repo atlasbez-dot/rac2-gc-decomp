@@ -148,31 +148,30 @@ extern char D_00189E20_2[];
 
 extern char D_00189E60[];
 
-extern void func_2EE5D8(void *a0, void *a1, void *a2);
+extern void func_002830C0(void *a0, void *a1, void *a2);
 
-extern float func_2EE7A8(float a, float b);
+extern float func_00283248(float a, float b);
 
-extern void func_31DCF0(void *a0, float f12, float f13);
+extern float func_002AA738(float from, int selector, float to);
 
-/* Reads two floats of the resident block through a helper, folds them with a second helper,
-   and passes the result with the second argument to the third. */
-void func_L00_002B9B38(void *a0, void *a1)
+/* Transform the direction into resident space and return its selected angle delta. */
+float func_L00_002B9B38(void *a0, int selector)
 {
-    float v[2];
+    float v[4];
 
-    func_2EE5D8(v, a0, D_00189E60);
-    func_31DCF0(a1, func_2EE7A8(v[0], v[1]), 0.0f);
+    func_002830C0(v, a0, D_00189E60);
+    return func_002AA738(func_00283248(v[0], v[1]), selector, 0.0f);
 }
 
 /* The resident id this forwards, and the helper it calls. */
 extern int D_0018C0B0;
 
-extern void func_35F3A8(void *a0, void *a1, int a2);
+extern int func_002E5CF8(int index, int flags, char *object);
 
-/* Forwards both of its arguments and the resident id to the helper. */
-void func_L00_002B9B88(void *a0, void *a1)
+/* Forward the sound index, flags and resident object pointer; return the result. */
+int func_L00_002B9B88(int index, int flags)
 {
-    func_35F3A8(a0, a1, D_0018C0B0);
+    return func_002E5CF8(index, flags, (char *)D_0018C0B0);
 }
 
 INCLUDE_ASM("asm/levels", func_L00_002B9BB0);

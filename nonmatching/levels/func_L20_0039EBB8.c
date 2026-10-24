@@ -1,3 +1,13 @@
+/* Readable C reconstruction, measured2026-10-23.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * us: 0/1, us2: 0/1, pal: not carried.
+ * 432 versus444 bytes; extra saved-register/address lifetimes, state dispatch and interpolation scheduling differ.
+ * Tried: Explicit vector address lifetimes, delayed rotation pointer setup and recomputed final rotation reference.
+ * Reopen: A verified source lifetime or local-vector layout remedy.
+ * Historical notes below are preserved; their copy-wall claims are superseded
+ * by the current qualified copy profiles. No handwritten-assembly inference.
+ */
+
 /* Not matched (worker 06, level-20 wave of 2026-10-20): the 128-bit
    copies are the wall.  The retail keeps the address of every 128-bit
    access in a register - `lq $v0,0x0($s2)` with `addiu $s2,$s1,0x10`
@@ -50,3 +60,37 @@
  * `sq $2,560($sp)`).
  *
  * This body belongs in the -G8 unit?  No: it reaches no global through $gp. */
+
+typedef int Quadword __attribute__((mode(TI)));
+typedef union { Quadword q; float f[4]; } Vector;
+extern int func_002B3868(unsigned char *);
+extern void func_002A7750(unsigned char *, unsigned char, int);
+extern int func_00282948(int *);
+extern void func_00282CF0(void *, const void *, const void *);
+extern void func_002AD6F0(void *, const void *, const void *, const void *);
+
+void func_L20_0039EBB8(unsigned char *object) {
+    Vector oldPosition, oldRotation, delta;
+    unsigned char *state = *(unsigned char **)(object + 0x68);
+    Vector *position = (Vector *)(object + 0x10);
+    float phase;
+    oldPosition.q = position->q;
+    oldRotation.q = *(Quadword *)(object + 0xF0);
+    switch (object[0x20]) {
+    case 0:
+        if (func_002B3868(object)) *(Quadword *)(state + 0x60) = position->q;
+        func_002A7750(object, 1, -1);
+        break;
+    case 1:
+        if (func_002B3868(object)) *(int *)(state + 0x7C) = *(int *)(state + 0x78);
+        if (func_00282948((int *)(state + 0x7C))) func_002A7750(object, 1, -1);
+        position->q = *(Quadword *)(state + 0x60);
+        phase = (float)*(int *)(state + 0x7C) / (float)*(int *)(state + 0x78) + *(float *)(state + 0x80);
+        while (1.0f < phase) phase -= 1.0f;
+        *(float *)(object + 0x14) += *(float *)(state + 0x74) +
+            (*(float *)(state + 0x70) - *(float *)(state + 0x74)) * phase;
+        break;
+    }
+    func_00282CF0(&delta, position, &oldPosition);
+    func_002AD6F0(state + 0x20, &delta, &oldRotation, object + 0xF0);
+}

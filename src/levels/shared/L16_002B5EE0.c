@@ -75,7 +75,7 @@ extern char *D_L16_001B2C0C __attribute__((sda));
 extern char *D_L16_001B2B1C __attribute__((sda));
 
 /* copies the 16-byte record the object's two indices pick out of the chosen table into dst */
-INCLUDE_ASM("asm/levels", func_L16_0040C7E8);
+/* Defined in L16_0040C7E8-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_00413850);
 

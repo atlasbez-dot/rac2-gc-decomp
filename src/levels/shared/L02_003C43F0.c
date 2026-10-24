@@ -31,7 +31,7 @@ extern void func_L02_002F1FB8(void *, void *, void *);
 
 extern void func_00282F20(char *, char *, float);
 
-extern void func_00282DB0(void *, void *);
+extern float func_00282DB0(void *, void *);
 
 extern char *D_L02_001FF1C0[];
 
@@ -643,15 +643,15 @@ void func_L02_003D1610(char *a0) {
         func_002A7470(a0, 6, 0, 5);
 }
 
-/* Builds three quadwords on the stack from A1 and A0+0xD0, then normalises and rotates them. */
-void func_L02_003D1820(char *a0, char *a1) {
+/* Builds three vectors, normalises the displacement and returns its dot product. */
+float func_L02_003D1820(char *a0, char *a1) {
     TI128 v[3];
 
     v[0] = *(TI128 *)a1;
     v[1] = *(TI128 *)(a0 + 0xD0);
     func_L02_002F1FB8((char *)&v[2], (char *)&v[0], a0 + 0x10);
     func_00282F20((char *)&v[2], (char *)&v[2], 1.0f);
-    func_00282DB0((char *)&v[1], (char *)&v[2]);
+    return func_00282DB0((char *)&v[1], (char *)&v[2]);
 }
 
 INCLUDE_ASM("asm/levels", func_L02_003D1FA0);
@@ -734,7 +734,7 @@ INCLUDE_ASM("asm/levels", func_L02_003D6DF8);
 
 INCLUDE_ASM("asm/levels", func_L02_003D6EE0);
 
-INCLUDE_ASM("asm/levels", func_L02_003D7040);
+/* Defined in L02_003D7040-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L02_003D7140);
 
@@ -944,7 +944,7 @@ INCLUDE_ASM("asm/levels", func_L02_00401530);
 
 INCLUDE_ASM("asm/levels", func_L02_00401ED8);
 
-INCLUDE_ASM("asm/levels", func_L02_00402300);
+/* Defined in L02_00402300-g8.c. */
 
 /* func_L02_00402440 lives in the -g8 sibling: it reads four $gp-relative scalars. */
 

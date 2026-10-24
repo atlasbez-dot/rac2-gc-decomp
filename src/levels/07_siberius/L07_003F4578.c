@@ -31,7 +31,7 @@ INCLUDE_ASM("asm/levels", func_L07_003F59C0);
 
 INCLUDE_ASM("asm/levels", func_L07_003F5B50);
 
-INCLUDE_ASM("asm/levels", func_L07_003F6328);
+/* func_L07_003F6328 is defined in L07_003F6328.c. */
 
 extern void func_3109C8(u8 *a, s32 b, s32 c);
 

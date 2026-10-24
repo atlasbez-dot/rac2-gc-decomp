@@ -1,43 +1,23 @@
-/* Near miss: func_L14_003CB868 (src/levels/14_aranos_prison/L14_00304190.c), 952 bytes against
-   retail's 960; 199 of retail's 240 words line up (relocations ignored). It needs this unit's
-   -G0 flags (the globals are `sda` externs: bare lui/lw outside a delay slot, $gp in the
-   delay slot of the walk's tests).
+/*
+ * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
+ * The existing manual body below is preserved. A separately measured pointer-spelling
+ * variant used this profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * That variant reported US 0/1; US2 0/1; PAL absent from catalogue. Its results are not a fresh
+ * measurement of the preserved body. Both variants have the same recorded 952/960-byte residual.
+ * Reopen only with independent source lifetime/allocation evidence beyond the historical
+ * forms below. No declaration or body from that variant is substituted here.
+ */
 
-   What is right, up to register names: the id-list walk of the state's group word at +0x64 (the
-   unrotated form with the second `p != 0`; entity base D_L14_001B259C, count D_L14_001B25B8,
-   as in func_L14_003DF200), the test inside it (func_00282CF0 offset of the entity, func_002AFDD8
-   into the owner's frame, off[3] = 1.0f, off[0] += 2.0f stored back, then fabs < 1.0 on both
-   lanes as a flag set by a branch-likely) with its two calls, the condition on the hero struct
-   `(D_00189E20[0x33C] == self && D_00189E20[0x340] != 0) || D_00189E20 float 0x31C < 0.5f`, and
-   the second block, which repeats the test against D_00189EA0 and then does by hand what
-   func_L14_003C96E0 does for an entity. The hi half of D_00189E20 is kept in $s7 from before the
-   walk and the lo half is added at each block (set after the first call of the second block).
-
-   What differs, in three places:
-   1. The walk's two callee-saved registers are swapped: retail keeps the id pointer in $s1 and
-      the entity in $s2, this build the opposite ($s1 = entity). global.c orders the pseudos by
-      floor_log2(refs) * refs / live_length, and here the entity (10 weighted references over
-      48 insns) comes before the id pointer (13 over 83); retail's order is the reverse. None of
-      these changes it: separate or shared names for the two pointers and for the two hero
-      pointers, a while loop, the flag as a char or set by nested ifs, the order of the two
-      declarations, a copy of the entity for the call, the operands of the sum before the last
-      call in the other order. Extra tests on the id pointer inside the walk (artificial: they
-      add code) do swap them, so it is the reference counts that decide.
-   2. The second block's three local pointers (sp+0x50, sp+0x60 and the hero base) are in
-      retail $s2, $s0 and $s1; this build gives $s0, $s2 and $s1 (the sched1 order defines
-      `sp+0x60` early here). The mtc1 of the constant 1/180 comes before the call of
-      func_002830C0 here and after it in retail.
-   3. The 128-bit copy wall of docs/COMPILER-NOTES.md: retail copies the result vector with
-        addiu s1,s1,0xF0 ; lq v0,0(s0) ; sq v0,0(s1)
-      ($s0 = sp+0x60 held in a register since three calls take it, $s1 the hero base) where this
-      compiler folds both offsets, `lq v0,0x60(sp) ; sq v0,0xF0(s1)`. The destination written
-      as a symbol (`D_00189E20 + 0xF0`) gets a materialised address, but with its own lui/addiu
-      pair instead of an `addiu` on the shared register, and the size then reaches 960 with the
-      wrong words.
-
-   Would unblock it: the compiler-side tie-break of find_best_addr for TImode (the copy wall);
-   after that the pseudo order of item 1, which only a source with fewer references to the
-   entity (or more to the id pointer) than this C would change. */
+/* Historical analysis (summary).
+ * Historical manual analysis measured 952/960 bytes, with 199 of 240 words aligned after
+ * relocation normalization; that was not a match. The preserved body walks the group id list,
+ * tests entities in local coordinates and updates the two player-relative paths. Remaining
+ * differences were the swapped id/entity register roles, local projection-pointer allocation, a
+ * constant lifetime and address materialization around the final vector transfer. Pointer
+ * renaming, loop forms, flag types, declaration order and argument ordering tied. Extra
+ * artificial tests changed allocation but did not provide a valid remedy. Reopen only with
+ * independent lifetime/address evidence; the earlier instruction excerpts remain private.
+ */
 
 typedef unsigned short u16;
 typedef int TI128 __attribute__((mode(TI)));

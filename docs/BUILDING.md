@@ -29,6 +29,14 @@ python3 tools/progress.py             # progress/report.json
 `tools/build.py boot`, `tools/build.py level 4` and `tools/build.py levels` build a part.
 Each program prints `OK` with its C functions, or stops at the first byte that differs.
 
+Ordinary C switches may bring compiler-owned branch tables. The linker retains a
+complete read-only input section only when its derived address, alignment and
+every case relocation agree with the retail data and independently placed C text.
+It replaces that exact data span, preserving all surrounding bytes. Mixed constant
+pools, overlapping claims and unplaced destinations fail closed; no instruction
+or table value is changed. A local function check alone does not qualify its data:
+run the strict linked build for every applicable release.
+
 ### Build in parallel
 
 The 28 programs do not depend on each other, so `all` and `levels` build several at once

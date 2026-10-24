@@ -1,23 +1,98 @@
-/* func_L00_0041EB38 - 800 bytes, 27 place(s), level 00_aranos_tutorial,
-   retail at 0x0041eb38. Screened with tools/w10_screen.py: 18 call(s)
-   [func_0029EFD0@0041EB70, func_00282F20@0041EBF8, func_002AB1F0@0041EC18,
-   func_002AFFD8@0041EC34, func_00282D30@0041EC44, func_00282CC0@0041EC54,
-   func_00282CF0@0041EC68, func_00282F20@0041EC78,
-   func_L00_0037FA90@0041ECAC, func_00282F20@0041ECC0,
-   func_00283CF0@0041ECEC, func_00283CE0@0041ECFC, func_002AB1F0@0041ED3C,
-   func_002B4038@0041ED80, func_0029F338@0041ED90, func_002FED90@0041EDF8,
-   func_L00_002E6EF8@0041EE14, func_002A0F48@0041EE1C]; data addresses
-   materialised [0x190000, 0x140000, 0x260000, 0x3c880000, 0x3eb20000,
-   0x190000, 0x420000]; float constants [0x41f00000, 0x41f00000, 0x3f800000,
-   0x3f800000]; $gp-relative small data: yes   saves: -; callee-saved
-   registers saved [-]; words plain C cannot emit [LQ/SQ 7A620000@0x00d8,
-   LQ/SQ 7FA20000@0x00dc, LQ/SQ 7AC20000@0x0194, LQ/SQ 7C620000@0x0198,
-   LQ/SQ 7A020000@0x0298, LQ/SQ 7FA20000@0x029c, LQ/SQ 78620000@0x02a8,
-   LQ/SQ 7E020000@0x02ac, LQ/SQ 7BA20000@0x02cc, LQ/SQ 7E020000@0x02d0].
-   Head: addiu $sp, $sp, -0x80 ; sd $s6, 0x50($sp) ; sd $s5, 0x48($sp) ;
-   daddu $s6, $a0, $zero ; sd $s7, 0x58($sp) ; daddu $s5, $a2, $zero. Not
-   matched in this wave: the 128-bit copy needs an `lq`/`sq` pair; plain C
-   reaches it only through a `mode(TI)` local, and this cc1 folds the
-   destination offset into the `sq` where retail materialises the pointer
-   first. What would unblock it: the exact source expression tree, so this
-   cc1 picks the same registers in the same order. */
+/*
+ * Retained handwritten near miss; historical evidence only.
+ * No linked-image equality or complete retail semantics is established.
+ * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * Reported final C / retail: 796 / 800 bytes; size equality is not a match.
+ * us: 0/27 placements; 796/800 bytes.
+ * us2: 0/27 placements; 796/800 bytes.
+ * pal: absent from catalogue (not a match).
+ * Residual: 796/800 bytes. B4038 canonical int(int,int): secondargument is livea1 ownerstate+12, explicitly passed and returntested. AB1F0 retains canonical int result before addresscast. Specialarc constant corrected to exact0x3eb2b8c4. Register and copy scheduling unresolved.
+ * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
+ * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ */
+
+/* Historical screen/map retained privately. The current manual reconstruction and measured residual above supersede that screen; its extracted instruction, opcode and address lists establish neither matching nor handwritten-assembly status. */
+
+/* Wave4 next-family manual reconstruction, 2026-10-23. Nonmatching.
+   Historical screening above remains as history.
+   Trial source: src/levels/shared/L00_0041EB38-g8-qcopy-next.c
+   Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+   796/800 bytes. B4038 canonical int(int,int): secondargument is livea1 ownerstate+12, explicitly passed and returntested. AB1F0 retains canonical int result before addresscast. Specialarc constant corrected to exact0x3eb2b8c4. Register and copy scheduling unresolved.
+   us: func_L00_0041EB38: 0 of 27 places match (src/levels/shared/L00_0041EB38-g8-qcopy-next.c), exit 1; us2: func_L00_0041EB38: 0 of 27 places match (src/levels/shared/L00_0041EB38-g8-qcopy-next.c), exit 1; pal: absent_from_catalogue, exit 1
+*/
+#include "common.h"
+typedef int Quad128 __attribute__((mode(TI)));
+typedef void (*DrawCallback_r002E6EF8)(void *);
+extern char *func_0029EFD0(int);
+extern void func_00282F20(void *,void *,float);
+extern int func_002AB1F0(u8 *);
+extern void func_002AFFD8(char *,char *,int);
+extern void func_00282D30(void *,void *,float);
+extern void func_00282CC0(void *,void *,void *);
+extern void func_00282CF0(void *,void *,void *);
+extern void func_L00_0037FA90(char *,char *,float,float,float);
+extern int func_00283CF0(float);
+extern float func_00283CE0(int);
+extern int func_002B4038(int,int);
+extern void func_0029F338(void *);
+extern int func_002FED90(void *,int,float,float,float);
+extern void func_L00_002E6EF8(DrawCallback_r002E6EF8,void *);
+extern void func_L00_0041F570(void *);
+extern void func_002A0F48(void *);
+extern char D_L00_00262570[],D_00139568[];
+extern short D_0018C30C __attribute__((nosda));
+extern int D_0018B320 __attribute__((nosda));
+extern Quad128 D_0018A580 __attribute__((nosda)),D_00189EA0 __attribute__((nosda));
+extern float D_L00_001B1498 __attribute__((sda)),D_L00_001B1494 __attribute__((sda));
+extern unsigned int D_L00_001B1490 __attribute__((sda));
+char *func_L00_0041EB38(Quad128 *origin,char *owner,char *target)
+{
+    Quad128 position,normal;
+    char *object,*state,*collision;
+    float speed;
+    int count,ownerIndex,ownerKind;
+    object=func_0029EFD0(0xc89);
+    if(!object) return object;
+    object[0x30]=255; *(short *)(object+0x34)=0x100; object[0x31]=1; *(short *)(object+0x32)=255;
+    *(char **)(object+0xb8)=owner; object[0x20]=0;
+    state=*(char **)(object+0x68);
+    speed=*(float *)(D_L00_00262570+((unsigned char *)D_00139568)[0x16]*224+0x50)*0.016666668f;
+    if(D_0018C30C==1) func_00282F20(state+0x20,owner+0xd0,-speed);
+    else if(!target) {
+        if(!D_0018B320) func_00282F20(state+0x20,&D_0018A580,speed);
+        else func_L00_0037FA90(state+0x20,(char *)origin,speed,30.0f,0.3490658998f);
+    } else {
+        position=*(Quad128 *)(target+0x10);
+        collision=(char *)func_002AB1F0((u8 *)target);
+        if(collision) {
+            func_002AFFD8(target+0x10,(char *)&normal,1);
+            func_00282D30(&normal,&normal,*(float *)(collision+0x10));
+            func_00282CC0(&position,&position,&normal);
+        }
+        func_00282CF0(state+0x20,&position,origin); func_00282F20(state+0x20,state+0x20,speed);
+    }
+    *(Quad128 *)(object+0x10)=*origin;
+    *(float *)(state+0x2c)=speed;
+    count=func_00283CF0(30.0f/speed)+1; *(int *)(state+0x38)=count;
+    *(float *)(state+0x3c)=1.0f/func_00283CE0(count);
+    *(float *)(object+0x2c)=*(float *)(*(char **)(object+0x24)+0x24)*D_L00_001B1498;
+    object[0x20]=0; *(char **)(state+0x1c)=target;
+    if(target) {
+        collision=(char *)func_002AB1F0((u8 *)target);
+        if(collision) *(unsigned short *)(collision+0x1e)|=0x80;
+    }
+    *(float *)(state+0x40)=1;
+    ownerIndex=*(short *)(*(char **)(owner+0x68)+0x12); *(int *)(state+0x14)=ownerIndex;
+    ownerKind=*(short *)(owner+0xaa); *(int *)(state+0x18)=ownerKind;
+    if(!func_002B4038(ownerKind,ownerIndex)) { func_0029F338(object); return 0; }
+    *(int *)(state+0x10)=0; D_L00_001B1494=0;
+    if(D_L00_001B1490>15) D_L00_001B1490=0;
+    *(unsigned int *)state=D_L00_001B1490; D_L00_001B1490++;
+    if((int)D_L00_001B1490>15) D_L00_001B1490=0;
+    position=*(Quad128 *)(object+0x10); *(Quad128 *)(object+0x10)=D_00189EA0;
+    *(int *)(state+0x34)=func_002FED90(object,0,1.0f,1.0f,1.0f);
+    *(Quad128 *)(object+0x10)=position;
+    func_L00_002E6EF8(func_L00_0041F570,object); func_002A0F48(object);
+    return object;
+}

@@ -131,7 +131,7 @@ extern float func_002EB478(float a, float b);
 
 extern int func_L09_0033E8B0_1(char *object, int index, void *out, int a, int b, float f);
 
-extern void func_L09_003E9E60(char *object, void *buf, float f);
+extern int func_L09_003E9E60(char *object, void *buf, float f);
 
 extern float func_00282E48_2(char *a, int b);
 
@@ -393,7 +393,7 @@ INCLUDE_ASM("asm/levels", func_L09_003E9AA0);
 INCLUDE_ASM("asm/levels", func_L09_003E9E60);
 
 /* steps the run's frame index and hands the sample it lands on to the linked stage */
-void func_L09_003EA058(char *object, int index) {
+int func_L09_003EA058(char *object, int index) {
     char *frame = *(char **)(object + 0x68);
     char buf[16];
     short value = *(short *)(frame + 0x118);
@@ -407,7 +407,7 @@ void func_L09_003EA058(char *object, int index) {
     base = D_L09_001FE6C0[index];
     off = (*(short *)(frame + 0x11A) << 4) + 0x10;
     f = func_00282E48_2(object + 0x10, base + off);
-    func_L09_003E9E60(object, buf, f);
+    return func_L09_003E9E60(object, buf, f);
 }
 
 INCLUDE_ASM("asm/levels", func_L09_003EA108);

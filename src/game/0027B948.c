@@ -275,7 +275,7 @@ INCLUDE_ASM("asm/game", func_0027D5C0);
 
 INCLUDE_ASM("asm/game", func_0027D900);
 
-INCLUDE_ASM("asm/game", func_0027DB68);
+/* Defined in 0027DB68-g8.c. */
 
 /* func_0027DDC0 is in 0027B948-g8.c (-G8: retail re-materialises the address of the
    packet pointer for every access, which only that flag reproduces). */
@@ -291,9 +291,9 @@ INCLUDE_ASM("asm/game", func_0027E1A0);
 
 INCLUDE_ASM("asm/game", func_0027E4A8);
 
-INCLUDE_ASM("asm/game", func_0027E920);
+/* Defined in 0027E920.c. */
 
-INCLUDE_ASM("asm/game", func_0027EA28);
+/* Defined in 0027EA28.c. */
 
 void func_0027EAE8(int i0, int i1, int i2, int i3, int tag, void *x)
 {

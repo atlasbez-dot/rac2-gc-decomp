@@ -22,7 +22,7 @@ INCLUDE_ASM("asm/levels", func_L18_002C4000);
 
 /* func_L18_002C41F0 is defined in L18_002C4000-g8.c (this unit has $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L18_002CFD68);
+/* func_L18_002CFD68 is defined in L18_002CFD68-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L18_002CFF48);
 

@@ -388,7 +388,7 @@ void func_002BB798(char *a0)
                          | ((*(int *)(a0 + 32) * 127 / 6) << 24);
 }
 
-INCLUDE_ASM("asm/game", func_002BB838);
+/* func_002BB838 uses the profile in 002BB838-qcopy.c. */
 
 extern int func_00283D38(int, int, float);
 extern unsigned char *D_001F2560;

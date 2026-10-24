@@ -94,13 +94,14 @@ def check_sources(known: dict, errors: list) -> None:
     defined = {}
     for path in sorted((ROOT / "src").rglob("*.c")):
         text = path.read_text(encoding="utf-8", errors="replace")
+        relative = path.relative_to(ROOT).as_posix()
         for n, line in enumerate(text.splitlines(), 1):
             m = DEFINITION.match(line)
             if m and not line.rstrip().endswith(";") and not line.startswith(("extern", "typedef")):
-                defined.setdefault(m.group(1), []).append(f"{path.relative_to(ROOT)}:{n}")
+                defined.setdefault(m.group(1), []).append(f"{relative}:{n}")
         for m in re.finditer(rf'^(?:INCLUDE_ASM|ASM_FUNC|LINKER_REMNANT)\("[^"]*",\s*({NAME})\);', text, re.M):
             n = text[:m.start()].count("\n") + 1
-            defined.setdefault(m.group(1), []).append(f"{path.relative_to(ROOT)}:{n} (asm)")
+            defined.setdefault(m.group(1), []).append(f"{relative}:{n} (asm)")
     for name, where in sorted(defined.items()):
         if len(where) > 1:
             errors.append(f"{name} appears {len(where)} times: {', '.join(where)}")

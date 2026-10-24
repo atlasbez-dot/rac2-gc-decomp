@@ -713,11 +713,11 @@ INCLUDE_ASM("asm/levels", func_L11_00445DF8);
 INCLUDE_ASM("asm/levels", func_L11_00446020);
 
 /* hands the state's 0x1C4 field to the shared helper, after the caller's argument */
-extern void func_332CE8();
+extern int func_L00_003206B8(void *, int);
 
-void func_L11_004461C0(u8 *object, u8 *arg) {
+int func_L11_004461C0(u8 *object, u8 *arg) {
     u8 *state = *(u8 **)(object + 0x68);
-    func_332CE8(arg, *(u8 **)(state + 0x1C4));
+    return func_L00_003206B8(arg, *(int *)(state + 0x1C4));
 }
 
 INCLUDE_ASM("asm/levels", func_L11_004461E8);

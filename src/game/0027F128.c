@@ -93,18 +93,18 @@ int func_0027F288(u8 *text, int length, float scale) {
 INCLUDE_ASM("asm/game", func_0027F2A8);
 
 
-extern int func_0027C878(int);
-extern void func_0027F2A8(int, int, int, u8 *, int, int, u8 *);
+extern u64 func_0027C878(int);
+extern void func_0027F2A8(int, int, u64, u8 *, int, u64, u8 *);
 
-void func_0027F538(int x, int y, int style, u8 *text, int length)
+void func_0027F538(int x, int y, u64 style, u8 *text, int length)
 {
-    int font = func_0027C878(1);
+    u64 font = func_0027C878(1);
     func_0027F2A8(x, y, style, text, length, font, D_00263B50);
 }
 
-void func_0027F5B8(int x, int y, int style, u8 *text, int length)
+void func_0027F5B8(int x, int y, u64 style, u8 *text, int length)
 {
-    int font = func_0027C878(2);
+    u64 font = func_0027C878(2);
     func_0027F2A8(x, y, style, text, length, font, D_00263EF0);
 }
 
@@ -128,25 +128,25 @@ INCLUDE_ASM("asm/game", func_0027F640);
 
 INCLUDE_ASM("asm/game", func_0027FC70);
 
-extern void func_0027FC70(int, int, u8 *, int, int, u8 *);
+extern void func_0027FC70(unsigned short *, u64, u8 *, int, u64, u8 *);
 
-void func_00280190(int x, int y, u8 *text, int length)
+void func_00280190(unsigned short *layout, u64 style, u8 *text, int length)
 {
-    int font = func_0027C878(1);
-    func_0027FC70(x, y, text, length, font, D_00263B50);
+    u64 font = func_0027C878(1);
+    func_0027FC70(layout, style, text, length, font, D_00263B50);
 }
 
-void func_00280200(int x, int y, u8 *text, int length)
+void func_00280200(unsigned short *layout, u64 style, u8 *text, int length)
 {
-    int font = func_0027C878(2);
-    func_0027FC70(x, y, text, length, font, D_00263EF0);
+    u64 font = func_0027C878(2);
+    func_0027FC70(layout, style, text, length, font, D_00263EF0);
 }
 
 
-void func_00280270(int x, int y, u8 *text, int length)
+void func_00280270(unsigned short *layout, u64 style, u8 *text, int length)
 {
-    int font = func_0027C878(3);
-    func_0027FC70(x, y, text, length, font, D_00264290);
+    u64 font = func_0027C878(3);
+    func_0027FC70(layout, style, text, length, font, D_00264290);
 }
 
 void func_002802E0(unsigned short *a0,s32 a1,s32 a2,s32 a3,s32 a4,s32 a5,s32 a6,s32 a7,s32 a8) {

@@ -1,10 +1,57 @@
-/* func_L19_0042A8B8, 228 bytes, 1 placement.  NOT RETRIED - the func_L04_00423178 family.
-   Same skeleton at level 19: D_001A8F00 == 2, D_001A7A40, the block at 0x001BD740
-   (`lui $v1,0x1C` / `addiu $v1,$v1,-0x28C0`) with its +0x44 count, then the +0x18C pointer
-   array walked (pointer in $s1 += 4) while the record's +0xAA short is compared with the
-   immediate 0xE3E and the publishing scale is f20 = 0x3FF33333 (1.9f); the count is re-read
-   at the loop bottom (`lh $v0,0x44($s2)` in both annulled `bnel` slots).
-   It is the same address-CSE wall already measured on func_L04_00423178 (retail rematerialises
-   each absolute address site by site, this cc1 parks them in callee-saved registers and the
-   frame grows), so no C is deposited: read that near miss for the spellings and the frame
-   numbers before spending another budget on the family. */
+/*
+ * Retained handwritten near miss; historical evidence only.
+ * No linked-image equality or complete retail semantics is established.
+ * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
+ * Profile: -O2 -G0 -ffunction-sections -mno-split-addresses.
+ * Reported final C / retail: 228 / 228 bytes; size equality is not a match.
+ * us: 0/1 placements.
+ * us2: not run after us mismatch; no exact candidate.
+ * pal: not run after us mismatch; no exact candidate.
+ * Residual: Nine source trials; the final int-index body is228 bytes with a0x40 frame. The loop body matches under -mno-split-addresses, but the initial list base remains in s2 across its count guard instead of being promoted from v1 afterward. Reopen with a naturally different list-base lifetime, not another equivalent loop.
+ * Reopening condition: Express the initial list/count lifetime without extending the persistent base through the guard.
+ * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ */
+
+/* Historical manual summary: Earlier address-commoning experiments identified list-base lifetime as a blocker. The current manual draft preserves that remaining source-lifetime question. The original map is retained privately; no extracted instruction, opcode, address or generated table is reproduced here. */
+
+/* Not matched, 2026-10-23.
+ * Nine source trials; the final int-index body is228 bytes with a0x40 frame. The loop body matches under -mno-split-addresses, but the initial list base remains in s2 across its count guard instead of being promoted from v1 afterward. Reopen with a naturally different list-base lifetime, not another equivalent loop.
+ * Profile: -O2 -G0 -ffunction-sections -mno-split-addresses
+ * Final us check: func_L19_0042A8B8: 0 of 1 places match (src/levels/19_grelbin/L19_0042A8B8.c); exit 1.
+ * This source has not passed a linked build or a runtime test.
+ */
+#include "common.h"
+
+extern s32 D_L19_001A8F00;
+extern u8 D_001A7A40;
+extern u8 D_L19_001B22E1;
+extern u8 D_L19_001B22E0[];
+extern f32 D_L19_001B2300;
+extern f32 D_L19_001B2304;
+extern f32 D_L19_001B2308;
+extern u8 D_L19_001BD740[];
+extern void func_0029F978(u8 *, u32, u8 *);
+
+void func_L19_0042A8B8(void)
+{
+    u8 *block;
+    u8 **entry;
+    int i;
+    if (D_L19_001A8F00 != 2) return;
+    if (!D_001A7A40) return;
+    block = D_L19_001BD740;
+    if (*(s16 *)(block+0x44) <= 0) return;
+    entry = (u8 **)(block+0x18c);
+    i=0;
+    do {
+        u8 *object = *entry;
+        if (*(s16 *)(object + 0xaa) == 0xe3e && !D_L19_001B22E1) {
+        func_0029F978(object, 0, D_L19_001B22E0);
+        D_L19_001B2300 = 1.9f;
+        D_L19_001B2304 = 1.9f;
+        D_L19_001B2308 = 1.9f;
+        }
+        i++;
+        entry++;
+    } while (i < *(s16 *)(block+0x44));
+}

@@ -155,23 +155,23 @@ void func_L00_002E6F48(void) {
 
 
 
-extern void func_0027F128(void *a0, void *a1, void *a2);
+extern int func_0027F128(char *text, int length, char *charset);
 extern char D_L00_0028C590[];
 
-void func_L00_002E9100(void *a0, void *a1) {
- func_0027F128(a0, a1, D_L00_0028C590);
+int func_L00_002E9100(char *text, int length) {
+ return func_0027F128(text, length, D_L00_0028C590);
 }
 
 extern char D_L00_0028C930[];
 
-void func_L00_002E9120(void *a0, void *a1) {
- func_0027F128(a0, a1, D_L00_0028C930);
+int func_L00_002E9120(char *text, int length) {
+ return func_0027F128(text, length, D_L00_0028C930);
 }
 
 extern char D_L00_0028CCD0[];
 
-void func_L00_002E9140(void *a0, void *a1) {
- func_0027F128(a0, a1, D_L00_0028CCD0);
+int func_L00_002E9140(char *text, int length) {
+ return func_0027F128(text, length, D_L00_0028CCD0);
 }
 
 extern void func_0027F1D8(void *a0, void *a1, void *a2);
@@ -182,13 +182,13 @@ void func_L00_002E9210(void *a0, void *a1) {
 }
 
 
-extern int func_0027C878(int);
+extern unsigned long func_0027C878(int);
 
-extern void func_0027F2A8(void *, void *, void *, void *, void *, int, void *);
+extern void func_0027F2A8(int, int, unsigned long, char *, int, unsigned long, char *);
 
-void func_L00_002E95C0(void *a0, void *a1, void *a2, void *a3, void *a4) {
- int t = func_0027C878(3);
- func_0027F2A8(a0, a1, a2, a3, a4, t, D_L00_0028CCD0);
+void func_L00_002E95C0(int x, int y, unsigned long colour, char *text, int length) {
+ unsigned long texture = func_0027C878(3);
+ func_0027F2A8(x, y, colour, text, length, texture, D_L00_0028CCD0);
 }
 
 

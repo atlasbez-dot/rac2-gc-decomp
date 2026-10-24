@@ -10,6 +10,8 @@ typedef unsigned char u8;
 
 typedef unsigned int u32;
 
+
+
 typedef float f32;
 
 typedef unsigned long long NativeCompactU64;
@@ -291,6 +293,7 @@ INCLUDE_ASM("asm/game", func_00300AA8);
 
 INCLUDE_ASM("asm/game", func_00300F58);
 
+
 INCLUDE_ASM("asm/game", func_00301D10);
 
 INCLUDE_ASM("asm/game", func_00301F18);
@@ -335,13 +338,17 @@ int func_00302440(char *obj, char *obj2)
     return func_003022A0(obj, obj2, 0.0f, 0.0f);
 }
 
+
+
 INCLUDE_ASM("asm/game", func_00302470);
 
 INCLUDE_ASM("asm/game", func_00302848);
 
-INCLUDE_ASM("asm/game", func_00302A20);
+/* func_00302A20 uses the quadword-copy profile in 00300618-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_00302A88);
+
+
 
 INCLUDE_ASM("asm/game", func_00302DA0);
 
@@ -364,7 +371,7 @@ INCLUDE_ASM("asm/game", func_00304128);
 
 INCLUDE_ASM("asm/game", func_00304210);
 
-INCLUDE_ASM("asm/game", func_00304AD0);
+/* func_00304AD0 uses the profile in 00304AD0-g8-qcopy.c. */
 
 void func_00304B68(char *object)
 {
@@ -508,19 +515,144 @@ void func_003058C8(void *owner)
     func_00305798(owner);
 }
 
-INCLUDE_ASM("asm/game", func_00305910);
+typedef struct { float x, y, z, w; } EffectVector __attribute__((aligned(16)));
+typedef struct {
+    EffectVector position[4];
+    u32 color[4];
+    float uv[4][2];
+    unsigned long primitive, texture, mode, registers;
+} EffectPacket;
+typedef struct { u8 prefix[0x140]; EffectVector position; } EffectCameraView;
+extern unsigned long func_0027C878(int);
+extern int func_002A7820(int, int);
+extern float func_002A7878(float, float);
+extern float func_002A7940(void);
+extern float func_00283248(float, float);
+extern float func_00282E80(void *, void *);
+extern void func_00283410(void *, void *);
+extern void func_00282F20(void *, void *, float);
+extern void func_00282D30(void *, void *, float);
+extern void func_00280B90(void *, void *, int);
+
+extern EffectCameraView ref_00305910_00;
+
+/* Draw three shrinking, independently colored layers facing the camera. */
+void func_00305910(void *owner, float *position)
+{
+    EffectPacket packet;
+    EffectVector matrix[4];
+    float rotation[4], offset[4];
+    u32 color;
+    float distance, scale;
+    func_00305838((char *)&packet);
+    packet.texture = func_0027C878(44);
+    packet.mode = 0x0000ff9000000260UL;
+    packet.registers = 0x0000008000000048UL;
+    packet.primitive = 0;
+    color = ((u32)func_002A7820(48,64) << 24) + 0x8183f;
+    rotation[3] = 0;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    rotation[2] = func_00283248(ref_00305910_00.position.x-position[0], ref_00305910_00.position.y-position[1]);
+    distance = func_00282E80(position, &ref_00305910_00.position);
+    rotation[1] = -func_00283248(distance, ref_00305910_00.position.z-position[2]);
+    rotation[0] = func_002A7940();
+    func_00283410(matrix,rotation);
+    func_00282CF0(offset,&ref_00305910_00.position,position);
+    func_00282F20(offset,offset,0.25f);
+    matrix[3].x = position[0] + offset[0];
+    matrix[3].y = position[1] + offset[1];
+    matrix[3].z = position[2] + offset[2];
+    matrix[3].w = 1.0f;
+    scale = func_002A7878(0.3f,0.4f);
+    func_00282D30(&packet.position[0],&packet.position[0],scale);
+    func_00282D30(&packet.position[1],&packet.position[1],scale);
+    func_00282D30(&packet.position[2],&packet.position[2],scale);
+    func_00282D30(&packet.position[3],&packet.position[3],scale);
+    func_00280B90(&packet,matrix,0);
+    func_00282D30(&packet.position[0],&packet.position[0],0.5f);
+    func_00282D30(&packet.position[1],&packet.position[1],0.5f);
+    func_00282D30(&packet.position[2],&packet.position[2],0.5f);
+    func_00282D30(&packet.position[3],&packet.position[3],0.5f);
+    color = ((u32)func_002A7820(64,127) << 24) + 0x103080;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    func_00280B90(&packet,matrix,0);
+    func_00282D30(&packet.position[0],&packet.position[0],0.5f);
+    func_00282D30(&packet.position[1],&packet.position[1],0.5f);
+    func_00282D30(&packet.position[2],&packet.position[2],0.5f);
+    func_00282D30(&packet.position[3],&packet.position[3],0.5f);
+    color = ((u32)func_002A7820(64,127) << 24) + 0x7f7f7f;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    func_00280B90(&packet,matrix,0);
+}
+
+
 
 INCLUDE_ASM("asm/game", func_00305C10);
 
-INCLUDE_ASM("asm/game", func_00306040);
+extern EffectCameraView ref_00306040_00;
+/* Packet initialization has distinct boot and level catalogue identities. */
+extern void ref_00306040_01(void *packet);
+
+/* Draw three shrinking, independently colored layers facing the camera. */
+void func_00306040(void *owner, float *position)
+{
+    EffectPacket packet;
+    EffectVector matrix[4];
+    float rotation[4], offset[4];
+    u32 color;
+    float distance, scale;
+    ref_00306040_01(&packet);
+    packet.texture = func_0027C878(11);
+    packet.mode = 0x0000ff9000000260UL;
+    packet.registers = 0x0000008000000048UL;
+    packet.primitive = 0;
+    color = ((u32)func_002A7820(48,64) << 24) + 0x80;
+    rotation[3] = 0;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    rotation[2] = func_00283248(ref_00306040_00.position.x-position[0], ref_00306040_00.position.y-position[1]);
+    distance = func_00282E80(position, &ref_00306040_00.position);
+    rotation[1] = -func_00283248(distance, ref_00306040_00.position.z-position[2]);
+    rotation[0] = func_002A7940();
+    func_00283410(matrix,rotation);
+    func_00282CF0(offset,&ref_00306040_00.position,position);
+    func_00282F20(offset,offset,0.25f);
+    matrix[3].x = position[0];
+    matrix[3].y = position[1];
+    matrix[3].z = position[2];
+    matrix[3].w = 1.0f;
+    scale = func_002A7878(0.03f,0.0625f);
+    func_00282D30(&packet.position[0],&packet.position[0],scale);
+    func_00282D30(&packet.position[1],&packet.position[1],scale);
+    func_00282D30(&packet.position[2],&packet.position[2],scale);
+    func_00282D30(&packet.position[3],&packet.position[3],scale);
+    func_00280B90(&packet,matrix,0);
+    func_00282D30(&packet.position[0],&packet.position[0],0.5f);
+    func_00282D30(&packet.position[1],&packet.position[1],0.5f);
+    func_00282D30(&packet.position[2],&packet.position[2],0.5f);
+    func_00282D30(&packet.position[3],&packet.position[3],0.5f);
+    color = ((u32)func_002A7820(64,127) << 24) + 0x1f1f1f;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    func_00280B90(&packet,matrix,0);
+    func_00282D30(&packet.position[0],&packet.position[0],0.5f);
+    func_00282D30(&packet.position[1],&packet.position[1],0.5f);
+    func_00282D30(&packet.position[2],&packet.position[2],0.5f);
+    func_00282D30(&packet.position[3],&packet.position[3],0.5f);
+    color = ((u32)func_002A7820(64,127) << 24) + 0x7f7f7f;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    func_00280B90(&packet,matrix,0);
+}
+
+
 
 INCLUDE_ASM("asm/game", func_00306318);
+
+
 
 INCLUDE_ASM("asm/game", func_00306680);
 
 INCLUDE_ASM("asm/game", func_00306A40);
 
-INCLUDE_ASM("asm/game", func_00307298);
+/* func_00307298 uses the profile in 00307298-g8-qcopy.c. */
 
 void func_00307330(char *object)
 {
@@ -633,10 +765,60 @@ void func_00307C30(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/game", func_00307CC0);
+extern EffectCameraView ref_00307CC0_00;
+
+/* Draw three shrinking, independently colored layers facing the camera. */
+void func_00307CC0(void *owner, float *position)
+{
+    EffectPacket packet;
+    EffectVector matrix[4];
+    float rotation[4], offset[4];
+    u32 color;
+    float distance, scale;
+    func_00307C30((char *)&packet);
+    packet.texture = func_0027C878(44);
+    packet.mode = 0x0000ff9000000260UL;
+    packet.registers = 0x0000008000000048UL;
+    packet.primitive = 0;
+    color = ((u32)func_002A7820(48,64) << 24) + 0x8183f;
+    rotation[3] = 0;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    rotation[2] = func_00283248(ref_00307CC0_00.position.x-position[0], ref_00307CC0_00.position.y-position[1]);
+    distance = func_00282E80(position, &ref_00307CC0_00.position);
+    rotation[1] = -func_00283248(distance, ref_00307CC0_00.position.z-position[2]);
+    rotation[0] = func_002A7940();
+    func_00283410(matrix,rotation);
+    func_00282CF0(offset,&ref_00307CC0_00.position,position);
+    func_00282F20(offset,offset,0.25f);
+    matrix[3].x = position[0] + offset[0];
+    matrix[3].y = position[1] + offset[1];
+    matrix[3].z = position[2] + offset[2];
+    matrix[3].w = 1.0f;
+    scale = func_002A7878(0.3f,0.4f);
+    func_00282D30(&packet.position[0],&packet.position[0],scale);
+    func_00282D30(&packet.position[1],&packet.position[1],scale);
+    func_00282D30(&packet.position[2],&packet.position[2],scale);
+    func_00282D30(&packet.position[3],&packet.position[3],scale);
+    func_00280B90(&packet,matrix,0);
+    func_00282D30(&packet.position[0],&packet.position[0],0.5f);
+    func_00282D30(&packet.position[1],&packet.position[1],0.5f);
+    func_00282D30(&packet.position[2],&packet.position[2],0.5f);
+    func_00282D30(&packet.position[3],&packet.position[3],0.5f);
+    color = ((u32)func_002A7820(64,127) << 24) + 0x103080;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    func_00280B90(&packet,matrix,0);
+    func_00282D30(&packet.position[0],&packet.position[0],0.5f);
+    func_00282D30(&packet.position[1],&packet.position[1],0.5f);
+    func_00282D30(&packet.position[2],&packet.position[2],0.5f);
+    func_00282D30(&packet.position[3],&packet.position[3],0.5f);
+    color = ((u32)func_002A7820(64,127) << 24) + 0x7f7f7f;
+    packet.color[0] = packet.color[1] = packet.color[2] = packet.color[3] = color;
+    func_00280B90(&packet,matrix,0);
+}
+
+
+
 
 INCLUDE_ASM("asm/game", func_00307FC0);
 
-
 INCLUDE_ASM("asm/game", func_00308408);
-

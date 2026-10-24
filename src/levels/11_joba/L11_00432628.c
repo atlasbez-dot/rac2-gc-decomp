@@ -185,12 +185,12 @@ void func_L11_00437DC0(char *p, int a1, int a2, int a3)
 }
 
 /* Invalidates the measured slot at 0x43 of the 256-byte record indexed by 0x358. */
-void func_L11_00437E68(char *p, int a1)
+void func_L11_00437E68(char *p, int a1, int a2, int a3)
 {
     int record = (*(int *)(*(char **)(p + 0x68) + 0x358) << 8) + D_L11_001B359C;
 
     if (*(unsigned char *)(record + 0x43) != a1)
-        func_32C700((char *)record, a1);
+        func_002A7470((char *)record, a1, a2, a3);
 }
 
 INCLUDE_ASM("asm/levels", func_L11_00437EA8);
@@ -207,8 +207,6 @@ extern void func_00282CC0(char *, char *, char *);
 
 INCLUDE_ASM("asm/levels", func_L11_00438248);
 
-extern void func_00282F20_2(float *p, float x);
-
 extern void func_00282DD8(char *a, char *b, char *c);
 
 extern void func_002AB6D8(char *a, char *b);
@@ -216,13 +214,13 @@ extern void func_002AB6D8(char *a, char *b);
 extern void func_002AAA00(char *a, char *b, int c, float d, float e, float f, float g);
 
 /* Builds the measured three-axis basis of the object and hands it to the three slots. */
-void func_L11_00438320(char *obj, float a, float b, float c)
+void func_L11_00438320(char *obj, char *direction, float a, float b, float c)
 {
     char *state = *(char **)(obj + 0x68);
     float m[4][4];
     float out[4];
 
-    func_00282F20_2(m[0], 1.0f);
+    func_00282F20((char *)m[0], direction, 1.0f);
     func_00282C88((TI128 *)m[2]);
     m[2][2] = 1.0f;
     func_00282DD8((char *)m[1], (char *)m[0], (char *)m[2]);
@@ -436,6 +434,7 @@ void func_L11_0043AB28(char *obj)
 INCLUDE_ASM("asm/levels", func_L11_0043ACB0);
 
 /* Maps the measured selector onto its small index. */
-INCLUDE_ASM("asm/levels", func_L11_0043E090);
+/* func_L11_0043E090 is defined in L11_0043E090.c. */
 
 /* Maps the measured selector onto its large index. */
+/* func_L11_0043E108 is defined in L11_0043E108.c. */

@@ -238,7 +238,7 @@ INCLUDE_ASM("asm/levels", func_L02_0040BBD8);
 
 INCLUDE_ASM("asm/levels", func_L02_0040BE08);
 
-INCLUDE_ASM("asm/levels", func_L02_0040CAF0);
+/* func_L02_0040CAF0 is defined in L02_0040CAF0-g8.c. */
 
 /* steps the actor's state machine, then raises its counter */
 void func_L02_0040CEE8(u8 *a0) {
@@ -552,7 +552,7 @@ INCLUDE_ASM("asm/levels", func_L02_004129D0);
 
 INCLUDE_ASM("asm/levels", func_L02_00412D50);
 
-INCLUDE_ASM("asm/levels", func_L02_00413730);
+/* func_L02_00413730 is defined in L02_00413730-g8.c. */
 
 /* func_L02_004216F0 is matched in L02_004216F0-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier -g). */
 

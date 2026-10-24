@@ -134,8 +134,8 @@ extern void func_00282CC0_32(void *a0, void *a0b, float *local);
 
 extern float func_00282C48_9(float t);
 
-void func_002A7750(u8 *a0,u8 a1,s32 a2) {
- u8 old=a0[0x20];a0[0x20]=a1;a0[0x94]=old;*(short *)(a0+0x96)=0;
+void func_002A7750(u8 *a0,s32 a1,s32 a2) {
+ u8 old=a0[0x20];a0[0x20]=(u8)a1;a0[0x94]=old;*(short *)(a0+0x96)=0;
  a0[0xbe]&=~1;
  if(a2!=-1){a0[0x95]=(u8)a2;a0[0xbe]&=~2;}
 }
@@ -343,7 +343,7 @@ int func_002A8860(int *p, int b) {
 
 INCLUDE_ASM("asm/game", func_002A89A8);
 
-extern void func_002A89A8(void *, int, float);
+extern float func_002A89A8(void *, int, float);
 
 void func_002A8A20(void *object) {
     func_002A89A8(object, 32, 0.5f);
@@ -389,13 +389,13 @@ void func_002A8C00(char *a, int b, int c, float d, Quad16 *q) {
 
 INCLUDE_ASM("asm/game", func_002A8C28);
 
-extern void func_0029FCC0(void *, void *, float *);
+extern void func_0029FCC0(void *, int, float *);
 extern int func_002A8C28(void *, float, float *, int, float, float, int, int, int);
 
-int func_002A8D70(float x, float y, float z, void *object, void *source, int mode, int first, int second, int third)
+int func_002A8D70(float x, float y, float z, void *object, int bone, int mode, int first, int second, int third)
 {
     float vector[4];
-    func_0029FCC0(object, source, vector);
+    func_0029FCC0(object, bone, vector);
     return func_002A8C28(object, x, vector, mode, y, z, first, second, third);
 }
 
@@ -600,12 +600,12 @@ float func_002AA458(void *a0, void *a1, void *a2, float f1, float f2, float f3)
 
 INCLUDE_ASM("asm/game", func_002AA548);
 
-extern float func_00283BE0(void);
+extern float func_00283BE0(float, float);
 extern float func_00282C48(float);
 
-f32 func_002AA738(s32 a0)
+f32 func_002AA738(float from, s32 a0, float to)
 {
-    f32 base = func_00283BE0();
+    f32 base = func_00283BE0(from, to);
 
     if (a0 == 0 || base * (f32)a0 > 0.0f)
         return base;

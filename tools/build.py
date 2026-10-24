@@ -336,10 +336,12 @@ class Placement:
         self.differ = []          # (C symbol, reason)
         self.values = {}          # symbol -> value
         self.objects = []
+        self.tables = {}          # (object path, section name) -> (address, size)
 
     def retail(self, address: int, size: int) -> bytes:
         for seg in self.image["segments"]:
-            if seg["type"] == elf.PT_LOAD and seg["address"] <= address < seg["address"] + seg["filesz"]:
+            if (seg["type"] == elf.PT_LOAD and seg["address"] <= address
+                    and address + size <= seg["address"] + seg["filesz"]):
                 at = seg["offset"] + address - seg["address"]
                 return self.image["data"][at:at + size]
         return b""
@@ -441,10 +443,11 @@ class Placement:
         return values, None
 
     def place(self) -> None:
-        taken, needs = set(), {}       # needs: C symbol -> {section name: address}
+        taken, needs, objects = set(), {}, {}
         for source in sources_for(self.name):
             path = compile_c(source)
             obj = elf.read_object(path)
+            objects[path] = obj
             for sym in obj["symbols"]:
                 if sym["type"] != 2 or sym["name"] not in self.functions:
                     continue
@@ -481,14 +484,72 @@ class Placement:
         changed = True
         while changed:
             changed = False
-            where = {sec: a for a, _, _, sec in self.placed.values()}
+            where = {(o, sec): a for a, _, o, sec in self.placed.values()}
+            tables = {}
             for name, need in needs.items():
-                if name in self.placed and any(where.get(sec) != a for sec, a in need.items()):
-                    bad = next(sec for sec, a in need.items() if where.get(sec) != a)
+                if name not in self.placed:
+                    continue
+                path = self.placed[name][2]
+                obj = objects[path]
+                for sec, address in need.items():
+                    if sec not in (".rodata", ".rdata"):
+                        continue
+                    index = next(i for i, s in enumerate(obj["sections"]) if s["name"] == sec)
+                    if self.jump_table(obj, index, address, path, where):
+                        tables[path, sec] = (address, obj["sections"][index]["size"])
+            # No two compiler input sections may claim the same retail bytes.
+            conflicts = {key for key, (a, n) in tables.items()
+                         if any(key != other and a < b + m and b < a + n
+                                for other, (b, m) in tables.items())}
+            for key in conflicts:
+                del tables[key]
+            where.update({key: a for key, (a, _) in tables.items()})
+            for name, need in needs.items():
+                if name in self.placed and any(where.get((self.placed[name][2], sec)) != a for sec, a in need.items()):
+                    bad = next(sec for sec, a in need.items() if where.get((self.placed[name][2], sec)) != a)
                     self.differ.append((name, f"needs {bad} at its place, which is not C"))
                     del self.placed[name]
                     changed = True
+        self.tables = {key: value for key, value in tables.items()
+                       if any(o == key[0] and needs[sym].get(key[1]) == value[0]
+                              for sym, (_, _, o, _) in self.placed.items())}
         self.objects = sorted({o for _, _, o, _ in self.placed.values()})
+
+    def jump_table(self, obj: dict, index: int, address: int, path: Path, where: dict) -> bool:
+        """Qualify a complete compiler-owned table, including every case destination.
+
+        Like RAC1's section-placement method, retain the original compiler section;
+        neither instructions nor table entries are rewritten. Mixed constant pools,
+        partial tables and targets outside placed C text remain unsupported.
+        """
+        sec = obj["sections"][index]
+        size, alignment = sec["size"], sec.get("align", 4)
+        if (sec["type"] != elf.SHT_PROGBITS or sec.get("flags", 2) != 2 or not size or size % 4
+                or len(sec["data"]) != size
+                or alignment < 4 or alignment & (alignment - 1) or address % alignment):
+            return False
+        owners = [s for s in self.image["sections"] if s["type"] == elf.SHT_PROGBITS
+                  and s["name"] not in (".text", "core.text")
+                  and s["address"] <= address and address + size <= s["address"] + s["size"]]
+        if len(owners) != 1:
+            return False
+        relocs = sorted(obj["relocations"].get(index, []))
+        if [r[0] for r in relocs] != list(range(0, size, 4)):
+            return False
+        values, why = self.derive(obj, index, address)
+        if why:
+            return False
+        for at, kind, symbol in relocs:
+            target = obj["symbols"][symbol]
+            if kind != elf.R_MIPS_32 or target["type"] != 3:
+                return False
+            text = obj["sections"][target["section"]]
+            base = where.get((path, text["name"]))
+            offset = struct.unpack_from("<I", sec["data"], at)[0]
+            if (base is None or not text["name"].startswith(".text") or offset % 4
+                    or offset >= text["size"] or values.get("§" + text["name"]) != base):
+                return False
+        return True
 
 
 def split_text(text: str, bodies: dict[int, tuple[str, int, str]]) -> tuple[list[tuple[str, str]], dict[str, str]]:
@@ -568,6 +629,78 @@ def level_reference(number: int) -> Path:
     return path
 
 
+def split_table_data(text: str, tables: dict[int, tuple[int, str]]) -> tuple[list[tuple[str, str]], dict[str, str]]:
+    """Replace measured whole-word data spans with compiler section inputs.
+
+    Keep all surrounding assembly and retain names defined inside a replaced span
+    at their measured addresses. Fail closed on non-word directives or gaps.
+    """
+    lines = text.splitlines(keepends=True)
+    pieces, aliases, current, pending = [], {}, [], []
+    active, seen, consumed = None, set(), set()
+    spans = sorted((a, a + n) for a, (n, _) in tables.items())
+    if any(a % 4 or end <= a or end % 4 for a, end in spans):
+        sys.exit("invalid compiler jump table span")
+    if any(end > following for (_, end), (following, _) in zip(spans, spans[1:])):
+        sys.exit("overlapping compiler jump tables")
+    for line in lines:
+        ins = INSTRUCTION.search(line)
+        if not ins:
+            pending.append(line)
+            continue
+        address = int(ins.group(1), 16)
+        if active is not None and address == active[0] + active[1]:
+            active = None
+        if address in tables:
+            if active:
+                sys.exit("overlapping compiler jump tables")
+            size, owner = tables[address]
+            active = (address, size, owner)
+            seen.add(address)
+            # Strings and alignment before a table belong to the preceding piece.
+            # Only its immediately preceding labels/comments move with the table.
+            cut = len(pending)
+            while cut and (not pending[cut - 1].strip()
+                           or re.fullmatch(r"\s*/\*.*?\*/\s*", pending[cut - 1])
+                           or re.fullmatch(r"\s*\.globl\s+[A-Za-z_.$][\w.$]*\s*", pending[cut - 1])
+                           or re.fullmatch(r"\s*[A-Za-z_.$][\w.$]*:\s*", pending[cut - 1])):
+                cut -= 1
+            current.extend(pending[:cut])
+            pending = pending[cut:]
+            if "".join(current).strip():
+                pieces.append(("asm", "".join(current)))
+            current = []
+            pieces.append(("c", owner))
+        if active:
+            start, size, _ = active
+            if address != start + 4 * sum(1 for a in consumed if start <= a < start + size):
+                sys.exit("noncontiguous compiler jump table span")
+            if not re.search(r"\*/\s*\.word\s+[^,;\n]+$", line.rstrip()):
+                sys.exit("compiler jump table span is not whole-word data")
+            for previous in pending:
+                label = re.fullmatch(r"\s*([A-Za-z_.$][\w.$]*):\s*", previous)
+                if label:
+                    aliases[label.group(1)] = f"{address:#x}"
+                elif (previous.strip()
+                      and not re.fullmatch(r"\s*\.globl\s+[A-Za-z_.$][\w.$]*\s*", previous)
+                      and not re.fullmatch(r"\s*/\*.*?\*/\s*", previous)):
+                    sys.exit("unsupported directive inside compiler jump table")
+            consumed.add(address)
+            if address + 4 == start + size:
+                active = None
+        else:
+            current.extend(pending)
+            current.append(line)
+        pending = []
+    current.extend(pending)
+    if "".join(current).strip():
+        pieces.append(("asm", "".join(current)))
+    if seen != tables.keys() or any(sum(1 for a in consumed if start <= a < start + n) * 4 != n
+                                    for start, (n, _) in tables.items()):
+        sys.exit("incomplete compiler jump table span")
+    return pieces, aliases
+
+
 def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int, int]:
     """Build program NAME; returns (C functions placed, their bytes)."""
     directory = out_dir() / name
@@ -623,6 +756,43 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
                 inputs.append("build/asm/" + piece.relative_to(directory / "asm_pp").as_posix() + ".o(.text);")
             script = script.replace(old, "\n        ".join(inputs))
             script = re.sub(re.escape(old[:-len("(.text);")]) + r"\(\.(?:data|rodata|bss)\);", "", script)
+        sources = kept
+        # Replace only qualified compiler table spans, retaining all unrelated data.
+        tables = {a: (n, f"{o.relative_to(directory, walk_up=True).as_posix()}({sec});")
+                  for (o, sec), (a, n) in placement.tables.items()}
+        kept = []
+        for source in sources:
+            text = source.read_text()
+            addresses = {int(m.group(1), 16) for m in INSTRUCTION.finditer(text)}
+            mine = {a: value for a, value in tables.items() if a in addresses}
+            if not mine:
+                kept.append(source)
+                continue
+            section = re.search(r'\.section\s+(\.\w+)', text)
+            if section is None or section.group(1) == ".text":
+                sys.exit("compiler jump table is not in a data assembly input")
+            old = ("build/asm/" + source.relative_to(directory / "asm_pp").as_posix()
+                   + f".o({section.group(1)});")
+            if script.count(old) != 1:
+                sys.exit(f"{name}: cannot find table input {old}")
+            pieces, labels = split_table_data(text, mine)
+            aliases.update(labels)
+            inputs = []
+            for k, (kind, body) in enumerate(pieces):
+                if kind == "c":
+                    inputs.append(body)
+                else:
+                    piece = directory / "asm_pp/pieces" / f"{source.stem}_data_{k}.s"
+                    piece.parent.mkdir(exist_ok=True)
+                    piece.write_text(f'.section {section.group(1)}, "wa"\n' + body)
+                    kept.append(piece)
+                    inputs.append("build/asm/" + piece.relative_to(directory / "asm_pp").as_posix()
+                                  + f".o({section.group(1)});")
+            script = script.replace(old, "\n        ".join(inputs))
+            for a in mine:
+                del tables[a]
+        if tables:
+            sys.exit(f"{name}: compiler jump tables missing from assembly data")
         sources = kept
         discard = "".join(f"        {o.relative_to(directory, walk_up=True).as_posix()}(*)\n" for o in placement.objects)
         end = script.rindex("}")

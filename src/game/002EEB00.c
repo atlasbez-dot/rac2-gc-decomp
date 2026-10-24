@@ -249,7 +249,7 @@ void func_002F0E38(void)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002F0EF8);
+/* func_002F0EF8 is in 002EEB00-flags.c (-mno-split-addresses). */
 
 
 INCLUDE_ASM("asm/game", func_002F0FA0);

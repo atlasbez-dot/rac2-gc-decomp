@@ -30,7 +30,7 @@ extern void func_002A0F48(void *);
 
 extern void func_00283678(void *, void *);
 
-extern void func_002A7470(void *, s32, s32, void *);
+extern void func_002A7470(void *, s32, s32, s32);
 
 extern void func_00282CF0(void *, void *, void *);
 
@@ -171,28 +171,28 @@ INCLUDE_ASM("asm/levels", func_L16_00411368);
 
 /* func_L16_00411480 is defined in L16_00403900-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L16_00411600);
+/* func_L16_00411600 is in L16_00411600-qcopy.c. */
 
 /* Routes one transition request to the handle itself or to its first child, depending on
    the state word and on which of the two animation slots is current. */
-void func_L16_004116C8(u8 *arg0, s32 arg1, void *arg2, float f)
+void func_L16_004116C8(u8 *arg0, s32 arg1, s32 duration, float f)
 {
     u8 *s2;
 
     s2 = *(u8 **)(arg0 + 0x68);
     if (*(s32 *)(s2 + 0x26C) == 0) {
         if (*(u8 *)(arg0 + 0x43) != arg1)
-            func_002A7470(arg0, arg1, (s32)f, arg2);
+            func_002A7470(arg0, arg1, (s32)f, duration);
     } else {
         if (*(u8 *)(arg0 + 0x43) != 0x16)
-            func_002A7470(arg0, 0x16, (s32)f, arg2);
+            func_002A7470(arg0, 0x16, (s32)f, duration);
         if (arg1 == 0xA)
             arg1 = 0x16;
     }
     if (arg1 < 0x11)
-        func_002A7470(*(u8 **)(s2 + 0x1F0), arg1, (s32)f, arg2);
+        func_002A7470(*(u8 **)(s2 + 0x1F0), arg1, (s32)f, duration);
     else
-        func_002A7470(*(u8 **)(s2 + 0x1F0), 0, (s32)f, arg2);
+        func_002A7470(*(u8 **)(s2 + 0x1F0), 0, (s32)f, duration);
 }
 
 INCLUDE_ASM("asm/levels", func_L16_004117A8);
@@ -223,7 +223,7 @@ INCLUDE_ASM("asm/levels", func_L16_00412E70);
 
 INCLUDE_ASM("asm/levels", func_L16_00412F48);
 
-INCLUDE_ASM("asm/levels", func_L16_004130B0);
+/* func_L16_004130B0 is in L16_004130B0-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_004133B0);
 
@@ -241,7 +241,7 @@ s32 func_L16_00413638(u8 *arg)
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L16_00413700);
+/* func_L16_00413700 is in L16_00413700-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_00413D10);
 

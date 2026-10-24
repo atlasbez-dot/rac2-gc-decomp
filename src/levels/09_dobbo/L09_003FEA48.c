@@ -205,7 +205,7 @@ INCLUDE_ASM("asm/levels", func_L09_00403798);
 
 INCLUDE_ASM("asm/levels", func_L09_00404C50);
 
-INCLUDE_ASM("asm/levels", func_L09_004050E0);
+/* Defined in L09_004050E0.c. */
 
 /* func_L09_004052F8 is defined in L09_003FEA48-g8.c (it reads the group count through $gp). */
 

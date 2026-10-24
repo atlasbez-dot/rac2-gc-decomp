@@ -1,3 +1,19 @@
+/*
+ * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
+ * Prior worker profile: -O2 -G8 -ffunction-sections.
+ * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
+ * These are the recorded worker checks; no fresh compilation was run for retention.
+ */
+
+/* Supplement requalification, 23 October 2026. Not matched or linked.
+ * Profile: -O2 -G8 -ffunction-sections
+ * USA: 952/1044 bytes; zero placements match.
+ * Corrected the pointer-returning 0032C700 interface: eight GPR inputs, two FP inputs and four stack inputs, including the nullable final pointer. Resident identities and the exact negative scale are corrected. Removing prematurely initialized color-scale locals recovers the retail 0x50 frame.
+ * The guarded switch and cross-joined terminal counter blocks differ; the old body is not an exact reconstruction. First real control-flow difference remains after the common prologue.
+ * Reopen: New retail-supported switch/control-flow reconstruction; do not replay ABI permutations or add artificial unreachable/barrier constructs.
+ * Historical notes below describe the earlier source/profile and remain provenance.
+ */
+
 #include "include_asm.h"
 
 typedef signed char s8;
@@ -8,24 +24,24 @@ typedef signed int s32;
 typedef unsigned int u32;
 typedef float f32;
 
-extern s32 func_L12_0041E8E8(void *);
-extern void func_L12_0041E8F8(void *);
-extern s32 func_00282948(void *);
-extern void func_002A7750(void *, s32, s32);
+extern s32 func_L12_0041E8E8(u8 *);
+extern void func_L12_0041E8F8(u8 *);
+extern s32 func_00282948(s32 *);
+extern void func_002A7750(u8 *, u8, s32);
 extern void func_0029F338(void *);
-extern void func_0032C700(void *, s32, s32, s32, s32, s32, s32, s32,
-                          s32, s32, s32, s32, f32, f32);
+extern u8 *func_0032C700(void *, s32, s32, s32, s32, s32, s32, s32,
+                          f32, f32, s32, s32, s32, void *);
 extern void func_00282F20(f32 *, void *, f32);
-extern void func_002B0A68(void *, s32, f32 *, s32, f32, f32, f32, f32);
+extern void func_002B0A68(char *, s32, s32, u8, f32, f32, f32, f32);
 
 /* level 12 data reached through $gp (small-data) */
-extern int D_L12_001A79F0 __attribute__((sda));
+extern int D_001A79F0 __attribute__((sda));
 extern u8 *D_L12_001B2E9C __attribute__((sda));
 extern int D_L12_001B18F0 __attribute__((sda));
 
 /* level 12 data reached absolutely: out of the $gp window */
-extern u8 D_L12_0021EDF0[0x1000];
-extern u8 D_L12_0019B4A8[0x4000];
+extern u8 D_L12_0021EDF0[];
+extern u8 D_0019B4A8[];
 
 typedef struct Actor {
     char pad00[0x18];
@@ -67,7 +83,7 @@ void func_L12_004163E8(Actor *self)
         q = D_L12_0021EDF0 + (s16)f;
         if (q[0x464] != 0)
             goto E;
-        p = D_L12_0019B4A8 + ((s16)f >> 1) + (D_L12_001A79F0 << 10);
+        p = D_0019B4A8 + ((s16)f >> 1) + (D_001A79F0 << 10);
         if (f & 1) {
             if (((*(s8 *)p >> 4) & 7) != 0)
                 goto E;
@@ -99,7 +115,7 @@ void func_L12_004163E8(Actor *self)
     case 2:
         if (func_00282948(&s1->fC) != 0)
             return;
-        func_002A7750(self, 3, -1);
+        func_002A7750((u8 *)self, 3, -1);
         s1->fC = D_L12_001B18F0;
         return;
 
@@ -114,23 +130,21 @@ void func_L12_004163E8(Actor *self)
         {
             u8 *t = (u8 *)D_L12_001B2E9C + (s1->f0 << 8);
             f32 local[4];
-            f32 a = 3.0f;
-            f32 b = 6.0f;
 
             func_0032C700(t + 0x10, 1, 0xE, 0xA, 0xF, 0xA, 0x14, 1,
-                          1, 1, 0, 0, 2.0f, 20.0f);
+                          2.0f, 20.0f, 1, 1, 0, 0);
             self->f98 = 0;
             self->f34 = (self->f34 | 0x41) & 0xEFFF;
             func_L12_0041E8F8(t);
-            func_00282F20(local, self->fC0, -0.1f);
-            func_002B0A68(self, 0x3F, local, 0xFF, a, b, a, b);
+            func_00282F20(local, self->fC0, -0.10000000894069672f);
+            func_002B0A68((char *)self, 0x3F, (s32)local, 0xFF, 3.0f, 6.0f, 3.0f, 6.0f);
             if (s1->f0 != -1) {
                 *(u16 *)((u8 *)D_L12_001B2E9C + (s1->f0 << 8) + 0x34) &= 0xEFFF;
                 func_0029F338((u8 *)D_L12_001B2E9C + (s1->f0 << 8));
             }
         }
         f = self->fB2;
-        p = D_L12_0019B4A8 + ((s16)f >> 1) + (D_L12_001A79F0 << 10);
+        p = D_0019B4A8 + ((s16)f >> 1) + (D_001A79F0 << 10);
         if (f & 1) {
             if (((*p >> 4) & 7) != 7)
                 *p += 0x10;
@@ -142,7 +156,7 @@ void func_L12_004163E8(Actor *self)
 
     case 5:
         f = self->fB2;
-        p = D_L12_0019B4A8 + ((s16)f >> 1) + (D_L12_001A79F0 << 10);
+        p = D_0019B4A8 + ((s16)f >> 1) + (D_001A79F0 << 10);
         if (f & 1) {
             if (((*p >> 4) & 7) != 7)
                 *p += 0x10;

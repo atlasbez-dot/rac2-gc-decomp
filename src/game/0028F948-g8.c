@@ -17,6 +17,6 @@ extern int D_001A9004 __attribute__((sda));
 extern float D_001A9008 __attribute__((sda));
 extern int D_001A900C __attribute__((sda));
 extern int D_001A9010 __attribute__((sda));
-extern void func_002900B8(void);
-extern void func_0029B7C0(int (*)(void), void (*)(void), int);
+extern int func_002900B8(void);
+extern void func_0029B7C0(int (*)(void), int (*)(void), int);
 extern float func_002AA340(int *, int, int);
