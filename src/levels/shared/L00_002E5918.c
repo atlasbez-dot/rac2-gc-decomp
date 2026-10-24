@@ -307,5 +307,3 @@ void func_L00_002EF548(float a, float b, float c)
         c = -func_00282C48_8(t);
     func_00283B98_10(a, c);
 }
-
-

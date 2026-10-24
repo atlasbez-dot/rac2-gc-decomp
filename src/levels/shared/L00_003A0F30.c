@@ -210,7 +210,7 @@ INCLUDE_ASM("asm/levels", func_L00_003A7AF0);
 
 INCLUDE_ASM("asm/levels", func_L00_003A7C30);
 
-INCLUDE_ASM("asm/levels", func_L00_003A7E78);
+/* func_L00_003A7E78 is defined in L00_003A7E78.c. */
 
 /* Computes two sub-record addresses of a 192-byte block and hands three of its sub-records to four helpers, threading a second argument through two of them. */
 void func_L00_003A8060(char *obj, char *arg)

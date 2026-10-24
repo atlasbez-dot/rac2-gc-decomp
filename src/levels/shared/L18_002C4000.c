@@ -284,7 +284,7 @@ BatchA_A18_s32 func_L18_003F75E8(BatchA_A18_s32 a0, BatchA_A18_u8 *a1) {
     return (BatchA_A18_s32)r;
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F76F0);
+/* func_L18_003F76F0 lives in L18_003F76F0-copy.c. */
 
 extern void func_00282F20(void *a0, void *a1, float f12);
 extern void func_00282CC0(void *a0, void *a1, void *a2);
@@ -328,7 +328,7 @@ void func_L18_003F7818(BatchA_A18_u8 *s2, BatchA_A18_u8 *s3, BatchA_A18_s32 s7) 
     func_L18_003F8E30((BatchA_A18_u8 *)*(BatchA_A18_s32 *)(s4 + 0x258));
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F7988);
+/* func_L18_003F7988 lives in L18_003F7988-copy.c. */
 
 void func_L18_003F7A08(BatchA_A18_u8 *a0) {
     BatchA_A18_u8 *s0 = a0;
@@ -505,6 +505,7 @@ INCLUDE_ASM("asm/levels", func_L18_003FA920);
 
 INCLUDE_ASM("asm/levels", func_L18_003FAE50);
 
+/* func_L18_003FB500 lives in L18_003FB500.c. */
 
 INCLUDE_ASM("asm/levels", func_L18_003FB5E8);
 
@@ -519,13 +520,13 @@ void func_L18_003FC958(BatchA_A18_u8 *a0, BatchA_A18_s32 a1) {
         (unsigned short)((*(unsigned short *)(a0 + 0x34) | 0x41) & 0xEFFF);
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003FC9B8);
+/* func_L18_003FC9B8 lives in L18_003F7988-copy.c. */
 
 INCLUDE_ASM("asm/levels", func_L18_003FCA38);
 
-INCLUDE_ASM("asm/levels", func_L18_003FCC48);
+/* func_L18_003FCC48 lives in L18_003FCC48-particles.c. */
 
-INCLUDE_ASM("asm/levels", func_L18_003FCD70);
+/* func_L18_003FCD70 lives in L18_003FCD70-particles.c. */
 
 INCLUDE_ASM("asm/levels", func_L18_003FD630);
 
@@ -560,7 +561,7 @@ void func_L18_00426D98(BatchA_A18_u8 *a0) {
 }
 
 
-INCLUDE_ASM("asm/levels", func_L18_00426E48);
+/* func_L18_00426E48 lives in L18_00426E48-g8.c. */
 
 extern void func_002EC9C8(BatchA_A18_u8 *a0, BatchA_A18_s32 a1);
 

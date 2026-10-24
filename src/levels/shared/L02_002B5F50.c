@@ -120,14 +120,14 @@ void func_L02_003294D8(char *arg0, float *arg1, float arg2) {
 
 typedef int TI128 __attribute__((mode(TI)));
 
-extern float func_002B04E0(void *arg0, void *arg1);
+extern float func_002B04E0(char *arg0, float *arg1, char *transform);
 extern float func_00282C48(float t);
 
 /* Copy the incoming 16-byte record to a local, hand both to the two calls. */
-void func_L02_00329C48(void *arg0, TI128 *arg1) {
+float func_L02_00329C48(char *arg0, TI128 *arg1, char *transform) {
     TI128 buf = *arg1;
 
-    func_00282C48(func_002B04E0(arg0, &buf));
+    return func_00282C48(func_002B04E0(arg0, (float *)&buf, transform));
 }
 
 INCLUDE_ASM("asm/levels", func_L02_0032B468);
@@ -890,7 +890,7 @@ void func_L02_003A6FE8(char *self) {
     self[0x7F] = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003A8770);
+/* func_L02_003A8770 is defined in L02_002B5F50-quad.c. */
 
 extern void func_002B9180(void *p);
 extern void func_0029F338(void *e);

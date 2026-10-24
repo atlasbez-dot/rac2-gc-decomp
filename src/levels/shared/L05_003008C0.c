@@ -47,7 +47,8 @@ INCLUDE_ASM("asm/levels", func_L05_0033D3A0);
 
 INCLUDE_ASM("asm/levels", func_L05_0033F4A8);
 
-INCLUDE_ASM("asm/levels", func_L05_00352B28);
+/* func_L05_00352B28 lives in L05_00352B28.c:
+   its grouped vector copy and debug division labels need a per-file profile. */
 
 INCLUDE_ASM("asm/levels", func_L05_00379968);
 
@@ -150,7 +151,8 @@ INCLUDE_ASM("asm/levels", func_L05_0037AC00);
 
 INCLUDE_ASM("asm/levels", func_L05_0037AC40);
 
-INCLUDE_ASM("asm/levels", func_L05_0037AC80);
+/* func_L05_0037AC80 lives in L05_0037AC80.c:
+   its state and damage flow are kept in a separate unit. */
 
 /* Add an argument to the stored value and clamp it into [8, 15]. */
 void func_L05_0037ADD8(float arg)

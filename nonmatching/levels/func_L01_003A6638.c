@@ -1,0 +1,207 @@
+/* Signature/interface follow-up, 23 October 2026.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
+ * USA v1.01: 2252/2276 bytes, 0/1 carrying placements.
+ * USA v2.00: 2252/2276 bytes, 0/1 carrying placements.
+ * PAL: canonical name absent from the catalogue.
+ * The surplus floating argument to func_003355A8 is removed; its removed expression was a
+ * nonvolatile global read with no C side effects.
+ * This follows the current linked C contract; it does not independently prove the original
+ * source declaration.
+ * The retained C remains nonmatching. Earlier sizes and residual offsets below are
+ * historical and superseded by this measurement; their reopening hypotheses remain
+ * unqualified. No linked build was run for this follow-up.
+ */
+
+/* Historical measurements, superseded where inconsistent with the follow-up above. */
+/* Measured with -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por. US:
+   01_oozla: 2252 bytes, expected 2276; 0/1 placements. US2: 0/1 placements. PAL: canonical function
+   absent. One complete reconstruction trial plus release verification. Movement, collision probes,
+   surface adjustment, orientation and attack paths reconstructed. Stack frame is retail size; register
+   assignment, scalar scheduling and branch layout differ. Reopen with exact smaller witnesses for the
+   movement and collision patterns.
+ */
+
+#include "common.h"
+#define F(p,o) (*(float *)((u8 *)(p)+(o)))
+#define I(p,o) (*(int *)((u8 *)(p)+(o)))
+typedef int OozlaQuad __attribute__((mode(TI)));
+extern float D_L01_001AF870 __attribute__((sda));
+extern float D_L01_001AF874 __attribute__((sda));
+extern int D_L01_001AF878 __attribute__((sda));
+extern float D_L01_001AF87C __attribute__((sda));
+extern float D_L01_001AF880 __attribute__((sda));
+extern float D_L01_001AF894 __attribute__((sda));
+extern float D_L01_001AF898 __attribute__((sda));
+extern float D_L01_001AF89C __attribute__((sda));
+extern float D_L01_001AF8A0 __attribute__((sda));
+extern float D_L01_001AF8A8 __attribute__((sda));
+extern float D_L01_001AF8AC __attribute__((sda));
+extern float D_L01_001AF8B0 __attribute__((sda));
+extern float D_L01_001AF8BC __attribute__((sda));
+extern float D_L01_001AF8C0 __attribute__((sda));
+extern float D_L01_001AC580[];
+extern u8 D_00139588;
+extern u32 D_00138324;
+extern u8 D_L01_002637A0[];
+extern u8 D_L01_001BF900[];
+extern u8 D_L01_001C3980[];
+extern int D_L01_001A8A44;
+extern void func_002A7470(void *,int,int,int);
+extern void func_L01_003A6448(float *,float *);
+extern float func_00283B98(float,float);
+extern void func_00282F20(void *,void *,float);
+extern void func_00283098(void *,void *,void *);
+extern void func_00282CC0(void *,void *,void *);
+extern void func_L01_003A65B0(void *);
+extern float func_00282DF0(void *);
+extern void func_L01_003A64F0(void *,void *);
+extern void func_00283410(void *,void *);
+extern void func_00282CF0(void *,void *,void *);
+extern float func_00282C48(float);
+extern void func_00282D30(void *,void *,float);
+extern int func_002761F8(void *,void *,int,void *,void *);
+extern float func_00282DB0(void *,void *);
+extern float func_002831B0(float);
+extern void func_00283658(void *,void *);
+extern void func_00283678(void *,void *);
+extern void func_00282DD8(void *,void *,void *);
+extern void func_00283788(void *,void *,void *);
+extern void func_002AB6D8(void *,void *);
+extern void func_00283698(void *,void *);
+extern void func_002830C0(void *,void *,void *);
+extern void func_L00_002EE4D8(void *,void *,float);
+extern void func_002ABBB8(void *,void *,int,int,int,int,int,int,int,int,int,int,float,float,float,float,float,float,float);
+extern int func_00277F48(void *,int,void *,int,float);
+extern void func_002A9850(void *,void *,void *,int,int,int,int,int,float,float,float);
+extern int func_00282948(void *);
+extern void func_003355A8(int);
+extern void func_L01_002BEB90(int,int);
+extern void func_0029F338(void *);
+extern void func_002A9288(void *,float);
+void func_L01_003A6638(u8 *object)
+{
+    float previous[4], velocity[4], position[4], rotation[4];
+    float inverse[12], basis[4], vector[4], temporary[8], matrix[16];
+    float angles[4], start[4], finish[4], shift[4], offset[4], hit[4], normal[4], force[4], adjustment[4], edge[4];
+    float horizontal, vertical, speed, progress, sign, angle, distance, step;
+    u8 *state = *(u8 **)(object+0x68);
+    int collision, count;
+    *(OozlaQuad *)previous = *(OozlaQuad *)(object+0x10);
+    switch (object[0x20]) {
+    case 0:
+        F(state,0x44) = F(state,0x18);
+        object[0x20] = 1;
+        if (object[0x43] != 1) func_002A7470(object,1,0,10);
+        break;
+    case 1:
+        func_L01_003A6448(&horizontal,&vertical);
+        F(state,0x18) = func_00283B98(F(state,0x44),D_L01_001AF870*horizontal*0.00029088825f);
+        F(state,0x44) = F(state,0x18);
+        speed = F(state,0x4C)+(vertical*F(D_L01_002637A0,D_00139588*0xE0+0x50)*0.016666668f-F(state,0x4C))*D_L01_001AF880;
+        F(state,0x4C) = speed;
+        speed /= F(D_L01_002637A0,D_00139588*0xE0+0x50)*0.016666668f;
+        F(object,0x48) = speed+speed+horizontal;
+        func_00282F20(velocity,D_L01_001AC580,F(state,0x4C));
+        func_00283098(velocity,velocity,object+0xC0);
+        velocity[2] += F(state,0x54);
+        func_00282CC0(position,object+0x10,velocity);
+        *(OozlaQuad *)(object+0x10) = *(OozlaQuad *)position;
+        func_L01_003A65B0(object);
+        if (F(state,0x4C) < 0.0f) F(state,0x4C) = -func_00282DF0(velocity);
+        else F(state,0x4C) = func_00282DF0(velocity);
+        func_L01_003A64F0(object,state);
+        *(OozlaQuad *)angles = 0;
+        *(OozlaQuad *)start = 0;
+        angles[2] = D_L01_001AF870*horizontal*0.00029088825f;
+        start[2] = angles[2];
+        func_00283410(rotation,angles);
+        progress = 0.0f;
+        collision = 0;
+        while (progress <= D_L01_001AF8A0 && !collision) {
+            sign = vertical < 0.0f ? -1.0f : 1.0f;
+            func_00282F20(start,object+0xE0,D_L01_001AF87C);
+            func_00282CC0(start,start,object+0x10);
+            func_00282F20(shift,object+0xC0,D_L01_001AF8AC*progress*sign);
+            func_00282CC0(start,start,shift);
+            func_00282F20(offset,object+0xE0,D_L01_001AF8A8);
+            func_00282CF0(finish,object+0x10,offset);
+            func_00282D30(normal,velocity,func_00282C48(vertical));
+            func_00282D30(shift,normal,(D_L01_001AF8BC*(D_L01_001AF8A0*0.5f-progress))/(D_L01_001AF8A0*0.5f));
+            func_00282CC0(finish,finish,shift);
+            collision = func_002761F8(start,finish,0,object,0);
+            progress += 1.0f;
+        }
+        if (!collision) {
+            *(OozlaQuad *)(object+0x10) = *(OozlaQuad *)previous;
+            func_00283658(basis,object+0xC0);
+            func_00283678(object+0xC0,matrix);
+            func_00283788(matrix,basis,rotation);
+            func_00283678(object+0xC0,matrix);
+        } else {
+            *(OozlaQuad *)hit = *(OozlaQuad *)(D_L01_001BF900+0x20);
+            func_00282F20(normal,object+0xE0,1.0f);
+            func_00282F20(force,D_L01_001BF900+0x40,1.0f);
+            angle = func_002831B0(func_00282DB0(normal,force));
+            if (D_L01_001AF8C0*0.017453294f < 1.5707964f-angle) {
+                *(OozlaQuad *)(object+0x10) = *(OozlaQuad *)previous;
+            } else {
+                func_00282F20(adjustment,D_L01_001BF900+0x40,D_L01_001AF894);
+                func_00282F20(start,object+0xE0,D_L01_001AF87C);
+                func_00282CF0(finish,object+0x10,start);
+                func_00282CC0(start,start,object+0x10);
+                if (func_002761F8(start,finish,0,object,0)) {
+                    func_00282F20(edge,D_L01_001BF900+0x40,D_L01_001AF898);
+                    func_00282CC0(adjustment,adjustment,edge);
+                }
+                func_00282F20(edge,object+0xE0,D_L01_001AF89C);
+                func_00282CC0(adjustment,adjustment,edge);
+                func_00283658(basis,object+0xC0);
+                func_00282F20(temporary,adjustment,-1.0f);
+                func_00282DD8(vector,temporary,basis);
+                func_00282DD8(basis,vector,temporary);
+                func_00283788(matrix,basis,rotation);
+                func_002AB6D8(matrix,object+0xF0);
+                func_00282CF0(edge,hit,object+0x10);
+                step = D_L01_001AF8B0*0.016666668f;
+                distance = func_00282DF0(edge);
+                if (step < distance) distance = step;
+                else distance = func_00282DF0(edge);
+                func_00282F20(edge,edge,distance);
+                func_00282CC0(object+0x10,object+0x10,edge);
+                F(state,0x54) = 0.0f;
+            }
+        }
+        func_L01_003A65B0(object);
+        func_00283698(inverse,object+0xC0);
+        func_00282CF0(rotation,object+0x10,previous);
+        func_002830C0(rotation,rotation,inverse);
+        func_L00_002EE4D8(rotation,rotation,func_00282C48(F(state,0x4C)));
+        func_00283098(rotation,rotation,object+0xC0);
+        func_00282CC0(object+0x10,previous,rotation);
+        if (D_00138324 & 0x20) {
+            func_002ABBB8(object,velocity,0,10,3,16,1,1,1,-1,0,0x810001,0.0f,0.0f,4.0f,2.0f,0.0f,1.0f,20.0f);
+            count = func_00277F48(object+0x10,16,object,0,D_L01_001AF874);
+            *(OozlaQuad *)vector = *(OozlaQuad *)(object+0x10);
+            func_002A9850(object,vector,D_L01_001C3980,count,0,0x830000,3,2,F(D_L01_002637A0,D_00139588*0xE0+0x70),1.0f,1.0f);
+            I(state,0x40) = D_L01_001AF878;
+            I(object,0x98) = 0;
+            *(u16 *)(object+0x34) = (*(u16 *)(object+0x34) & 0xEFFF)|0x41;
+            D_L01_001A8A44 = 0;
+            object[0x20] = 2;
+        }
+        if (F(object,0x10)<2.0f || F(object,0x10)>1021.0f || F(object,0x14)<2.0f || F(object,0x14)>1021.0f || F(object,0x18)<2.0f || F(object,0x18)>1021.0f) {
+            func_0029F338(object);
+            return;
+        }
+        break;
+    case 2:
+        if (func_00282948(state+0x40)) {
+            func_003355A8(0);
+            func_L01_002BEB90(0,1);
+            func_0029F338(object);
+            return;
+        }
+        break;
+    }
+    func_002A9288(object,D_L01_001AF87C);
+}

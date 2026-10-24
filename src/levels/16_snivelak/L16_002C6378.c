@@ -89,6 +89,6 @@ void func_L16_003F54F8(char *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L16_003F55A0);
+/* func_L16_003F55A0 is in L16_003F55A0-g8.c; its division needs -g. */
 
 INCLUDE_ASM("asm/levels", func_L16_003F5708);

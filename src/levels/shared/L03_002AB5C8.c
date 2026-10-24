@@ -40,7 +40,7 @@ INCLUDE_ASM("asm/levels", func_L03_002AB5C8);
 
 INCLUDE_ASM("asm/levels", func_L03_002AD540);
 
-INCLUDE_ASM("asm/levels", func_L03_002ADC00);
+/* func_L03_002ADC00 is in its dedicated zero-vector profile unit. */
 
 void func_L03_002ADCA0(void) {
     unsigned char *g = D_L03_00189E20;
@@ -50,7 +50,48 @@ void func_L03_002ADCA0(void) {
 }
 
 
-INCLUDE_ASM("asm/levels", func_L03_002B8D10);
+extern float func_002AA2E8(float *, float, float);
+extern void func_002AA3A8(float *, float *, float, float, float, float);
+extern float func_00282E80(void *, void *);
+
+void func_L03_002B8D10(void) {
+    switch (D_L03_00189E20[0x22B4]) {
+    case 0:
+        *(float *)(D_L03_00189E20 + 0x258) = 0.8f;
+        *(float *)(D_L03_00189E20 + 0x25C) = 0.7f;
+        *(float *)(D_L03_00189E20 + 0x260) = 0.449999988079071f;
+        break;
+    case 1:
+        *(float *)(D_L03_00189E20 + 0x258) = 0.599999964237213f;
+        *(float *)(D_L03_00189E20 + 0x25C) = 0.450000017881394f;
+        *(float *)(D_L03_00189E20 + 0x260) = 0.3f;
+        break;
+    }
+    {
+        unsigned char *g = D_L03_00189E20;
+        if (*(int *)(g + 0x229C) == 4) {
+            if (*(short *)(g + 0x4AC) < *(int *)(g + 0x1B8) && !g[0x49E])
+                *(float *)(g + 0x25C) = *(float *)(g + 0x4B8);
+        } else if (*(int *)(g + 0x2294) == 6) {
+            *(float *)(g + 0x25C) = 0.5f;
+        } else if (*(int *)(g + 0x2294) == 4) {
+            *(float *)(g + 0x258) = 0.350000023841858f;
+        } else if (*(int *)(g + 0x2294) == 0x7C) {
+            *(float *)(g + 0x260) = 0.8f;
+        }
+    }
+    if (!D_L03_00189E20[0x287] || *(int *)(D_L03_00189E20 + 0x22A4) == 0x12 ||
+        *(int *)(D_L03_00189E20 + 0x22B0) == 0x12 ||
+        (!D_L03_00189E20[0x22B4] && *(float *)(D_L03_00189E20 + 0x254) < 0.53f) ||
+        *(int *)(D_L03_00189E20 + 0x229C) == 0x11 || D_L03_00189E20[0x1494] ||
+        func_00282E80(D_L03_00189E20 + 0x240, D_L03_00189E20 + 0x80) > *(float *)(D_L03_00189E20 + 0x264) * 0.5f) {
+        float *p = (float *)(D_L03_00189E20 + 0x250);
+        unsigned char *g = D_L03_00189E20;
+        func_002AA2E8(p, *(float *)(g + 0x258), 0.02f);
+        func_002AA2E8(p + 1, *(float *)(g + 0x25C), 0.02f);
+        func_002AA3A8(p + 5, p + 6, *(float *)(g + 0x260), 0.02f, 0.3f, 0.06666667f);
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L03_002BC430);
 
@@ -84,7 +125,7 @@ INCLUDE_ASM("asm/levels", func_L03_00329EF0);
 
 INCLUDE_ASM("asm/levels", func_L03_0032AB20);
 
-INCLUDE_ASM("asm/levels", func_L03_00339128);
+/* func_L03_00339128 is defined in L03_00339128-qcopy.c. */
 
 void func_L03_00339268(unsigned char *a0) {
     if (*(short *)(a0 + 0xA) == -1)
@@ -167,9 +208,9 @@ int func_L03_003C41B8(unsigned char *a0, int a1, int a2) {
 
 /* func_L03_003C4240 is defined in L03_002AB5C8-g8.c (it reads two $gp constants). */
 
-INCLUDE_ASM("asm/levels", func_L03_003C4368);
+/* func_L03_003C4368 is defined in L03_003C4368-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L03_003C4468);
+/* func_L03_003C4468 is defined in L03_003C4468-flags.c. */
 
 /* func_L03_003C4578 is defined in L03_002AB5C8-g8.c (it reads $gp data). */
 

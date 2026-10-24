@@ -153,7 +153,7 @@ extern void func_00282C98(void *);
 
 extern void func_L00_003252C8_1(u8 *) __asm__("func_L00_003252C8");
 
-extern void func_002B00D8(u8 *);
+extern void func_002B00D8(void *, float *, float *, float);
 
 extern void func_002B0408(void *, void *, void *);
 
@@ -501,9 +501,9 @@ void func_L00_00325300(u8 *a0)
     func_L00_003252C8_1(a0 + 0x10);
 }
 
-void func_L00_003253A0(u8 *a0)
+void func_L00_003253A0(u8 *a0, float *first, float *second, float amount)
 {
-    func_002B00D8(a0 + 0x10);
+    func_002B00D8(a0 + 0x10, first, second, amount);
 }
 
 

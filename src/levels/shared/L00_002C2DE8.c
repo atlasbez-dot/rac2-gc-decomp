@@ -225,7 +225,7 @@ int func_L00_002C8C00(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002C8CB0);
 
-INCLUDE_ASM("asm/levels", func_L00_002C8E10);
+/* func_L00_002C8E10 is built in its dedicated G8 unit. */
 
 /* Drives one effect state: branches on several resource fields, decays and integrates two float components through three float helpers, and writes back the summed value. */
 void func_L00_002C9228(void)

@@ -49,11 +49,11 @@ Decompilation progress is tracked live on **[openrac.dev](https://openrac.dev)**
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 2,030 of 3,134 | 346,552 of 1,046,952 bytes |
-| Levels | 2,306 of 5,467 | 407,736 of 4,482,196 bytes |
-| **Total** | 4,336 of 8,601 | 754,288 of 5,529,148 bytes (13.64%) |
+| Boot executable | 2,031 of 3,134 | 347,232 of 1,046,952 bytes |
+| Levels | 2,359 of 5,467 | 428,420 of 4,482,196 bytes |
+| **Total** | 4,390 of 8,601 | 775,652 of 5,529,148 bytes (14.03%) |
 
-The 27 levels hold 101,292 function placements; C covers 51,723 of them.
+The 27 levels hold 101,292 function placements; C covers 52,313 of them.
 307 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
 <!-- /progress -->
 
@@ -144,6 +144,7 @@ For the details:
 - [`docs/BUILDING.md`](docs/BUILDING.md) – the build, the toolchain, the container, CI
 - [`docs/LEVELS.md`](docs/LEVELS.md) – the 27 level programs and the function catalogue
 - [`docs/COMPILER-NOTES.md`](docs/COMPILER-NOTES.md) – the compiler and what was measured of it
+- [`docs/PERMUTER.md`](docs/PERMUTER.md) – decomp-permuter for near misses, through OpenRAC's shared tool
 - [`docs/VERSIONS.md`](docs/VERSIONS.md) – the three releases (v1.01, PAL, v2.00): their dumps, catalogues, builds and reports
 
 ---
