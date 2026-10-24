@@ -15,7 +15,7 @@ extern float func_00283BE0_3(float, float);
 
 extern float func_00282C48_5(float);
 
-extern void func_00283B98_6(float, float);
+extern float func_00283B98(float, float);
 
 typedef unsigned char u8;
 
@@ -215,7 +215,7 @@ unsigned int func_0026F740(void)
     return 0;
 }
 
-unsigned int func_0026F748(void)
+unsigned int func_0026F748(int unused0, int unused1)
 {
     return 0;
 }
@@ -429,7 +429,7 @@ float func_002702C8(float *p, float a, float b, float c, float d, float lim)
 }
 
 /* Advances a stored float by a scaled helper result, then clamps it against a positive limit, then clamps it again with a second helper and finally rescales it through a third helper. */
-void func_002703B0(char *obj, float p1, float p2, float p3, float p4, float p5)
+float func_002703B0(char *obj, float p1, float p2, float p3, float p4, float p5)
 {
     float r;
     float t;
@@ -458,7 +458,7 @@ void func_002703B0(char *obj, float p1, float p2, float p3, float p4, float p5)
         *(float *)obj = -func_00282C48_5(r);
     }
 
-    func_00283B98_6(p1, *(float *)obj);
+    return func_00283B98(p1, *(float *)obj);
 }
 
 /* sets the referenced object halfword at 0x7e and clears its byte at 0x7d */
@@ -569,11 +569,11 @@ void func_00270B58(float *out, float *p0, float *p1, float *dir0, float *dir1, f
     out[2] = func_00282DF0(diff);
 }
 
-INCLUDE_ASM("asm/game", func_00270D50);
+/* func_00270D50 is defined separately in 00270D50.c. */
 
-INCLUDE_ASM("asm/game", func_00270E30);
+/* func_00270E30 uses the quadword-copy profile in 0026EA00-qcopy.c. */
 
-INCLUDE_ASM("asm/game", func_00270EA8);
+/* func_00270EA8 uses the quadword-copy profile in 0026EA00-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_00270EE0);
 
@@ -581,7 +581,7 @@ INCLUDE_ASM("asm/game", func_00271130);
 
 INCLUDE_ASM("asm/game", func_002712D8);
 
-INCLUDE_ASM("asm/game", func_002718B8);
+/* func_002718B8 uses the quadword-copy profile in 0026EA00-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_00271958);
 

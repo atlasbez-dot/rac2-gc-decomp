@@ -121,7 +121,7 @@ extern void func_00283D38_2(s32, s32, f32);
 
 extern void func_002A93B0(void);
 
-extern void func_00283D38(void);
+extern int func_00283D38(int from, int to, float fraction);
 
 extern int func_002EF250(float);
 
@@ -145,7 +145,7 @@ extern void func_00283098(char *, char *, char *);
 
 extern void func_00282D30(void *, void *, float);
 
-extern void func_002AFFD8_1(u8 *) __asm__("func_002AFFD8");
+extern void func_002AFFD8(char *, char *, int);
 
 extern int D_001A8FF0;
 
@@ -266,9 +266,9 @@ void func_L00_0031C978(void)
     func_002A93B0();
 }
 
-void func_L00_0031C998(void)
+int func_L00_0031C998(int from, int to, float fraction)
 {
-    func_00283D38();
+    return func_00283D38(from, to, fraction);
 }
 
 
@@ -487,9 +487,9 @@ void func_L00_00324F18(char *a0, char *a1, float f12, float f13, float f14) {
     func_00282CC0(a1, a1, a0 + 0x10);
 }
 
-void func_L00_003252A8(u8 *a0)
+void func_L00_003252A8(void *object, void *output, int mode)
 {
-    func_002AFFD8_1(a0 + 0x10);
+    func_002AFFD8((char *)object + 0x10, (char *)output, mode);
 }
 
 /* func_L00_003252C8 (flag-routed handler, reads the caller's a1) is a near miss:
@@ -542,7 +542,7 @@ void func_L00_00326200(void)
 
 INCLUDE_ASM("asm/levels", func_L00_003263D0);
 
-INCLUDE_ASM("asm/levels", func_L00_00326620);
+/* Defined in L00_00326620.c. */
 
 /* func_L00_003266D8 is built in its own unit. */
 
@@ -595,5 +595,3 @@ void func_L00_0032A0E8(void) {
 INCLUDE_ASM("asm/levels", func_L00_0032A258);
 
 INCLUDE_ASM("asm/levels", func_L00_0032A530);
-
-

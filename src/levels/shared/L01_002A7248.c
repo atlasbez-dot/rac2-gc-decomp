@@ -94,10 +94,6 @@ extern void func_002E3918(void *a0, void *a1, void *a2);
 
 extern void func_002E3470(void *a0, void *a1, void *a2);
 
-extern float func_002E3A60(int a0, int a1);
-
-extern void func_002E4600(int a0, int a1, float f12);
-
 extern float func_00283B98(float f12, float f13);
 
 extern float func_00283198(float f12);
@@ -110,7 +106,7 @@ extern void func_002AEC18(void *a0, int a1);
 
 extern float func_002E3B10(float f12, float f13);
 
-extern void func_003212C0(char *a0, char *a1, float f12);
+extern int func_002B50E0(char *a0, char *a1, float f12);
 
 extern char *func_00321F08(int a0);
 
@@ -119,7 +115,6 @@ extern void func_003140B0(char *a0, char *a1, int a2, float f12, float f13,
 
 extern char D_00139A28[];
 
-extern int func_003246F8(void);
 
 extern int D_L01_001A79F0;
 
@@ -246,6 +241,7 @@ INCLUDE_ASM("asm/levels", func_L01_002E2608);
 INCLUDE_ASM("asm/levels", func_L01_002EABA8);
 
 
+/* Defined in L01_002F14E8-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L01_002F1588);
 
@@ -255,6 +251,7 @@ INCLUDE_ASM("asm/levels", func_L01_002F1FD0);
 
 INCLUDE_ASM("asm/levels", func_L01_00304270);
 
+/* Defined in L01_00310BC0.c. */
 
 /* rac1-decomp src/overlays/shared/mobyutil_0026E8E0.c: func_L01_0026F090 */
 // Walks a list of moby indices and sets the state byte of each one that is non-negative.
@@ -273,7 +270,7 @@ void func_L01_003115E8(int list, int state)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L01_00311C18);
+/* Defined in L01_00311C18.c. */
 
 INCLUDE_ASM("asm/levels", func_L01_003120A8);
 
@@ -327,9 +324,9 @@ INCLUDE_ASM("asm/levels", func_L01_0031AB20);
 
 INCLUDE_ASM("asm/levels", func_L01_0031B300);
 
-void func_L01_0031BC68(int a0, int a1) {
-    float v = func_002E3A60(a0, a1);
-    func_002E4600(a0, a1, v * 0.5f + 0.5f);
+int func_L01_0031BC68(int a0, int a1, float phase) {
+    float v = func_00283198(phase);
+    return func_00283D38(a0, a1, v * 0.5f + 0.5f);
 }
 
 
@@ -366,10 +363,10 @@ void func_L01_003208D0(void *a0, float *a1, int a2) {
 
 INCLUDE_ASM("asm/levels", func_L01_003209F8);
 
-void func_L01_00321178(char *a0, char *a1) {
+int func_L01_00321178(char *a0, char *a1) {
     float v = func_002E3B10(*(float *)(a1 + 0) - *(float *)(a0 + 0x10),
                             *(float *)(a1 + 4) - *(float *)(a0 + 0x14));
-    func_003212C0(a0, a1, v);
+    return func_002B50E0(a0, a1, v);
 }
 
 int func_L01_00322288(int a0, float f12) {
@@ -417,12 +414,9 @@ void func_L01_003246A0(int a) {
         *(int *)p = 1;
 }
 
-void func_L01_003246D0(void) {
-    func_L01_003246A0(func_003246F8());
-}
+/* func_L01_003246D0 is defined in L01_003246D0.c. */
 
-/* scans the half-open span the counter global picks out of the pair table, looking for
-   the caller's key; the key rides in $a0 without a caller-side argument */
+/* Scans the half-open span of the pair table for the caller's key. */
 int func_L01_003246F8(int key) {
  unsigned n=(unsigned)D_L01_001A79F0;
  int i;

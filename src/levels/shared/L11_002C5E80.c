@@ -273,7 +273,7 @@ void func_L11_0045FFB0(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00460258);
+/* func_L11_00460258 is defined in L11_00460258-g32.c. */
 
 INCLUDE_ASM("asm/levels", func_L11_0046B9F0);
 

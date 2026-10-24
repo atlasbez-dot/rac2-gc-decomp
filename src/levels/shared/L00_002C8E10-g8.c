@@ -7,7 +7,7 @@ extern void func_L00_002B47A8(void *, void *, int, float, float);
 extern int func_002761F8(void *, void *, int, void *, int);
 extern short func_00278E78(void);
 extern void func_L00_002C42E0(int, int);
-extern void func_L00_002B9B88(int, int);
+extern int func_L00_002B9B88(int, int);
 
 /* Decide whether the resident should transition after falling or leaving support. */
 int func_L00_002C8E10(void)

@@ -23,7 +23,7 @@ extern char D_L00_001A9000[] __attribute__((sda));
 
 extern float func_00282E48_1(char *a, char *b);
 
-extern void func_00282F20_6(void *, float);
+extern void func_00282F20(void *, void *, float);
 
 extern void func_00282DD8_2(void *, void *, void *);
 
@@ -51,7 +51,7 @@ extern float func_00283198_4(float);
 
 extern void func_00283098_3(float *dst, float *src, char *table);
 
-extern void func_00282CC0_11(float *dst, float *src, int arg);
+extern void func_00282CC0_11(float *dst, float *src, float *arg);
 
 extern int D_L00_001A8FF0_1 __attribute__((sda));
 
@@ -126,7 +126,7 @@ void func_002B0408(void *a0, void *a1, void *a2)
     float q[4];
     float x;
 
-    func_00282F20_6(q, 1.0f);
+    func_00282F20(q, a1, 1.0f);
     func_00282DD8_2(m, q, (char *)a0 + 32);
     func_00282D30_12(m, m, 0.5f);
     x = func_00282DF0_1(m);
@@ -214,11 +214,12 @@ void func_002B0A48(int first, int second, int third) {
 }
 
 /* Walks selected mask bits, evaluates three stored curve components, optionally transforms the vector, and dispatches one object operation per selected bit. */
-void func_002B0A68(char *self, int mask, int arg2,
+void func_002B0A68(char *self, int mask, float *arg2,
                                         unsigned char arg3,
                                         float f0, float f1, float f2, float f3)
 {
-    float buf[3];
+    /* Vector primitives read/write all 16 bytes; retail initializes only xyz. */
+    float buf[4] __attribute__((aligned(16)));
     float v;
     float k;
     float fa;

@@ -11,7 +11,8 @@ extern float func_3E22A8();
 extern void func_2F5C38();
 extern void func_2F5C68();
 extern void func_2F6498();
-extern void func_2F5CC0();
+extern void func_00282D30(void *dst, void *src, float scale);
+extern void func_00282CC0(void *dst, void *a, void *b);
 extern void func_31A618();
 extern void func_4209A0();
 extern int func_420C68();
@@ -69,11 +70,11 @@ void func_L14_00390FE8(char *arg0) {
     }
 }
 
-void func_L14_00391B58(char *arg0) {
+void func_L14_00391B58(char *arg0, float scale) {
     char buf[16];
 
-    func_2F5CC0(buf, arg0);
-    func_2F5C38(arg0 + 0x30, arg0 + 0x30, buf);
+    func_00282D30(buf, arg0, scale);
+    func_00282CC0(arg0 + 0x30, arg0 + 0x30, buf);
 }
 
 INCLUDE_ASM("asm/levels", func_L14_00399E28);
@@ -384,10 +385,8 @@ void func_L14_003E2238(char *arg0) {
     float f = func_3E22A8(arg0);
 
     func_2F6498(arg0 + 0xC0, arg0 + 0xF0);
-    ((void (*)(float *, float *, float))func_2F5CC0)((float *)(arg0 + 0xC0),
-                                                     (float *)(arg0 + 0xC0), f);
-    ((void (*)(float *, float *, float))func_2F5CC0)((float *)(arg0 + 0xD0),
-                                                     (float *)(arg0 + 0xD0), f);
+    func_00282D30(arg0 + 0xC0, arg0 + 0xC0, f);
+    func_00282D30(arg0 + 0xD0, arg0 + 0xD0, f);
     func_31A618(arg0);
 }
 

@@ -57,6 +57,13 @@ informed the register-address and scratch-register model in
 copied into RAC2's C sources. The transformer and its tests are independently
 authored.
 
+The ordinary-C packet cursor views used by `func_0027DB68`, `func_0027E920`
+and `func_0027EA28` also reference Lombyte's GPL-3.0
+[`dma_tag.h` at c41bf1c](https://github.com/lombyte-project/Lombyte/blob/c41bf1c324eecae8006bf82808ad19ed42ee5eb9/include/rnc/rendering/dma_tag.h).
+Their source comments record the pinned reference and local adaptations. The
+retail-specific bindings and packet writes were reconstructed for RAC2; no inline
+assembly, SDK header or assembler alias was imported.
+
 ## Public C runtime sources
 
 | Source and revision | Use in this repository |

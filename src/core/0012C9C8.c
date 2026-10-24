@@ -89,6 +89,5 @@ void func_0012CBC0(void *arg0) {
     r1_func_001291C8_0012CBC0(s, temporal_reference);  /* Update_Temporal_Reference_Tacking_Data */
 }
 
-INCLUDE_ASM("asm/core", func_0012CC88);
 
 INCLUDE_ASM("asm/core", func_0012CDB0);

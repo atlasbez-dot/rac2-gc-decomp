@@ -129,9 +129,11 @@ After merging, a maintainer regenerates the three reports together (they must ag
 
 ## Totals, old and new
 
-v1.01's count is unchanged by this: **8,601 functions, 5,529,156 bytes** (3,134 boot
-functions, 5,467 level functions the boot does not have). The two new releases are counted
-with the same rules from their own binaries:
+The original multi-release inventory recorded **8,601 functions, 5,529,156 bytes**
+for v1.01 (3,134 boot functions, 5,467 level functions the boot does not have).
+The following inventory is that historical snapshot. Later entry corrections
+preserve all loaded bytes while changing the code counted by the catalogues;
+the generated coverage table below uses the current totals.
 
 | | v1.01 | PAL | v2.00 |
 | --- | ---: | ---: | ---: |
@@ -146,17 +148,18 @@ with the same rules from their own binaries:
 | functions of the release's own (markers in `src/<version>/`) | - | 3,575 | 1,101 |
 | v1.01 functions not carried (`not_carried.tsv`) | - | 98 | 58 |
 
-Matched, when this layout landed (the three reports from one build):
+Current matched coverage (the three reports from validated builds):
 
 | Version | Release | Functions | Boot code | Level code | Total code |
 | --- | --- | ---: | ---: | ---: | ---: |
-| `SCUS_972.68` | USA v1.01 | 4,390 of 8,601 | 347,232 of 1,046,952 | 428,420 of 4,482,196 | 775,652 of 5,529,148 (14.03%) |
-| `SCES_516.07` | Europe/Australia v1.00 | 3,700 of 8,693 | 284,600 of 1,056,500 | 295,836 of 4,650,756 | 580,436 of 5,707,256 (10.17%) |
-| `SCUS_972.68_v2` | USA v2.00 (Greatest Hits) | 4,187 of 8,655 | 309,380 of 1,050,472 | 422,940 of 4,532,636 | 732,320 of 5,583,108 (13.12%) |
+| `SCUS_972.68` | USA v1.01 | 4,469 of 8,601 | 354,140 of 1,046,952 | 450,732 of 4,482,196 | 804,872 of 5,529,148 (14.56%) |
+| `SCES_516.07` | Europe/Australia v1.00 | 3,749 of 8,693 | 290,672 of 1,056,500 | 306,168 of 4,650,756 | 596,840 of 5,707,256 (10.46%) |
+| `SCUS_972.68_v2` | USA v2.00 (Greatest Hits) | 4,263 of 8,655 | 316,288 of 1,050,472 | 443,820 of 4,532,636 | 760,108 of 5,583,108 (13.61%) |
 
-(`tools/progress.py --version pal|us2` keeps the last two lines current.) PAL counts fewer
-matched functions than v1.01 because 1,036 of v1.01's matched functions are another
-release's code there (the 50 Hz constants, the moved fields, and the callers of either),
-and v2.00 508; each needs C of its own in `src/<version>/`, usually v1.01's C with the
+`tools/progress.py --version us|pal|us2` maintains the corresponding coverage row.
+In the original layout sample, 1,036 of v1.01's then-matched functions differed in
+PAL, and 508 in v2.00 (50 Hz constants, moved fields and their callers). Those are
+historical sample counts, not the current difference between the totals above.
+Such functions need C of their own in `src/<version>/`, often v1.01's C with the
 release's constants. Exact and fuzzy are kept apart in every report; until near misses
 carry a measured closeness, each report's fuzzy figure equals its exact one.

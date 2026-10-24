@@ -1,3 +1,183 @@
+/* Nonmatching: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_00392530: 0 of 27 places match (src/levels/shared/L00_00392530.c); us2: func_L00_00392530: 0 of 27 places match (src/levels/shared/L00_00392530.c); pal: absent. Manual reconstruction2564/2644 frame0x80. Full two-target acquisition/ammo/statistics/light/sound behavior retained. Verified AFFD8threeGPR and AB1F0oneactor/GPR32 value interpreted as record pointer. Scalar short timers and pointer targets truthful. Remaining globalbase sharing, branch order/register scheduling; reopen with original struct/expression layout. */
+#include "common.h"
+typedef int Quad __attribute__((mode(TI)));
+typedef union { Quad quad; float f[4]; } Vector;
+typedef struct {
+    Vector start, end;
+    char *target;
+    float length;
+    short targetAge, secondaryAge;
+    int timer, light, fade;
+    char *secondary;
+    short ammoTimer, cooldown, targetReady, secondaryReady, targetTimer, secondaryTimer;
+    int sound;
+} DualBeamState;
+extern char D_00189E20[] NOT_SDA, D_00138180[] NOT_SDA, D_00188660[] NOT_SDA;
+extern float D_0025C64C NOT_SDA, D_0018A550[4][4] NOT_SDA;
+extern u8 D_0013957A;
+extern char D_L00_00262570[][0xE0];
+extern float D_L00_001C6F40[8][8];
+extern int D_L00_001AF130 __attribute__((sda)), D_L00_001B2748 __attribute__((sda));
+extern u32 D_001A7390 __attribute__((sda)), D_001A79F0;
+extern int func_L00_002D4040(int), func_L00_002D3F30(int, int), func_00282948(int *), func_00282978(short *);
+extern void func_00273318(void *, u32, void *, int, int, int, float, float, float);
+extern int func_00291308(void *, int, float, float), func_002E5CF8(int, int, char *), func_002E59B0(int, int);
+extern float func_00283248(float, float), func_00283C80(float, float), func_00282E48(void *, void *), func_00283CE0(int);
+extern void func_002AFFD8(char *, char *, int), func_00282D30(void *, void *, float), func_00282CC0(void *, void *, void *);
+extern int func_002AB1F0(u8 *);
+extern void func_0029FCC0(char *, int, char *), func_00283098(void *, void *, void *), func_00282F20(void *, void *, float);
+extern void func_0030A188(char *), func_L00_00393148(char *), func_0030BA38(void *);
+extern void func_L00_002E6EF8(void (*)(void *), void *), func_002E59F8(int);
+extern void func_L00_002AF568(void), func_L00_002AF7D0(void), func_00291450(int);
+/* Maintains two beam targets, their acquisition delays, ammunition and the light/sound state. */
+void func_L00_00392530(char *actor) {
+    Vector direction, offset, local;
+    DualBeamState *beam = *(DualBeamState **)(actor + 0x68);
+    char *player = D_00189E20, *input = D_00138180, *entry, *sound;
+    int stopping = *(int *)(player + 0x1244) == 3;
+    int active = 0, permitted = 1, ammo, limit;
+    u32 stamp;
+    float angle, desiredLength, fade;
+    if ((*(u32 *)(input + 0x1A4) & *(u32 *)(player + 0x1230)) && !((u8 *)player)[0x22BC]) beam->length = 0.8f;
+    D_0025C64C = 0.9f;
+    ammo = func_L00_002D4040(-1);
+    if (*(int *)(player + 0x2294) == 1) {
+        if (!func_00282948((int *)(player + 0x2534))) permitted = 0;
+        else func_00273318(actor, func_L00_002D4040(-1) ? 0x600FFF0F : 0x600000FF, 0, 31, -1, 4, 1, 0, 90);
+    } else *(int *)(player + 0x2534) = 40;
+    if (!(*(u32 *)(input + 0x1A0) & *(u32 *)(player + 0x1230)) || (u8)actor[0x20] == 4 || !(u8)actor[0x20] ||
+        ((u8 *)player)[0x22BC] || *(int *)(player + 0x2294) == 0x6F || *(int *)(player + 0x1240) < 23 || !permitted) {
+        beam->target = 0; goto clear_targets;
+    }
+    if (!beam->timer) {
+        if (ammo < 1) {
+            beam->target = 0; beam->secondary = 0;
+            beam->targetReady = 0; beam->secondaryReady = 0; beam->targetTimer = 0; beam->secondaryTimer = 0;
+        } else {
+            if (func_00282978(&beam->ammoTimer)) {
+                func_00282978(&beam->targetTimer); func_00282978(&beam->secondaryTimer);
+                func_L00_002D3F30(-1, 1); beam->ammoTimer = 10;
+            }
+            if (beam->light == -1) beam->light = func_00291308(actor + 0x10, 0, 7.5f, 0);
+            else if (beam->fade < 10) ++beam->fade;
+            active = 1;
+            if (beam->target) {
+                angle = func_00283248(*(float *)(beam->target + 0x10) - *(float *)(player + 0x80), *(float *)(beam->target + 0x14) - *(float *)(player + 0x84));
+                angle = func_00283C80(*(float *)(player + 0x98), angle);
+                if (angle > 2.0943f || !((u8 *)beam->target)[0x31] || func_00282E48(beam->target + 0x10, player + 0x80) > 20) {
+                    beam->target = 0; beam->targetReady = 0;
+                }
+            }
+            if (beam->secondary) {
+                angle = func_00283248(*(float *)(beam->secondary + 0x10) - *(float *)(player + 0x80), *(float *)(beam->secondary + 0x14) - *(float *)(player + 0x84));
+                angle = func_00283C80(*(float *)(player + 0x98), angle);
+                if (angle > 2.0943f || !((u8 *)beam->secondary)[0x31] || func_00282E48(beam->secondary + 0x10, player + 0x80) > 20) {
+                    beam->secondary = 0; beam->secondaryReady = 0;
+                }
+            }
+            func_002AFFD8((char *)beam, (char *)&direction, 1);
+            beam->start.quad = *(Quad *)(actor + 0x10);
+            func_00282D30(&offset, &direction, 0.7f);
+            func_00282CC0(&beam->start, &beam->start, &offset);
+            beam->end.quad = beam->start.quad;
+            if (!beam->target || !beam->targetReady) beam->targetAge = 0;
+            else {
+                ++beam->targetAge;
+                entry = (char *)func_002AB1F0((u8 *)beam->target); limit = 50;
+                if (entry && *(short *)(entry + 4) == 1) limit = 5;
+                if (beam->targetAge >= limit) { beam->target = 0; beam->targetReady = 0; }
+            }
+            if (!beam->secondary || !beam->secondaryReady) beam->secondaryAge = 0;
+            else {
+                ++beam->secondaryAge;
+                entry = (char *)func_002AB1F0((u8 *)beam->secondary); limit = 50;
+                if (entry && *(short *)(entry + 4) == 1) limit = 5;
+                if (beam->secondaryAge >= limit) { beam->secondary = 0; beam->secondaryReady = 0; }
+            }
+            desiredLength = 12;
+            if (D_L00_00262570[D_0013957A][4]) desiredLength = 18;
+            beam->length += (desiredLength - beam->length) * 0.07f;
+            if (*(short *)(player + 0x24EC) == 1) {
+                func_0029FCC0(actor, 0, (char *)&beam->start);
+                local.f[0] = 0; local.f[2] = 0; local.f[1] = -beam->length;
+                func_00283098(&local, &local, actor + 0xC0);
+                func_00282CC0(&beam->end, &beam->start, &local);
+            } else {
+                func_0029FCC0(actor, 0, (char *)&beam->start);
+                func_00282F20(&beam->end, D_0018A550, beam->length);
+                func_00282CC0(&beam->end, &beam->start, &beam->end);
+            }
+            func_0030A188(actor); func_L00_00393148(actor);
+            func_L00_002E6EF8(func_0030BA38, actor);
+        }
+    }
+    goto update_sound;
+clear_targets:
+    beam->secondary = 0; beam->targetReady = 0; beam->secondaryReady = 0;
+update_sound:
+    if (active) {
+        if (!func_002E59B0((int)actor, beam->sound)) beam->sound = func_002E5CF8(4, 4, actor);
+    } else {
+        D_L00_001AF130 = 1;
+        if (beam->fade > 0) --beam->fade;
+        sound = D_00188660 + beam->sound * 0x70;
+        if (beam->sound != -1 && *(char **)(sound + 0x88) == actor && (u8)sound[0x74]) func_002E59F8(beam->sound);
+        beam->sound = -1;
+    }
+    if (!beam->target || (u8)beam->target[0x20] == 0xFE || (u8)beam->target[0x20] == 0xFD || !(*(u16 *)(beam->target + 0x34) & 0x1000)) beam->targetReady = 1;
+    if (!beam->secondary || (u8)beam->secondary[0x20] == 0xFE || (u8)beam->secondary[0x20] == 0xFD || !(*(u16 *)(beam->secondary + 0x34) & 0x1000)) beam->secondaryReady = 1;
+    switch ((u8)actor[0x20]) {
+    case 0:
+        beam->timer = 16; beam->light = func_00291308(&beam->start, 0, 0, 0);
+        D_L00_001AF130 = 1; actor[0x20] = 1; beam->cooldown = 20; beam->sound = -1;
+        beam->secondary = 0; beam->target = 0; beam->targetReady = 0; beam->secondaryReady = 0;
+        beam->secondaryTimer = 0; beam->targetTimer = 0; D_L00_001B2748 = 10;
+        break;
+    case 1:
+        func_00282948(&beam->timer);
+        if (active) { func_L00_002AF568(); actor[0x20] = 3; }
+        if ((*(u32 *)(input + 0x1A4) & *(u32 *)(player + 0x1230)) && !((u8 *)player)[0x22BC]) {
+            if (!active) {
+                beam->target = 0; beam->secondary = 0; beam->targetReady = 0; beam->secondaryReady = 0;
+                actor[0x20] = 1; func_002E5CF8(0, 0, actor); func_L00_002AF7D0();
+            } else {
+                stamp = D_001A7390;
+                if (*(u16 *)(player + 0x2618) != 0xFFFF) { ++*(u16 *)(player + 0x2618); stamp = D_001A7390; }
+                if (*(u32 *)(player + 0x261C) < stamp) *(u32 *)(player + 0x261C) = stamp;
+                *(u32 *)(player + 0x2620) |= (1u << (D_001A79F0 & 31)) | 0x80000000;
+                func_L00_002AF568(); actor[0x20] = 3;
+            }
+        }
+        break;
+    case 3:
+        if (!(*(u32 *)(input + 0x1A8) & *(u32 *)(player + 0x1230)) && active && !((u8 *)player)[0x22BC]) break;
+        if (*(int *)(player + 0x1D8) > 70 && *(u16 *)(player + 0x2A68) != 0xFFFF) ++*(u16 *)(player + 0x2A68);
+        if (*(u32 *)(player + 0x2A6C) < D_001A7390) *(u32 *)(player + 0x2A6C) = D_001A7390;
+        *(u32 *)(player + 0x2A70) |= (1u << (D_001A79F0 & 31)) | 0x80000000;
+        if (*(int *)(player + 0x1D8) < 30) ++((u8 *)player)[0x22C5]; else player[0x22C5] = 0;
+        beam->target = 0; beam->secondary = 0; beam->targetReady = 0; beam->secondaryReady = 0; beam->length = 0;
+        func_L00_002AF7D0(); actor[0x20] = 1;
+        break;
+    case 2: case 4: case 5: default: break;
+    }
+    if (beam->light != -1) {
+        direction.quad = 0; direction.f[0] = 2; direction.f[2] = 2;
+        func_00283098(&direction, &direction, D_0018A550);
+        D_L00_001C6F40[beam->light][4] = *(float *)(player + 0x80) + direction.f[0];
+        D_L00_001C6F40[beam->light][5] = *(float *)(player + 0x84) + direction.f[1];
+        D_L00_001C6F40[beam->light][6] = *(float *)(player + 0x88) + direction.f[2];
+        D_L00_001C6F40[beam->light][7] = 7.5f;
+        fade = func_00283CE0(beam->fade) * 0.1f;
+        D_L00_001C6F40[beam->light][2] = fade;
+        D_L00_001C6F40[beam->light][1] = fade * 0.7f;
+        D_L00_001C6F40[beam->light][0] = D_L00_001C6F40[beam->light][1];
+        if (!stopping) return;
+        if (beam->light != -1) { func_00291450(beam->light); beam->light = -1; }
+    }
+    if (stopping && beam->light == -1) actor[0x20] = 4;
+}
+
+/* Historical screening only; superseded by the measured reconstruction above. */
 /* func_L00_00392530 - 2644 bytes, 27 place(s), level 00_aranos_tutorial,
    retail at 0x00392530. Screened with tools/w10_screen.py: 42 call(s)
    [func_L00_002D4040@003925D0, func_00282948@003925EC,

@@ -1,3 +1,9 @@
+/* Later ABI audit: func_0032C700 returns an object pointer and its final stack
+ * slot is a nullable pointer. The declaration below is corrected accordingly.
+ * These declaration-only edits were not remeasured; numerical residuals below
+ * describe the earlier tested source, not a new result.
+ */
+
 /* Reconstructed 2026-10-23; -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
  * us: 0/2, us2: 0/2, pal: absent.
  * 3772/3992 bytes, 0xA0 frame versus retail 0xB0.
@@ -40,7 +46,7 @@ extern void func_002A93B0(void *);
 extern void func_L03_0032AD10(int);
 extern void *func_002A9640(void *, u32, int);
 extern int func_00282C30(int);
-extern void func_0032C700(float, float, void *, int, int, int, int, int, int, int, int, int, int, int);
+extern void *func_0032C700(float, float, void *, int, int, int, int, int, int, int, int, int, int, void *);
 extern void func_002B0A68(char *, int, int, unsigned char, float, float, float, float);
 extern void func_L03_003C5668(void *, void *, void *);
 extern void func_L02_002EF388(void *, void *, void *, int, int);

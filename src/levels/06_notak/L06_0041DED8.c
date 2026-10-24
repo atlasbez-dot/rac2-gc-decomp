@@ -435,7 +435,7 @@ void func_L06_00456EE0(void)
     func_3BFBB8(D_L06_002AA500, 0x30);
 }
 
-INCLUDE_ASM("asm/levels", func_L06_00456F08);
+/* func_L06_00456F08 is defined in L06_00456F08.c. */
 
 INCLUDE_ASM("asm/levels", func_L06_00457100);
 

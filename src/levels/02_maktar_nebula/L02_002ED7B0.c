@@ -326,7 +326,7 @@ u8 *func_L02_003CD5B0(int group) {
 }
 
 /* Resets the actor's aim record and hands its descriptor to the object system. */
-INCLUDE_ASM("asm/levels", func_L02_003CD668);
+/* func_L02_003CD668 is defined in L02_003CD668.c. */
 
 INCLUDE_ASM("asm/levels", func_L02_003CFAC8);
 

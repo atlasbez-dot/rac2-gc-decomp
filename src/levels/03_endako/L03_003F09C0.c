@@ -258,7 +258,7 @@ INCLUDE_ASM("asm/levels", func_L03_0041BE50);
 
 INCLUDE_ASM("asm/levels", func_L03_0041CA78);
 
-INCLUDE_ASM("asm/levels", func_L03_0041CEB0);
+/* func_L03_0041CEB0 is defined in L03_0041CEB0.c. */
 
 /* func_L03_0041D0A8 lives in L03_003F09C0-g8.c (it reaches D_L03_001B2A1C
  * through $gp). */

@@ -77,6 +77,16 @@ original SDK flags.
 
 ## Frames, calls and ABI
 
+### Object extent and stack allocation
+
+A physical stack slot does not establish a C object's size. In
+`func_L01_003DD3A0`, the iterator helper reads and updates one pointer; replacing a
+padded 16-byte cursor struct with a plain `char *` cursor preserves all 776 bytes
+in each carrying release's local check. Keep the compiler's padding implicit.
+Likewise, adjacent GP-relative addresses establish spacing, not the complete size
+of each external object. A known field prefix does not justify a bounded small-data
+declaration when the owning allocation or remaining consumers are unknown.
+
 ### Save order and loop padding
 
 The default game profile uses 8-byte GPR slots and ascending GPR save/restore order.
@@ -298,6 +308,18 @@ This models the schedulers, not every optimizer effect of inline assembly. Incom
 links retain producer latencies; interblock motion sees a store; jump2 can remove a
 move that a volatile operation retains. `func_002B50E0` retained three argument-move
 differences. Artificial clobbers, register pins and inline assembly remain forbidden.
+
+24 October 2026: the barrier closed five retained near misses whose notes had named the
+missing inline-asm copy barrier: `func_00270EA8` (56 bytes), `func_00270E30` (116),
+`func_00302A20` (100), `func_003353C8` (88) and `func_002AD6F0` (196), in qualified
+qcopy/barrier units. Before the barrier they were one restore or one copy-address
+allocation away; after it each is 28/28 in USA v1.01, PAL and USA v2.00. This is further
+evidence for the dependence model, not a blanket claim that every copy near miss closes.
+
+The same profile closed four more near misses: `func_002BB838` (236 bytes), `func_00313678`
+(84), and the boot-only G8 twins `func_00304AD0` and `func_00307298` (148 each; 1/1 in both
+USA releases, no PAL row). For `func_00313678` the copy source had to stay in a `char *`
+local while the call passed the same pointer; qcopy alone folded the load.
 
 The retained `func_00335370` exposes another latency gap: sched2 moves an independent
 return-address restore between a field load and address formation. Correct copy size
@@ -584,10 +606,18 @@ surrounding flow/returns and incoming references; missing jr alone is insufficie
 Change the generator in tools/levels.py, never the generated catalogue by hand.
 
 Tools/check.py can pass while linking fails: other local C sections, symbol-value
-consistency and data placement are whole-program constraints. A C switch's new
-.rodata/.sdata can be unplaceable. A table already in retail can use its measured
-symbol and computed goto; a static label-address array keeps legitimate arms in
-discarded data. It must describe the right arms and earns no matched-data credit.
+consistency and data placement are whole-program constraints. The build now places
+complete compiler `.rodata`/`.rdata` branch-table sections when every R_MIPS_32
+entry resolves to the correct already-placed C case destination. It interleaves
+the unchanged compiler section with the remaining retail data, then compares all
+loaded bytes. Dependencies are object-scoped; unrelated sections cannot satisfy
+them. Scalar/mixed pools and unsupported `.sdata` remain unplaceable. See
+[switch-table qualification and limits](MATCHING-BLOCKERS.md#blocker-06).
+
+A legacy table already in retail can use its measured symbol and computed goto;
+a static label-address array keeps legitimate arms in discarded data. That array
+must describe the right arms and earns no matched-data credit. New table support
+does not independently requalify those existing source constructs.
 Do not assume every jtbl_/D_ spelling binds identically across releases.
 
 ## Qualification and controls

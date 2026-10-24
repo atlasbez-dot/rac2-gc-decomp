@@ -390,12 +390,12 @@ done:
     return ret;
 }
 
-void func_002D5E38(char *object, int arg, int *result)
+int func_002D5E38(char *object, int arg, int *result)
 {
     typedef struct { int first, value, third; } Func002D5E38Row;
     Func002D5E38Row *rows = *(Func002D5E38Row **)(object + 0x34);
     int index = *(int *)(object + 0x40);
-    func_002D5B58(arg, rows[index].value, result);
+    return func_002D5B58(arg, rows[index].value, result);
 }
 
 void func_002D5E70(char *object, int *result) {

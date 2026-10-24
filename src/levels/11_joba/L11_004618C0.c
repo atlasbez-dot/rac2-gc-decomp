@@ -49,7 +49,7 @@ void func_L11_00472DE8(unsigned char *a0) {
 
 INCLUDE_ASM("asm/levels", func_L11_00472E10);
 
-INCLUDE_ASM("asm/levels", func_L11_00474920);
+/* Defined in L11_00474920-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L11_0047A310);
 
@@ -88,6 +88,3 @@ void func_L11_004885B8(unsigned char *a0) {
     func_80301000(a0, buf);
     *(unsigned short *)(a0 + 0x7E) = 0;
 }
-
-
-

@@ -7,7 +7,7 @@ extern unsigned char *func_0029EFD0(int size);
 
 extern unsigned char *D_L00_001B0A20 __attribute__((sda));
 
-unsigned char *func_L00_003F8DC8(void)
+unsigned char *func_L00_003F8DC8(int unused)
 {
     unsigned char *p = func_0029EFD0(0xD04);
 

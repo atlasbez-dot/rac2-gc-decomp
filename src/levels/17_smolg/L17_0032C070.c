@@ -31,7 +31,7 @@ extern void func_L17_003C71B0();
 INCLUDE_ASM("asm/levels", func_L17_0032C070);
 
 
-INCLUDE_ASM("asm/levels", func_L17_00340DD0);
+
 
 /* divides two sub-object measurements taken through the float accessor, scales the ratio by a fixed
    2*pi-scale constant, folds the result through two helpers and packs a colour byte into the object's
@@ -113,6 +113,7 @@ void func_L17_003C3250(char *a2)
 }
 
 INCLUDE_ASM("asm/levels", func_L17_003C3330);
+
 
 
 INCLUDE_ASM("asm/levels", func_L17_003C3AF0);

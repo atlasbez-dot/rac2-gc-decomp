@@ -135,7 +135,7 @@ void func_0028FAB8(int a0, int a1, int a2, int a3, int p4, int p5)
 }
 
 /* shared native body of family 5e27257c03e3aebd */
-void func_0028FC48(int a0, int a1, int a2, int a3, int p4, int p5)
+void func_0028FC48(int a0, int a1, int a2, int a3, unsigned long p4, int p5)
 {
     long long *q;
 

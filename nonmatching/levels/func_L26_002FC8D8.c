@@ -1,43 +1,75 @@
-/* func_L26_002FC8D8 (384 bytes, 1 placement, level 26 jamming array): NOT ATTEMPTED.
-   The body was read but no C was written for it: the wave's budget went to the four
-   neighbouring functions, and this one is the largest of the five and needs a -G8 unit.
-   What the retail bytes say, for whoever takes it next:
+/*
+ * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
+ * Prior worker profile: -O2 -G64 -Wa,-G64 -ffunction-sections.
+ * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
+ * These are the recorded worker checks; no fresh compilation was run for retention.
+ */
 
-   The frame is 0xC0 and saves $s0..$s7 and $ra plus $f20; the prologue reads the mode
-   word *(0x1A79F0) (the same word func_L26_004070F8 shifts by) and leaves the function
-   at once unless the mode is 0x1A:
-
-       lui $v1,0x1A ; lw $v1,0x79F0($v1) ; bne $v1,$v0,<end>   (with 0x1A materialised)
-
-   The table at 0x1BC880 (0x1C0000-0x3780) is then walked. Its word at +0x30 is a kind:
-   0 and 1 skip the walk, any other value takes the pointer at +0x194 (kept in $s2). The
-   two tests are a `beqz` and a `bne` against 1, and a folded `beq $a1,$v0` with $a1 = 1
-   and $v0 = -1 that never fires - a comparison of two constants the source could not
-   fold, so the original had a variable in it.
-
-   The walk itself uses the table entry at +0x18C (a pointer, read through the entry's
-   index times four) and the entry's field at +0x50, which is set to 0x27E310; the
-   second array is then at 0x27E330 and $s5 = the pointer at +0x10. A pointer read
-   through $gp ($gp-0x5C10) is walked three times, so the unit must be built with -G8.
-
-   The loop (three times, the counter in $s3) calls, in this order:
-     - func_L02_002EF2B0 (the boot's func_002EF2B0) with the pointer at +0x58 of the
-       walk's pointer, plus 0x10;
-     - func_L02_002EF118 with the frame's own scratch (sp) and the same scratch;
-     - a division of the float at +0x2C by the float at +0x24 of the pointer the word
-       at +0x24 holds (div.s into $f20);
-     - func_L02_002EE7D0 with the array at 0x27E330 and the $gp pointer;
-     - func_L02_002EE398 with the array at 0x27E330 and the ratio in $f12;
-     - func_L02_002EE328 with the array at 0x27E330 and the pointer at +0x10;
-   the array advances by 0x10 and the $gp pointer by 0x10 each turn.
-
-   After the walk the entry's +0x18C word is copied into the field at +0x68 of the table
-   entry's +0x50 pointer, the table's word at +0x34 is compared with 0x597, and the
-   entry's +0x50 field is cleared when it is (a branch-likely with the store in its
-   delay slot).
-
-   The declarations the body needs are the ones the other level-26 units use:
-   D_L26_001A79F0 (the mode word), the table's own address (0x1BC880, a level address,
-   so it needs a name), the words at 0x1BC8B0, 0x1BCA14, 0x1BC8B4 and the $gp pointer. */
+/* Historical screening note follows; superseded by the measured manual reconstruction below. */
+/* Historical analysis (summary).
+ * Historical screening described the mode guard, selected group-record walk, transform scratch
+ * and final state update, but did not reconstruct C. The measured manual reconstruction below
+ * supersedes that screening and corrects its loop count to four iterations. Its two matrices and
+ * four-vector GP input have their full accessed extents. The earlier decoded instruction
+ * sequence and address map remain private.
+ */
 
 #include "include_asm.h"
+
+/*
+ * Manual C reconstruction retained after bounded retail comparison.
+ * Profile: -O2 -G64 -Wa,-G64 -ffunction-sections
+ * Measured text: 360 bytes; retail: 384 bytes. Stack frame 0xC0; retail 0xC0.
+ * Final coverage: US 0/1, US2 0/1, PAL absent. Absences are not matches.
+ * 1 measured source/profile forms. Selector comparisons fold differently and register/address
+ * lifetimes differ. The two matrix temporaries are 48 bytes each; the GP vertex input is a
+ * complete four-vector array, so G64 is intentional. The retail countdown performs four
+ * iterations, superseding the historical three-iteration note. Reopen with a new
+ * selector/control-flow or register-lifetime hypothesis.
+ * All carrying checks are nonmatches (exit 1); no linked-build credit.
+ */
+
+extern int D_001A79F0;
+extern char D_L26_001BC880[];
+extern char D_L26_0027E310[];
+extern float D_L26_001A93E0[4][4] __attribute__((sda));
+extern void func_00283AF0(void *, void *);
+extern void func_00283958(void *, void *);
+extern void func_00283098(void *, void *, void *);
+extern void func_00282D30(void *, void *, float);
+extern void func_00282CC0(void *, void *, void *);
+
+void func_L26_002FC8D8(void) {
+    float matrix[12];
+    float rotation[12];
+    char *child = 0;
+    int index = -1;
+    char *hero = D_L26_001BC880;
+    float *out;
+    float *vertex;
+    float scale;
+    int count;
+    if (D_001A79F0 != 26) return;
+    if (*(int *)(hero + 0x30) == 0 || *(int *)(hero + 0x30) == 1) {
+        index = 1;
+        child = *(char **)(hero + 0x194);
+    }
+    if (index != -1 && child != 0 && *(int *)(hero + 0x18C + index * 4) != 0) {
+        *(char **)(hero + 0x50) = D_L26_0027E310;
+        out = (float *)(D_L26_0027E310 + 0x20);
+        vertex = D_L26_001A93E0[0];
+        func_00283AF0(*(char **)(child + 0x58) + 0x10, rotation);
+        func_00283958(rotation, matrix);
+        scale = *(float *)(child + 0x2C) / *(float *)(*(char **)(child + 0x24) + 0x24);
+        count = 3;
+        do {
+            func_00283098(out, vertex, matrix);
+            vertex += 4;
+            func_00282D30(out, out, scale);
+            func_00282CC0(out, out, child + 0x10);
+            out += 4;
+        } while (--count >= 0);
+        *(int *)(*(char **)(hero + 0x50) + 0x68) = *(int *)(hero + 0x18C + index * 4);
+    }
+    if (*(int *)(hero + 0x34) >= 0x597) *(char **)(hero + 0x50) = 0;
+}

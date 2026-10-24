@@ -218,7 +218,7 @@ INCLUDE_ASM("asm/levels", func_L20_0039E1E8);
 /* func_L20_0039E368 is defined in L20_0039C448-g8.c (it reaches a global through $gp). */
 
 /* func_L20_0039E5F0 is defined in L20_0039C448-g8.c (it reaches a global through $gp). */
-INCLUDE_ASM("asm/levels", func_L20_0039E770);
+/* func_L20_0039E770 is defined in L20_0039E770.c for its grouped-copy profile. */
 
 /* func_L20_0039E890 is defined in L20_0039C448-g8.c (it reaches a global through $gp). */
 

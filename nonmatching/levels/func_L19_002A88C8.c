@@ -1,53 +1,38 @@
-#include "include_asm.h"
-
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef int s32;
-
 /*
- * func_L19_002A88C8 -- not attempted: a `.word 0x00651818` multiply-shape word whose
- * result nothing reads.
- *
- * retail 0x002A88C8, 148 bytes, level 19 (19_grelbin). Instruction map:
- *   0x002A88C8  addiu sp,sp,-0x10 ; lui v0,0x19 ; sd ra,0x0(sp)
- *   0x002A88D4  a1 = 0x00189E20 (lui 0x19 + addiu -0x61E0) ; a2 = 0x00190000
- *   0x002A88DC  v1 = *(u8 *)(a1+0x22B4)      (0x0018C0D4)
- *   0x002A88E0  v0 = 4 ; beq v1,v0,epilogue ; v0 = 0xD
- *   0x002A88EC  beqz a0, 0x002A8940 ; v1 = a2-0x61E0 (= a1)
- *   0x002A88F4  v0 = *(u8 *)(a1+0x22BA)      (0x0018C0DA)
- *   0x002A88F8  beqz v0, 0x002A8944 ; v0 = 0x51
- *   0x002A8900  v0 = *(s16 *)(a1+0x24EC)     (0x0018C30C)
- *   0x002A8904  bnel v0,$zero,0x002A8944 ; v0 = 0x51
- *   0x002A890C  jal func_L00_002ADEA0 (level 19: 0x002B0CA8) ; a0 = 0
- *   0x002A8914  v1 = 0x00139568 (lui 0x14 + addiu -0x6A98) ; a1 = 0xE0 ; v0 += v1
- *   0x002A892C  a0 = 0x00265870 (lui 0x26 + addiu 0x5870) ; v1 = *(u8 *)v0
- *   0x002A8930  .word 0x00651818   <-- SPECIAL funct 0x18 (mult) rs=$v1 rt=$a1 rd=$v1
- *   0x002A8934  v1 += a0 ; b 0x002A8950 ; v0 = *(s32 *)(v1+0x28)
- *   0x002A8940  v0 = 0x51
- *   0x002A8944  a0 = *(s32 *)(v1+0x24CC) ; a0 ^= 1 ; movn v0,zero,a0
- *   0x002A8950  ld ra,0x0(sp) ; jr ra ; addiu sp,sp,0x10
- *
- * Read: func_L00_002ADEA0(0) returns an index into the byte table at 0x00139568; the
- * byte then selects a record whose word at +0x28 is returned (the 0x51/0xD defaults
- * come from the gate at 0x0018C0DA and the halfword at 0x0018C30C). The whole body is
- * a table lookup, so it is writable in C, but the multiply at 0x002A8930 computes
- * $v1 * 0xE0 into a register that the very next delay slot overwrites: the product is
- * dead in the retail, and the byte/word index arithmetic (`base + byte`, no scaling)
- * does not correspond to a scaled record stride either. `mult` with a destination
- * register and a dead result is not something this cc1 emits, so the word needs
- * identifying first (the same 3-operand MULT shape as the R5900's MULT1 note).
- * ASM_FUNC candidate.
-    Wave 24 (worker 13) attempted it: the `mult` is the index times the 0xE0 stride of
-   the table, not a stray word.  The body is the frame byte at +0x22B4, the flag at
-   +0x22BA, the halfword at +0x24EC and the word at +0x24CC of the resident block
-   D_00189E20, and, when all three allow it, the word at +0x28 of
-   D_L19_00265870[D_00139568[func_L00_002ADEA0(0)] * 0xE0]; the table path returns
-   without running the +0x24CC test (retail branches to the epilogue).  The C reached
-   35 of the 37 words; what is left: retail materialises the %hi of D_00189E20 into
-   $v0, copies it to $a2 and adds the %lo again at the last use (the split address),
-   while this cc1 keeps the whole address in one register; and the register of the
-   result variable (retail keeps it in $v0, next to the constant 4, this cc1 in
-   $a1), which decides the two delay slots of the first two branches.
-*/
+ * Retained handwritten near miss; historical evidence only.
+ * No linked-image equality or complete retail semantics is established.
+ * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
+ * Profile: -O2 -G0 -ffunction-sections.
+ * Reported final C / retail: 144 / 148 bytes; size equality is not a match.
+ * us: 0/1 placements; 144/148 bytes.
+ * us2: not run / not reported.
+ * pal: not run / not reported.
+ * Residual: Retained readable C. Default -O2 -G0 -ffunction-sections. Retail uses the same table and fields; reconstruction remains nonmatching.
+ * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
+ * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ */
 
-INCLUDE_ASM("asm/levels", func_L19_002A88C8);
+/* Historical manual summary: The earlier multiply-shape screen is superseded by the manual draft. R5900 multiply result behavior must be considered when revisiting allocation; the old screen does not establish handwritten-assembly status. The original map is retained privately; no extracted instruction, opcode, address or generated table is reproduced here. */
+
+/* Retained readable C. Default -O2 -G0 -ffunction-sections.
+ * Retail uses the same table and fields; reconstruction remains nonmatching.
+ */
+extern unsigned char D_00189E20[];
+/* Latest trial: 144/148 bytes, US 0/1. Earlier result-variable form was
+ * 148/148 but did not match the split address materialisation and result register.
+ * The retail three-operand mult is a live record-stride multiplication, not an
+ * assembly-only obstacle. Reopen with a meaningful control-flow/address form.
+ */
+extern unsigned char D_00139568[];
+extern unsigned char D_L19_00265870[];
+extern int func_L00_002ADEA0(int);
+
+int func_L19_002A88C8(int enabled) {
+    if (D_00189E20[0x22B4] == 4)
+        return 13;
+    if (enabled && D_00189E20[0x22BA] && *(short *)(D_00189E20 + 0x24EC) == 0)
+        return *(int *)(D_L19_00265870 + D_00139568[func_L00_002ADEA0(0)] * 0xE0 + 0x28);
+    if (*(int *)(D_00189E20 + 0x24CC) == 1)
+        return 81;
+    return 0;
+}

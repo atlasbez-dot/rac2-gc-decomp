@@ -313,7 +313,7 @@ INCLUDE_ASM("asm/game", func_00335270);
 
 INCLUDE_ASM("asm/game", func_00335370);
 
-INCLUDE_ASM("asm/game", func_003353C8);
+/* func_003353C8 uses the quadword-copy profile in 0032EB28-qcopy.c. */
 
 
 INCLUDE_ASM("asm/game", func_00335438);

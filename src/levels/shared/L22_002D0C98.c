@@ -58,7 +58,7 @@ void func_L22_00328220(u8 *a0, u8 *a1, u8 *a2, u8 *a3, f32 f12, f32 f13, f32 f14
 
 
 
-INCLUDE_ASM("asm/levels", func_L22_003300E8);
+/* Defined in L22_003300E8-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L22_00334F78);
 

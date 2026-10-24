@@ -288,7 +288,7 @@ typedef int TI128_L00_002D3290 __attribute__((mode(TI)));
 
 /* Rotates the level state's aim vector: the two angles of the state's yaw and pitch
    drive two matrix builds, and the state's own vector is transformed between them. */
-void func_L00_002D3290(void)
+float func_L00_002D3290(void)
 {
     TI128_L00_002D3290 matrix[4];
     float v[4];
@@ -322,5 +322,5 @@ void func_L00_002D3290(void)
         func_002830C0(v, v, matrix);
     }
 
-    func_00283248(v[0], v[1]);
+    return func_00283248(v[0], v[1]);
 }

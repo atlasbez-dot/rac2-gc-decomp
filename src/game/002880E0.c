@@ -121,7 +121,22 @@ void func_00288508(int param)
         func_002B0A18(0, -1);
 }
 
-INCLUDE_ASM("asm/game", func_002886C8);
+extern int func_00288D58(void);
+
+/* True when the id is in the mapping table and its value is at or past the
+   table's bound while still inside the small id range. */
+int func_002886C8(int id, int value)
+{
+    int i;
+
+    if (id == 9 && func_00288D58() != 0)
+        return 1;
+    for (i = 0; D_002403C0[i].id != -2; i++) {
+        if (id == D_002403C0[i].id && value >= D_002403C0[i].value && value < 0x15)
+            return 1;
+    }
+    return 0;
+}
 
 int func_00288768(int value) {
     int i;

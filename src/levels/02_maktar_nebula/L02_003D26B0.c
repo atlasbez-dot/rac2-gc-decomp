@@ -632,7 +632,7 @@ void func_L02_003DAD88(char *arg0) {
 
 /* func_L02_003DAE60 is matched in L02_003DAE60-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
-INCLUDE_ASM("asm/levels", func_L02_003DAF90);
+/* func_L02_003DAF90 uses its dedicated G16 vector unit. */
 
 
 

@@ -488,7 +488,7 @@ INCLUDE_ASM("asm/game", func_0032DA58);
 INCLUDE_ASM("asm/game", func_0032DD40);
 
 
-INCLUDE_ASM("asm/game", func_0032E4F0);
+/* func_0032E4F0 uses small data in 00327038-g8.c. */
 
 
 INCLUDE_ASM("asm/game", func_0032E588);

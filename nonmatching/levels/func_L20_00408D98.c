@@ -1,3 +1,17 @@
+/*
+ * Retained handwritten near miss; historical evidence only.
+ * No linked-image equality or complete retail semantics is established.
+ * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
+ * Profile: -O2 -G8 -ffunction-sections -frac2-gcse-unsplit-edges.
+ * Reported final C / retail: 1752 / 1760 bytes; size equality is not a match.
+ * us: 0/1 placements; 1752/1760 bytes.
+ * us2: 0/1 placements; 1752/1760 bytes.
+ * pal: absent from catalogue (not a match).
+ * Residual: Complete eight-state controller:1776 then1752 bytes against1760. Honest scalar SDA attributes are based on real GP accesses. Mixed absolute/GP choices and persistent high-address allocation differ, along with state-machine scheduling. This reconstruction uses a normal compiler-owned switch; historical computed-goto/ghost-table suggestions above were not used. Reopen with a grounded profile/allocation hypothesis; do not introduce table aliases, fake extents or keepalive barriers.
+ * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
+ * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ */
+
 /* Near miss from src/levels/20_yeedil/L20_0039C448-g8.c (the -G8 unit).
 
    No C was written for this body in this wave; what is recorded here is
@@ -125,3 +139,164 @@
    addressed float), and the arms use D_001A79F0 (the $gp base at
    0x1AEFF0 - 0x7600) and D_0019B2E8 as table bases.
 */
+
+/* Manual retained reconstruction; not an exact match.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-gcse-unsplit-edges.
+ * Complete eight-state controller:1776 then1752 bytes against1760. Honest scalar SDA attributes are based on real GP accesses. Mixed absolute/GP choices and persistent high-address allocation differ, along with state-machine scheduling. This reconstruction uses a normal compiler-owned switch; historical computed-goto/ghost-table suggestions above were not used. Reopen with a grounded profile/allocation hypothesis; do not introduce table aliases, fake extents or keepalive barriers.
+ * All carrying releases fail the final complete check; absent catalogue entries are not matches.
+ */
+#include "common.h"
+extern char *D_L20_001B2F9C;
+extern char *D_L20_001B308C __attribute__((sda));
+extern float D_L20_001B29E0 __attribute__((sda));
+extern void func_L20_004095D0(char *);
+extern u32 D_L20_001CA540;
+extern float D_L20_001B2BE8;
+extern int D_001A79F0 __attribute__((sda));
+extern u8 D_0019B2E8[];
+extern float D_00189EA0[];
+extern int D_L20_001A8F08;
+extern int D_L20_001A8F00 __attribute__((sda));
+extern int func_0029B3E0(int, int);
+extern void func_L01_00323310(int, int);
+extern void func_L00_00303530(int, int);
+extern void func_L00_002B9D60(void *, void *, int, int);
+extern int func_002ACBC8(void *, int);
+extern void func_002A0430(unsigned int);
+extern void func_L00_003294F0(unsigned char *, int);
+extern void func_L20_00409480(s32);
+extern void func_002A7750(u8 *, u8, s32);
+extern s32 func_002B3868(u8 *);
+extern int func_00282948(int *);
+extern void func_L00_002E6EF8(void (*)(void *), void *);
+extern void func_L20_002DC390(int);
+
+/* The platform controller records switch edges and raises its linked platform. */
+void func_L20_00408D98(u8 *object) {
+    s32 *state = *(s32 **)(object + 0x68);
+    char *record;
+    int frame_offset;
+    int next_state;
+
+    if (D_L20_001CA540 < 2) D_L20_001B2BE8 = 85.0f;
+    switch (object[0x20]) {
+    case 0:
+        frame_offset = D_001A79F0 * 16;
+        state[8] = D_L20_001CA540;
+        state[5] = 0;
+        state[4] = 0;
+        state[0x23] = D_0019B2E8[state[2] + frame_offset] >> 7;
+        if ((D_0019B2E8[state[1] + frame_offset] & 0x80) == 0) {
+            state[0x1F] = 0;
+            record = D_L20_001B2F9C + state[0x1C] * 0x100;
+            *(float *)(state + 0x1D) = *(float *)(record + 0x18);
+            *(float *)(record + 0x18) += 20.0f;
+        } else state[0x1F] = 1;
+        next_state = 1;
+        goto change_state;
+    case 1:
+        if (state[0x23] == 0 &&
+            (D_0019B2E8[state[2] + D_001A79F0 * 16] & 0x80) != 0 &&
+            func_002ACBC8(D_00189EA0, state[10]) != 0) {
+            state[0x23] = 1;
+            func_0029B3E0(0, -1);
+        }
+        if (D_L20_001CA540 == 2) {
+            if (state[4] == 0) {
+                if (func_002ACBC8(D_00189EA0, state[0x18])) {
+                    state[4] = 1;
+                    func_L01_00323310(state[0x20], -1);
+                }
+            }
+        }
+        if (func_002ACBC8(D_00189EA0, state[11]) != 0) {
+            if (D_0019B2E8[state[1] + D_001A79F0 * 16] & 0x80) return;
+            func_002A0430(state[1]);
+            if (state[0x13] >= 0)
+                func_L00_003294F0((u8 *)D_L20_001B2F9C + state[0x13] * 0x100, 1);
+            func_L20_00409480(state[0x14]);
+            func_L20_00409480(state[0x15]);
+            state[8] = 2;
+            state[15] = 3;
+            func_002A7750(object, 5, -1);
+        }
+        if (D_0019B2E8[state[1] + D_001A79F0 * 16] & 0x80) return;
+        if (*(s8 *)(D_L20_001B2F9C + state[0x1B] * 0x100 + 0xBC) == 1) return;
+        if (state[0x1F] != 0) return;
+        record = D_L20_001B2F9C + state[0x19] * 0x100;
+        if (record != 0 && *(s16 *)(record + 0xAA) == 0xCBC &&
+            *(s8 *)(record + 0x20) != -2 && *(s8 *)(record + 0x20) != -3) return;
+        record = D_L20_001B2F9C + state[0x1A] * 0x100;
+        if (record != 0 && *(s16 *)(record + 0xAA) == 0xCBC &&
+            *(s8 *)(record + 0x20) != -2 && *(s8 *)(record + 0x20) != -3) return;
+        next_state = 7;
+        goto change_state;
+    case 2:
+    case 3:
+        if (func_002B3868(object)) state[5] = 125;
+        if (func_00282948(state + 5)) func_002A7750(object, state[7], -1);
+        else if (object[0x20] == 2) *(float *)(state + 3) = 1.0f - (float)state[5] * 0.008f;
+        else *(float *)(state + 3) = (float)state[5] * 0.008f;
+        func_L00_002E6EF8((void (*)(void *))func_L20_004095D0, object);
+        break;
+    case 4:
+        record = D_L20_001B308C + state[state[15] + 9] * 0x80;
+        func_L00_00303530(state[8], state[0x21]);
+        func_002A0430(state[0]);
+        func_L00_002B9D60(record + 0x30, record + 0x70, 0x6F, 1);
+        func_L20_002DC390(0);
+        state[7] = 1;
+        D_L20_001B29E0 = 1.0f;
+        *(float *)(state + 3) = 1.0f;
+        func_L00_002E6EF8((void (*)(void *))func_L20_004095D0, object);
+        next_state = 6;
+change_state:
+        func_002A7750(object, next_state, -1);
+        break;
+    case 5:
+        if (D_L20_001A8F08 == -2 && D_L20_001A8F00 != 2) {
+            *(float *)(state + 3) = 1.0f;
+            func_L00_002E6EF8((void (*)(void *))func_L20_004095D0, object);
+            if (*(u8 *)(D_L20_001B2F9C + state[0x13] * 0x100 + 0x20) > 0x80)
+                func_002A7750(object, 4, -1);
+        }
+        state[6]++;
+        break;
+    case 6:
+        if (D_L20_001A8F00 == 2) D_L20_001B29E0 = 0.0f;
+        else {
+            D_L20_001B29E0 = 1.0f;
+            *(float *)(state + 3) = 1.0f;
+            func_L00_002E6EF8((void (*)(void *))func_L20_004095D0, object);
+            if (D_L20_001A8F00 != 2 &&
+                *(u8 *)(D_L20_001B2F9C + state[0x12] * 0x100 + 0x20) > 0x80) {
+                *(u16 *)(D_L20_001B2F9C + state[0x17] * 0x100 + 0x34) &= 0xFFFD;
+                *(u16 *)(D_L20_001B2F9C + state[0x16] * 0x100 + 0x34) &= 0xFFFD;
+                *(u16 *)(D_L20_001B2F9C + state[0x17] * 0x100 + 0x34) &= 0xFFBE;
+                *(u16 *)(D_L20_001B2F9C + state[0x17] * 0x100 + 0x34) |= 0x1000;
+                record = D_L20_001B2F9C + state[0x17] * 0x100;
+                *(int *)(record + 0x98) = *(int *)(*(char **)(record + 0x24) + 0x10);
+                *(u16 *)(D_L20_001B2F9C + state[0x16] * 0x100 + 0x34) &= 0xFFBE;
+                *(u16 *)(D_L20_001B2F9C + state[0x16] * 0x100 + 0x34) |= 0x1000;
+                record = D_L20_001B2F9C + state[0x16] * 0x100;
+                *(int *)(record + 0x98) = *(int *)(*(char **)(record + 0x24) + 0x10);
+                D_L20_001B29E0 = 0.0f;
+                func_002A7750(object, 3, -1);
+            }
+        }
+        state[6]++;
+        break;
+    case 7:
+        if (func_002B3868(object)) {
+            record = D_L20_001B2F9C + state[0x1B] * 0x100;
+            record[0xBC] = 1;
+            state[0x1F] = 1;
+            state[0x1E] = *(int *)(*(char **)(record + 0x68) + 0x2C);
+            state[6] = state[0x1E];
+        }
+        *(float *)(D_L20_001B2F9C + state[0x1C] * 0x100 + 0x18) =
+            *(float *)(state + 0x1D) + ((float)state[6] * 20.0f) / (float)state[0x1E];
+        if (func_00282948(state + 6)) func_002A7750(object, 1, -1);
+        break;
+    }
+}

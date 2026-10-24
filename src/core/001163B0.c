@@ -41,6 +41,6 @@ INCLUDE_ASM("asm/core", func_00119AC0);
 
 INCLUDE_ASM("asm/core", func_00119BF8);
 
-INCLUDE_ASM("asm/core", func_00118CC8);
+/* func_00118CC8 is defined in 00118CC8.c with quadword saves. */
 
 INCLUDE_ASM("asm/core", func_0011A7F8);

@@ -37,7 +37,7 @@ extern int D_001A79F0 __attribute__((sda));
 extern int D_L04_001B24DC __attribute__((sda));
 extern u8 D_L04_001BF880[];
 
-INCLUDE_ASM("asm/levels", func_L04_00422D40);
+/* Defined in L04_00422D40-qcopy.c. */
 INCLUDE_ASM("asm/levels", func_L04_00422DA8);
 INCLUDE_ASM("asm/levels", func_L04_00423258);
 /* Counts the object's state up, easing its timer down while it is over the

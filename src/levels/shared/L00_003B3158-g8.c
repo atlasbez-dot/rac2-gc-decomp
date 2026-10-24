@@ -22,7 +22,7 @@ extern OBJ3 *D_L00_0023DBA0[];
 
 extern int D_L00_0023DCA0[];
 
-void func_L00_003B7260(float x, float y, float *p, float *q)
+void func_L00_003B7260(float x, float y, float unused_step, float *p, float *q)
 {
     float s = -(D_L00_001AFA40 * 0.000277777785f) / (x * x + y * y);
 

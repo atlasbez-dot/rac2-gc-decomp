@@ -235,7 +235,7 @@ float func_002AB0E8(int a0, int a1, int a2, int a3)
 	return m[a3];
 }
 
-extern void func_00282F20(float *, float);
+extern void func_00282F20(float *, float *, float);
 extern float func_00282DB0(void *, void *);
 extern void func_00282D30(void *, void *, float);
 extern void func_00282CF0(void *, void *, void *);
@@ -245,7 +245,7 @@ void func_002AB168(float *out, float *vector, float *axis, float amount)
     float scaled[4];
     float unit[4];
     float dot;
-    ((void (*)(float *, float *, float))func_00282F20)(unit, axis, 1.0f);
+    func_00282F20(unit, axis, 1.0f);
     dot = func_00282DB0(unit, vector);
     func_00282D30(scaled, unit, dot * amount);
     func_00282CF0(out, vector, scaled);
@@ -453,9 +453,9 @@ INCLUDE_ASM("asm/game", func_002ABBB8);
 INCLUDE_ASM("asm/game", func_002AC728);
 
 
-extern void func_00282F20(float *, float);
+extern void func_00282F20(float *, float *, float);
 extern float func_00282DF0(float *);
-void func_002AC9F8(float *p, float threshold) { if (threshold < func_00282DF0(p)) ((void (*)(float *, float *, float))func_00282F20)(p, p, threshold); }
+void func_002AC9F8(float *p, float threshold) { if (threshold < func_00282DF0(p)) func_00282F20(p, p, threshold); }
 
 
 extern int D_L02_001B359C;
@@ -565,10 +565,10 @@ int func_002ACD38(void *object)
 
 INCLUDE_ASM("asm/game", func_002ACDE8);
 
-extern void func_00282F20(float *p, float x);
+extern void func_00282F20(float *dst, float *src, float scale);
 extern float func_00282C10(float x);
 
-void func_002ACE78(float *p, float x) { func_00282F20(p, x); p[3] = func_00282C10(1.0f - x * x); }
+void func_002ACE78(float *p, float *src, float x) { func_00282F20(p, src, x); p[3] = func_00282C10(1.0f - x * x); }
 
 INCLUDE_ASM("asm/game", func_002ACEC0);
 
@@ -644,7 +644,7 @@ int func_002AD5F8(char *unused, char *obj, char *arg2, char *arg3, char *arg4, c
     return 1;
 }
 
-INCLUDE_ASM("asm/game", func_002AD6F0);
+/* func_002AD6F0 uses the quadword-copy profile in 002AA800-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002AD7B8);
 
