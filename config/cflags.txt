@@ -1,3 +1,4 @@
+src/core/0012CC88-rc2.c	sdk -fno-builtin -O2 -ffunction-sections
 src/game/0032EB28-g8.c	-O2 -G8 -ffunction-sections -Wa,-G32
 src/game/002BF6F0.c	-O2 -G0 -ffunction-sections -g
 src/game/002AA800.c	-O2 -G0 -ffunction-sections -g -ffast-math
