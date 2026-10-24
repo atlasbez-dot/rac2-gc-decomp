@@ -56,7 +56,7 @@ void *func_00339008(char *a0)
 }
 
 
-INCLUDE_ASM("asm/game", func_00339078);
+/* func_00339078 is defined in 00339078-g16.c. */
 
 typedef struct { float x, y; } Float2_00339320;
 

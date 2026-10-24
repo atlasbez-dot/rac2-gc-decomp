@@ -133,6 +133,10 @@ silently changing neighbouring definitions.
 - Integer and FP arguments use separate register banks. Their declaration order
   can affect setup while preserving the measured ABI: `func_0030E700` and existing
   Barlow effect-helper declarations are witnesses. Check the whole call site.
+- Check the canonical helper and its live inputs before writing a prototype.
+  An omitted FP argument or a float result consumed as an integer is an ABI
+  error, even in a retained draft. A wrapper's current C signature can also be
+  incomplete: inspect forwarded registers before discarding a caller argument.
 - A pointer live across a call can need a saved register and a larger frame.
   Creating it later, or keeping genuinely distinct guard and walk variables,
   can recover the live ranges (`func_L08_00328BB0`).
@@ -188,8 +192,9 @@ observations, not qualified rules:
 
 ## Symbols, addresses and small data
 
-Use catalogue function identities, resident `D_XXXXXXXX` below the selected level
-base, and level `D_LNN_XXXXXXXX` data names. When a callee/data pairing changes by
+Use catalogue function identities, resident `D_XXXXXXXX` within the resident region
+described in [AGENTS.md](../AGENTS.md#naming-in-c), and level `D_LNN_XXXXXXXX`
+data names. When a callee/data pairing changes by
 program, use `ref_LNN_XXXXXXXX_kk`. Zero-padding a level address is not enough to
 identify its canonical function. See [LEVELS.md](LEVELS.md).
 
@@ -219,6 +224,22 @@ Odd-address byte globals are valid absolute bindings (`0x001A7B94/95`,
 `0x001A7BB2/B3`); there is no universal four-byte alignment requirement. A low half
 with bit 15 set also needs the correct signed-low-half relocation. Compare bound
 addresses and words, not just textual `lui` operands.
+
+Keep external object sizes truthful. A 16-byte vector read needs a vector-sized
+declaration; a known 15-byte label must not be declared as eight bytes to make it
+fit `-G8`. Dedicated files for `func_L16_00411B40`, `func_L16_00411900` and
+`func_00339078` use the standard per-file `-G16 -Wa,-G16` profile. Both thresholds
+matter because the GNU assembler is invoked separately from cc1. With the existing
+copy profiles where needed, these declarations preserve the earlier instruction
+bytes and relocations and pass every carrying release's placement checks.
+The complete strict builds remain the acceptance gate. This is a reconstruction
+profile, not evidence of the shipping compiler's flags.
+
+The same size rule applies beyond vectors. The particle emitters
+`func_L18_003FCD70` and `func_L18_003FCC48` declare their measured 24-byte
+settings records and use `-G32 -Wa,-G32`. `func_L00_00396078` keeps its complete
+four-vector, 64-byte template with `-G64 -Wa,-G64`. Isolate these profiles per
+file; do not shorten an object or raise the global threshold to obtain GP loads.
 
 ## Quadword copies
 

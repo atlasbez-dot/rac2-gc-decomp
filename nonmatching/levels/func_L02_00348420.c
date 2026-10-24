@@ -1,13 +1,42 @@
-/* 0 of 3 places match - 128-bit LQ/SQ (out of C reach).
-   Level 2 (02_maktar_nebula), 0x00348420, 180 bytes: a nearest-index loop over
-   0x10-byte records (func_2F2130, c.olt.s against 0x4B18967F = 9999999.0f,
-   bc1f/mov.s to keep the running minimum). The block is blocked only by
-   `.word 0x78820000` (opcode 0x1E = LQ) and `.word 0x7FA20000` (opcode 0x1F = SQ)
-   at +0x38/+0x3c, which move the loop's scratch record on and off the stack.
-   MEASURED this session on func_L03_0041F048: this cc1 expands a 16-byte aggregate
-   copy into ld/sd word moves and never emits LQ/SQ, so no C can produce them.
-   ASM_FUNC candidate. */
+/* Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 180/180 bytes, 0/3 US places: initial stack query pointer and save schedule differ. Reassigning position to its local copy restores s4 lifetime; explicit query variant differs. Reopen with initialization-order evidence.
+ * All carrying us/us2/pal placements checked; logs private.
+ * Earlier LQ/SQ-only screening is superseded: TImode emits the copies.
+ */
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef float f32;
+typedef int TI128 __attribute__((mode(TI)));
+struct QuadPacket {
+    TI128 vertices[4];
+    int colors[4];
+    f32 uv[4][2];
+    long state70, state78, state80, state88;
+};
+extern void func_00281DE8(struct QuadPacket *, int, int, int);
+extern u8 *func_0029EFD0(int);
+extern void func_00282C88(TI128 *);
+extern void func_002833F0(void *, void *);
+extern f32 func_00282E48(void *, void *);
+extern void func_0026FEB8(const char *, ...);
+extern char ref_L02_003C0890_00[];
+struct PositionRecord { TI128 first; TI128 position; };
 
-#include "include_asm.h"
-
-INCLUDE_ASM("asm/levels", func_L02_00348420);
+int func_L02_00348420(TI128 *position, struct PointList *list) {
+    TI128 point;
+    int i, nearest = -1;
+    f32 distance, minimum = 9999999.0f;
+    point = *position;
+    position = &point;
+    if (list) {
+        for (i = 0; i < list->count; i++) {
+            distance = func_00282E48(position, &list->points[i]);
+            if (distance < minimum) {
+                minimum = distance;
+                nearest = i;
+            }
+        }
+    }
+    return nearest;
+}

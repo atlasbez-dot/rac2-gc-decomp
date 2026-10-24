@@ -174,13 +174,13 @@ void func_L00_003EE8E8(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
 
 INCLUDE_ASM("asm/levels", func_L00_003EE920);
 
-INCLUDE_ASM("asm/levels", func_L00_003EED10);
+/* func_L00_003EED10 uses its dedicated quadword-copy profile. */
 
 INCLUDE_ASM("asm/levels", func_L00_003EEE20);
 
 INCLUDE_ASM("asm/levels", func_L00_003EEE90);
 
-INCLUDE_ASM("asm/levels", func_L00_003EF3E0);
+/* func_L00_003EF3E0 uses its dedicated quadword-copy profile. */
 
 extern int D_L00_001B0838 __attribute__((sda));
 
@@ -392,7 +392,7 @@ void func_L00_003F0B10(char *pos, int a1, int a2, char *a3, int t0,
 
 INCLUDE_ASM("asm/levels", func_L00_003F0CC8);
 
-INCLUDE_ASM("asm/levels", func_L00_003F1300);
+/* func_L00_003F1300 is defined in L00_003F1300-g8.c. */
 
 extern int D_L00_001B08D0 __attribute__((sda));
 
@@ -489,7 +489,7 @@ void func_L00_003F1EB8(char *pos, int a1, int a2, char *a3, int t0,
     func_00280B90(pkt, m, 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F26C8);
+/* func_L00_003F26C8 is defined in L00_003F26C8-qcopy.c. */
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L00_003F28A0(Vec16_Fc936841d *object, int index)
@@ -676,7 +676,7 @@ INCLUDE_ASM("asm/levels", func_L00_003F3D70);
 
 INCLUDE_ASM("asm/levels", func_L00_003F4210);
 
-INCLUDE_ASM("asm/levels", func_L00_003F4B68);
+/* func_L00_003F4B68 uses its dedicated quadword-copy profile. */
 
 INCLUDE_ASM("asm/levels", func_L00_003F4C68);
 
@@ -751,7 +751,7 @@ INCLUDE_ASM("asm/levels", func_L00_003F6168);
 
 INCLUDE_ASM("asm/levels", func_L00_003F6308);
 
-INCLUDE_ASM("asm/levels", func_L00_003F6900);
+/* func_L00_003F6900 is defined in L00_003F6900-g8-qcopy.c. */
 
 /* Walks 120 records of 64 bytes from a base resolved through two descriptor lookups; for each live record it calls an update helper and, when that reports zero, counts it and advances a float pair by one step, clearing the record's live flag otherwise. */
 int func_L00_003F6A58(int *a0)
@@ -837,4 +837,3 @@ void func_L00_003F89F8(Obj_Fe48725c6 *p)
     v = p->u.b.h6;
     d->b6 = v;
 }
-

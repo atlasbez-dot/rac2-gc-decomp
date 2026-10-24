@@ -1,4 +1,3 @@
-src/game/002BD5B0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/0032EB28-g8.c	-O2 -G8 -ffunction-sections -Wa,-G32
 src/game/002BF6F0.c	-O2 -G0 -ffunction-sections -g
 src/game/002AA800.c	-O2 -G0 -ffunction-sections -g -ffast-math
@@ -459,6 +458,45 @@ src/levels/shared/L00_0038F020.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2
 src/levels/shared/L00_002C3BB0.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
 src/levels/shared/L00_002C3E18.c	-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
 src/levels/shared/L00_002CA898.c	-O2 -G0 -ffunction-sections -frac2-keep-block-order
+src/levels/16_snivelak/L16_00404F50.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_003F4B68-g8-qcopy.c	-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_003EED10-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_003EF3E0-g8-qcopy.c	-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/01_oozla/L01_003B4200.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-gcse -mno-split-addresses
+src/levels/16_snivelak/L16_0041F1F0.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/16_snivelak/L16_0041E370.c	-O2 -G0 -ffunction-sections -frac2-zero-ti-por
+src/levels/16_snivelak/L16_003F55A0-g8.c	-O2 -G8 -ffunction-sections -g
+src/levels/16_snivelak/L16_00411B40-g16.c	-O2 -G16 -ffunction-sections -Wa,-G16
+src/levels/16_snivelak/L16_00411900-g16.c	-O2 -G16 -ffunction-sections -Wa,-G16 -frac2-qcopy -frac2-qcopy-barrier
+src/game/00339078-g16.c	-O2 -G16 -ffunction-sections -Wa,-G16
+src/levels/shared/L18_003F76F0-copy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L18_003F7988-copy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L18_003FCC48-particles.c	-O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L18_003FCD70-particles.c	-O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L16_003960F8-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L16_003C3A10-g8-qcopy.c	-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses
+src/levels/shared/L16_00395C00-rotation.c	-O2 -G0 -ffunction-sections
+src/levels/shared/L16_003C3870-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_003A7E78.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L07_00321D68-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_0033FFB8.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_00340560.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_00341B18.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_00340898.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_00340CF8.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L05_00352B28.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g
+src/levels/shared/L02_002B5F50-quad.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L03_002ADC00-flags.c	-O2 -G0 -ffunction-sections -frac2-zero-ti-por
+src/levels/shared/L03_003C4468-flags.c	-O2 -G0 -ffunction-sections -mno-split-addresses
+src/levels/shared/L03_00339128-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_003F6900-g8-qcopy.c	-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_003F26C8-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_0039E600.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_0038FC48-g8.c	-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L00_00396078-g64.c	-O2 -G64 -Wa,-G64 -ffunction-sections
+src/levels/shared/L02_00410450-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/levels/shared/L02_00410D00-g8.c	-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+src/game/002BD5B0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00272198-rc2.c	-O2 -ffunction-sections -fno-builtin -g -G0
 src/game/00288970-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/00292B20-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
@@ -514,7 +552,6 @@ src/levels/shared/L22_003FBF00-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/09_dobbo/L09_00408058-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/06_notak/L06_004576C8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L01_0042E0A8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
-src/levels/shared/L16_00395C00-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L22_003A4490-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/levels/16_snivelak/L16_003D6D00-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/03_endako/L03_00384340-rc2.c	-fno-builtin -O2 -G8 -ffast-math -ffunction-sections
@@ -525,7 +562,6 @@ src/levels/shared/L02_003CD1E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/levels/shared/L18_003F9EF0-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/levels/shared/L18_00428338-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L00_0037E5F0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin -fno-schedule-insns
-src/levels/shared/L18_003FB500-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
 src/levels/shared/L04_0039FC28-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/shared/L04_003A0008-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin -fno-schedule-insns
 src/levels/shared/L04_00415EA8-rc2.c	-O2 -G0 -fno-sched-interblock -ffunction-sections -fno-builtin

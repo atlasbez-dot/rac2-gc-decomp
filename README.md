@@ -144,6 +144,7 @@ For the details:
 - [`docs/BUILDING.md`](docs/BUILDING.md) – the build, the toolchain, the container, CI
 - [`docs/LEVELS.md`](docs/LEVELS.md) – the 27 level programs and the function catalogue
 - [`docs/COMPILER-NOTES.md`](docs/COMPILER-NOTES.md) – the compiler and what was measured of it
+- [`docs/PERMUTER.md`](docs/PERMUTER.md) – decomp-permuter for near misses, through OpenRAC's shared tool
 - [`docs/VERSIONS.md`](docs/VERSIONS.md) – the three releases (v1.01, PAL, v2.00): their dumps, catalogues, builds and reports
 
 ---

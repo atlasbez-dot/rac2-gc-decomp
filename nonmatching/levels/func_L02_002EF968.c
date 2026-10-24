@@ -1,8 +1,35 @@
-/* 128-bit block moves: no C spelling. 148 bytes, level 02 (8 places).
-   Retail at 0x2EF968 saves five registers, calls func_2EF8C8(dst+0x40, ..., count 0x80) once, then
-   runs a 4-iteration loop that per pass copies two floats with `lwc1`/`swc1` (from a source pointer
-   in $s2), stores one word, and moves 16 bytes with `lq $s1,0x0($s0)` / `sq ...` (raw words
-   0x7A220000 and 0x7E020000 at +0x54, opcodes 0x1E/0x1F, printed as .word by the disassembler).
-   The argument registers are the ABI's 5th/6th slots ($t0/$t1 taken into $s1 and $a2 before the
-   call). A struct copy in C does not select lq/sq here, so the row needs assembly. ASM_FUNC
-   candidate. */
+/* Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 148/148 bytes, 0/8 US places: two source/destination cursor increments are reversed. Indexed, explicit postincrement and full cursor forms tried; reopen with loop source-lifetime evidence.
+ * All carrying us/us2/pal placements checked; logs private.
+ * Earlier LQ/SQ-only screening is superseded: TImode emits the copies.
+ */
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef float f32;
+typedef int TI128 __attribute__((mode(TI)));
+struct QuadPacket {
+    TI128 vertices[4];
+    int colors[4];
+    f32 uv[4][2];
+    long state70, state78, state80, state88;
+};
+extern void func_00281DE8(struct QuadPacket *, int, int, int);
+extern u8 *func_0029EFD0(int);
+extern void func_00282C88(TI128 *);
+extern void func_002833F0(void *, void *);
+extern f32 func_00282E48(void *, void *);
+extern void func_0026FEB8(const char *, ...);
+extern char ref_L02_003C0890_00[];
+struct PositionRecord { TI128 first; TI128 position; };
+
+void func_L02_002EF968(struct QuadPacket *packet, int texture, int color, f32 (*uv)[2], TI128 *vertices, int flags) {
+    int i;
+    func_00281DE8(packet, texture, flags, 128);
+    for (i = 0; i < 4; i++) {
+        packet->uv[i][0] = uv[i][0];
+        packet->uv[i][1] = uv[i][1];
+        packet->colors[i] = color;
+        packet->vertices[i] = vertices[i];
+    }
+}

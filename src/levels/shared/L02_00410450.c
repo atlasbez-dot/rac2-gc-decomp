@@ -18,7 +18,7 @@ extern float func_0031E8D0(void);
 
 INCLUDE_ASM("asm/levels", func_L02_00410450);
 
-INCLUDE_ASM("asm/levels", func_L02_00410D00);
+/* func_L02_00410D00 is defined in L02_00410D00-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L02_00410E58);
 
@@ -41,7 +41,7 @@ void func_L02_00414D48(u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L02_004164A8);
 
-INCLUDE_ASM("asm/levels", func_L02_00416720);
+/* func_L02_00416720 is defined in L02_00410450-qcopy.c. */
 
 /* True when the record is in state 1 and its sub-object holds a cleared origin. */
 int func_L02_00416800(void *arg0) {
@@ -93,9 +93,9 @@ void func_L02_00422638(u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L02_00422720);
 
-INCLUDE_ASM("asm/levels", func_L02_00422BB8);
+/* func_L02_00422BB8 is defined in L02_00422BB8-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L02_00422D68);
+/* func_L02_00422D68 is defined in L02_00422D68-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L02_004230B0);
 

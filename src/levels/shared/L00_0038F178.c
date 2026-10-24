@@ -72,7 +72,7 @@ typedef struct {
 
 extern void func_0029F338(NativeUpdate775View *object);
 
-INCLUDE_ASM("asm/levels", func_L00_0038F178);
+/* func_L00_0038F178 is defined in L00_0038F178-effects.c. */
 
 /* Family 6eb4f363e5305bed: seed body at func_L00_00387408. */
 void func_L00_0038F3D8(char *object)
@@ -88,11 +88,69 @@ void func_L00_0038F3D8(char *object)
     func_002BF728(object + 16, local, func_002A7878_1(0.05f, 0.1f) * 210000.0f, base);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0038F5F0);
+typedef union { TI128 quad; float f[4]; } ParticleUpdateVector;
+typedef struct { int color[4]; } ParticleUpdateColors;
+extern ParticleUpdateColors D_L00_001AF010;
+extern float func_002A7878(float, float);
+extern void func_00282F20(void *, void *, float);
+extern int func_002AAFA0(int, int);
+extern void func_002BAE50(void *, void *, int, int, int, int, int, int);
+extern float func_00283B98(float, float);
+extern void func_00282CC0(void *, void *, void *);
+extern void func_L00_003253A0(void *, void *, void *, float);
+extern float func_00283CE0(int);
+extern int func_00282978(short *);
+
+void func_L00_0038F5F0(char *object)
+{
+    ParticleUpdateColors colors;
+    ParticleUpdateVector direction, random;
+    char *state = *(char **)(object + 0x68);
+    int enabled = 1;
+    if (*(int *)(state + 0x20) != 0)
+        if (func_002A77E0(2))
+            enabled = 0;
+    if ((*(unsigned char *)(object + 0xBC) & 1) && enabled) {
+        int color;
+        colors = D_L00_001AF010;
+        random.quad = 0;
+        random.f[0] = func_002A7878(-1.0f, 1.0f);
+        random.f[1] = func_002A7878(-1.0f, 1.0f);
+        random.f[2] = func_002A7878(-1.0f, 1.0f);
+        direction.quad = random.quad;
+        func_00282F20(&direction, &direction, 1.0f / 60.0f);
+        if (*(unsigned char *)(object + 0xBC) & 0xFE) {
+            color = func_002AAFA0(colors.color[func_002A77E0(4)],
+                                *(unsigned char *)(object + 0xBC) >> 1);
+            func_002BAE50(object + 0x10, &direction, color,
+                         func_002AAFA0(0x4FFF, *(unsigned char *)(object + 0xBC) >> 1),
+                         45, 50, 120, 1);
+        } else {
+            func_002BAE50(object + 0x10, &direction, colors.color[func_002A77E0(4)],
+                         0x4FFF, 45, 50, 120, 1);
+        }
+    }
+    *(float *)(object + 0xF0) = func_00283B98(*(float *)(object + 0xF0), *(float *)(state + 0x10));
+    *(float *)(object + 0xF4) = func_00283B98(*(float *)(object + 0xF4), *(float *)(state + 0x14));
+    func_00282CC0(object + 0x10, object + 0x10, state);
+    func_L00_003253A0(object, state, state, 0.0040555559f);
+    if (*(float *)(object + 0x10) < 0.0f || *(float *)(object + 0x14) < 0.0f ||
+        *(float *)(object + 0x18) < 0.0f) {
+        func_0029F338((NativeUpdate775View *)object);
+        return;
+    }
+    if (*(short *)(state + 0x18) < *(short *)(state + 0x1A) / 4) {
+        float amount = func_00283CE0(*(short *)(state + 0x18));
+        *(float *)(object + 0x2C) = *(float *)(state + 0x1C) * amount /
+                                  func_00283CE0(*(short *)(state + 0x1A) / 4);
+    }
+    if (func_00282978((short *)(state + 0x18)))
+        func_0029F338((NativeUpdate775View *)object);
+}
 
 INCLUDE_ASM("asm/levels", func_L00_0038F8B8);
 
-INCLUDE_ASM("asm/levels", func_L00_0038FC48);
+/* func_L00_0038FC48 is defined in L00_0038FC48-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_0038FE10);
 
@@ -245,7 +303,7 @@ INCLUDE_ASM("asm/levels", func_L00_003959C0);
 
 INCLUDE_ASM("asm/levels", func_L00_00395A88);
 
-INCLUDE_ASM("asm/levels", func_L00_00396078);
+/* func_L00_00396078 is defined in L00_00396078-g64.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_00396288);
 
@@ -304,7 +362,7 @@ void func_L00_0039E5B0(NativeUpdate775View *object)
         func_0029F338(object);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0039E600);
+/* func_L00_0039E600 is defined in L00_0039E600.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_0039E7A8);
 

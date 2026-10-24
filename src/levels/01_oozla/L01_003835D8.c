@@ -44,7 +44,8 @@ INCLUDE_ASM("asm/levels", func_L01_003A6638);
 
 INCLUDE_ASM("asm/levels", func_L01_003B1F08);
 
-INCLUDE_ASM("asm/levels", func_L01_003B4200);
+/* func_L01_003B4200 lives in L01_003B4200.c: its grouped copies and
+   global-address scheduling need a per-file profile. */
 
 /* func_L01_003B4480 lives in L01_003B4480.c: its 128-bit copy needs the grouped
    copy profile, which is a per-file flag. */

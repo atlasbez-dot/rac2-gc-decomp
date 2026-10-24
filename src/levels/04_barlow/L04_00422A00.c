@@ -67,7 +67,65 @@ void func_L04_0042BF58(u8 *a0) {
 }
 INCLUDE_ASM("asm/levels", func_L04_00434BB0);
 INCLUDE_ASM("asm/levels", func_L04_004389C0);
-INCLUDE_ASM("asm/levels", func_L04_00438B50);
+struct BarlowEntry { u8 bytes[256]; };
+extern u8 D_00189EA0[];
+extern u16 *D_L04_001FB1E0[];
+extern u8 D_L04_001B1218[];
+extern u8 D_L04_001B1230[];
+extern int func_002ACBC8(void *, int);
+extern int func_002A8508(int, int);
+extern void func_0026FEB8(const char *, ...);
+
+void func_L04_00438B50(u8 *object) {
+    int *data = *(int **)(object + 0x68);
+    int i;
+    if (object[0x20] == 0) {
+        if (func_002ACBC8(D_00189EA0, data[4]))
+            object[0x20] = 1;
+    }
+    if (object[0x20] == 1) {
+        u16 *ids;
+        u8 *entry;
+        struct BarlowEntry *base;
+        for (i = 0; i < 4; i++) {
+            if (D_L04_001FB1E0[*(int *)((u32)data + (i << 2))] && func_002A8508(*(int *)((u32)data + (i << 2)), -1) >= 2) {
+                base = (struct BarlowEntry *)D_L04_001B24DC;
+                ids = D_L04_001FB1E0[*(int *)((u32)data + (i << 2))];
+                do {
+                    entry = base[*ids & 0x7FFF].bytes;
+                    *(u16 *)(entry + 0x34) |= 0x43;
+                    *(int *)(entry + 0x98) = 0;
+                } while ((s16)*ids++ >= 0);
+            }
+        }
+        func_0026FEB8(D_L04_001B1218);
+        object[0x20] = 2;
+    }
+    if (object[0x20] == 2) {
+        if (!func_002ACBC8(D_00189EA0, data[4]))
+            object[0x20] = 3;
+    }
+    if (object[0x20] == 3) {
+        u16 *ids;
+        u8 *entry;
+        struct BarlowEntry *base;
+        for (i = 0; i < 4; i++) {
+            if (D_L04_001FB1E0[*(int *)((u32)data + (i << 2))] && func_002A8508(*(int *)((u32)data + (i << 2)), -1) >= 2) {
+                base = (struct BarlowEntry *)D_L04_001B24DC;
+                ids = D_L04_001FB1E0[*(int *)((u32)data + (i << 2))];
+                do {
+                    entry = base[*ids & 0x7FFF].bytes;
+                    *(u16 *)(entry + 0x34) &= ~0x41;
+                    *(int *)(entry + 0x98) = *(int *)(*(u8 **)(entry + 0x24) + 0x10);
+                    *(u16 *)(entry + 0x34) &= ~2;
+                } while ((s16)*ids++ >= 0);
+            }
+        }
+        func_0026FEB8(D_L04_001B1230);
+        func_0029F338(object);
+    }
+}
+
 /* func_L04_00439870 is defined in L04_00422A00-g8.c (this unit's -G8 profile gives the
    retail's address forms). */
 INCLUDE_ASM("asm/levels", func_L04_00439950);
@@ -222,7 +280,56 @@ void func_L04_00450268(char *a0) {
     }
 }
 INCLUDE_ASM("asm/levels", func_L04_004502D0);
-INCLUDE_ASM("asm/levels", func_L04_00450D50);
+extern float func_00282DF0(void *);
+extern void func_00282CF0(void *, void *, void *);
+extern void func_L02_0032E998(void *, void *, void *, void *, int, void *, void *, f32, f32);
+extern void func_002AAA00(void *, f32, f32, f32, f32, void *, int);
+extern f32 func_00283C80(f32, f32);
+extern void func_002AA548(void *, void *, f32, f32, f32, f32);
+extern f32 func_002AA2E8(f32 *, f32, f32);
+extern void func_00282F20(void *, void *, f32);
+extern void func_00282CC0(void *, void *, void *);
+extern int func_002A7EA0(void *, void *, void *, f32, f32, f32, f32, int);
+
+int func_L04_00450D50(u8 *object, void *target, f32 desiredHeading, f32 speed, f32 stopDistance, f32 margin) {
+    f32 delta[4], displacement[4], destination[4];
+    f32 angle, frameSpeed = 0.0f;
+    u8 *data = *(u8 **)(object + 0x68);
+    int done = 0;
+    f32 distance, acceleration;
+    func_00282CF0(delta, target, object + 0x10);
+    delta[2] = 0.0f;
+    distance = func_00282DF0(delta);
+    acceleration = speed * 0.0008333333535119891f;
+    if (stopDistance < distance) {
+        int collision = *(int *)(data + 0x540);
+        angle = 0.0f;
+        func_L02_0032E998(object + 0x10, target, &angle, data + 0x340, collision, data + 0x550, data + 0x554, margin, 0.4f);
+        func_002AAA00(object + 0xF8, angle, 0.006981317885220051f, 0.0034906589426100254f, 0.20943954586982727f, data + 0x28C, 0);
+        if (func_00283C80(*(f32 *)(object + 0xF8), angle) < 0.523598849773407f) {
+            func_002AA548(&frameSpeed, data + 0x558, distance, acceleration, acceleration, speed * 0.01666666753590107f);
+        } else {
+            *(f32 *)(data + 0x558) = 0.0f;
+        }
+    } else {
+        func_002AAA00(object + 0xF8, desiredHeading, 0.006981317885220051f, 0.2f, 0.20943954586982727f, data + 0x28C, 0);
+        func_002AA2E8((f32 *)(data + 0x558), 0.0f, acceleration);
+        if (*(f32 *)(data + 0x558) == 0.0f && func_00283C80(*(f32 *)(object + 0xF8), desiredHeading) < 0.0872664749622345f) {
+            *(f32 *)(data + 0x28C) = 0.0f;
+            done = 1;
+        }
+    }
+    func_00282F20(displacement, object + 0xC0, *(f32 *)(data + 0x558));
+    func_00282CC0(destination, displacement, object + 0x10);
+    if (!func_002A7EA0(object, object + 0x10, destination, 0.75f, 0.75f, 0.4f, 0.523598849773407f, 0))
+        *(int *)(data + 0x55C) += 1;
+    if (*(int *)(data + 0x55C) >= 30) {
+        *(int *)(data + 0x55C) = 0;
+        done = 1;
+    }
+    return done;
+}
+
 
 void func_L04_00451018(char *a0) {
     char *s0 = *(char **)(a0 + 0x68);

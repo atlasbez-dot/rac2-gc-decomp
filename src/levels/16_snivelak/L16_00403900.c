@@ -89,7 +89,7 @@ INCLUDE_ASM("asm/levels", func_L16_00403900);
 
 INCLUDE_ASM("asm/levels", func_L16_00404E40);
 
-INCLUDE_ASM("asm/levels", func_L16_00404F50);
+/* func_L16_00404F50 is defined in L16_00404F50.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_004050D8);
 
@@ -101,7 +101,7 @@ INCLUDE_ASM("asm/levels", func_L16_0040C840);
 
 INCLUDE_ASM("asm/levels", func_L16_0040CD88);
 
-INCLUDE_ASM("asm/levels", func_L16_0040CF98);
+/* func_L16_0040CF98 is defined in L16_00403900-g8.c. */
 
 extern u16 *D_L16_001FB660[];
 
@@ -169,7 +169,7 @@ INCLUDE_ASM("asm/levels", func_L16_004110D0);
 
 INCLUDE_ASM("asm/levels", func_L16_00411368);
 
-INCLUDE_ASM("asm/levels", func_L16_00411480);
+/* func_L16_00411480 is defined in L16_00403900-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_00411600);
 
@@ -197,9 +197,9 @@ void func_L16_004116C8(u8 *arg0, s32 arg1, void *arg2, float f)
 
 INCLUDE_ASM("asm/levels", func_L16_004117A8);
 
-INCLUDE_ASM("asm/levels", func_L16_00411900);
+/* func_L16_00411900 is defined in L16_00411900-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L16_00411B40);
+/* func_L16_00411B40 is defined in L16_00411B40-g16.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_00411D00);
 

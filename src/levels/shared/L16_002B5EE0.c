@@ -29,6 +29,7 @@ extern void func_00283958(char *a, char *b);
 extern void func_00283738(char *a, char *b, char *c);
 
 /* steers the object along the ground normal the terrain query returns */
+/* func_L16_00395C00 uses its dedicated compiler profile. */
 
 INCLUDE_ASM("asm/levels", func_L16_00395D30);
 
@@ -45,7 +46,7 @@ extern int func_002DA3C8(void *v, int a1, char *object, int a3, float f);
 extern char *D_L16_001C3FC0[];
 
 /* reports whether the first live marker in the run still carries the kind byte it looks for */
-INCLUDE_ASM("asm/levels", func_L16_003960F8);
+/* func_L16_003960F8 uses its dedicated compiler profile. */
 
 INCLUDE_ASM("asm/levels", func_L16_003A8D58);
 
@@ -54,9 +55,9 @@ INCLUDE_ASM("asm/levels", func_L16_003C2C08);
 
 INCLUDE_ASM("asm/levels", func_L16_003C32F8);
 
-INCLUDE_ASM("asm/levels", func_L16_003C3870);
+/* func_L16_003C3870 uses its dedicated compiler profile. */
 
-INCLUDE_ASM("asm/levels", func_L16_003C3A10);
+/* func_L16_003C3A10 uses its dedicated compiler profile. */
 
 INCLUDE_ASM("asm/levels", func_L16_004051A8);
 
