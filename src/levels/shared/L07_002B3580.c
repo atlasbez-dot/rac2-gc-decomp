@@ -60,6 +60,5 @@ unsigned char *func_L07_003F6B88(int group) {
 /* func_L07_003F6F00 is defined in L07_002B3580-g8.c (it reads five tuning words through $gp). */
 
 
-INCLUDE_ASM("asm/levels", func_L07_00409300);
 
 INCLUDE_ASM("asm/levels", func_L07_00416510);

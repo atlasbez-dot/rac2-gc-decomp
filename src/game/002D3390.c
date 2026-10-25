@@ -180,7 +180,6 @@ int func_002D5038(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002D5048);
 
 
 extern char *D_001A8CFC[] __attribute__((sda));

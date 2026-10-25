@@ -206,7 +206,6 @@ INCLUDE_ASM("asm/core", func_00132498);
 
 INCLUDE_ASM("asm/core", func_001325E0);
 
-INCLUDE_ASM("asm/core", func_00132818);
 
 void func_00132858(int value) {
     int payload[4];
@@ -242,7 +241,6 @@ void func_00132938(int value) {
     func_00132DF0(11, 4, (int)payload, 0, 0);
 }
 
-INCLUDE_ASM("asm/core", func_00132968);
 
 void func_001329B0(int first, int second, int third) {
     int payload[4];
@@ -252,11 +250,8 @@ void func_001329B0(int first, int second, int third) {
     func_00132DF0(78, 12, (int)payload, 0, 0);
 }
 
-INCLUDE_ASM("asm/core", func_001329F0);
 
-INCLUDE_ASM("asm/core", func_00132A58);
 
-INCLUDE_ASM("asm/core", func_00132AA0);
 
 void func_00132AF8(int value) {
     int payload[4];
@@ -278,7 +273,6 @@ void func_00132B58(int value, long fourth, int fifth) {
     func_00132DF0(25, 4, (int)payload, fourth, fifth);
 }
 
-INCLUDE_ASM("asm/core", func_00132B88);
 
 
 INCLUDE_ASM("asm/core", func_00132C48);
@@ -294,11 +288,8 @@ void func_00133220(void) {
     *(int *)&r1_D_0015EDC4 = 1;
 }
 
-INCLUDE_ASM("asm/core", func_00133300);
 
-INCLUDE_ASM("asm/core", func_00133340);
 
-INCLUDE_ASM("asm/core", func_001333C0);
 
 void func_00133400(int value) {
     int payload[4];

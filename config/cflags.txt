@@ -1,3 +1,38 @@
+src/core/0011E740-rc2.c	sdk -O2 -fno-schedule-insns -G0 -ffunction-sections -fno-builtin
+src/core/0011FB8C-rc2.c	sdk -O2 -ffunction-sections -fno-builtin
+src/core/001248B0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00127E40-rc2.c	sdk -O2 -G0 -ffunction-sections -fno-builtin
+src/core/00127F90-rc2.c	sdk -O2 -G0 -ffunction-sections -fno-builtin
+src/core/00132818-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00132968-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/001329F0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00132A58-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00132AA0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00132B88-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00133300-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00133340-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
+src/core/001333C0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00133700-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/001337C8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00133818-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/core/00133848-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002C0C70-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002C38A0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/002D5048-rc2.c	-fno-builtin -O2 -G8 -ffunction-sections
+src/game/00335918-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/00335D30-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/game/00336288-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/00336468-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/game/003367C0-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
+src/levels/shared/L00_004263A8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L01_0041C890-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/shared/L02_003F0788-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/03_endako/L03_0038AA20-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/07_siberius/L07_003791E8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/shared/L07_00409300-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
+src/levels/13_boldan/L13_0042BE60-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/16_snivelak/L16_00424B48-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
+src/levels/19_grelbin/L19_0041C3D8-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
 src/game/0032EB28-g8.c	-O2 -G8 -ffunction-sections -Wa,-G32
 src/game/002BF6F0.c	-O2 -G0 -ffunction-sections -g
 src/game/002AA800.c	-O2 -G0 -ffunction-sections -g -ffast-math

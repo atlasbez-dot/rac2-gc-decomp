@@ -372,7 +372,6 @@ void func_003358A0(void *unused, char *out, float factor) {
     *(float *)(out + 0xC) = (1.0f - factor) * 0.5f;
 }
 
-INCLUDE_ASM("asm/game", func_00335918);
 
 INCLUDE_ASM("asm/game", func_00335960);
 
@@ -423,7 +422,6 @@ void func_00335CC0(float factor,
     destination[3] = complement * source->first_3 + factor * source->second_3;
 }
 
-INCLUDE_ASM("asm/game", func_00335D30);
 
 void func_00335D60(void *object, int flags) {
     func_00335870(object, flags);
@@ -600,7 +598,6 @@ void func_003361E0(char *obj)
     *(int *)(obj + 72) = 0;
 }
 
-INCLUDE_ASM("asm/game", func_00336288);
 
 
 /* Measured target: byte-identical across all 27 levels. */
@@ -626,7 +623,6 @@ void func_00336408(char *object, int a1, int a2, int a3, int a4) {
     *(int *)(object + 0x44) = 0x80000000;
 }
 
-INCLUDE_ASM("asm/game", func_00336468);
 
 /* lot12 -- measured bodies with sizes recorded in the catalogue. */
 void func_00336498(u8 *a0, s32 a1, s32 a2) {
@@ -684,4 +680,3 @@ void func_00336710(char *s1, int a1, char *a2)
 /* Measured target: byte-identical across all 27 levels. */
 s32 func_003367B8(u8 *a0) { return *(s32 *)(a0 + 0x34); }
 
-INCLUDE_ASM("asm/game", func_003367C0);

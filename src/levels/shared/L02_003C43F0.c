@@ -836,7 +836,6 @@ void func_L02_003F0628(char *a0) {
 
 /* Boundary suspect: the retail body at this row is an epilogue (`addiu $sp,$sp,0x50; nop;
    jr $ra; nop`), so the catalogue row starts inside the function before it. Not a function. */
-INCLUDE_ASM("asm/levels", func_L02_003F0788);
 
 /* Forwards the first argument with a null second and a third of three. */
 void func_L02_003FC248(void *a0) {

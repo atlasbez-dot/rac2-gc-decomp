@@ -163,7 +163,6 @@ extern void func_00307EF8(char *, int *, int *, int *);
 INCLUDE_ASM("asm/levels", func_L01_003E9CF8);
 
 /* clears the three child slots, holds the wheels and counts the lifetime down */
-INCLUDE_ASM("asm/levels", func_L01_0041C890);
 
 extern void func_L01_003EE8E0(char *);
 
