@@ -1,3 +1,16 @@
+/* Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/core/001184D0.c
+ * Actual game profile: -O2 -G2 -ffunction-sections
+ * Release checks: US 0/1 (exit1); PAL 0/1 (exit1); US2 0/1 (exit1).
+ * Current residual: 120/120 bytes, base/counter remain t0/t1 rather than retail t1/t0.
+ * Regalloc identifies p84 base refs 7/live 24 and p86 counter refs 7/live 26, inferred
+ * priorities 7/12 and 7/13. no-rerun-loop-opt and no-sched-interblock tie, as does a focused
+ * postincrement-lifetime form.
+ * Reopen only for: A source lifetime or allocator rule that reverses the measured
+ * priorities while retaining the entry delay slot; no cosmetic permutations.
+ * Older notes below are historical; the marker and trial-only flags were restored.
+ */
+
 /* from src/core/001163B0.c: 120 bytes, matching retail instruction for instruction
    except one register assignment */
 /*

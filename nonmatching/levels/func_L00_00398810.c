@@ -1,3 +1,12 @@
+/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measurement: 724/732 bytes, 0/27 US placements, frame 0x30.
+ * Change: Approved qcopy preserves five real aligned transfers. Two readable inline predicates distinguish the active standard and upgraded weapon families.
+ * Residual: The predicates improve the previous 652-byte body. A common-return form measured 716 and no-split-addresses 704; null-guard, predicate/list block order and allocation remain different.
+ * Reopen: Reopen on measured list-count/global base lifetimes or predicate materialization; do not add padding or change the 64-byte list and 0xE0 weapon strides.
+ * Earlier measurements/screens below are historical; they do not prohibit
+ * the currently approved shared transfer helpers or establish linked equality.
+ */
 /* Nonmatching: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_00398810: 0 of 27 places match (src/levels/shared/L00_00398810.c); us2: func_L00_00398810: 0 of 27 places match (src/levels/shared/L00_00398810.c); pal: func_L00_00398810: 0 of 27 places match (src/levels/shared/L00_00398810.c). One full reconstruction652/732 bytes, original frame0x30. Truthful64-byte projectile list(count+31 short indices), E0-byte weapon records and16-byte copies. Current predicates/list walks compile more compactly than retail; pool/global identity and source predicate expansion remain hypotheses. Factory pointer/handle banks and current integer-pointer list helper APIs verified. Reopen with measured source predicate/list lifetime evidence; no padding or aliases added. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -12,11 +21,21 @@ extern char *func_0029EFD0(int);
 extern int func_002FED90(void *, int, float, float, float);
 extern void func_002AB650(u8 *);
 extern void func_002ACAD0(int, unsigned short *), func_002ACA50(int, short *, short), func_002A0F48(void *);
+/* Separate predicates match the weapon pool's two active families. */
+static __inline__ int projectile_standard_weapon(void) {
+    WeaponRecord *entry = D_L00_00262570 + D_00139579;
+    if (!entry->active) return 0;
+    return entry->kind == 2 || entry->kind == 1;
+}
+static __inline__ int projectile_upgraded_weapon(void) {
+    WeaponRecord *entry = D_L00_00262570 + D_00139579;
+    if (!entry->active) return 0;
+    return entry->kind == 3;
+}
 /* Creates a projectile and retires the oldest live entries when the shared list is full. */
 char *func_L00_00398810(char *position, char *direction) {
     char *actor = func_0029EFD0(0xCB);
     char *state, *hero, *oldest;
-    WeaponRecord *weapon;
     int i, age, oldestAge;
     short *slot;
     if (!actor) return 0;
@@ -24,13 +43,13 @@ char *func_L00_00398810(char *position, char *direction) {
     *(unsigned char *)(actor + 0x30) = 0xFF;
     *(unsigned short *)(actor + 0x34) |= 0x100;
     state = *(char **)(actor + 0x68);
-    *(Quad *)(actor + 0x10) = *(Quad *)position;
-    *(Quad *)(state + 0x10) = *(Quad *)direction;
+    qcopy(actor + 0x10, position);
+    qcopy(state + 0x10, direction);
     *(unsigned char *)(actor + 0x20) = 0;
     hero = D_0018C0B0;
-    *(Quad *)(actor + 0xC0) = *(Quad *)(hero + 0xC0);
-    *(Quad *)(actor + 0xD0) = *(Quad *)(hero + 0xD0);
-    *(Quad *)(actor + 0xE0) = *(Quad *)(hero + 0xE0);
+    qcopy(actor + 0xC0, hero + 0xC0);
+    qcopy(actor + 0xD0, hero + 0xD0);
+    qcopy(actor + 0xE0, hero + 0xE0);
     *(int *)(state + 0x30) = 0;
     *(int *)(state + 0x2C) = 0;
     *(int *)(state + 0x28) = 0;
@@ -48,8 +67,7 @@ char *func_L00_00398810(char *position, char *direction) {
     *(int *)(state + 0x40) = 0;
     *(int *)(state + 0x3C) = 0;
     *(int *)(state + 0x38) = 0;
-    weapon = D_L00_00262570 + D_00139579;
-    if (weapon->active && (weapon->kind == 1 || weapon->kind == 2 || weapon->kind == 3)) *(float *)(state + 0x24) = 60.0f;
+    if (projectile_standard_weapon() || projectile_upgraded_weapon()) *(float *)(state + 0x24) = 60.0f;
     else *(float *)(state + 0x24) = 6.0f;
     while (D_L00_001B1FF0.count > 5) {
         oldest = 0;

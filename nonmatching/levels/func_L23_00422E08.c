@@ -1,3 +1,20 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/levels/23_damosel_orbit/L23_00422E08-g8.c
+ * Game profile: -O2 -G8 -ffunction-sections
+ * Release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL catalogue absent (exit1).
+ * Current residual: 1376/1380 bytes. Grouped transfers are expressed with approved qcopy,
+ * but pointer allocation and surrounding copy/call scheduling remain different. The old
+ * three-float declaration explicitly chosen to exceed the GP threshold and the
+ * guessed 0x20-byte table extent were replaced by incomplete views. Canonical float/int
+ * return declarations were repaired.
+ * Reopen only for: Qualify the actual global object extents/storage and the remaining
+ * pointer lifetime difference; do not reinstate guessed array sizes.
+ * Older notes below are historical. ASM marker and trial-only profiles were restored.
+ */
+
+#include "common.h"
+
 /* func_L23_00422E08 (level 23, 1380 bytes) -- NEAR MISS, not integrated.
    state: 1380 bytes against retail's 1380 (345 instructions each); tools/check.py: 0 of 1 places
    match (instruction at +0x24 differs); 63 of 345 words differ once the two bodies are aligned.
@@ -30,17 +47,17 @@
    what would unblock it: the 16-byte copy fold (compiler side); the shape fits copies whose
    addresses are register operands, such as an inline-asm qcopy helper, which AGENTS.md rules out. */
 
-typedef unsigned char u8;
 
-typedef unsigned short u16;
 
-typedef short s16;
 
-typedef int s32;
+
+
+
+
 
 typedef int TI16 __attribute__((mode(TI)));
 
-extern void func_002E5CF8(int, int, u8 *);
+extern int func_002E5CF8(int, int, u8 *);
 
 extern void func_0029F338(u8 *object);
 
@@ -57,10 +74,10 @@ extern float D_L23_001B192C __attribute__((sda));
 
 extern float D_L23_001B1930 __attribute__((sda));
 
-/* read as a bare symbol through $at: sized past the $gp limit */
-extern float D_L23_001B3700[3] __attribute__((sda));
+/* Absolute scalar view; the surrounding object extent is unqualified. */
+extern float D_L23_001B3700[] __attribute__((nosda));
 
-extern u8 D_L23_001A8F20[0x20] __attribute__((sda));
+extern u8 D_L23_001A8F20[];
 
 /* the last hit reported by the collision query */
 typedef struct {
@@ -74,7 +91,7 @@ extern L23Hit1C0A80 D_L23_001C0A80;
 
 /* the record the collision query and the damage call read */
 typedef struct {
-    float v[4];
+    float v[4] __attribute__((aligned(16)));
     u8 *obj;
     s32 flags;
     u8 b18;
@@ -86,7 +103,7 @@ typedef struct {
 
 extern void func_002AFFD8(void *, void *, s32);
 
-extern void func_002AA2E8(float *, float, float);
+extern float func_002AA2E8(float *, float, float);
 
 extern void func_00282F20(void *, void *, float);
 
@@ -128,14 +145,14 @@ extern void func_L00_00320B70(void *, void *, void *, void *, void *, void *, fl
 extern void func_002C65A0(void *, void *, s32, s32, s32, s32, s32, s32, float, float, float);
 
 void func_L23_00422E08(u8 *obj) {
-    float up[4];
-    float vel[4];
-    float mtx[12];
-    float quat[4];
-    float axis[4];
-    float a[4];
-    float b[4];
-    float c[4];
+    float up[4] __attribute__((aligned(16)));
+    float vel[4] __attribute__((aligned(16)));
+    float mtx[12] __attribute__((aligned(16)));
+    float quat[4] __attribute__((aligned(16)));
+    float axis[4] __attribute__((aligned(16)));
+    float a[4] __attribute__((aligned(16)));
+    float b[4] __attribute__((aligned(16)));
+    float c[4] __attribute__((aligned(16)));
     L23Rec rec;
     u8 *vars;
     u8 *hit;
@@ -179,10 +196,10 @@ void func_L23_00422E08(u8 *obj) {
         } else {
             func_00282D30(vel, vars + 0x30, *(float *)(vars + 0x1C));
             func_00282F20(a, vel, 1.0f);
-            *(TI16 *)(obj + 0xC0) = *(TI16 *)a;
+            qcopy(obj + 0xC0, a);
         }
     }
-    *(TI16 *)b = *(TI16 *)(obj + 0x10);
+    qcopy(b, obj + 0x10);
     func_00282D30(c, vel, 0.7f);
     r = func_002A7878(0.1f, 0.3f);
     n = func_002A77E0(0xFF);
@@ -190,7 +207,7 @@ void func_L23_00422E08(u8 *obj) {
     func_00282CC0(a, a, b);
     func_002C65A0(a, D_L23_001A8F20, 0xF, 0x808080, n, 0x20, 0, 0, r * 210000.0f, r * 42000.0f, 0.0f);
     func_00282CC0(b, b, c);
-    *(TI16 *)a = *(TI16 *)(obj + 0x10);
+    qcopy(a, obj + 0x10);
     func_00282CC0(obj + 0x10, obj + 0x10, vel);
     if (*(float *)(obj + 0x10) < 0.0f || *(float *)(obj + 0x14) < 0.0f || *(float *)(obj + 0x18) < 0.0f) {
         func_0029F338(obj);
@@ -208,11 +225,11 @@ void func_L23_00422E08(u8 *obj) {
         if (hit != 0) {
             if (hit != *(u8 **)(obj + 0xB8)) {
                 obj[0xBC] = 2;
-                *(TI16 *)(obj + 0x10) = D_L23_001C0A80.f20;
+                qcopy(obj + 0x10, &D_L23_001C0A80.f20);
             }
         } else if (D_L23_001C0A80.f1C > 0) {
             obj[0xBC] = 1;
-            *(TI16 *)(obj + 0x10) = D_L23_001C0A80.f20;
+            qcopy(obj + 0x10, &D_L23_001C0A80.f20);
         }
         flag = 0;
         other = D_L23_001C0A80.f18;

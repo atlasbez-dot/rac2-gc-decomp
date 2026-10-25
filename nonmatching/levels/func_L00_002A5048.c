@@ -1,3 +1,14 @@
+/* 2026-10-25 ADDRESS follow-up: retained best prior C, not matching.
+ * Baseline reproduced 800/800 bytes, 0/27 US placements, first difference
+ * +0x1F8: four non-relocated call-setup words exchange f15 zero/a2 direction.
+ * A truthful attachment-prefix record, approved qcopy, no-sched-spec and
+ * no-sched-interblock retain the same residue; no-force-mem gives 792 bytes.
+ * A diagnostic compile with allocator dumps was byte-identical to the normal
+ * complete object. Saved node/owner/angle/position pseudos map to hard regs
+ * 16/17/19/18; direction/limit argument scheduling is the residual concern.
+ * Reopen with an evidenced scheduler dependency/call-setup source idiom;
+ * preserve the real direction-third helper ABI and all FP inputs.
+ */
 /* Retained near miss: 800/800 bytes in US v1.01 and US v2.00, 0/27 places each.
  * No catalogue entry of this name exists in PAL.
  * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.

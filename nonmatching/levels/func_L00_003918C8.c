@@ -1,3 +1,12 @@
+/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-barrier
+ * Fresh local measurement: 3100/3172 bytes, 0/27 US placements; frame 0x130 versus retail 0x140.
+ * Change: Approved qcopy expresses the real aligned position/damage/contact transfers; the two initial TI zeros retain the retail register-fed clear profile.
+ * Residual: No-split-addresses tied. Branch/register/stack allocation remains different; the complete 48-byte damage record, 128-byte collision result and constructor stack arguments remain present.
+ * Reopen: Reopen with measured branch-local workspace/lifetime evidence and independently qualify any remaining data identities.
+ * Earlier measurements/screens below are historical; they do not prohibit
+ * the currently approved shared transfer helpers or establish linked equality.
+ */
 /* Nonmatching: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-barrier. us: func_L00_003918C8: 0 of 27 places match (src/levels/shared/L00_003918C8.c); us2: absent; pal: absent. Manual reconstruction3100/3172 frame0x130 versus0x140. Full48-byte aligned damage record,128-byte collision result,16-byte vectors and complete constructorstacktail retained. 002761F8fiveGPR->bool,00277F48fourGPR+float->count,002A89A8point/int/float->F0 verified. Historical MMI claim superseded: ordinaryC compiles the body. Remaining stack/register/branch scheduling and identity binding differences; reopen with original source/local lifetime evidence. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -109,7 +118,7 @@ void func_L00_003918C8(char *actor) {
     }
     if (!mode) func_002AF000(velocity.f, *(float *)(state + 4), *(float *)(actor + 0xF8), -*(float *)(actor + 0xF4));
     else func_00282D30(&velocity, actor + 0xC0, *(float *)(state + 4));
-    previous.quad = *(Quad *)(actor + 0x10);
+    qcopy(&previous, actor + 0x10);
     func_00282CC0(actor + 0x10, actor + 0x10, &velocity); func_00300190(actor + 0x10, actor + 0x10);
     if (*(int *)(state + 0x10) >= 0xB7D) {
         height = func_002A89A8(actor + 0x10, 0, 0.5f) + *(float *)(state + 0x44);
@@ -129,7 +138,7 @@ void func_L00_003918C8(char *actor) {
     inputX = func_00282C48(*(float *)(state + 0x18) * 0.33333334f);
     bank = ((*(float *)(state + 0x18) - *(float *)(actor + 0xF0)) * 1.1f - (*(float *)(state + 0x1C) * 0.5f + inputX)) * 0.7f;
     func_00283898(*(char **)(state + 0x28) + 0x10, 1, bank);
-    damage.direction.quad = velocity.quad; damage.owner = actor; damage.flags = 0x830000;
+    qcopy(&damage.direction, &velocity); damage.owner = actor; damage.flags = 0x830000;
     damage.mode = 1; damage.power = *(float *)(D_L00_00262570[D_00139576] + 0x70);
     func_00282F70(&damage.direction, &damage.direction, 1);
     damage.objectClass = *(u16 *)(actor + 0xAA); damage.kind = 3; damage.response = 2;
@@ -138,16 +147,16 @@ void func_L00_003918C8(char *actor) {
     if (*(int *)(state + 0x10) > 0xB90) ignore = *(char **)(player + 0x2290);
     if (func_L00_00380058(actor + 0x10)) {
         actor[0xBC] = 2;
-        contactEdge.quad = *(Quad *)D_L00_001B8FF0;
+        qcopy(&contactEdge, D_L00_001B8FF0);
         scratch.quad = 0; scratch.f[2] = 1; scratch.f[3] = 1; plane = &scratch;
         goto rebound;
     }
     if (func_002761F8(&previous, actor + 0x10, 0, ignore, &damage)) {
         if (D_L00_001BF200.hit) {
             actor[0xBC] = 2; playerHit = D_L00_001BF200.hit == *(char **)(player + 0x2290);
-            *(Quad *)(actor + 0x10) = D_L00_001BF200.position.quad;
+            qcopy(actor + 0x10, &D_L00_001BF200.position);
         } else if (D_L00_001BF200.mesh > 0) {
-            actor[0xBC] = 1; *(Quad *)(actor + 0x10) = D_L00_001BF200.position.quad;
+            actor[0xBC] = 1; qcopy(actor + 0x10, &D_L00_001BF200.position);
         } else goto after_rebound;
         func_00282CF0(&contactEdge, &D_L00_001BF200.edgeStart, &D_L00_001BF200.edgeEnd);
         func_00282F20(&contactEdge, &contactEdge, 1); plane = &D_L00_001BF200.normal;
@@ -168,17 +177,17 @@ after_rebound:
         if (!playerHit) {
             func_002ABBB8(actor, &blast, 0, 0, 0, 10, 3, 16, 4, 2, 0, 1, 1, 20, 1, 1, -1, 0, 0x810001);
             hits = func_00277F48(actor + 0x10, 16, actor, 0, 4);
-            scratch.quad = *(Quad *)(actor + 0x10);
+            qcopy(&scratch, actor + 0x10);
             func_002A9850(actor, &scratch, D_L00_001C3280, hits, 0, 0x830000, 3, 2,
                           *(float *)(D_L00_00262570[D_00139576] + 0x70), 1, 1);
         }
         *(u16 *)(actor + 0x34) |= 1; *(float *)(state + 4) = 0.02f;
         *(float *)(state + 0x18) *= 0.01f;
         *(int *)(state + 0x10) = *(int *)(state + 0x10) < 0xB9B ? -1 : -100;
-        scratch.quad = *(Quad *)(actor + 0x10);
+        qcopy(&scratch, actor + 0x10);
         for (i = 4; i >= 0; --i) {
-            *(Quad *)(actor + 0x10) = scratch.quad; func_002ACB48((float *)(actor + 0x10), 1.5f); func_L00_003914E0(actor, 1);
-            *(Quad *)(actor + 0x10) = scratch.quad;
+            qcopy(actor + 0x10, &scratch); func_002ACB48((float *)(actor + 0x10), 1.5f); func_L00_003914E0(actor, 1);
+            qcopy(actor + 0x10, &scratch);
         }
         velocity.f[0] = 0; actor[0xBC] = 0;
     }

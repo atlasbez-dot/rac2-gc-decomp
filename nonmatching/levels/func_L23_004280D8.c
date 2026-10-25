@@ -1,3 +1,19 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/levels/23_damosel_orbit/L23_004280D8-g8.c
+ * Game profile: -O2 -G8 -ffunction-sections -mno-split-addresses
+ * Release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL catalogue absent (exit1).
+ * Current residual: 580/580 bytes. Real header/copy order and separate random-value
+ * lifetimes recover the retail frame/GPR/FPR allocation. Call argument motion and the
+ * four-float payload snapshot still differ; first difference +0x1a0 under
+ * mno-split-addresses.
+ * Reopen only for: A measured call setup or FPR snapshot allocation model without altering
+ * the real callee signature.
+ * Older notes below are historical. ASM marker and trial-only profiles were restored.
+ */
+
+#include "common.h"
+
 /* func_L23_004280D8 (580 bytes, 1 place: 23:004280D8) -- NEAR MISS, not integrated.
    This C compiles to 584 bytes against retail's 580 (-g8 unit, -O2 -G8): one callee-saved
    register too many, and one word of a quad store that cannot be spelled. The calls, their
@@ -34,11 +50,11 @@
    order below is the best of a hill-climb over the header statements, scored by instruction-
    line differences against retail (tools/check.py's side by side, immediates ignored). */
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef short s16;
-typedef int s32;
-typedef long long s64;
+
+
+
+
+
 typedef int TI128 __attribute__((mode(TI)));
 
 extern float D_L23_001B1AD8 __attribute__((sda));
@@ -64,39 +80,45 @@ extern void func_002C2210(void *, s32, s32, s32, s32, void *, s32, float, float,
 u8 *func_L23_004280D8(u8 *parent, TI128 *a1, TI128 *a2, s32 b, float f) {
     u8 *obj = func_0029EFD0(0x1230);
     u8 *payload;
-    float r;
+    float rotationRandom;
+    float particleRandom;
+    float v30, v34, v38, v3c;
 
     if (obj != 0) {
-        *(TI128 *)(obj + 0x10) = *a2;
-        *(s16 *)(obj + 0x32) = 0xFF;
         obj[0x30] = 0xFF;
-        obj[0xBC] = b;
+        *(s16 *)(obj + 0x32) = 0xFF;
         obj[0x31] = 1;
-        *(s64 *)(obj + 0x38) = *(s64 *)(parent + 0x38);
+        obj[0xBC] = b;
         obj[0x20] = 0;
+        *(s64 *)(obj + 0x38) = *(s64 *)(parent + 0x38);
+        qcopy(obj + 0x10, a2);
         payload = *(u8 **)(obj + 0x68);
+        qcopy(payload, a1);
         *(u8 **)(payload + 0x10) = parent;
-        *(TI128 *)payload = *a1;
         *(float *)(payload + 0x14) = f;
         *(float *)(payload + 0x20) = 0.15f;
         *(u16 *)(obj + 0x34) |= 0x208;
         *(float *)(obj + 0xF8) = func_00283B98(func_00283248(((float *)a1)[0], ((float *)a1)[1]), 1.5707965f);
         *(float *)(obj + 0xF0) = -func_00283248(func_00282E20(a1), ((float *)a1)[2]);
-        r = func_002A7940();
-        func_002ACEC0(obj + 0xE0, obj + 0xE0, obj + 0xD0, r);
-        func_002ACEC0(obj + 0xC0, obj + 0xC0, obj + 0xD0, r);
+        rotationRandom = func_002A7940();
+        func_002ACEC0(obj + 0xE0, obj + 0xE0, obj + 0xD0, rotationRandom);
+        func_002ACEC0(obj + 0xC0, obj + 0xC0, obj + 0xD0, rotationRandom);
         func_002833F0(obj + 0xC0, obj + 0xF0);
         obj[0x23] = 0x80;
         *(float *)(obj + 0x2C) = D_L23_001B1AD8;
         *(u16 *)(obj + 0x34) |= 0x100;
         *(s32 *)(payload + 0x24) = 0;
-        r = func_002A7878(8.0f, 10.0f);
-        func_002C2210(obj + 0x10, 0xF, D_L23_001B1A44, 0, 10, D_L23_001A8F20, 0, r * 0.3f, r, 0.0f);
-        func_002C2210(obj + 0x10, 0xF, D_L23_001B1A48, 1, -10, D_L23_001A8F20_2, 0, r * 0.04f, r * 0.4f, 0.0f);
-        *(float *)(payload + 0x3C) = D_L23_001B1A20;
-        *(float *)(payload + 0x38) = D_L23_001B1A38;
-        *(float *)(payload + 0x34) = D_L23_001B1A2C;
-        *(float *)(payload + 0x30) = D_L23_001B1A14;
+        particleRandom = func_002A7878(8.0f, 10.0f);
+        func_002C2210(obj + 0x10, 0xF, D_L23_001B1A44, 0, 10, D_L23_001A8F20, 0, particleRandom * 0.3f, particleRandom, 0.0f);
+        func_002C2210(obj + 0x10, 0xF, D_L23_001B1A48, 1, -10, D_L23_001A8F20_2, 0, particleRandom * 0.04f, particleRandom * 0.4f, 0.0f);
+        v30 = D_L23_001B1A14;
+        v34 = D_L23_001B1A2C;
+        v38 = D_L23_001B1A38;
+        v3c = D_L23_001B1A20;
+        *(float *)(payload + 0x30) = v30;
+        *(float *)(payload + 0x3C) = v3c;
+        *(float *)(payload + 0x34) = v34;
+        *(float *)(payload + 0x38) = v38;
     }
     return obj;
 }

@@ -311,7 +311,7 @@ INCLUDE_ASM("asm/game", func_003351B0);
 
 INCLUDE_ASM("asm/game", func_00335270);
 
-INCLUDE_ASM("asm/game", func_00335370);
+/* func_00335370 is defined in 00335370-copy.c. */
 
 /* func_003353C8 uses the quadword-copy profile in 0032EB28-qcopy.c. */
 
@@ -679,4 +679,3 @@ void func_00336710(char *s1, int a1, char *a2)
 
 /* Measured target: byte-identical across all 27 levels. */
 s32 func_003367B8(u8 *a0) { return *(s32 *)(a0 + 0x34); }
-

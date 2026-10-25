@@ -1,3 +1,16 @@
+/* Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/game/0028CC98-g8.c
+ * Actual game profile: -O2 -G8 -ffunction-sections
+ * Release checks: US 0/28 (exit1); PAL absent (exit1); US2 0/28 (exit1).
+ * Current residual: 76/72 bytes. The true table extent is unknown; an incomplete
+ * declaration uses an absolute two-instruction address where retail uses GP.
+ * Constant/store scheduling also differs. The old one-element declaration was unqualified
+ * and has been removed.
+ * Reopen only for: Recover the complete table extent or a reviewed genuine storage model;
+ * do not reinstate an invented small array.
+ * Older notes below are historical; the marker and trial-only flags were restored.
+ */
+
 /* from src/game/0028BDB0.c: 72-byte near miss; 6 of 18 words differ.
    The stores, their order and the two halfword stores are all right (the two
    halfword stores have to be written in the reverse order in the source, this
@@ -7,7 +20,8 @@
    address before the store of the 8 where retail has it after.  The register
    allocation follows from that order.  The body needs the -G8 profile (two
    $gp-relative objects), so it belongs in 0028BDB0-g8.c. */
-extern int D_001A8DD8[1] __attribute__((sda));
+/* The referenced table has no qualified complete extent. */
+extern int D_001A8DD8[];
 extern int D_001A8D48 __attribute__((sda));
 extern int D_001B18D0;
 extern int D_001B18D4;

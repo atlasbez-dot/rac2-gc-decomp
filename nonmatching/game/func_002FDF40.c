@@ -1,3 +1,11 @@
+/* 25 October 2026 approved-helper experiment; original C below is preserved.
+ * Trial profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses -g
+ * Trial checks: us: 0/28; us2: 0/27; pal: 0/27.
+ * 1624/1628 bytes with the correct 0x210 frame. Approved qcopy reproduces the four source-object copy pairs, but initial FPR/GPR scheduling and resident-object base lifetime still differ. A truthful typed prefix was 1612 bytes and did not close the body.
+ * Reopen: Independent evidence for resident-base lifetime or source-parameter/FPR scheduling; the centrally audited scoped callee and its real two integer arguments must remain.
+ * No exact, linked or native-runtime credit is claimed.
+ */
+
 /*
  * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
  * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier

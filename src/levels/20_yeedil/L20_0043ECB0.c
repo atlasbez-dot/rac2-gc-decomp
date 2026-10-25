@@ -149,9 +149,7 @@ INCLUDE_ASM("asm/levels", func_L20_004431E0);
 
 extern unsigned int D_L20_001B2F9C __attribute__((sda));
 extern int func_L03_003CA138(char *);
-INCLUDE_ASM("asm/levels", func_L20_004499E8);
-/* func_L20_004499E8 reads a global through $gp: its near miss is in
-   nonmatching/levels/func_L20_004499E8.c and belongs in the -G8 sibling. */
+/* func_L20_004499E8 is defined in L20_004499E8-g8.c. */
 extern int func_L20_00449AC8(char *);
 
 extern void func_0039BDF0(char *, char *, int, int);

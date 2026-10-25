@@ -1,3 +1,11 @@
+/* 25 October 2026 approved-helper experiment; original C below is preserved.
+ * Trial profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Trial checks: us: 0/21; us2: 0/21; pal: absent.
+ * 372/372 bytes, still three argument-move words differ at +0x124. The actual qcopy helper is byte-neutral relative to the old qualified TI-copy/barrier source; it does not change the soft-frame-pointer scheduling tie.
+ * Reopen: New evidence for genuine stack-work pointer lifetimes or the argument-move scheduling policy; do not repeat unchanged pointer aliases or flag sweeps.
+ * No exact, linked or native-runtime credit is claimed.
+ */
+
 /* func_002B50E0 (boot function, 372 bytes; 20 levels, 21 places in all): NEAR MISS, measured
  * 22 October 2026.  Built alone (src/game/002B50E0.c) with
  * `-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier` it is retail's 372 bytes and

@@ -695,7 +695,7 @@ void func_L00_003F51A0(char *obj, char *arg)
     func_00282DD8(obj + 224, other, base);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F5238);
+/* func_L00_003F5238 is in L00_003F5238-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003F5390);
 
@@ -747,7 +747,7 @@ INCLUDE_ASM("asm/levels", func_L00_003F5B10);
 
 INCLUDE_ASM("asm/levels", func_L00_003F5F90);
 
-INCLUDE_ASM("asm/levels", func_L00_003F6168);
+/* func_L00_003F6168 is in L00_003F6168-helpers-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003F6308);
 

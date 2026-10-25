@@ -23,7 +23,7 @@ def read(path: Path) -> dict:
     sections = []
     for h in headers:
         raw = data[names + h[0]:]
-        sections.append({"name": raw[:raw.index(b"\0")].decode(), "type": h[1], "address": h[3],
+        sections.append({"name": raw[:raw.index(b"\0")].decode(), "type": h[1], "flags": h[2], "address": h[3],
                          "offset": h[4], "size": h[5]})
     return {"type": struct.unpack_from("<H", data, 0x10)[0], "entry": entry,
             "segments": segments, "sections": sections, "data": data}

@@ -38,7 +38,6 @@ void func_002A0468(unsigned long long *command_words, unsigned long long upper_f
 
 INCLUDE_ASM("asm/game", func_002A0488);
 
-INCLUDE_ASM("asm/game", func_002A04B8);
 
 ASM_FUNC("asm/game", func_002A04E8);
 

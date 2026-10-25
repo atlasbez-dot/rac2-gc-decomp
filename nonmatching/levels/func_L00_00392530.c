@@ -1,3 +1,12 @@
+/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measurement: 2568/2644 bytes, 0/27 US placements, frame 0x80.
+ * Change: Approved qcopy expresses the start/end transfers and qzero the measured local clear. Both target paths, ammunition/statistics, light and sound behavior remain present.
+ * Residual: No-split-addresses hit GNU as assertion tc-mips.c:11867 and was removed. Branch/global base/register scheduling remains different.
+ * Reopen: Reopen with measured dual-target field/source lifetime evidence or an independently controlled assembler fix.
+ * Earlier measurements/screens below are historical; they do not prohibit
+ * the currently approved shared transfer helpers or establish linked equality.
+ */
 /* Nonmatching: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_00392530: 0 of 27 places match (src/levels/shared/L00_00392530.c); us2: func_L00_00392530: 0 of 27 places match (src/levels/shared/L00_00392530.c); pal: absent. Manual reconstruction2564/2644 frame0x80. Full two-target acquisition/ammo/statistics/light/sound behavior retained. Verified AFFD8threeGPR and AB1F0oneactor/GPR32 value interpreted as record pointer. Scalar short timers and pointer targets truthful. Remaining globalbase sharing, branch order/register scheduling; reopen with original struct/expression layout. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -76,10 +85,10 @@ void func_L00_00392530(char *actor) {
                 }
             }
             func_002AFFD8((char *)beam, (char *)&direction, 1);
-            beam->start.quad = *(Quad *)(actor + 0x10);
+            qcopy(&beam->start, actor + 0x10);
             func_00282D30(&offset, &direction, 0.7f);
             func_00282CC0(&beam->start, &beam->start, &offset);
-            beam->end.quad = beam->start.quad;
+            qcopy(&beam->end, &beam->start);
             if (!beam->target || !beam->targetReady) beam->targetAge = 0;
             else {
                 ++beam->targetAge;
@@ -161,7 +170,7 @@ update_sound:
     case 2: case 4: case 5: default: break;
     }
     if (beam->light != -1) {
-        direction.quad = 0; direction.f[0] = 2; direction.f[2] = 2;
+        qzero(&direction); direction.f[0] = 2; direction.f[2] = 2;
         func_00283098(&direction, &direction, D_0018A550);
         D_L00_001C6F40[beam->light][4] = *(float *)(player + 0x80) + direction.f[0];
         D_L00_001C6F40[beam->light][5] = *(float *)(player + 0x84) + direction.f[1];

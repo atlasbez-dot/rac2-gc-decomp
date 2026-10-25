@@ -1,11 +1,6 @@
-/* Retained near miss: 180/180 bytes and 0/1 placements with -O2 -G8 -ffunction-sections -frac2-qcopy. The copy, floating registers and final block match; the global load and float-constant materialization remain in the opposite order at +0x3C. Five bounded source variants were checked. */
+/* Advances the phase and restores the complete saved position before the height update. */
+#include "common.h"
 
-#include "include_asm.h"
-
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef signed int s32;
 typedef int TI128 __attribute__((mode(TI)));
 
 extern float D_L20_001B2410 __attribute__((sda));
@@ -24,7 +19,7 @@ void func_L20_0044A838(char *arg0) {
 
     *(u16 *)(arg0 + 0x96) = n + 1;
     if (*(u8 *)(arg0 + 0x31)) {
-        *(TI128 *)(arg0 + 0x10) = *(TI128 *)(state + 0x180);
+        qcopy((arg0 + 0x10), (state + 0x180));
         r = D_L20_001B2414;
         r = func_00283B98(*(float *)(state + 0x1A0), r * 0.000290888245f);
         *(float *)(state + 0x1A0) = r;

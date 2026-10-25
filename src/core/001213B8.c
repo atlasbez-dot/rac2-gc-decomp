@@ -24,7 +24,7 @@ double func_001213B8(long value) {
     return func_00122A40(high, low);
 }
 
-INCLUDE_ASM("asm/core", func_00121450);
+/* func_00121450 is in 00121450.c, its own public libgcc module. */
 
 INCLUDE_ASM("asm/core", func_00121AB8);
 

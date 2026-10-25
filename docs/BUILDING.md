@@ -32,9 +32,12 @@ Each program prints `OK` with its C functions, or stops at the first byte that d
 Ordinary C switches may bring compiler-owned branch tables. The linker retains a
 complete read-only input section only when its derived address, alignment and
 every case relocation agree with the retail data and independently placed C text.
-It replaces that exact data span, preserving all surrounding bytes. Mixed constant
-pools, overlapping claims and unplaced destinations fail closed; no instruction
-or table value is changed. A local function check alone does not qualify its data:
+Complete relocation-free `.rodata`/`.rdata` constant pools can also be placed when
+their entire contents, including padding, equal one initialized retail data span.
+Their address comes from that object's accepted text relocations, never a search
+for equal values. It replaces that exact data span, preserving all surrounding
+bytes. Mixed relocated/scalar pools, overlapping claims and unplaced destinations
+fail closed; no instruction or table value is changed. A local function check alone does not qualify its data:
 run the strict linked build for every applicable release.
 
 ### Build in parallel

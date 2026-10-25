@@ -1,3 +1,17 @@
+/* Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/core/00118548.c
+ * Actual game profile: -O2 -G2 -ffunction-sections -mastra-quad-saves
+ * Release checks: US 0/1 (exit1); PAL 0/1 (exit1); US2 0/1 (exit1).
+ * Current residual: 156/156 bytes. The retained unsigned complement-plus-one form keeps
+ * the body nearest retail; conditional negation/control flow and frame/division scheduling
+ * differ. Native unsigned negation and a named-magnitude/later-counter-lifetime form
+ * are 160 bytes. no-sched-spec, no-force-mem and no-rerun-loop-opt did not fix that 160-byte
+ * shape; no-sched-interblock ties on the retained 156-byte form.
+ * Reopen only for: A concrete non-artificial if-conversion/lifetime model preserving the
+ * parameter and conditional negation, then actual frame/division scheduling.
+ * Older notes below are historical; the marker and trial-only flags were restored.
+ */
+
 /* from src/core/001163B0.c: C that compiles to 156 bytes where retail has 156
  * - the same size, but 19 words differ.
  *

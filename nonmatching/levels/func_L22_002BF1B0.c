@@ -1,3 +1,18 @@
+/* 2026-10-25 ADDRESS follow-up: retained best prior C, not matching.
+ * Baseline reproduced 37280/37268 bytes, 0/1 US placement, frame 0x1A0
+ * versus 0x1B0. A truthful typed entry-object/header view measured 37416;
+ * verified canonical resident field identities measured 37304. No-force-mem
+ * measured 37096; no-rerun-loop-opt 37288. No new profile/source won.
+ * A diagnostic compile with allocator dumps was byte-identical to the normal
+ * complete object. Entry-object pseudo 87 has 11 refs/live 7229/crosses 801
+ * calls and spills; snapshot pseudos 90/93 have 2 refs and the same lifetime.
+ * Resident-high pseudo 7340 has 51 refs/live 4032 and receives hard reg 22.
+ * These are dumped fields; priority scores are inferred, not shipping data.
+ * Reopen with evidence for branch-disjoint live-range treatment of the saved
+ * entry object or the resident high/base model; do not manufacture extra refs.
+ * Existing full helper contracts, 48-byte probes, 64-byte matrices and the
+ * typed shared state workspace are preserved. Linked equality remains unproved.
+ */
 /* Dobbo Orbit hero-state dispatcher, USA v1.01: complete C reconstruction,
  * NOT MATCHING and never linked by the build.
  *
