@@ -6,9 +6,8 @@
 <p align="center">
   <a href="https://openrac.dev"><img src="https://img.shields.io/badge/Website-openrac.dev-ff8a00?logo=googlechrome&logoColor=white" alt="OpenRAC website"></a>
   <a href="https://discord.gg/Sfd2B54PDG"><img src="https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white" alt="OpenRAC Discord"></a>
-  <a href="https://github.com/OpenRAC/rac2-gc-decomp/actions/workflows/progress.yml"><img src="https://github.com/OpenRAC/rac2-gc-decomp/actions/workflows/progress.yml/badge.svg" alt="Progress report"></a>
-  <a href="https://bytematch.dev/OpenRAC/rac2-gc-decomp"><img src="https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Code&measure=matched_code_percent" alt="Code matched"></a>
-  <a href="https://bytematch.dev/OpenRAC/rac2-gc-decomp"><img src="https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Functions&measure=matched_functions" alt="Functions matched"></a>
+  <a href="https://github.com/atlasbez-dot/rac2-gc-decomp/actions/workflows/progress.yml"><img src="https://github.com/atlasbez-dot/rac2-gc-decomp/actions/workflows/progress.yml/badge.svg" alt="Progress report"></a>
+  <a href="#progress"><strong>Fork progress — validated reports</strong></a>
 </p>
 
 A work-in-progress **matching decompilation** of *Ratchet & Clank: Going Commando* (Insomniac
@@ -37,14 +36,15 @@ continuous regression tests.
 
 ## Progress
 
-Decompilation progress is tracked live on **[openrac.dev](https://openrac.dev)** and
-**[bytematch.dev/OpenRAC/rac2-gc-decomp](https://bytematch.dev/OpenRAC/rac2-gc-decomp)**.
+This fork's progress is shown in the generated summary below and the
+[three-release summary](docs/VERSIONS.md), using the committed reports from this branch.
+[OpenRAC's live dashboard](https://bytematch.dev/OpenRAC/rac2-gc-decomp) tracks upstream.
 
-| Version | Region | Target ID | Code Matched | Functions Matched |
-|---|---|---|---|---|
-| v1.01 | USA | `SCUS_972.68` | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Code&measure=matched_code_percent)](https://bytematch.dev/OpenRAC/rac2-gc-decomp) | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Functions&measure=matched_functions)](https://bytematch.dev/OpenRAC/rac2-gc-decomp) |
-| v1.00 | Europe/Australia | `SCES_516.07` | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Code&measure=matched_code_percent&version=SCES_516.07)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCES_516.07) | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Functions&measure=matched_functions&version=SCES_516.07)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCES_516.07) |
-| v2.00 (Greatest Hits) | USA | `SCUS_972.68_v2` | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Code&measure=matched_code_percent&version=SCUS_972.68_v2)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCUS_972.68_v2) | [![](https://bytematch.dev/OpenRAC/rac2-gc-decomp.svg?mode=shield&label=Functions&measure=matched_functions&version=SCUS_972.68_v2)](https://bytematch.dev/OpenRAC/rac2-gc-decomp/SCUS_972.68_v2) |
+| Version | Region | Target ID | Fork report |
+|---|---|---|---|
+| v1.01 | USA | `SCUS_972.68` | [Validated report](progress/report.json) |
+| v1.00 | Europe/Australia | `SCES_516.07` | [Validated report](progress/pal/report.json) |
+| v2.00 (Greatest Hits) | USA | `SCUS_972.68_v2` | [Validated report](progress/us2/report.json) |
 
 <!-- progress -->
 | | Functions | Code |
