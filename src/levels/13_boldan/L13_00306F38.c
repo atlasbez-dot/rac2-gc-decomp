@@ -181,7 +181,6 @@ INCLUDE_ASM("asm/levels", func_L13_0041BDA8);
 
 INCLUDE_ASM("asm/levels", func_L13_0041CD18);
 
-INCLUDE_ASM("asm/levels", func_L13_0041E170);
 
 INCLUDE_ASM("asm/levels", func_L13_0041F8B8);
 
@@ -338,7 +337,6 @@ void func_L13_00424728(u8 *a0) {
 /* func_L13_0042BE60: the catalogue entry starts 8 bytes before the body (a stray
    "addiu $sp,$sp,0x190 ; nop" tail). Not a function start — left as retail asm. */
 
-INCLUDE_ASM("asm/levels", func_L13_0042BE60);
 
 extern void func_002E5CF8(s32, s32, u8 *);
 extern void func_002AA548(f32 *, f32 *, f32, f32, f32, f32);

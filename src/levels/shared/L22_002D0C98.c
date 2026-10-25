@@ -28,7 +28,7 @@ extern u8 *D_001FF814;
 INCLUDE_ASM("asm/levels", func_L22_002D0C98);
 
 /* VU0 macro-op helper (lqc2/sdc2 + a COP2 op): hand-written assembly. */
-INCLUDE_ASM("asm/levels", func_L22_002F3B38);
+ASM_FUNC("asm/levels", func_L22_002F3B38);
 
 /* Early-outs when the third float argument is positive; otherwise bends the first angle
    through one helper, feeds the second angle and the angle at the fourth pointer through

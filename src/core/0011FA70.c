@@ -75,7 +75,6 @@ void func_0011FAB8(void) {
     }
 }
 
-INCLUDE_ASM("asm/core", func_0011FB8C);
 
 /* The object's last row. The real body of the func_0011FB8C row starts at
    0x11FB98 (see nonmatching/core/func_0011FB8C.c): a teardown that walks the

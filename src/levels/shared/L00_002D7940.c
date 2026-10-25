@@ -130,7 +130,6 @@ void func_L00_002DA0B8(float *out, float *p, void *q)
 
 INCLUDE_ASM("asm/levels", func_L00_002DA1E0);
 
-INCLUDE_ASM("asm/levels", func_L00_002DA390);
 
 INCLUDE_ASM("asm/levels", func_L00_002DB350);
 

@@ -398,6 +398,275 @@ def level_extent(number: int, address: int, size: int) -> tuple[int, int]:
     return address + skip, size - skip
 
 
+# Measured mixed extents shared by the boot and level copies. Canonical names
+# stay stable; only the callable entry moves, with the original end preserved.
+FUNCTION_ENTRY_OFFSETS = {
+    "func_0011E740": (232, 96),
+    "func_0011FB8C": (188, 12),
+    "func_001248B0": (68, 8),
+    "func_00127E40": (336, 8),
+    "func_00127F90": (212, 8),
+    "func_00128A48": (220, 8),
+    "func_0012EB28": (768, 8),
+    "func_001325E0": (244, 8),
+    "func_00132818": (60, 16),
+    "func_00132968": (68, 16),
+    "func_001329F0": (104, 32),
+    "func_00132A58": (72, 24),
+    "func_00132AA0": (84, 40),
+    "func_00132B88": (128, 56),
+    "func_00133300": (60, 16),
+    "func_00133340": (128, 16),
+    "func_001333C0": (64, 16),
+    "func_001336C0": (64, 16),
+    "func_00133700": (80, 16),
+    "func_001337C8": (76, 40),
+    "func_00133818": (44, 8),
+    "func_00133848": (68, 8),
+    "func_002BEBC0": (688, 8),
+    "func_002BEE70": (1312, 8),
+    "func_002C0C70": (80, 8),
+    "func_002C1DB0": (160, 8),
+    "func_002C3B08": (632, 8),
+    "func_002C47E8": (808, 8),
+    "func_002C6B68": (620, 24),
+    "func_002C7050": (592, 8),
+    "func_002C72A0": (664, 8),
+    "func_00308768": (1616, 16),
+    "func_0031FC28": (1724, 56),
+    "func_0032E700": (1060, 8),
+    "func_00335C60": (96, 16),
+    "func_00335D30": (44, 16),
+    "func_00336288": (128, 8),
+    "func_00336468": (44, 8),
+    "func_003367C0": (104, 8),
+    "func_L00_00304AE8": (84, 8),
+    "func_L00_003B3158": (756, 8),
+    "func_L00_003B3450": (1396, 8),
+    "func_L00_003B7D48": (1008, 8),
+    "func_L00_003CA650": (52, 8),
+    "func_L00_003E8180": (2328, 8),
+    "func_L00_00410D20": (952, 8),
+    "func_L00_004195C8": (156, 8),
+    "func_L00_00419A80": (212, 16),
+    "func_L00_004263A8": (16, 8),
+    "func_L01_003B1F08": (1676, 8),
+    "func_L01_003D8358": (1116, 8),
+    "func_L01_00410AD0": (1548, 8),
+    "func_L01_00412E00": (280, 8),
+    "func_L01_0041C890": (204, 8),
+    "func_L02_003EA180": (772, 8),
+    "func_L02_003F0788": (16, 8),
+    "func_L02_004004D0": (384, 8),
+    "func_L02_00439CD8": (1548, 8),
+    "func_L03_0038AA20": (268, 24),
+    "func_L03_003C5FE8": (540, 8),
+    "func_L03_003C7E20": (2008, 8),
+    "func_L03_00421398": (1428, 8),
+    "func_L04_003AB458": (512, 104),
+    "func_L04_003EE7C0": (1056, 8),
+    "func_L04_0041AD18": (968, 8),
+    "func_L04_0044BC90": (612, 8),
+    "func_L05_00414F90": (1548, 8),
+    "func_L05_00419888": (1084, 16),
+    "func_L05_0041A228": (2164, 8),
+    "func_L05_00441F30": (1128, 8),
+    "func_L06_004012B0": (1388, 8),
+    "func_L06_00455BC0": (1548, 8),
+    "func_L07_003791E8": (36, 8),
+    "func_L07_003B72E8": (1264, 8),
+    "func_L07_00409300": (172, 8),
+    "func_L07_00416510": (2048, 8),
+    "func_L09_003FEF00": (4028, 8),
+    "func_L09_0041D650": (976, 8),
+    "func_L10_00415A50": (1548, 8),
+    "func_L11_0046D660": (1548, 8),
+    "func_L11_0046F8F0": (2220, 8),
+    "func_L11_0047A310": (2184, 8),
+    "func_L12_00417690": (1548, 8),
+    "func_L13_003C5908": (456, 8),
+    "func_L13_0041CD18": (1548, 8),
+    "func_L13_0041F8B8": (808, 8),
+    "func_L13_0042BE60": (44, 8),
+    "func_L14_003E4208": (2104, 8),
+    "func_L14_00421BC0": (1548, 8),
+    "func_L15_0041F2F8": (1548, 8),
+    "func_L16_003A8D58": (904, 8),
+    "func_L16_003E70E0": (220, 8),
+    "func_L16_004165B0": (1880, 8),
+    "func_L16_00424B48": (168, 8),
+    "func_L17_00417DB0": (1548, 8),
+    "func_L18_0042FBC8": (1568, 8),
+    "func_L18_00436B80": (1548, 8),
+    "func_L18_00439960": (1636, 8),
+    "func_L18_0043C778": (896, 16),
+    "func_L18_00447128": (2056, 16),
+    "func_L19_003D2E38": (1308, 8),
+    "func_L19_00412140": (3316, 8),
+    "func_L19_0041C3D8": (148, 8),
+    "func_L20_00438F98": (1548, 8),
+    "func_L20_004451C0": (1392, 16),
+    "func_L22_003AD090": (280, 8),
+    "func_L22_0040F1C0": (1548, 8),
+    "func_L22_004135F8": (1388, 8),
+    "func_L22_00413B70": (3756, 40),
+    "func_L23_00415988": (1548, 8),
+    "func_L24_003EFA38": (1376, 8),
+    "func_L30_003E1BA0": (724, 8),
+    "func_L30_003E1E78": (2352, 32),
+    "func_L30_00404608": (236, 8),
+    "func_002C38A0": (64, 8),
+    "func_00335918": (68, 32),
+    "func_US2_00320A20": (1724, 56),
+    "func_US2_L01_00412040": (1548, 8),
+    "func_US2_L02_0043B510": (1548, 8),
+    "func_US2_L05_00416530": (1548, 8),
+    "func_US2_L06_004571C8": (1548, 8),
+    "func_US2_L07_0040A6A0": (192, 8),
+    "func_US2_L10_00416FF0": (1548, 8),
+    "func_US2_L11_0046F118": (1548, 8),
+    "func_US2_L12_00418AE8": (1548, 8),
+    "func_US2_L13_003C6DC0": (456, 8),
+    "func_US2_L13_0041E1E0": (1548, 8),
+    "func_US2_L14_00423180": (1548, 8),
+    "func_US2_L15_004208A0": (1548, 8),
+    "func_US2_L16_004179E8": (1880, 8),
+    "func_US2_L17_00419430": (1548, 8),
+    "func_US2_L18_00438070": (1548, 8),
+    "func_US2_L18_0043AE50": (1636, 8),
+    "func_US2_L19_00413430": (3340, 8),
+    "func_US2_L20_0043A530": (1548, 8),
+    "func_US2_L22_004106C0": (1548, 8),
+    "func_US2_L23_00416E88": (1548, 8),
+    "func_PAL_002BBC10": (176, 8),
+    "func_PAL_002BD1A0": (604, 8),
+    "func_PAL_002BD698": (244, 8),
+    "func_PAL_002BF8A8": (688, 8),
+    "func_PAL_002BFB58": (1312, 8),
+    "func_PAL_002C0218": (468, 8),
+    "func_PAL_002C4810": (636, 8),
+    "func_PAL_002C585C": (460, 12),
+    "func_PAL_002C5A28": (492, 8),
+    "func_PAL_002C7D8C": (624, 12),
+    "func_PAL_00309A30": (1608, 8),
+    "func_PAL_00321298": (1724, 56),
+    "func_PAL_L00_003B6A7C": (760, 12),
+    "func_PAL_L00_003B6D78": (1556, 8),
+    "func_PAL_L00_003BB8F0": (1008, 8),
+    "func_PAL_L00_003CE538": (52, 8),
+    "func_PAL_L00_003D9580": (4504, 8),
+    "func_PAL_L00_003EC43C": (2332, 12),
+    "func_PAL_L00_00415B78": (952, 8),
+    "func_PAL_L00_0041ED18": (212, 16),
+    "func_PAL_L00_0041EDF0": (44, 8),
+    "func_PAL_L01_003B5970": (1760, 8),
+    "func_PAL_L01_003DC780": (1228, 8),
+    "func_PAL_L01_00415E78": (1548, 8),
+    "func_PAL_L01_00418210": (280, 8),
+    "func_PAL_L01_004220F0": (204, 8),
+    "func_PAL_L02_003EE5D0": (772, 8),
+    "func_PAL_L02_0043F638": (1548, 8),
+    "func_PAL_L03_003CA028": (540, 8),
+    "func_PAL_L03_003CBE60": (2008, 8),
+    "func_PAL_L03_00426850": (1428, 8),
+    "func_PAL_L03_00431370": (2052, 8),
+    "func_PAL_L04_003F2778": (1056, 8),
+    "func_PAL_L04_0041F8A8": (968, 8),
+    "func_PAL_L04_00451600": (612, 8),
+    "func_PAL_L04_00462038": (420, 8),
+    "func_PAL_L05_00419C60": (1548, 8),
+    "func_PAL_L05_0041E5C8": (1084, 16),
+    "func_PAL_L05_00448114": (1164, 12),
+    "func_PAL_L06_00404FE8": (1452, 8),
+    "func_PAL_L06_0045ACC8": (1548, 8),
+    "func_PAL_L07_0040E120": (192, 8),
+    "func_PAL_L07_0041B7D8": (2052, 8),
+    "func_PAL_L09_00403B10": (4036, 8),
+    "func_PAL_L09_00422D30": (976, 8),
+    "func_PAL_L09_0042E660": (16, 8),
+    "func_PAL_L10_0041A730": (1548, 8),
+    "func_PAL_L11_00473908": (1548, 8),
+    "func_PAL_L11_00475BF0": (2252, 8),
+    "func_PAL_L11_00480AF0": (2184, 8),
+    "func_PAL_L12_0041C930": (1548, 8),
+    "func_PAL_L12_00425A08": (468, 8),
+    "func_PAL_L13_003C9550": (456, 8),
+    "func_PAL_L13_00421C68": (1548, 8),
+    "func_PAL_L13_00424870": (808, 8),
+    "func_PAL_L14_003E8608": (2128, 8),
+    "func_PAL_L14_00427108": (1548, 8),
+    "func_PAL_L15_004241F8": (1548, 8),
+    "func_PAL_L16_003AC4A8": (904, 8),
+    "func_PAL_L16_0041B7E8": (1880, 8),
+    "func_PAL_L16_0042A338": (168, 8),
+    "func_PAL_L17_0041D4E8": (1548, 8),
+    "func_PAL_L18_00434BE0": (1568, 8),
+    "func_PAL_L18_0043BDE8": (1548, 8),
+    "func_PAL_L18_0043ECA0": (1676, 8),
+    "func_PAL_L18_00441B80": (896, 16),
+    "func_PAL_L18_0044C9C0": (2060, 16),
+    "func_PAL_L19_003D6F70": (1460, 8),
+    "func_PAL_L19_00417318": (3372, 8),
+    "func_PAL_L20_0043E868": (1548, 8),
+    "func_PAL_L20_0044AC98": (1432, 16),
+    "func_PAL_L22_003B06CC": (284, 12),
+    "func_PAL_L22_00414080": (1548, 8),
+    "func_PAL_L22_0041858C": (1392, 12),
+    "func_PAL_L22_00418B08": (3756, 40),
+    "func_PAL_L23_0041A950": (1548, 8),
+    "func_PAL_L23_0042CCF8": (52, 8),
+    "func_PAL_L24_003F44F8": (1380, 8),
+    "func_PAL_L30_003B71B8": (756, 8),
+    "func_PAL_L30_003E5F94": (728, 12),
+    "func_PAL_L30_003E6270": (2352, 32),
+}
+
+
+def function_extent(name: str, address: int, size: int) -> tuple[int, int]:
+    """Apply a named, measured entry correction once; reject unexpected extents."""
+    if name not in FUNCTION_ENTRY_OFFSETS:
+        return address, size
+    original, skip = FUNCTION_ENTRY_OFFSETS[name]
+    if size == original - skip:
+        return address, size
+    if size != original:
+        raise ValueError(f"{name}: {size} bytes, expected {original} or {original - skip}")
+    return address + skip, size - skip
+
+
+# Individually checked one-word remnants after completed returns or a tail jump.
+# These names have no incoming reference at any measured placement. Keep the
+# selection named: an identical store in another extent is not evidence to cut it.
+FUNCTION_RESIDUES = {
+    "func_0011F864": 4,
+    "func_00335E60": 4,
+    "func_L00_002DA390": 4,
+    "func_L00_0037B408": 4,
+    "func_L00_0037B4B8": 4,
+    "func_L00_0037B5C0": 4,
+    "func_L00_0037B810": 4,
+    "func_L00_003D1B48": 4,
+    "func_L00_00400F30": 4,
+    "func_L02_004547D0": 4,
+    "func_L05_00339078": 4,
+    "func_L05_0037AE38": 4,
+    "func_L05_0037B438": 4,
+    "func_L11_004417A0": 4,
+    "func_L13_0041E170": 4,
+    "func_L22_003FDB90": 4,
+    "func_L23_00423378": 4,
+}
+
+
+def function_residue(name: str, size: int) -> bool:
+    """Recognise only named, measured remnants; reject changed extents."""
+    if name not in FUNCTION_RESIDUES:
+        return False
+    if size != FUNCTION_RESIDUES[name]:
+        raise ValueError(f"{name}: residue changed from {FUNCTION_RESIDUES[name]} to {size} bytes")
+    return True
+
+
 # The level's linker leaves padding between the bodies, and a body that ends in a
 # `jr $ra` leaves the word after its delay slot behind.  Both are measured from the
 # retail bytes, not from a list of addresses: an extent whose words are only stack
@@ -533,6 +802,42 @@ def catalogue() -> None:
                 if text_va <= a < text_va + text_size]
     else:
         boot = read_boot_functions()
+    # Recover the original complete extent even after a previous regeneration.
+    # Its exact normalized code/size identifies level copies without a table of
+    # per-level addresses, including when starting from the historical inputs.
+    entry_keys, entry_bodies, entry_kinds = {}, {}, {}
+
+    def remember_entry(name, a, n, read, kind):
+        original, skip = FUNCTION_ENTRY_OFFSETS[name]
+        function_extent(name, a, n)       # validate before writing any output
+        start = a if n == original else a - skip
+        key = fingerprint(read(start, original), start), original
+        entry_keys.setdefault(key, set()).add(name)
+        entry_bodies[name] = (fingerprint(read(start + skip, original - skip), start + skip),
+                              original - skip)
+        entry_kinds[name] = kind
+
+    for name, a, n in boot:
+        if name in FUNCTION_ENTRY_OFFSETS:
+            remember_entry(name, a, n, boot_bytes, "boot")
+    source_rows = [] if from_old and not CATALOGUE.is_file() else read_catalogue()
+    for name, kind, n, _, places in source_rows:
+        if name in FUNCTION_ENTRY_OFFSETS and name not in entry_bodies:
+            number, a = places[0]
+            base, data = level_text(DUMP / level_dir(number))
+            remember_entry(name, a, n, lambda p, size: data[p - base:p - base + size], kind)
+    source_kinds = {name: kind for name, kind, _, _, _ in source_rows}
+    stable_keys = set(entry_bodies.values())
+    # Read named residues from the immutable input, including after their rows
+    # have disappeared. Otherwise a second run can rename a surviving copy.
+    for name, n in FUNCTION_RESIDUES.items():
+        a = int(name.rsplit("_", 1)[1], 16)
+        if name.startswith("func_L"):
+            number = int(name.split("_")[1][1:])
+            base, data = level_text(DUMP / level_dir(number))
+            stable_keys.add((fingerprint(data[a - base:a - base + n], a), n))
+        else:
+            stable_keys.add((fingerprint(boot_bytes(a, n), a), n))
     boot_by_fp = {}
     # Compute from the pinned retail input even after the rows have been removed,
     # so catalogue regeneration is repeatable. Size and normalised bytes both
@@ -541,6 +846,9 @@ def catalogue() -> None:
     corrected_boot = []
     last_end, last_body = None, b""
     for name, a, n in sorted(boot, key=lambda r: r[1]):
+        if function_residue(name, n):
+            continue
+        a, n = function_extent(name, a, n)
         body = boot_bytes(a, n)
         if (fingerprint(body, a), n) in residue_keys:
             continue
@@ -555,32 +863,57 @@ def catalogue() -> None:
     if from_old:
         for number in NAMES:
             base, data = level_text(DUMP / level_dir(number))
-            extents[number] = [(a, n) for a, n in old_extents(f"{number}_{NAMES[number]}")
+            extents[number] = [(a, n, None) for a, n in old_extents(f"{number}_{NAMES[number]}")
                                if base <= a < base + len(data)]
     else:
-        for name, kind, size, fp, places in read_catalogue():
+        for name, kind, size, fp, places in source_rows:
             for number, a in places:
-                extents.setdefault(number, []).append((a, size))
-    found = {}
+                extents.setdefault(number, []).append((a, size, name))
+    found, entry_pairs = {}, {}
     for number in sorted(extents):
         base, data = level_text(DUMP / level_dir(number))
         # the previous extent of the same program, for the epilogue residue
         last_end, last_body = None, b""
-        for a, n in sorted(extents[number]):
+        for a, n, original_name in sorted(extents[number]):
+            if function_residue(original_name, n):
+                continue
             a, n = level_extent(number, a, n)
             body = data[a - base:a - base + n]
+            candidates = entry_keys.get((fingerprint(body, a), n), set())
+            entry_name = (original_name if original_name in candidates else
+                          next(iter(candidates)) if original_name is None and len(candidates) == 1 else None)
+            if entry_name:
+                a, n = function_extent(entry_name, a, n)
+                body = data[a - base:a - base + n]
+            elif original_name in FUNCTION_ENTRY_OFFSETS:
+                # Replay keeps the association established by the original
+                # extent, provided the shortened code still matches its measured
+                # identity. It may now be identical to other methods.
+                if function_extent(original_name, a, n) != (a, n):
+                    raise ValueError(f"{original_name}: level {number} no longer matches its original extent")
+                if entry_bodies[original_name] != (fingerprint(body, a), n):
+                    raise ValueError(f"{original_name}: level {number} differs after entry correction")
+                entry_name = original_name
             if (fingerprint(body, a), n) in residue_keys:
                 continue
             if not trim(body) or is_padding(body):
                 continue
             if len(words(body)) == 1 and last_end == a and is_epilogue_residue(body, last_body):
                 continue                # the residue of the previous body's epilogue
+            # Shortening/removing an extent must not rename an unrelated method
+            # when that changes the number of identical copies in its group.
+            if not entry_name and original_name and (fingerprint(body, a), n) in stable_keys:
+                entry_name = original_name
+                entry_bodies[entry_name] = fingerprint(body, a), n
+                entry_kinds[entry_name] = source_kinds[entry_name]
+            if entry_name:
+                entry_pairs[number, a] = entry_name
             # the size too: the same instructions with different padding are two functions
             entry = found.setdefault((fingerprint(body, a), n), {"size": n, "places": []})
             entry["places"].append((number, a))
             last_end, last_body = a + n, body
     # Boot functions paired by hand with level places the code alone cannot tell apart.
-    pairs = {}
+    pairs = dict(entry_pairs)
     if BOOT_PAIRS.is_file():
         for line in BOOT_PAIRS.read_text().splitlines():
             if not line.startswith("#"):
@@ -596,12 +929,13 @@ def catalogue() -> None:
         fp = key[0]
         per_level, paired = {}, {}
         for number, a in sorted(e["places"]):
-            if (number, a) in pairs and pairs[(number, a)] in boot_by_fp.get(key, ()):
-                paired.setdefault(pairs[(number, a)], []).append((number, a))
+            name = pairs.get((number, a))
+            if name in boot_by_fp.get(key, ()) or entry_bodies.get(name) == key:
+                paired.setdefault(name, []).append((number, a))
             else:
                 per_level.setdefault(number, []).append(a)
         for name, places in sorted(paired.items()):
-            rows.append((name, "boot", e["size"], fp, places))
+            rows.append((name, entry_kinds.get(name, "boot"), e["size"], fp, places))
         if not per_level:
             continue
         copies = max(len(v) for v in per_level.values())

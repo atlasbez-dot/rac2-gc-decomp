@@ -1,10 +1,10 @@
-/* 64-byte near miss: the 56-byte C body is retail's exact bytes at every one of the
- * 28 places, but the catalogue row starts eight bytes early: retail's row opens
- * with the linker's fill, `addiu $sp,$sp,0x50` and a `nop`, and the real body
- * begins at +8 with the standard `addiu $sp,$sp,-0x10` frame. A
- * LEVEL_ENTRY_OFFSETS{(level, address): 8} entry for each of the 28 places (and
- * the same shift in config/boot/functions.tsv) is what makes the row place the
- * body; no C can cover the leading two words.
+/* Retained C for the 56-byte body at USA v1.01 0x002C38A8.
+ * The generator now excludes the eight-byte preceding stack-restoration prefix,
+ * preserving the original end and canonical name in all three releases.
+ * Historical checks found the 56-byte C instruction-exact at all 28 USA places;
+ * this retained draft has not been recompiled or integrated by the boundary fix.
+ * Requalify with the current compiler, helper interfaces and strict linked builds
+ * before claiming C coverage. The skipped bytes remain assembly.
  */
 extern int func_00282978(short *);
 extern void func_002B9180(void *);

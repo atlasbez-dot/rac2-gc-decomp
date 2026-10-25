@@ -67,7 +67,6 @@ int func_L05_0037AFD0(char *object, int flag)
 
 /* func_L05_0037B3A0 uses the verified one-argument state-query interface in L05_0037B3A0.c. */
 
-INCLUDE_ASM("asm/levels", func_L05_0037B438);
 
 
 INCLUDE_ASM("asm/levels", func_L05_0037B538);

@@ -67,6 +67,50 @@ catalogue and carrying it with `tools/carry.py --version us2` gives the same
 canonical wrapper at v2.00's `00428CB8`, with its end also unchanged. PAL keeps
 its separate version-specific wrapper and catalogue entry.
 
+Two mixed boot/level extents have measured entry corrections too:
+`func_002C38A0` skips eight leading bytes (64 to 56 bytes), and `func_00335918`
+skips 32 (68 to 36 bytes). Their canonical names and original ends are retained.
+References identify the corrected entries in all 28 programs of each of the
+three releases; the skipped stores/stack adjustments remain in assembly.
+`FUNCTION_ENTRY_OFFSETS` applies these named corrections before fingerprinting.
+The original full-extent identity preserves the level-to-boot pairing when a
+shortened body becomes identical to another boot method. Regeneration validates
+and retains that pairing, including on replay, rather than guessing a new name.
+Regenerate the primary catalogue with `tools/levels.py catalogue`. For existing
+release catalogues, apply the measured repairs with `tools/carry.py --version us2
+--entries` and `tools/carry.py --version pal --entries`.
+
+The same named rule now covers the remaining measured entries, including core
+library bodies and level-only functions. Each correction is supported by an
+incoming call, branch or code/data address reference at the shortened entry in every
+affected program; the original ends and all skipped bytes are preserved. A rule
+does not apply to a separately named method just because its full code is identical.
+Both original and shortened identity collisions preserve existing names and kinds,
+and replay checks all corrected copies against their measured identity.
+
+Release-specific rows have their own named corrections. `tools/carry.py --entries`
+repairs established extents while retaining their existing identities and kinds,
+rather than renaming them for the new address or merging identical short methods.
+Unexpected sizes or divergent shortened copies are errors, checked before either
+catalogue is written. The normal carry command still performs full cross-release
+alignment and may revisit correspondences; entry maintenance does not do that or
+change source files. These are catalogue repairs, not compiler changes or new C matches.
+
+`FUNCTION_RESIDUES` excludes individually verified one-word remnants by name and
+size. Their immediate predecessors finish with a return and its delay slot across
+alignment nops, or a closed tail jump before debug-fill bytes. The static scan found
+no incoming branch/call, literal pointer or straight-line address-construction
+reference to these remnants. An identical instruction
+with a different name is left alone. Removed words remain in assembly, and surviving
+identities remain stable when the number of identical copies changes. The rule does
+not classify arbitrary code without a return as filler.
+
+A boundary-only PR leaves progress reports for the later maintainer refresh.
+The non-strict report check tolerates obsolete rows only for these named remnants,
+with zero matching credit and no missing new entry. Unknown deletions, duplicate
+rows and any retained matching credit still fail; `--check --strict` requires the
+report to be regenerated. No report is rewritten by a check.
+
 Two more kinds of row are measured from the retail bytes, not from a list of
 addresses. An extent whose words are only stack adjustments and nops is the linker's
 filler between two bodies, not a function, and leaves the catalogue: 257 level rows

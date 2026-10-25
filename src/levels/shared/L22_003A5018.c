@@ -131,9 +131,35 @@ void func_L22_003A8BA0(u8 *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L22_003AD090);
+extern int func_00283CF0(f32);
+extern int func_00282948(void *);
+extern void func_0029F338(void *);
+extern void func_002A8C28(void *, void *, int, f32, f32, f32, int, int, int);
 
-INCLUDE_ASM("asm/levels", func_L22_003B8FE8);
+/* Halves whatever the two floats say, doubles it back, rescales it by the
+ * controller's rate, then hands the result to the placement call as the alpha;
+ * the controller's counter also drives the byte at +0x23 (a 127/40 ramp). */
+void func_L22_003AD090(u8 *a0) {
+    u8 *obj = a0;
+    u8 *sub = *(u8 **)(obj + 0x24);
+    u8 *ctl = *(u8 **)(obj + 0x68);
+    u8 *resident;
+    f32 v;
+    int n;
+
+    v = *(f32 *)(obj + 0x2C) / *(f32 *)(sub + 0x24) * 0.5f;
+    v += *(f32 *)(ctl + 0x0);
+    *(f32 *)(obj + 0x2C) = v + v;
+    *(f32 *)(obj + 0x2C) = *(f32 *)(obj + 0x2C) * *(f32 *)(sub + 0x24);
+    n = *(int *)(ctl + 0x8);
+    if (n < 0x28) *(u8 *)(obj + 0x23) = n * 127 / 40;
+    resident = D_00189E20;
+    func_002A8C28(*(void **)(resident + 0x2290), obj + 0x10, 0x30000, v,
+                  (f32)func_00283CF0(*(f32 *)(ctl + 0xC)), 1.0f, 0, 1, 0);
+    if (func_00282948(ctl + 0x8))
+        func_0029F338(obj);
+}
+
 
 INCLUDE_ASM("asm/levels", func_L22_003B9128);
 
@@ -211,6 +237,7 @@ INCLUDE_ASM("asm/levels", func_L22_003F85A0);
 
 INCLUDE_ASM("asm/levels", func_L22_003F8658);
 
+
 INCLUDE_ASM("asm/levels", func_L22_003FB1F8);
 
 INCLUDE_ASM("asm/levels", func_L22_003FB310);
@@ -239,7 +266,6 @@ INCLUDE_ASM("asm/levels", func_L22_003FD2D8);
 
 INCLUDE_ASM("asm/levels", func_L22_003FD958);
 
-INCLUDE_ASM("asm/levels", func_L22_003FDB90);
 
 INCLUDE_ASM("asm/levels", func_L22_0040DD40);
 

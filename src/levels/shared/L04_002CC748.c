@@ -135,9 +135,9 @@ extern u32 ref_L04_00362940_00;
 
 INCLUDE_ASM("asm/levels", func_L04_0030C948);
 
-INCLUDE_ASM("asm/levels", func_L04_0030EDE0);
+ASM_FUNC("asm/levels", func_L04_0030EDE0);
 
-INCLUDE_ASM("asm/levels", func_L04_0030FA30);
+ASM_FUNC("asm/levels", func_L04_0030FA30);
 
 typedef struct {
     u8 pad00[0x34];
@@ -185,11 +185,11 @@ void func_L04_0031D630(void) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L04_0032F1D8);
+ASM_FUNC("asm/levels", func_L04_0032F1D8);
 
-INCLUDE_ASM("asm/levels", func_L04_0032F340);
+ASM_FUNC("asm/levels", func_L04_0032F340);
 
-INCLUDE_ASM("asm/levels", func_L04_0032F3C0);
+ASM_FUNC("asm/levels", func_L04_0032F3C0);
 
 INCLUDE_ASM("asm/levels", func_L04_0032F62C);
 
@@ -565,7 +565,7 @@ void func_L04_003A1FA0(u8 *self) {
         *(u8 *)(*(u32 *)(self + 0x28) + 0x20) = 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L04_003A1FE0);
+/* func_L04_003A1FE0 is matched in L04_002CC748-g8.c (built with -G8). */
 
 INCLUDE_ASM("asm/levels", func_L04_003A21F8);
 

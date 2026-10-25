@@ -32,7 +32,6 @@ void func_L05_0030C930(int a0, int a1) {
 
 
 
-INCLUDE_ASM("asm/levels", func_L05_00339078);
 
 
 
@@ -175,7 +174,6 @@ float func_L05_0037AE28(void) {
     return ((float *)D_L05_00221D10)[12];
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0037AE38);
 
 extern char *func_L05_00379CA0(char *);
 

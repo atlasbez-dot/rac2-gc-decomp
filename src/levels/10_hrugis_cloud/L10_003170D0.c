@@ -124,6 +124,7 @@ void func_L10_00417040(u8 *arg0) {
 
 INCLUDE_ASM("asm/levels", func_L10_004170F8);
 
+/* func_L10_004174C8 is in L10_003170D0-g8.c: it only comes out right with -G8. */
 
 void func_L10_004175C8(u8 *arg0) {
     u8 *s = *(u8 **)(arg0 + 0x68);

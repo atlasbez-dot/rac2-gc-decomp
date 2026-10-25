@@ -15,7 +15,7 @@ void **func_00115210(void)
 }
 
 
-INCLUDE_ASM("asm/core", func_00115250);
+ASM_FUNC("asm/core", func_00115250);
 
 ASM_FUNC("asm/core", func_00115340);
 

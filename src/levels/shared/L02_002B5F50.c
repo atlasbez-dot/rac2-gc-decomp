@@ -11,9 +11,9 @@ INCLUDE_ASM("asm/levels", func_L02_002EF968);
 INCLUDE_ASM("asm/levels", func_L02_002EFB60);
 
 
-INCLUDE_ASM("asm/levels", func_L02_002F1FB8);
+ASM_FUNC("asm/levels", func_L02_002F1FB8);
 
-INCLUDE_ASM("asm/levels", func_L02_002F21C0);
+ASM_FUNC("asm/levels", func_L02_002F21C0);
 
 float func_L02_0031E918(float scale)
 {

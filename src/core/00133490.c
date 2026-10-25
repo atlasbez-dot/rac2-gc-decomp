@@ -26,7 +26,6 @@ INCLUDE_ASM("asm/core", func_00133580);
 
 INCLUDE_ASM("asm/core", func_001336C0);
 
-INCLUDE_ASM("asm/core", func_00133700);
 
 extern int func_00132DF0(int, int, void *, int, int);
 
@@ -48,11 +47,8 @@ int func_00133788(int first, int second, int third, int fourth) {
     return func_00132DF0(16, 16, payload, 0, 0);
 }
 
-INCLUDE_ASM("asm/core", func_001337C8);
 
-INCLUDE_ASM("asm/core", func_00133818);
 
-INCLUDE_ASM("asm/core", func_00133848);
 
 int func_00133890(void) {
     return func_00132C48(61, 0, 0);
