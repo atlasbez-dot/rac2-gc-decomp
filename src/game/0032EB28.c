@@ -679,4 +679,3 @@ void func_00336710(char *s1, int a1, char *a2)
 
 /* Measured target: byte-identical across all 27 levels. */
 s32 func_003367B8(u8 *a0) { return *(s32 *)(a0 + 0x34); }
-
