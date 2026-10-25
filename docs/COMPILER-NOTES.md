@@ -72,8 +72,11 @@ wrong profile with extra operations or knowingly false prototypes.
 | Float min/max expands into compare and branch | -ffast-math; optimization level still affects allocation | func_L01_003BD560, func_L00_002EE050 |
 
 `-G8` can change allocation even without GP accesses: `func_L17_003BCBC8` puts
-colour constants in different registers. A successful profile is not proof of the
-original SDK flags.
+colour constants in different registers. The effect can be a loop hoist: with
+`-G0`, cc1 lifts the `lui` of a level global's address out of the loop into a
+callee-saved register and saves it; with `-G8` it re-materialises `lui`/`lw` at
+each use, which is what retail does (`func_L10_004174C8`, `func_L02_003CCFE8`).
+A successful profile is not proof of the original SDK flags.
 
 ## Frames, calls and ABI
 
@@ -142,7 +145,10 @@ silently changing neighbouring definitions.
   result; explicit 32-bit truncation adds two instructions.
 - Integer and FP arguments use separate register banks. Their declaration order
   can affect setup while preserving the measured ABI: `func_0030E700` and existing
-  Barlow effect-helper declarations are witnesses. Check the whole call site.
+  Barlow effect-helper declarations are witnesses. A float declared third among
+  integers still travels in `$f12`; moving it before an integer is what puts the
+  `lwc1` on the other side of the call (`func_L16_003E70E0`, `func_L02_003CCFE8`).
+  Check the whole call site.
 - Check the canonical helper and its live inputs before writing a prototype.
   An omitted FP argument or a float result consumed as an integer is an ABI
   error, even in a retained draft. A wrapper's current C signature can also be
@@ -219,6 +225,10 @@ matter; neither `sda` nor `nosda` is a universal opcode selector:
 - `sda` can restore the backend's one-instruction model. At -G8, a suitable known
   size and emitted `.extern NAME,size` enable GP addressing. An incomplete array
   prevented it in `func_00132DF0`; a sized two-element array provided the control.
+  The declared size must fit the `-G` threshold, not merely exist: `extern float D[16]`
+  (64 bytes) falls back to `lui`/`addiu` under `-G8`, while a two-element array takes
+  `addiu $r,$gp,offset` (`func_L00_003C8608`). Declare the smallest size that fits
+  and index past it.
 - `nosda` can preserve an absolute access but can also add a temporary or hoist
   the address across a call. It is not neutral at -G8.
 - `-mno-split-addresses` changes pseudos, not all GP loads uniformly. An FP repair
@@ -532,6 +542,12 @@ Compose these three mechanisms; none replaces the others:
    instruction gains one, two gain none. Conditional/likely branches and b trigger
    it; j/jal/jr/jalr do not. Integer division is unaffected. It consumes the label
    transformer's anchors, so order matters.
+
+The floor is placed after a **code label**. A unit built with `-g` carries line
+labels, which is enough: `func_L22_003AD090` reached 264 of retail's 272 bytes
+without the pre-`div.s` `nop` pair and matched once its file had `-g` in
+`config/cflags.txt`, with no change to the other nine functions of that unit.
+Before treating such a pair as unreachable, try `-g` on the file.
 
 The genuine SDK 3.01 oracle Ps2EeAs has SHA-256
 `cb5adda955e64626564212ef7e0c1434708c4e1ef423344a92ec8033306ed3aa`.

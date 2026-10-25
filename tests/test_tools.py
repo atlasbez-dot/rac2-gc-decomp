@@ -1,4 +1,5 @@
 """Tests for tools/levels.py and tools/elf.py: no game data, no toolchains."""
+import json
 import struct
 import sys
 import tempfile
@@ -76,6 +77,31 @@ class LevelExtents(unittest.TestCase):
             levels.level_extent(0, 0x354DE8, 16)
         with self.assertRaises(ValueError):
             levels.level_extent(23, 0x4277B0, 8)
+
+
+class FunctionExtents(unittest.TestCase):
+    def test_named_residues_require_the_measured_size(self):
+        for name, size in levels.FUNCTION_RESIDUES.items():
+            with self.subTest(name=name):
+                self.assertTrue(levels.function_residue(name, size))
+                with self.assertRaises(ValueError):
+                    levels.function_residue(name, size + 4)
+        self.assertFalse(levels.function_residue("func_00002000", 4))
+
+    def test_named_entries_preserve_ends_and_replay_at_each_release_address(self):
+        for name, (original, skip) in levels.FUNCTION_ENTRY_OFFSETS.items():
+            for address in (0x210000, 0x220008, 0x230010):
+                with self.subTest(name=name, address=address):
+                    entry, size = levels.function_extent(name, address, original)
+                    self.assertEqual((entry, size), (address + skip, original - skip))
+                    self.assertEqual(entry + size, address + original)
+                    self.assertEqual(levels.function_extent(name, entry, size), (entry, size))
+
+    def test_unrelated_name_is_not_shifted_and_unexpected_sizes_fail(self):
+        self.assertEqual(levels.function_extent("func_00002000", 0x2000, 64), (0x2000, 64))
+        for name, size in (("func_002C38A0", 60), ("func_00335918", 64)):
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                levels.function_extent(name, 0x2000, size)
 
 
 class Filler(unittest.TestCase):
@@ -187,6 +213,138 @@ class Identity(unittest.TestCase):
 
 
 class Catalogue(unittest.TestCase):
+    def test_historical_bootstrap_does_not_require_an_existing_catalogue(self):
+        raw = code(JR_RA,NOP)
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            boot, catalogue = root/"boot.tsv", root/"levels.tsv"
+            with patch.multiple(levels, BOOT_FUNCTIONS=boot, CATALOGUE=catalogue, LEVELS=root,
+                                NAMES={}, BOOT_RESIDUES={}, FUNCTION_ENTRY_OFFSETS={}, FUNCTION_RESIDUES={},
+                                BOOT_PAIRS=root/"absent.tsv"), \
+                 patch.object(levels,"boot_image",return_value=(raw,[(0x1000,0,len(raw))])), \
+                 patch.object(levels,"old_extents",return_value=[(0x1000,8)]), \
+                 patch.object(sys,"argv",["levels.py","catalogue","--from-old"]):
+                levels.catalogue()
+                self.assertEqual(levels.read_boot_functions(),[("func_00001000",0x1000,8)])
+                self.assertEqual(levels.read_catalogue(),[])
+
+    def test_named_residue_does_not_remove_an_identical_unrelated_instruction(self):
+        raw = code((0x2B << 26) | (4 << 21) | (2 << 16), NOP) * 2
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            boot, catalogue, dump = root / "boot.tsv", root / "levels.tsv", root / "dump"
+            boot.write_text("# name\taddress\tsize\nfunc_00001000\t00001000\t4\n"
+                            "func_00001008\t00001008\t4\n")
+            catalogue.write_text("# name\tkind\tsize\tfingerprint\tlevels\tplaces\n"
+                                 "func_00001000\tboot\t4\tunused\t1\t00:00002000\n"
+                                 "func_L00_00002008\tlevel\t4\tunused\t1\t00:00002008\n")
+            directory = dump / "00_test"
+            directory.mkdir(parents=True)
+            (directory / "manifest.json").write_text(
+                '{"sections":[{"name":"text","address":8192}]}')
+            (directory / "text.bin").write_bytes(raw)
+            with patch.multiple(levels, BOOT_FUNCTIONS=boot, CATALOGUE=catalogue, LEVELS=root,
+                                BOOT_PAIRS=root / "absent.tsv", DUMP=dump, NAMES={0:"test"},
+                                BOOT_RESIDUES={}, FUNCTION_ENTRY_OFFSETS={},
+                                FUNCTION_RESIDUES={"func_00001000": 4}), \
+                 patch.object(levels, "boot_image", return_value=(raw, [(0x1000,0,len(raw))])), \
+                 patch.object(sys, "argv", ["levels.py", "catalogue"]):
+                levels.catalogue()
+                self.assertEqual(levels.read_boot_functions(), [("func_00001008",0x1008,4)])
+                self.assertEqual([(r[0],r[4]) for r in levels.read_catalogue()],
+                                 [("func_L00_00002008",[(0,0x2008)])])
+                first_output = boot.read_bytes(), catalogue.read_bytes()
+                levels.catalogue()
+                self.assertEqual((boot.read_bytes(), catalogue.read_bytes()), first_output)
+
+    def test_level_only_entries_keep_distinct_names_after_identity_collisions(self):
+        names = ("func_L00_004263A8", "func_L02_003F0788")
+        # Identical short methods, with distinct or identical original prefixes.
+        # A third uncorrected method and a boot method have the same short code.
+        for second_restore in (80, 96):
+            with self.subTest(second_restore=second_restore), tempfile.TemporaryDirectory() as d:
+                root = Path(d)
+                boot, catalogue, dump = root / "boot.tsv", root / "levels.tsv", root / "dump"
+                method = code(JR_RA, NOP)
+                data = code(addiu(29, 29, 80), NOP) + method
+                data += code(addiu(29, 29, second_restore), NOP) + method + method
+                boot.write_text("# name\taddress\tsize\nfunc_00001000\t00001000\t8\n")
+                catalogue.write_text("# name\tkind\tsize\tfingerprint\tlevels\tplaces\n" +
+                    "".join(f"{name}\tshared\t16\tunused\t2\t00:{0x2000+i*16:08X},01:{0x3000+i*16:08X}\n"
+                            for i, name in enumerate(names)) +
+                    "func_L00_00002020\tshared\t8\tunused\t2\t00:00002020,01:00003020\n")
+                for number in (0, 1):
+                    directory = dump / f"{number:02d}_test"
+                    directory.mkdir(parents=True)
+                    (directory / "manifest.json").write_text(
+                        '{"sections":[{"name":"text","address":' + str(0x2000 + number * 0x1000) + '}]}')
+                    (directory / "text.bin").write_bytes(data)
+                with patch.multiple(levels, BOOT_FUNCTIONS=boot, CATALOGUE=catalogue, LEVELS=root,
+                                    BOOT_PAIRS=root / "absent.tsv", DUMP=dump,
+                                    NAMES={0:"test", 1:"test"}, BOOT_RESIDUES={}, FUNCTION_RESIDUES={},
+                                    FUNCTION_ENTRY_OFFSETS={n: (16,8) for n in names}), \
+                     patch.object(levels, "boot_image", return_value=(method, [(0x1000,0,len(method))])), \
+                     patch.object(sys, "argv", ["levels.py", "catalogue"]):
+                    levels.catalogue()
+                    rows = {r[0]: (r[1], r[2], r[4]) for r in levels.read_catalogue()}
+                    self.assertEqual(rows, {
+                        names[0]: ("shared", 8, [(0,0x2008),(1,0x3008)]),
+                        names[1]: ("shared", 8, [(0,0x2018),(1,0x3018)]),
+                        "func_L00_00002020": ("shared", 8, [(0,0x2020),(1,0x3020)])})
+                    first_output = boot.read_bytes(), catalogue.read_bytes()
+                    levels.catalogue()
+                    self.assertEqual((boot.read_bytes(), catalogue.read_bytes()), first_output)
+                    # A later copy whose code changed must fail replay, not keep
+                    # a measured identity based only on its input name and size.
+                    (dump / "01_test" / "text.bin").write_bytes(
+                        data[:12] + code(addiu(2, 0, 1)) + data[16:])
+                    with self.assertRaisesRegex(ValueError, "differs after entry correction"):
+                        levels.catalogue()
+                    self.assertEqual((boot.read_bytes(), catalogue.read_bytes()), first_output)
+
+    def test_named_entry_corrections_reach_boot_and_level_copies_and_are_stable(self):
+        # Synthetic bodies, not retail bytes. A separately named method with
+        # identical full code must not inherit another method's correction.
+        first = code(addiu(29, 29, -16), *([addiu(2, 0, 17)] * 10), JR_RA,
+                     addiu(29, 29, 16), NOP)
+        second = code(addiu(29, 29, -32), *([addiu(3, 0, 33)] * 5), JR_RA,
+                      addiu(29, 29, 32), NOP)
+        unrelated = code(addiu(29, 29, 80), NOP) + first
+        data = code(addiu(29, 29, 80), NOP) + first
+        data += code(*([addiu(29, 29, 16), NOP] * 4)) + second + unrelated + first
+        rows = [("func_002C38A0", 0x1000, 64), ("func_00335918", 0x1040, 68),
+                ("func_00001084", 0x1084, 64), ("func_000010C4", 0x10C4, 56)]
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            boot, catalogue, dump = root / "boot.tsv", root / "levels.tsv", root / "dump"
+            boot.write_text("# name\taddress\tsize\n" + "".join(
+                f"{name}\t{address:08X}\t{size}\n" for name, address, size in rows))
+            catalogue.write_text("# name\tkind\tsize\tfingerprint\tlevels\tplaces\n" + "".join(
+                f"{name}\tboot\t{size}\tunused\t2\t00:{address+0x1000:08X},01:{address+0x2000:08X}\n"
+                for name, address, size in rows[:3]))
+            for number in (0, 1):
+                directory = dump / f"{number:02d}_test"
+                directory.mkdir(parents=True)
+                (directory / "manifest.json").write_text(
+                    '{"sections":[{"name":"text","address":' + str(0x2000 + number * 0x1000) + '}]}')
+                (directory / "text.bin").write_bytes(data)
+            with patch.multiple(levels, BOOT_FUNCTIONS=boot, CATALOGUE=catalogue, LEVELS=root,
+                                BOOT_PAIRS=root / "absent.tsv", DUMP=dump,
+                                NAMES={0:"test", 1:"test"}, BOOT_RESIDUES={}, FUNCTION_RESIDUES={}), \
+                 patch.object(levels, "boot_image", return_value=(data, [(0x1000,0,len(data))])), \
+                 patch.object(sys, "argv", ["levels.py", "catalogue"]):
+                levels.catalogue()
+                self.assertEqual(levels.read_boot_functions(), [
+                    ("func_002C38A0", 0x1008, 56), ("func_00335918", 0x1060, 36),
+                    ("func_00001084", 0x1084, 64), ("func_000010C4", 0x10C4, 56)])
+                corrected = {r[0]: (r[2], r[4]) for r in levels.read_catalogue()}
+                self.assertEqual(corrected["func_002C38A0"], (56, [(0,0x2008),(1,0x3008)]))
+                self.assertEqual(corrected["func_00335918"], (36, [(0,0x2060),(1,0x3060)]))
+                self.assertEqual(corrected["func_00001084"], (64, [(0,0x2084),(1,0x3084)]))
+                first_output = boot.read_bytes(), catalogue.read_bytes()
+                levels.catalogue()
+                self.assertEqual((boot.read_bytes(), catalogue.read_bytes()), first_output)
+
     def test_measured_residue_removed_in_boot_and_level_and_replay_is_stable(self):
         # Synthetic residue: a store without a complete function around it.
         # A different store and a tail jump of the same size must remain.
@@ -207,7 +365,7 @@ class Catalogue(unittest.TestCase):
             (level / "text.bin").write_bytes(data)
             with patch.multiple(levels, BOOT_FUNCTIONS=boot, CATALOGUE=catalogue, LEVELS=root,
                                 BOOT_PAIRS=root / "absent.tsv", DUMP=dump, NAMES={0:"test"},
-                                BOOT_RESIDUES={0x1000:8}), \
+                                BOOT_RESIDUES={0x1000:8}, FUNCTION_RESIDUES={}), \
                  patch.object(levels, "boot_image", return_value=(data, [(0x1000,0,len(data))])), \
                  patch.object(sys, "argv", ["levels.py", "catalogue"]):
                 levels.catalogue()
@@ -336,6 +494,89 @@ class IsoTest(unittest.TestCase):
             with self.assertRaises(KeyError):
                 iso.find("G/MISSING")
             iso.f.close()
+
+
+class ProgressChecks(unittest.TestCase):
+    def test_primary_check_keeps_pending_original_assembly_separate_from_c(self):
+        import contextlib
+        import io
+        import progress
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/"report.json"
+            path.write_text(json.dumps({"units":[{"functions":[]}]}))
+            before=path.read_bytes();output=io.StringIO()
+            with patch.object(progress,"REPORT",path), \
+                 patch.object(progress,"source_functions",return_value={"x.c":[("c_body",True),("assembly_body",False)]}), \
+                 patch.object(progress,"handwritten",return_value={"assembly_body"}), \
+                 patch.object(sys,"argv",["progress.py","--check"]), contextlib.redirect_stdout(output):
+                progress.check()
+            self.assertIn("1 C and 1 original-assembly functions",output.getvalue())
+            self.assertEqual(path.read_bytes(),before)
+
+    def test_release_check_does_not_present_new_asm_func_as_new_c(self):
+        import contextlib
+        import io
+        import progress
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);path=root/"report.json"
+            path.write_text(json.dumps({"units":[{"functions":[{"name":"assembly_body","fuzzy_match_percent":0.0}]}]}))
+            before=path.read_bytes();output=io.StringIO()
+            with patch.object(progress,"ROOT",root), \
+                 patch.object(progress,"release_functions",return_value={"assembly_body":(0x1000,8,"boot",None)}), \
+                 patch.object(progress,"source_functions",return_value={"x.c":[("assembly_body",False)]}), \
+                 patch.object(progress,"handwritten",return_value={"assembly_body"}), \
+                 patch.object(sys,"argv",["progress.py","--check"]), contextlib.redirect_stdout(output):
+                progress.release_check("pal",path)
+            self.assertIn("0 C and 1 original-assembly functions",output.getvalue())
+            self.assertEqual(path.read_bytes(),before)
+
+    def release(self, functions, flags=(), where=None):
+        import progress
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            path = root / "report.json"
+            path.write_text(json.dumps({"units":[{"functions":functions}]}))
+            before = path.read_bytes()
+            with patch.object(progress,"ROOT",root), \
+                 patch.object(progress,"release_functions",return_value=where or {"kept":(0x1000,8,"boot",None)}), \
+                 patch.object(progress,"source_functions",return_value={}), \
+                 patch.object(progress,"handwritten",return_value=set()), \
+                 patch.object(levels,"FUNCTION_RESIDUES",{"retired":4}), \
+                 patch.object(sys,"argv",["progress.py","--check",*flags]):
+                progress.release_check("pal",path)
+            self.assertEqual(path.read_bytes(),before)
+
+    def test_unmatched_named_retirement_can_wait_for_a_report_refresh(self):
+        self.release([{"name":"kept","fuzzy_match_percent":0.0},
+                      {"name":"retired","fuzzy_match_percent":0.0}])
+
+    def test_strict_report_check_still_requires_the_retired_row_removed(self):
+        with self.assertRaises(SystemExit):
+            self.release([{"name":"kept","fuzzy_match_percent":0.0},
+                          {"name":"retired","fuzzy_match_percent":0.0}],flags=("--strict",))
+
+    def test_report_cannot_keep_matching_credit_for_a_retired_function(self):
+        for percentage in (25.0,100.0):
+            with self.subTest(percentage=percentage), self.assertRaises(SystemExit):
+                self.release([{"name":"kept","fuzzy_match_percent":0.0},
+                              {"name":"retired","fuzzy_match_percent":percentage}])
+
+    def test_unknown_deletion_is_not_a_measured_retirement(self):
+        with self.assertRaises(SystemExit):
+            self.release([{"name":"kept","fuzzy_match_percent":0.0},
+                          {"name":"unknown","fuzzy_match_percent":0.0}])
+
+    def test_duplicate_retired_rows_are_not_tolerated(self):
+        with self.assertRaises(SystemExit):
+            self.release([{"name":"kept","fuzzy_match_percent":0.0},
+                          {"name":"retired","fuzzy_match_percent":0.0},
+                          {"name":"retired","fuzzy_match_percent":0.0}])
+
+    def test_a_retirement_cannot_hide_an_added_catalogue_function(self):
+        with self.assertRaises(SystemExit):
+            self.release([{"name":"kept","fuzzy_match_percent":0.0},
+                          {"name":"retired","fuzzy_match_percent":0.0}],
+                         where={"kept":(0x1000,8,"boot",None),"new":(0x2000,8,"boot",None)})
 
 
 class Todo(unittest.TestCase):

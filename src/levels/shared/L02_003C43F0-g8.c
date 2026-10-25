@@ -143,3 +143,52 @@ int func_L02_003FCF08(int a0) {
     }
     return func_00283CF0(f20) << 5;
 }
+
+extern void func_00282C98(void *);
+extern void func_00282DD8(void *, void *, void *);
+extern float func_00282DF0(void *);
+extern void func_00282F70(void *, void *, float);
+extern int func_L02_0032EF10(void *, char *, char *, int, float);
+
+/* The level's 0x80-byte placement records, whose direction sits at +0x30. */
+extern char *D_L02_001B368C;
+
+/* Aligns the actor with the record its state names: the -1 case builds a direction from the
+   +0x1F0 axis and the +0x340 vector and picks the 1.5-scaled or negated one by the sign of the
+   dot product; the other case uses the 0x80-byte record from the boot table. The shared tail
+   copies the +0x340 vector to the stack and hands it to the level's nine-place routine. */
+int func_L02_003CCFE8(char *a0, char *a1)
+{
+    char *st = *(char **)(a0 + 0x68);
+    TI128 a, b, c, d, e;
+    int ret;
+
+    if (*(int *)(st + 0x334) == -1) {
+        func_00282CF0((float *)&a, (float *)(st + 0x1F0), (float *)(st + 0x340));
+        func_00282C98(&b);
+        func_00282DD8(&c, &a, &b);
+        func_00282F20((char *)&c, (char *)&c, 1.5f);
+        func_00282D30(&d, &c, -1.0f);
+        func_00282CF0((float *)&e, a0 + 0x10, (float *)(st + 0x340));
+        if (func_00282DB0(&e, &c) < 0.0f) {
+            func_00282CC0(a1, &c, st + 0x340);
+            ret = 1;
+        } else {
+            func_00282CC0(a1, &d, st + 0x340);
+            ret = 0;
+        }
+    } else {
+        func_00282CF0((float *)&a, (float *)(st + 0x1F0),
+                      (float *)(D_L02_001B368C + (*(int *)(st + 0x334) << 7) + 0x30));
+        ret = 1;
+        func_00282F70((char *)&a, (char *)&a,
+                      func_00282DF0(D_L02_001B368C + (*(int *)(st + 0x334) << 7)));
+        func_00282CC0(a1, &a, D_L02_001B368C + (*(int *)(st + 0x334) << 7) + 0x30);
+        func_00282CF0((float *)&b, a1, a0 + 0x10);
+        if (!(0.0f <= func_00282DB0(&b, a0 + 0xD0)))
+            ret = 0;
+    }
+    a = *(TI128 *)(st + 0x340);
+    func_L02_0032EF10(&a, a1, a1, *(int *)(st + 0x318), *(float *)(st + 0x100));
+    return ret;
+}

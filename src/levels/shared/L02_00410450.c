@@ -142,9 +142,3 @@ void func_L02_0043FA98(u8 *a0) {
     }
     *(short *)(s1 + 0x48) = func_002F3158(func_0031E808(135.0f, 225.0f));
 }
-
-INCLUDE_ASM("asm/levels", func_L02_004547D0);
-
-
-
-

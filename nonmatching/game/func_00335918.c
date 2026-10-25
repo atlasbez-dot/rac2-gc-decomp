@@ -1,7 +1,7 @@
-/* No attempt: the catalogue's extent for func_00335918 is 32 bytes too long at
-   the front.  The extent starts on sw $zero, 0x118($a0) ; nop ; addiu $sp, $sp, 0x10 ; nop ; addiu $sp, $sp, 0x30 ; nop ; addiu $sp, $sp, 0x20 ; nop
-   - the epilogue area of the previous function, which no C can produce at the
-   start of a function - and the body starts at +0x20 with `addiu $sp, $sp, -0x10`.  The bytes in between belong to no
-   catalogued function, the same catalogue defect as func_L00_00341798 and
-   func_L00_002E6440.  A fix in tools/levels.py that moves the start of the
-   extent to the prologue would make the function matchable. */
+/* Catalogue boundary corrected: the USA v1.01 body starts at 0x00335938
+ * and spans 36 bytes, retaining the canonical name func_00335918.
+ * The preceding 32 bytes contain an orphan store and stack restorations; they
+ * remain assembly, with the original extent end preserved. The generator
+ * carries the corrected boundary to all 28 placements in each release.
+ * No complete C reconstruction is retained here, and no C match is claimed.
+ */

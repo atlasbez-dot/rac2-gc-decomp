@@ -304,7 +304,8 @@ INCLUDE_ASM("asm/levels", func_L02_003CCCC8);
 
 INCLUDE_ASM("asm/levels", func_L02_003CCEA0);
 
-INCLUDE_ASM("asm/levels", func_L02_003CCFE8);
+/* func_L02_003CCFE8 is defined in L02_003C43F0-g8.c (the -G8 profile reproduces its
+   placement-table address reloads; the body itself reads no $gp data). */
 
 
 extern int D_L02_001B35B8 __attribute__((sda));

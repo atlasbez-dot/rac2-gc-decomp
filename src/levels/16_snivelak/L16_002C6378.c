@@ -49,7 +49,7 @@ INCLUDE_ASM("asm/levels", func_L16_003AA3F0);
 
 INCLUDE_ASM("asm/levels", func_L16_003E6E08);
 
-INCLUDE_ASM("asm/levels", func_L16_003E70E0);
+/* func_L16_003E70E0 is defined in L16_002C6378-g8.c (it reads $gp data). */
 
 INCLUDE_ASM("asm/levels", func_L16_003E7248);
 

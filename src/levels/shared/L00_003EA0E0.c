@@ -114,7 +114,71 @@ void func_L00_003EA860(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003EA8C8);
+typedef struct {
+    char pad_000[0x140];
+    float x_140;
+    float y_144;
+    float z_148;
+} L00AimVector;
+
+extern L00AimVector D_L00_001B8C80;
+extern void func_3EA860(char *);
+extern int func_2E67A0(int);
+extern float func_2EE7A8(float, float);
+extern float func_2EE2E8(char *, char *);
+extern float func_31A888(void);
+extern void func_2EE970(char *, char *);
+extern void func_2EE178(char *, char *, float);
+extern void func_2EAC30(char *, char *, int);
+
+/* Builds one aim/render packet: resets the work record, fills the colour and the blend words,
+   takes the two aim angles from the level's aim vector, turns them into the packet's orientation
+   and scales the packet's four basis vectors by the caller's alpha. */
+void func_L00_003EA8C8(char *unused, char *position, int color, float alpha)
+{
+    unsigned char work[0xE0];
+    float first;
+    float second;
+
+    func_3EA860((char *)work);
+    *(int *)(work + 0x50) = 0;
+    *(int *)(work + 0x54) = 0;
+    *(int *)(work + 0x58) = 0;
+    *(float *)(work + 0x5C) = 1.0f;
+    *(float *)(work + 0x60) = 1.0f;
+    *(int *)(work + 0x64) = 0;
+    *(float *)(work + 0x68) = 1.0f;
+    *(float *)(work + 0x6C) = 1.0f;
+    *(long long *)(work + 0x78) = func_2E67A0(0x2C);
+    *(long long *)(work + 0x80) = 0x0000FF9000000260LL;
+    *(long long *)(work + 0x88) = 0x0000008000000048LL;
+    *(int *)(work + 0x4C) = color;
+    *(int *)(work + 0x48) = color;
+    *(int *)(work + 0x44) = color;
+    *(int *)(work + 0x40) = color;
+    *(long long *)(work + 0x70) = 0;
+    *(int *)(work + 0xDC) = 0;
+
+    first = func_2EE7A8(D_L00_001B8C80.x_140 - *(float *)(position + 0),
+                        D_L00_001B8C80.y_144 - *(float *)(position + 4));
+    *(float *)(work + 0xD8) = first;
+
+    second = func_2EE7A8(func_2EE2E8(position, &D_L00_001B8C80.x_140),
+                         D_L00_001B8C80.z_148 - *(float *)(position + 8));
+    *(float *)(work + 0xD4) = -second;
+    *(float *)(work + 0xD0) = func_31A888();
+    func_2EE970((char *)work + 0x90, (char *)work + 0xD0);
+
+    *(float *)(work + 0xC0) = *(float *)(position + 0);
+    *(float *)(work + 0xC4) = *(float *)(position + 4);
+    *(float *)(work + 0xC8) = *(float *)(position + 8);
+    *(float *)(work + 0xCC) = 1.0f;
+    func_2EE178((char *)work, (char *)work, alpha);
+    func_2EE178((char *)work + 16, (char *)work + 16, alpha);
+    func_2EE178((char *)work + 32, (char *)work + 32, alpha);
+    func_2EE178((char *)work + 48, (char *)work + 48, alpha);
+    func_2EAC30((char *)work, (char *)work + 0x90, 0);
+}
 
 INCLUDE_ASM("asm/levels", func_L00_003EAA58);
 

@@ -109,7 +109,9 @@ def data_measures() -> dict:
 def check() -> None:
     report = json.loads(REPORT.read_text())
     matched = {f["name"] for u in report["units"] for f in u["functions"] if f["fuzzy_match_percent"] == 100.0}
-    in_c = {n for fns in source_functions().values() for n, c in fns if c} | handwritten()
+    c_names = {n for fns in source_functions().values() for n, c in fns if c}
+    by_hand = handwritten()
+    in_c = c_names | by_hand
     gone = sorted(matched - in_c)
     if gone:
         sys.exit(f"progress/report.json counts {len(gone)} function(s) that are not C in src/, e.g. "
@@ -120,8 +122,9 @@ def check() -> None:
                  f"{', '.join(ahead[:5])}: run tools/build.py all, then tools/progress.py")
     if ahead:
         # A pull request does not carry the report: a maintainer regenerates it on master.
-        print(f"progress/report.json: {len(matched)} matched functions; {len(ahead)} more are C in src/ "
-              f"and not in it yet (regenerated on master after merging)")
+        print(f"progress/report.json: {len(matched)} matched functions; "
+              f"{len(set(ahead) & c_names)} C and {len(set(ahead) & by_hand)} original-assembly functions "
+              "await the maintainer's report refresh")
     else:
         print(f"progress/report.json is current: {len(matched)} matched functions")
 
@@ -219,20 +222,38 @@ def release_check(version: str, report_path: Path) -> None:
     report = json.loads(report_path.read_text())
     where = release_functions()
     matched = {f["name"] for u in report["units"] for f in u["functions"] if f["fuzzy_match_percent"] == 100.0}
-    in_c = {n for fns in source_functions(version).values() for n, c in fns if c} | handwritten(version)
+    c_names = {n for fns in source_functions(version).values() for n, c in fns if c}
+    by_hand = handwritten(version)
+    in_c = c_names | by_hand
     gone = sorted(matched - (in_c & set(where)))
     if gone:
         sys.exit(f"{report_path.relative_to(ROOT)} counts {len(gone)} function(s) that are not C in src/, e.g. "
                  f"{', '.join(gone[:5])}: run tools/build.py all --version {version}, then tools/progress.py --version {version}")
     total = sum(len(u["functions"]) for u in report["units"])
-    if total != len(where):
-        sys.exit(f"{report_path.relative_to(ROOT)} has {total} functions, the catalogues {len(where)}: "
-                 f"regenerate it with tools/progress.py --version {version}")
+    functions = [f for u in report["units"] for f in u["functions"]]
+    reported = {f["name"] for f in functions}
+    retired = reported - set(where)
+    if total != len(where) or retired:
+        # Boundary-only PRs leave the reports for a maintainer's later refresh.
+        # Tolerate only measured, wholly unmatched remnants, never a new missing
+        # entry, arbitrary deletion, duplicate row or an overstated match.
+        known_retirement = (retired and retired <= set(levels.FUNCTION_RESIDUES)
+                            and not (set(where) - reported)
+                            and total == len(where) + len(retired)
+                            and all(f["fuzzy_match_percent"] == 0.0 for f in functions
+                                    if f["name"] in retired))
+        if not known_retirement or "--strict" in sys.argv:
+            sys.exit(f"{report_path.relative_to(ROOT)} has {total} functions, the catalogues {len(where)}: "
+                     f"regenerate it with tools/progress.py --version {version}")
+        print(f"{report_path.relative_to(ROOT)} retains {len(retired)} unmatched catalogue remnants; "
+              "a maintainer regenerates it on master")
     ahead = sorted((in_c & set(where)) - matched)
     if ahead and "--strict" in sys.argv:
         sys.exit(f"{report_path.relative_to(ROOT)} is behind src/ by {len(ahead)} function(s), e.g. {', '.join(ahead[:5])}")
     print(f"{report_path.relative_to(ROOT)}: {len(matched)} matched functions"
-          + (f"; {len(ahead)} more are C in src/ and may match {version} once rebuilt" if ahead else ", current"))
+          + (f"; {len(set(ahead) & c_names)} C and {len(set(ahead) & by_hand)} original-assembly functions "
+             "await the maintainer's report refresh" if ahead else
+             ", matching credit current" if retired else ", current"))
 
 
 def release_table(version: str, report: dict) -> None:

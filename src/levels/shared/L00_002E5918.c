@@ -280,19 +280,19 @@ INCLUDE_ASM("asm/levels", func_L00_002EDD38);
    unit, src/levels/shared/L00_002EE050.c: it needs the -O1 -ffast-math
    profile, which changes the other bodies of this file. */
 
-INCLUDE_ASM("asm/levels", func_L00_002EE058);
+ASM_FUNC("asm/levels", func_L00_002EE058);
 
-INCLUDE_ASM("asm/levels", func_L00_002EE078);
+ASM_FUNC("asm/levels", func_L00_002EE078);
 
 INCLUDE_ASM("asm/levels", func_L00_002EE0C0);
 
-INCLUDE_ASM("asm/levels", func_L00_002EE290);
+ASM_FUNC("asm/levels", func_L00_002EE290);
 
-INCLUDE_ASM("asm/levels", func_L00_002EE340);
+ASM_FUNC("asm/levels", func_L00_002EE340);
 
-INCLUDE_ASM("asm/levels", func_L00_002EE4D8);
+ASM_FUNC("asm/levels", func_L00_002EE4D8);
 
-INCLUDE_ASM("asm/levels", func_L00_002EE660);
+ASM_FUNC("asm/levels", func_L00_002EE660);
 
 /* Takes three floats, computes a value from the second and first, negates the third when that value is not positive, clamps the third against that value and its negation (recomputing it in each branch), then calls a helper with the first and the clamped third. */
 void func_L00_002EF548(float a, float b, float c)

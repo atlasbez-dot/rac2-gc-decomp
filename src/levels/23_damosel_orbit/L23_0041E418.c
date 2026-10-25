@@ -22,7 +22,6 @@ INCLUDE_ASM("asm/levels", func_L23_00422A30);
 
 INCLUDE_ASM("asm/levels", func_L23_00422E08);
 
-INCLUDE_ASM("asm/levels", func_L23_00423378);
 
 /* func_L23_00423380 is defined in L23_0041E418-g8.c (this unit has no $gp access for it). */
 

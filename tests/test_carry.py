@@ -2,6 +2,8 @@
 import struct
 import sys
 import unittest
+import tempfile
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -57,6 +59,45 @@ class CrossIdentity(unittest.TestCase):
 
 
 class Carry(unittest.TestCase):
+    def test_entry_refresh_preserves_identities_removes_only_named_remnants_and_replays(self):
+        with tempfile.TemporaryDirectory() as d:
+            boot, catalogue = Path(d)/"boot.tsv", Path(d)/"levels.tsv"
+            name = "func_PAL_00002000"
+            boot.write_text(f"# name\taddress\tsize\n{name}\t00002000\t20\n"
+                            "remnant\t00002100\t4\nuntouched\t00002200\t4\n")
+            catalogue.write_text("# name\tkind\tsize\tfingerprint\tlevels\tplaces\n" +
+                                 f"{name}\tboot\t20\told\t2\t00:00003000,01:00004000\n"
+                                 "remnant\tlevel\t4\told\t1\t00:00003100\n"
+                                 "untouched\tshared\t4\tsame\t2\t00:00003200,01:00004200\n")
+            raw = code(addiu(29,29,80),NOP,addiu(2,0,7),JR_RA,NOP)
+            with patch.multiple(levels, BOOT_FUNCTIONS=boot, CATALOGUE=catalogue,
+                                FUNCTION_ENTRY_OFFSETS={name:(20,8)}, FUNCTION_RESIDUES={"remnant":4}), \
+                 patch.object(levels,"level_text",side_effect=[(0x3000,raw),(0x4000,raw)]):
+                carry.refresh_entries()
+                self.assertEqual(levels.read_boot_functions(),[(name,0x2008,12),("untouched",0x2200,4)])
+                rows = levels.read_catalogue()
+                self.assertEqual((rows[0][0],rows[0][1],rows[0][2],rows[0][4]),
+                                 (name,"boot",12,[(0,0x3008),(1,0x4008)]))
+                self.assertEqual(rows[1],("untouched","shared",4,"same",[(0,0x3200),(1,0x4200)]))
+                first = boot.read_bytes(), catalogue.read_bytes()
+                carry.refresh_entries()
+                self.assertEqual((boot.read_bytes(),catalogue.read_bytes()), first)
+                # A changed level extent must fail before either file is written.
+                catalogue.write_text(catalogue.read_text().replace("\t12\t","\t16\t"))
+                before = boot.read_bytes(), catalogue.read_bytes()
+                with self.assertRaises(ValueError):carry.refresh_entries()
+                self.assertEqual((boot.read_bytes(),catalogue.read_bytes()), before)
+
+    def test_entry_refresh_rejects_disagreement_between_shortened_copies(self):
+        name = "func_US2_L00_00002000"
+        rows = [(name,"shared",20,"old",[(0,0x2000),(1,0x3000)])]
+        first = code(addiu(29,29,80),NOP,addiu(2,0,7),JR_RA,NOP)
+        second = code(addiu(29,29,80),NOP,addiu(2,0,9),JR_RA,NOP)
+        with patch.dict(levels.FUNCTION_ENTRY_OFFSETS,{name:(20,8)}), \
+             patch.object(levels,"level_text",side_effect=[(0x2000,first),(0x3000,second)]), \
+             self.assertRaisesRegex(ValueError,"corrected level copies differ"):
+            carry.correct_level_entries(rows)
+
     def test_branch_target(self):
         self.assertEqual(carry.branch_target(0x10400003, 0x1000), 0x1010)   # beqz v0,+3
         self.assertEqual(carry.branch_target(0x1000FFFF, 0x1000), 0x1000)   # b .

@@ -1,4 +1,3 @@
-src/core/0012CC88-rc2.c	sdk -fno-builtin -O2 -ffunction-sections
 src/game/0032EB28-g8.c	-O2 -G8 -ffunction-sections -Wa,-G32
 src/game/002BF6F0.c	-O2 -G0 -ffunction-sections -g
 src/game/002AA800.c	-O2 -G0 -ffunction-sections -g -ffast-math
@@ -557,6 +556,9 @@ src/game/0030F7B0-qcopy.c	-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-
 
 # Format dispatch preserves the retail quadword return-address save.
 src/core/00118CC8.c	-O2 -G2 -ffunction-sections -mastra-quad-saves
+src/levels/shared/L22_003A5018.c	-O2 -G0 -ffunction-sections -g
+src/levels/shared/L22_003B8FE8-g8.c	-O2 -G8 -ffunction-sections
+src/core/0012CC88-rc2.c	sdk -fno-builtin -O2 -ffunction-sections
 src/levels/14_aranos_prison/L14_003C96E0-rc2.c	-fno-builtin -O2 -G0 -g -ffunction-sections
 src/levels/14_aranos_prison/L14_003DE310-rc2.c	-fno-builtin -O2 -G0 -ffunction-sections
 src/game/002BD5B0-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin
@@ -631,7 +633,6 @@ src/levels/shared/L02_00332900-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/30_insomniac_museum/L30_004185E0-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/30_insomniac_museum/L30_003848B8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/26_jamming_array/L26_003DC048-rc2.c	-O2 -G0 -mno-split-addresses -ffunction-sections -fno-builtin
-src/levels/10_hrugis_cloud/L10_004174C8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L03_00408068-rc2.c	-O2 -G8 -mastra-r5900-extern-buffer -ffunction-sections -fno-builtin
 src/levels/16_snivelak/L16_0041EBE8-rc2.c	-O2 -G8 -ffunction-sections -fno-builtin
 src/levels/shared/L18_00426E00-rc2.c	-O2 -G0 -ffunction-sections -fno-builtin

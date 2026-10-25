@@ -4,6 +4,7 @@ Another release's function catalogues, carried from USA v1.01's by identical cod
 
   python3 tools/carry.py --version pal    # config/pal/boot/functions.tsv, config/pal/levels/functions.tsv
   python3 tools/carry.py --version us2    # config/us2/...
+  python3 tools/carry.py --version pal --entries  # measured boundary repairs, existing identities
   python3 tools/carry.py --version pal --demote   # after tools/build.py all --version pal: config/pal/not_carried.tsv
 
 Needs the dumps of both releases (tools/levels.py dump, and with --version V). Writes the two
@@ -299,11 +300,60 @@ def not_carried(version: str) -> set[str]:
     return set(names)
 
 
+def correct_level_entries(rows: list[tuple]) -> list[tuple]:
+    """Apply measured entries without regrouping or renaming existing rows."""
+    texts, out = {}, []
+    for name, kind, size, fp, places in rows:
+        if levels.function_residue(name, size):
+            continue
+        corrected = [(lv, *levels.function_extent(name, a, size)) for lv, a in places]
+        if all((a, n) == (old, size) for (_, a, n), (_, old) in zip(corrected, places)):
+            out.append((name, kind, size, fp, places))
+            continue
+        keys = set()
+        for lv, a, n in corrected:
+            if lv not in texts:
+                texts[lv] = levels.level_text(levels.DUMP / levels.level_dir(lv))
+            base, data = texts[lv]
+            keys.add((levels.fingerprint(data[a - base:a - base + n], a), n))
+        if len(keys) != 1:
+            raise ValueError(f"{name}: corrected level copies differ")
+        new_fp, new_size = next(iter(keys))
+        out.append((name, kind, new_size, new_fp, [(lv, a) for lv, a, _ in corrected]))
+    return out
+
+
+def refresh_entries() -> None:
+    """Repair measured extents in an existing release catalogue, retaining identities.
+
+    This does not realign releases, revisit callee correspondences or promote C.
+    The normal carry remains the full cross-release alignment operation.
+    """
+    boot = []
+    for name, a, n in levels.read_boot_functions():
+        if not levels.function_residue(name, n):
+            a, n = levels.function_extent(name, a, n)
+            boot.append((name, a, n))
+    rows = correct_level_entries(levels.read_catalogue())
+    # Validate both catalogues completely before writing either output.
+    levels.BOOT_FUNCTIONS.write_text("# name\taddress\tsize -- tools/carry.py\n" + "".join(
+        f"{name}\t{a:08X}\t{n}\n" for name, a, n in boot))
+    lines = ["# name\tkind\tsize\tfingerprint\tlevels\tplaces (level:address) -- tools/carry.py"]
+    for name, kind, n, fp, places in rows:
+        lines.append(f"{name}\t{kind}\t{n}\t{fp}\t{len({p[0] for p in places})}\t" +
+                     ",".join(f"{lv:02d}:{a:08X}" for lv, a in places))
+    levels.CATALOGUE.write_text("\n".join(lines) + "\n")
+    print(f"entry repairs: {len(boot)} boot functions, {len(rows)} level rows; identities retained")
+
+
 def main() -> None:
     version = levels.version_argument()
     levels.select(version)
     if version == "us":
         sys.exit("USA v1.01 is the catalogue the others are carried from: --version pal or us2")
+    if "--entries" in sys.argv:
+        refresh_entries()
+        return
     tag = levels.VERSIONS[version]["tag"]
     levels.select("us")
     us_boot = levels.read_boot_functions()

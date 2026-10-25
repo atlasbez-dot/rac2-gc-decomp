@@ -120,11 +120,11 @@ void func_002E10B8(void)
 
 INCLUDE_ASM("asm/game", func_002E11C0);
 
-INCLUDE_ASM("asm/game", func_002E1228);
+ASM_FUNC("asm/game", func_002E1228);
 
 ASM_FUNC("asm/game", func_002E2988);
 
-INCLUDE_ASM("asm/game", func_002E2C38);
+ASM_FUNC("asm/game", func_002E2C38);
 
 INCLUDE_ASM("asm/game", func_002E31E8);
 

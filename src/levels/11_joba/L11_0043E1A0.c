@@ -168,7 +168,6 @@ INCLUDE_ASM("asm/levels", func_L11_004411C8);
 
 /* func_L11_00441350 lives below, after the id-list macros it uses. */
 
-INCLUDE_ASM("asm/levels", func_L11_004417A0);
 
 /* arms the one-shot flag block when it is idle and the state agrees */
 typedef struct { u8 pad[0x284]; s32 field284; s32 field288; } JobaFlagBlockView;
