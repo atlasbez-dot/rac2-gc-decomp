@@ -1,3 +1,20 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured unit: src/levels/23_damosel_orbit/L23_0042A018-g8.c
+ * Game profile: -O2 -G8 -ffunction-sections
+ * Release coverage after copy-dependency correction: US 0/1 (exit1); US2 0/1 (exit1); PAL
+ * absent (exit1).
+ * Current residual: 1052/1052 bytes. The 144-byte packet and matrix/axis extents are
+ * preserved. Only the first three independent stack rows use qcopy_nc; the fourth row uses
+ * qcopy because C overwrites w. qzero retains its memory clobber. Matrix/state allocation
+ * differs from +0x78; ALPHA scheduling and outer-loop setup remain different.
+ * Reopen only for: A true matrix/state lifetime model and measured ALPHA/loop allocation
+ * change; do not repeat recorded declaration permutations.
+ * Older notes below are historical. Marker and trial-only flags are restored.
+ */
+
+#include "common.h"
+
 /* func_L23_0042A018 (1052 bytes, level 23 only) -- NEAR MISS, not integrated.
    Measured on 22 October 2026 with the compiler built from master (qcopy barrier and the
    annulled-wide-store switch included). This C compiles to 1052 bytes, retail's size; check.py:
@@ -45,17 +62,17 @@
    expression or with `unsigned long` casts, `x` kept as a variable or as an s64, the colour
    select as a ternary, with the mask outside the arms or with `0xFFFFFF & rgb`. */
 
-typedef unsigned char u8;
 
-typedef unsigned short u16;
 
-typedef unsigned int u32;
 
-typedef short s16;
 
-typedef int s32;
 
-typedef long long s64;
+
+
+
+
+
+
 
 typedef int TI16 __attribute__((mode(TI)));
 
@@ -150,7 +167,7 @@ extern float func_002A7878(float, float);
 
 extern long long func_0027C878(s32);
 
-extern void func_002FC560(u32, unsigned long);
+extern void func_002FC560(u32, u64);
 
 extern void func_00282D30(void *, void *, float);
 
@@ -175,6 +192,7 @@ void func_L23_0042A018(u8 *moby) {
     float fc;
     float fd;
     s32 i;
+    u8 *hero;
     s32 k;
     u32 col;
     s64 reg;
@@ -197,12 +215,15 @@ void func_L23_0042A018(u8 *moby) {
         pkt.tail[1] = tex;
         pkt.tail[0] = 0;
         func_002FC560(0x47, 0x53001);
-        m[0] = *(TI16 *)(D_L23_001B1484_2 + 0xC0);
-        m[1] = *(TI16 *)(D_L23_001B1484_2 + 0xD0);
-        m[2] = *(TI16 *)(D_L23_001B1484_2 + 0xE0);
-        m[3] = *(TI16 *)(D_L23_001B1484_2 + 0x10);
+        /* The first three rows are independent stack writes until the matrix calls.
+         * Row four keeps qcopy because C overwrites its w field immediately. */
+        hero = D_L23_001B1484_2;
+        qcopy_nc(&m[0], hero + 0xC0);
+        qcopy_nc(&m[1], hero + 0xD0);
+        qcopy_nc(&m[2], hero + 0xE0);
+        qcopy(&m[3], hero + 0x10);
         ((float *)&m[3])[3] = 1.0f;
-        axis[0] = 0;
+        qzero(axis);
         ((float *)axis)[2] = vars->turn;
         func_002833F0(rot, axis);
         func_00283738(m, m, rot);

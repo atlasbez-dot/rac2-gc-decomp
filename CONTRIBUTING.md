@@ -54,10 +54,16 @@ invalidate the affected cached C objects.
   builds, symbol dumps from them, leaked source), not even as a reference. Publicly distributed
   prototype discs may be cited, naming the build, never as the evidence for a match. OpenRAC's
   docs/policy/SOURCING.md is the full policy.
-- Plain C. No inline assembly in a function, no register pins, no tricks to defeat the
-  compiler. Flags are per file (`config/cflags.txt`), never per function.
-- The build only does what the retail assembler and linker did; nothing edits compiler
-  output.
+- Follow RAC1's source practices: meaningful C may call the reviewed shared EE helpers
+  `qcopy`, `qcopy_nc` and `qzero` in `include/common.h`. Public runtime-library target
+  primitives may retain their original assembly with upstream provenance and licence.
+  No ad-hoc instruction sequences in game functions, register pins, artificial barriers,
+  fake dependencies or false interfaces. Flags are per file (`config/cflags.txt`), never
+  per function. These exceptions still require exact linked validation; see `AGENTS.md`.
+- The build may model measured retail assembler/linker behavior, following RAC1:
+  macro expansion, hardware padding and data-section placement need independent
+  controls and strict linked validation. Never patch compiler-authored operations,
+  values or register assignments to manufacture a match.
 - Never commit game data, extracted assembly, disc images or proprietary tools: `baserom/`,
   `toolchain/` and `build/` stay local.
 - Conventional commit subjects (`feat(src):`, `fix(tools):`, `docs:` ...), with a body that

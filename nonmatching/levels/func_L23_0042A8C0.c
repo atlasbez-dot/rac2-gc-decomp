@@ -1,3 +1,20 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured unit: src/levels/23_damosel_orbit/L23_0042A8C0-g8.c
+ * Game profile: -O2 -G8 -ffunction-sections
+ * Release coverage after copy-dependency correction: US 0/1 (exit1); US2 0/1 (exit1); PAL
+ * absent (exit1).
+ * Current residual: 952/940 bytes. Only the first three independent stack matrix rows use
+ * qcopy_nc. The fourth row uses clobbering qcopy because C overwrites its w field next;
+ * both qzero clears retain their memory clobbers. Matrix/state pointer allocation and
+ * ring-count modulo setup remain different. Count-table extent is incomplete.
+ * Reopen only for: A measured source representation for matrix/state lifetimes and ring
+ * modulo values, retaining real alias effects.
+ * Older notes below are historical. Marker and trial-only flags are restored.
+ */
+
+#include "common.h"
+
 /* func_L23_0042A8C0 (level 23, 940 bytes) -- NEAR MISS, not integrated.
    state: 936 bytes against retail's 940 (this body, `-O2 -G8 -ffunction-sections -frac2-qcopy`, a unit of
    its own: it reads $gp outside delay slots, hence -G8, and copies 16 bytes five times and clears it
@@ -40,10 +57,10 @@
    prologue, or assigned just before the call that builds the rotation), assigning `cnt` before or after
    the modulo, -fno-schedule-insns (928 bytes), -fno-schedule-insns2 (920 bytes). */
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef short s16;
-typedef int s32;
+
+
+
+
 
 typedef int TI128 __attribute__((mode(TI)));
 
@@ -64,7 +81,7 @@ extern s32 D_L23_001B1694;
 
 extern s32 D_L23_001B3934;
 
-extern s32 D_L23_001B3980[16];
+extern s32 D_L23_001B3980[];
 
 extern s32 D_L23_0025E9D0[];
 
@@ -134,12 +151,12 @@ extern void *func_L23_004256F0(void *, u8 *, void *, u8, u8, s16, s16, s32, floa
    two edge vectors from the edge table and starts the effect object with them. */
 void func_L23_0042A8C0(u8 *moby) {
     u8 *vars;
-    float m[16];
-    float v60[4];
-    float v70[4];
-    float m80[12];
-    float vB0[4];
-    float vC0[4];
+    float m[16] __attribute__((aligned(16)));
+    float v60[4] __attribute__((aligned(16)));
+    float v70[4] __attribute__((aligned(16)));
+    float m80[12] __attribute__((aligned(16)));
+    float vB0[4] __attribute__((aligned(16)));
+    float vC0[4] __attribute__((aligned(16)));
     float f20;
     float f21;
     float f22;
@@ -149,6 +166,7 @@ void func_L23_0042A8C0(u8 *moby) {
     s32 flag;
     s32 *cnt;
     s32 e;
+    u8 *hero;
 
     if (D_L23_001B1484 != 0) {
         D_L23_001B39D0 = D_L23_001B1470 * D_L23_001B1C60;
@@ -173,14 +191,16 @@ void func_L23_0042A8C0(u8 *moby) {
             f20 = D_L23_001B1C50;
         }
         vars = *(u8 **)(moby + 0x68);
-        *(TI128 *)(m) = *(TI128 *)(D_L23_001B1484 + 0xC0);
-        *(TI128 *)(m + 4) = *(TI128 *)(D_L23_001B1484 + 0xD0);
-        *(TI128 *)(m + 8) = *(TI128 *)(D_L23_001B1484 + 0xE0);
-        *(TI128 *)(m + 12) = 0;
+        /* The following transfers only write private stack matrix rows. */
+        hero = D_L23_001B1484;
+        qcopy_nc(m, hero + 0xC0);
+        qcopy_nc(m + 4, hero + 0xD0);
+        qcopy_nc(m + 8, hero + 0xE0);
+        qzero(m + 12);
         func_L03_002EFB60(m, m, D_L23_001B1C0C);
-        *(TI128 *)(m + 12) = *(TI128 *)(D_L23_001B1484 + 0x10);
+        qcopy(m + 12, D_L23_001B1484 + 0x10);
         m[15] = 1.0f;
-        *(TI128 *)v70 = 0;
+        qzero(v70);
         v70[2] = *(float *)vars;
         func_002833F0(m80, v70);
         func_00283738(m, m, m80);
@@ -196,8 +216,8 @@ void func_L23_0042A8C0(u8 *moby) {
         e = D_L23_0025E9D0[cnt[D_L23_001B1B98_2]];
         func_002830C0(vB0, D_L23_002A6390[D_L23_002A7A70[e].a], m);
         func_002830C0(vC0, D_L23_002A6390[D_L23_002A7A70[e].b], m);
-        *(TI128 *)D_L23_0025EC40[D_L23_001B1B98_2 * 2] = *(TI128 *)vB0;
-        *(TI128 *)D_L23_0025EC40[D_L23_001B1B98_2 * 2 + 1] = *(TI128 *)vC0;
+        qcopy(D_L23_0025EC40[D_L23_001B1B98_2 * 2], vB0);
+        qcopy(D_L23_0025EC40[D_L23_001B1B98_2 * 2 + 1], vC0);
         func_L23_004256F0(D_L23_0025EC40[D_L23_001B1B98_2 * 2], moby, D_L23_0025EC40[D_L23_001B1B98_2 * 2 + 1],
                           D_L23_001B1C58, D_L23_001B1C5C, D_L23_001B1C38, D_L23_001B1C3C, D_L23_001B1C40, f21,
                           f20, f22, D_L23_001B1C34, D_L23_001B1C44, flag, D_L23_001B1C48, 0);

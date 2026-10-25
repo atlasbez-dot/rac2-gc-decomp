@@ -147,7 +147,7 @@ func_0028A130(int param_1)
 INCLUDE_ASM("asm/game", func_0028A180);
 
 
-INCLUDE_ASM("asm/game", func_0028A278);
+/* func_0028A278 is defined in 0028A278.c with its qualified address profile. */
 
 INCLUDE_ASM("asm/game", func_0028A2F8);
 

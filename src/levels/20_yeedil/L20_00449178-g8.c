@@ -106,21 +106,17 @@ void func_L20_00449AE8(char *arg0) {
     func_002A7750(arg0, 1, -1);
 }
 
-INCLUDE_ASM("asm/levels", func_L20_0044A838);
+/* func_L20_0044A838 is defined in L20_0044A838-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L20_00449BB0);
+/* func_L20_00449BB0 is defined in L20_00449BB0-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L20_00449FD0);
 
-INCLUDE_ASM("asm/levels", func_L20_0044B100);
+/* func_L20_0044B100 is defined in L20_0044B100-g8.c. */
 
-/* func_L20_0044A658 is a near miss: nonmatching/levels/func_L20_0044A658.c */
+/* func_L20_0044A658 is defined in L20_0044A658-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L20_0044A658);
-
-/* func_L20_0044A8F0 is a near miss: nonmatching/levels/func_L20_0044A8F0.c */
-
-INCLUDE_ASM("asm/levels", func_L20_0044A8F0);
+/* func_L20_0044A8F0 is defined in L20_0044A8F0-g8.c. */
 
 /* func_L20_00449338 is a near miss: nonmatching/levels/func_L20_00449338.c */
 

@@ -34,11 +34,21 @@ agreed result here. A persistent personal issue comment is no longer required fo
 
 ## Recent verified updates
 
+**Source-method update, 25 October 2026:** RAC1's reviewed shared EE helpers
+(`qcopy`, `qcopy_nc`, `qzero`) and original public runtime-library target
+primitives are now permitted under `AGENTS.md`. Earlier prohibitions below are
+historical for those specific routes; they do not establish that the affected
+functions now match. Requalify the retained C, its interfaces and every applicable
+linked placement. Arbitrary game-function assembly, register pins, artificial
+barriers and false declarations remain forbidden. Proprietary SDK source is
+still outside the permitted sourcing policy.
+
 The imported observations below are dated measurements, not a fresh census. In particular,
 older claims that the following mechanisms are universally impossible are superseded:
 
 | Topic | Verified update |
 | --- | --- |
+| Complete compiler constant pools and RAC1 source methods | [#318](https://github.com/OpenRAC/rac2-decomp/pull/318) records the 25 October qualification: six functions (4,420 distinct C bytes), 240/240 placements and all 84 strict programs passing. `__divdi3`, `__moddi3` and the decimal formatter retain their original compiler sections (560 constant bytes per boot release). Reviewed transfer helpers close two copy/clear bodies; accurate scalar stores close a sixth. All 225 runtime tests pass. Reports are unchanged; constants receive no new Data credit. |
 | Vector-copy address formation and scheduling | [#262](https://github.com/OpenRAC/rac2-gc-decomp/pull/262) and [#275](https://github.com/OpenRAC/rac2-gc-decomp/pull/275) provide opt-in copy profiles. They solve qualified witnesses, not every copy/allocation case. |
 | Wide-store annulled slots | [#279](https://github.com/OpenRAC/rac2-gc-decomp/pull/279) restricts two search paths with an opt-in profile; it is not a hardware prohibition. |
 | A register-fed clear of `0($sp)` | [#281](https://github.com/OpenRAC/rac2-gc-decomp/pull/281) is merged; older source notes calling it proposed are historical. |
@@ -175,6 +185,26 @@ Preserve the measured 48-byte probe and 64-byte matrix outputs and the live
 integer/FP inputs and return values; several older helper declarations omit
 them. A compiled complete draft and a small size delta are neither a byte match
 nor a runtime validation.
+
+**25 October allocator follow-up:** `tools/regalloc.py` confirms identical normal
+and dump-enabled objects for this retained body. The entry-object pseudo has
+11 references, a 7,229-instruction live length and crosses 801 static call sites;
+it is not assigned a hard register. One resident-high pseudo has 51 references
+over 4,032 instructions and takes `$s6`. These are dump observations, not dynamic
+execution counts. Typed-object and field-at-use variants and the bounded loop/
+scheduling options did not close the body; the best remains 37,280/37,268 bytes.
+The three-function address follow-up adds no C match. Keep the retained body and
+reopen with independent object/lifetime evidence, not fabricated reference counts.
+
+The shorter retained `func_L00_003A2258` is still 420/420 bytes: its first
+pointer has 7 references over a live length of 60, versus the index's 9 over
+114. The ordinary and diagnostic objects agree, but the first-input/index
+roles still take the wrong saved registers at +0x3C. Earlier increments and
+non-clobbering local copies did not close that allocation. In
+`func_L00_003A8670`, a measured 112-byte record and explicit configuration
+branches improve 364 bytes to the retail 356; column/index association and
+three address/schedule words remain different after the matching prefix
+through +0xFC. Neither equal size nor a neutral allocator-dump build is a match.
 
 <a id="blocker-02"></a>
 
@@ -324,6 +354,17 @@ avoids that invalid binding assumption. Root/index lifetime and address setup
 still differ. Reopen with independent type/lifetime evidence and exact arm
 layout; neither generated switch data nor linking has been qualified.
 
+**Complete constant pools, 25 October 2026:** the same interleaving principle
+now retains complete relocation-free `.rodata`/`.rdata` sections. Their base is
+derived from that object's accepted text relocations; every byte and padding
+byte, alignment, allocated non-executable retail owner and non-overlap must
+agree. A real ELF-parser regression checks section flags, not only handcrafted
+metadata. The two public libgcc modules and the formatter provide the witnesses:
+`func_0011FC68` (1,772 bytes), `func_00121450` (1,640) and `func_0011C090` (360),
+one boot placement each per release. Their 256/256/48-byte pools are unchanged
+compiler input sections; all 84 strict programs pass. Mixed relocated/scalar
+pools, `.sdata` and unsupported assembly data directives remain rejected.
+
 <a id="blocker-07"></a>
 
 ## 7. Annulled integer branch delay slots
@@ -350,6 +391,12 @@ Two documented names may express different addressing forms of one real global. 
 
 **24 October 2026, retained near miss:** `func_002721C8` (game `-O2 -G8 -ffunction-sections`) is 176/184 bytes and 0/28 placements in each of USA v1.01, PAL and USA v2.00. A typed partial camera-state view recovers the 0x30 frame and saved registers; a raw byte view was 168 bytes and a `nosda` scalar grew to 200. Retail uses absolute address/first-load forms and a later GP read of the same scalar, while the retained single canonical SDA declaration uses GP throughout. Six checker invocations, no scratch compiles; size mismatch prevents relocation-qualified binding checks. The actual C is in `nonmatching/game/func_002721C8.c`, with its source marker restored. Reopen with evidence for the real scalar storage/declaration and its two addressing forms, without duplicate invented identities or scheduling barriers.
 
+A bounded `-mno-split-addresses` trial for `func_L00_00396288` and
+`func_L00_00392530` fails in the qualified GNU assembler with the internal
+assertion at `tc-mips.c:11867`. The retained drafts use their ordinary profiles;
+this is a failure of that tested path, not evidence of handwritten game code
+or a reason to rewrite the output instructions.
+
 <a id="blocker-09"></a>
 
 ## 9. Folded addresses where retail materialises the base
@@ -366,13 +413,48 @@ scope. All 28 programs pass --strict and all 71 tests pass in the final tree.
 
 **Signature:** retail `addiu $v1,$base,N ; lq/sq $v0,0($v1)` where cc1 folds to `lq $v0,N($base)`. One instruction, and it drags the register allocation with it.
 
-**Not a workaround, on the contrary:** `qcopy(dst, src)` / `qzero(p)` from `include/common.h` do force
-the address into a register, but they are inline assembly, and AGENTS.md's "Plain C" rule (no
-inline assembly in a function) rules that out as a matching route - docs/COMPILER-NOTES.md says it
-explicitly. Seventeen bodies that had been landed with them were removed from `src/` on 2026-10-13
-and sit in `nonmatching/` with their notes, waiting for a plain-C spelling. The remaining levers are
-`mode(TI)` assignment (offset folded, wrong when retail materialises) and an aggregate/`memcpy`
-spelling (neither reproduced it in the waves' attempts). A sibling shape was re-confirmed on the `func_L00_003B0AB0` / `B0A28` / `B0CE8` family in wave 8: retail keeps `lui %hi(D) ; addiu %lo(D) ; addiu rd,rs,CONST` with the constant in a **separate** `addiu`, and all seven source forms tried (`D+0xC+idx*0x1C`, `(char *)&D[idx*0x1C]+0x10`, `((char (*)[0x1C])D)[idx]+0x10`, a local base, ...) folded `D+CONST` into the `%lo`. Those seven forms did not close that family; this is a bounded result, not a proof about every legal source form.
+**Helper route reopened on 25 October 2026:** `qcopy(dst, src)` / `qzero(p)` from
+`include/common.h` force the address into a register and are now approved shared
+helpers under `AGENTS.md`. Their real memory effects still need source/ABI and
+strict linked qualification. Seventeen bodies that had been landed with helpers
+were removed under the earlier policy on 2026-10-13
+and their retained drafts require fresh qualification under the approved helper policy.
+The historical `mode(TI)` and aggregate/`memcpy` experiments did not reproduce those
+transfers; those failures do not rule out the now-approved helpers. A sibling shape was re-confirmed on the `func_L00_003B0AB0` / `B0A28` / `B0CE8` family in wave 8: retail keeps `lui %hi(D) ; addiu %lo(D) ; addiu rd,rs,CONST` with the constant in a **separate** `addiu`, and all seven source forms tried (`D+0xC+idx*0x1C`, `(char *)&D[idx*0x1C]+0x10`, `((char (*)[0x1C])D)[idx]+0x10`, a local base, ...) folded `D+CONST` into the `%lo`. Those seven forms did not close that family; this is a bounded result, not a proof about every legal source form.
+
+**25 October 2026 helper and lifetime follow-up:** nineteen functions totaling
+7,580 distinct C bytes pass all 84 strict program builds across USA v1.01,
+USA v2.00 and PAL; all 162 carrying placements use C without fallback.
+Catalogue absences are recorded separately, not counted as checks or matches.
+[Qualified source and retained reconstructions](https://github.com/OpenRAC/rac2-decomp/commit/f8236cfde5556b48cb745ba3907af9d8c94b1c8f).
+The approved helpers recover complete transfers without guessing local extents.
+`func_L23_00428490` keeps its measured 144-byte packet and sixth integer argument;
+`func_L07_003F8010` needs a single 64-byte affine matrix, rather than separate
+48-byte and 16-byte locals. The ribbon drafts `func_L00_003973E8` and
+`func_L00_00395A88` now copy all four components on the zero-length ray path;
+the old drafts copied only the last two. Their 1480/1488 and 1508/1516-byte
+results remain near misses, with loop lifetimes and saved-register allocation
+still different. The allocator diagnostic reproduces the ordinary compiled
+objects; it measures interference and priorities, not semantic correctness.
+
+Copy independence includes later writes: the fourth matrix row in
+`func_L23_0042A018` and `func_L23_0042A8C0` is followed by a write to its W
+component, so it uses clobbering `qcopy`. Only the first three independent rows
+use `qcopy_nc`. Rechecking this repair leaves the measured object bytes
+unchanged; equality alone would not have justified the weaker memory contract.
+The existing `func_002B5678` definition also now declares the unused fourth
+scratch-pointer slot supplied by its C caller. The retail body does not read
+that input; no dummy use or instruction is added.
+
+Two residuals need source evidence, not padding or instruction rewriting:
+`func_L18_003FD630` is 252/252 bytes with a 0x90 frame instead of 0xF0;
+only four input control vectors are established, so an extra 0x60-byte local
+would be unsupported. `func_L18_002CFF48` is 504/504 bytes and agrees through
++0x194; a plain branch at +0x198 differs from the retail likely branch, with
+a different global-mode temporary. Duplicate calls worsen it to 520 bytes;
+natural switch/goto forms tie. Reopen with independent storage or conditional
+lifetime evidence. Final profiles, release coverage and reopening conditions
+remain beside the retained C in `nonmatching/`.
 
 **24 October 2026 linked C qualification:** `func_00270D50` (220 bytes) passes 28/28 placements in each of USA v1.01, PAL and USA v2.00 in its dedicated `-O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier` unit. The default profile gave 204 bytes; qcopy alone recovered retail size but still moved address/call setup and restores across the copies. The existing barrier profile reproduces the complete body without a source barrier. The C keeps the camera fields within the canonical `D_L00_001B8C80` object and the established six-pointer `func_00270B58` interface; the helper also passes 28/28 checks per release. All 84 strict program builds pass with the candidate linked, without C fallback. This is one distinct function, not one per placement.
 
@@ -392,7 +474,7 @@ spelling (neither reproduced it in the waves' attempts). A sibling shape was re-
 
 The wave 8 correction correctly identified 0x700014A9 as por, not mtsa or an undecodable word. The recorded mtsa zero encoding was 0x00000029. A por-plus-sq zero mismatch remains separate from a decoder error (section 17).
 
-lq/sq are not VU0/COP2 and can be emitted from a TImode C assignment. Four targets were nearly misclassified because the reader used a generic instruction category. Use `rabbitizer.Instruction(word, address, rabbitizer.InstrCategory.R5900).disassemble()`; not every generic INVALID word is lq/sq, so decode each exact word. qcopy/qzero inline assembly is not an allowed matching route.
+lq/sq are not VU0/COP2 and can be emitted from a TImode C assignment. Four targets were nearly misclassified because the reader used a generic instruction category. Use `rabbitizer.Instruction(word, address, rabbitizer.InstrCategory.R5900).disassemble()`; not every generic INVALID word is lq/sq, so decode each exact word. The reviewed qcopy/qzero helpers are also permitted under the updated source-method rule; none of these instructions alone proves a complete match.
 
 `func_L00_00391398` provides a further plain-C control: its 324-byte body, including
 `por` plus `sq` zero initialization, passed `tools/check.py` at 27/27 placements in
@@ -517,7 +599,14 @@ Merged PR #251 provides the qualified, default-off per-file `-frac2-zero-ti-barr
 
 [PR #258](https://github.com/OpenRAC/rac2-gc-decomp/pull/258) restricts the existing fold to a register-only memory address, retaining materialized zero registers for offset stores. Its 775-unit A/B run found no non-debug section changes and 11 mdebug differences. The integrated clean witnesses are func_L20_0044AB68 (204 bytes, 1/1 placement), func_L20_00443908 (264 bytes, 1/1) and func_L00_003ACC88 (112 bytes, 27/27 in its G8 unit). All 28 programs pass --strict and all 57 tests pass. This corrects the zero-store rule; it does not resolve all TI-copy address families or all historically screened near misses.
 
-**Separate copy-epilogue residue:** `func_00335370` remains 88/88 bytes, 0/28 with `-frac2-qcopy`. Before `sched2`, the copy and restores already have retail order; `sched2` fills the field-load-to-address latency gap with the independent return-address restore. The source-pointer restore has a real anti-dependence on the copy. `-mastra-keep-frame-order` is byte-identical because these restores are not frame-related; disabling sched2 repairs the tail but changes the prologue. Keep the retained C. Reopen with independent evidence for an original epilogue/scheduling policy or a meaningful source dependency, not an artificial clobber or barrier.
+**Copy-epilogue qualification, 25 October 2026:** `func_00335370` is now
+C in `src/game/00335370-copy.c`, 88 bytes at 28/28 placements in each release.
+The real shared `qcopy` helper reproduces the memory dependence that keeps the
+return-address restore after the copy, with the default game profile. The earlier
+TI-only frame-order and sched2 experiments were near misses, not proof of an
+unreachable epilogue. `func_002B5678` similarly qualifies its snapshot and clear
+through `qcopy`/`qzero`: 432 bytes at 21/21 placements per release. Both are
+included in the 84 strict program builds; old drafts remain in Git history.
 
 <a id="blocker-18"></a>
 
@@ -614,7 +703,7 @@ reproduces retail's `sd a2..t3` + `swc1 f12..f18` save prologue **and** the fram
 
 ## 22. Vector copies: address materialisation is only part of the mismatch
 
-Historical Tabora near misses remain separate: func_L08_003D3D80(128-byte target), func_L08_003D8290(96) and func_L08_003D0508(192) differed in pointer materialisation, copy order, frame or scheduling. They are still markers. qcopy/qzero experiments are not acceptable source promotions because they use inline assembly.
+Historical Tabora near misses remain separate: func_L08_003D3D80(128-byte target), func_L08_003D8290(96) and func_L08_003D0508(192) differed in pointer materialisation, copy order, frame or scheduling. They are still markers. Approved qcopy/qzero helpers now provide a concrete reopening route; the historical experiments have not thereby gained linked qualification.
 
 Plain TI-mode C can emit lq/sq; some struct/memcpy spellings instead emitted scalar or unaligned copies. Roughly twenty forms under game/SDK profiles did not close these candidates. Fixed offsets commonly folded into the access, but “only opaque pointer parameters can work” is too broad: current notes also document held/loop-carried/memory-loaded/join-dependent pointers and out-of-range offsets. These observations neither solve the three candidates nor prove all fixed-offset copies impossible.
 
@@ -747,7 +836,7 @@ as a loop unrolled once by cc1").
 
 ## 30. Loop-alignment padding
 
-**Partial resolution:** func_L22_003A48F8 passes 2/2 and func_L23_00419CA0 passes 1/1. The qcopy experiment below concerns prohibited inline assembly, not an acceptable matching route.
+**Partial resolution:** func_L22_003A48F8 passes 2/2 and func_L23_00419CA0 passes 1/1. The historical qcopy experiment below predates the reviewed-helper exception and still needs its own current linked check.
 
 **Signature:** the `nop`s the R5900 pass puts in front of a loop head are missing, or there is
 one too many, shifting the loop by a word. The pass is named in one note
@@ -775,6 +864,12 @@ Wave 8 probes found -mno-split-addresses produced the required absolute-access f
 The infrastructure now exists: many dedicated units already use the flag in config/cflags.txt. It is not the only way to produce every at-based access; declaration size/attributes, profile and assembler context still matter (section 8). A probe's “only” must not become a universal rule.
 
 PR #246's func_L20_00444138 is a current 1/1 witness in a G8/mno-split-addresses unit, also using the two true addressing forms of one bound. Isolate incompatible profiles in separate files and recheck all C in a changed unit.
+
+**25 October scalar-store witness:** `func_0028A278` qualifies at 128 bytes,
+28/28 placements in each release, in its own `-mno-split-addresses` unit. The
+ordinary independent stores must also use the correct canonical globals and
+order; a size-only result hid reversed bindings. The existing canonical helper
+interface is preserved. The final tree passes all 84 strict programs.
 
 <a id="blocker-32"></a>
 
@@ -1053,6 +1148,15 @@ Historical examples, to requalify in the final unit:
 **Both sign-bit encodings occur.** The multiplier needs `ori 0x8000; dsll32 16` at two sites, while the default `addiu -1; dsll32 31` remains required by existing game code. Per-file `-Wa,--r5900-sign-bit=unsigned` selects this bounded assembler option; explicit `signed` restores the default. No output rewriting or function/address special case is involved.
 
 Fresh recipe, 80 container tests and all 28 strict programs pass with zero C fallback. Same-source A/B across 781 units changes code only in the new multiplier; eleven units differ only in `.mdebug`. The 1,980 authored assembler cases are checked in each of three profiles. Details and source references are in [COMPILER-NOTES.md](https://github.com/OpenRAC/rac2-gc-decomp/blob/master/docs/COMPILER-NOTES.md). Progress regeneration remains deferred.
+
+**Public runtime modules, 25 October 2026:** `__divdi3` and `__moddi3`
+qualify with the original public GCC MIPS multiplication primitive and the
+complete `count_leading_zeros` macro, including its portable constant-size
+branch wrapper. Flattening that wrapper changed padding even with equivalent
+arithmetic. No instructions or nops were patched. Dedicated SDK-profile units
+and the complete constant-pool placement above give 1/1 in each release and
+all 84 strict builds. Original GNU notices and the linking exception remain
+in both source files; no proprietary SDK source was used.
 
 <a id="blocker-47"></a>
 
@@ -1480,7 +1584,7 @@ attributed for provenance, not exclusive ownership.
 | --- | --- | --- |
 | `_fpadd_parts`, `func_00122800` | **Merged, #265** | 576 bytes, 1/1 boot placement with the SDK profile. The assembler's bounded positive shifted-mask rule reduced two constants from seven to three instructions each. Full 28-program strict build passed. |
 | `dpmul`, `func_00122B00` | **Merged, #267** | 680 bytes, 1/1 boot placement. Restoring the public fraction union restores the real alias dependence and the rounding `bnel`/store slot. Two sign-bit loads use the per-file unsigned assembler seed; the signed default remains unchanged. All 80 tests and 28 strict programs passed. |
-| Copy epilogue, `func_00335370` | **Retained, not matched** | 88/88 bytes, 0/28 placements with `-frac2-qcopy`. `sched2` fills the field-load-to-address latency gap with the independent ra restore. Frame-order is byte-neutral; disabling sched2 repairs only the tail and changes the prologue. The copy profile merged in #275 is now a concrete reopening experiment. This retained function was not requalified in this review, so no match credit is claimed; keep the measured source and avoid artificial clobbers or barriers. |
+| Copy epilogue, `func_00335370` | **Qualified C, 25 October** | Default game profile plus the reviewed shared `qcopy`: 88 bytes, 28/28 per release, all 84 strict programs pass. Prior TI-only measurements are historical; source is `src/game/00335370-copy.c`. |
 
 For #267, a same-source comparison of 781 configured units changed code only in the new multiplier; eleven differences were debug-only. The shared union changed no object section in the four existing users. Source, flags and durable explanations are in the merged repository; partial C remains in `nonmatching/`. No progress report was regenerated.
 

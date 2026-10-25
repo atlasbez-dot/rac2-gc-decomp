@@ -1,3 +1,19 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/levels/23_damosel_orbit/L23_0042A438-g8.c
+ * Game profile: -O2 -G8 -ffunction-sections
+ * Release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL 0/1 (exit1).
+ * Current residual: 1132/1156 bytes. Approved qcopy/qzero retain full matrix and packet
+ * extents. Shortening the matrix-pointer lifetime and holding the source only across
+ * stack-row writes still leaves loop stack-slot versus register allocation, ALPHA reload
+ * and global-float scheduling differences.
+ * Reopen only for: A true counter/matrix lifetime model and explanation of the ALPHA field
+ * reloads across the divisor check.
+ * Older notes below are historical. ASM marker and trial-only profiles were restored.
+ */
+
+#include "common.h"
+
 /* func_L23_0042A438 (1156 bytes, level 23 only) -- NEAR MISS, not integrated.
    Measured on 22 October 2026 with the compiler built from master (qcopy barrier and the
    annulled-wide-store switch included): this C compiles to 1140 bytes, 16 short of retail's
@@ -39,17 +55,17 @@
    check; a pointer-walk loop and a descending loop with an index expression (151 rows) were
    worse. */
 
-typedef unsigned char u8;
 
-typedef unsigned short u16;
 
-typedef unsigned int u32;
 
-typedef short s16;
 
-typedef int s32;
 
-typedef long long s64;
+
+
+
+
+
+
 
 typedef int TI16 __attribute__((mode(TI)));
 
@@ -144,7 +160,7 @@ extern s32 func_L00_002FCF18(void *, float, float, float, float, float);
 
 extern long long func_0027C878(s32);
 
-extern void func_002FC560(u32, unsigned long);
+extern void func_002FC560(u32, u64);
 
 extern void func_L03_002EFB60(void *, void *, float);
 
@@ -164,7 +180,7 @@ void func_L23_0042A438(u8 *moby) {
     L23Spin3 *vars;
     L23Quad pkt;
     TI16 m[4];
-    TI16 *mp = m;
+    TI16 *mp;
     TI16 w[1];
     TI16 axis[1];
     TI16 rot[3];
@@ -179,6 +195,7 @@ void func_L23_0042A438(u8 *moby) {
     float f;
     float t;
     s32 i;
+    u8 *hero;
     s64 reg;
     s64 tex;
 
@@ -215,14 +232,16 @@ void func_L23_0042A438(u8 *moby) {
         pkt.tail[1] = tex;
         pkt.tail[0] = 0;
         func_002FC560(0x47, 0x53001);
-        m[0] = *(TI16 *)(D_L23_001B1484_2 + 0xC0);
-        m[1] = *(TI16 *)(D_L23_001B1484_2 + 0xD0);
-        m[2] = *(TI16 *)(D_L23_001B1484_2 + 0xE0);
-        m[3] = 0;
+        hero = D_L23_001B1484_2;
+        qcopy(&m[0], hero + 0xC0);
+        qcopy(&m[1], hero + 0xD0);
+        qcopy(&m[2], hero + 0xE0);
+        qzero(&m[3]);
+        mp = m;
         func_L03_002EFB60(mp, mp, D_L23_001B1C0C);
-        m[3] = *(TI16 *)(D_L23_001B1484_2 + 0x10);
+        qcopy(&m[3], D_L23_001B1484_2 + 0x10);
         ((float *)&m[3])[3] = 1.0f;
-        axis[0] = 0;
+        qzero(axis);
         ((float *)axis)[2] = vars->turn;
         func_002833F0(rot, axis);
         func_00283738(m, m, rot);

@@ -337,6 +337,7 @@ class Placement:
         self.values = {}          # symbol -> value
         self.objects = []
         self.tables = {}          # (object path, section name) -> (address, size)
+        self.scalar_pools = set() # the relocation-free subset of tables
 
     def retail(self, address: int, size: int) -> bytes:
         for seg in self.image["segments"]:
@@ -485,7 +486,11 @@ class Placement:
         while changed:
             changed = False
             where = {(o, sec): a for a, _, o, sec in self.placed.values()}
-            tables = {}
+            tables, scalar_pools, bindings = {}, set(), {}
+            for name, need in needs.items():
+                if name in self.placed:
+                    for sec, address in need.items():
+                        bindings.setdefault((self.placed[name][2], sec), set()).add(address)
             for name, need in needs.items():
                 if name not in self.placed:
                     continue
@@ -494,13 +499,19 @@ class Placement:
                 for sec, address in need.items():
                     if sec not in (".rodata", ".rdata"):
                         continue
+                    if len(bindings[path, sec]) != 1:
+                        continue
                     index = next(i for i, s in enumerate(obj["sections"]) if s["name"] == sec)
                     if self.jump_table(obj, index, address, path, where):
                         tables[path, sec] = (address, obj["sections"][index]["size"])
+                    elif self.scalar_pool(obj, index, address):
+                        tables[path, sec] = (address, obj["sections"][index]["size"])
+                        scalar_pools.add((path, sec))
             # No two compiler input sections may claim the same retail bytes.
             conflicts = {key for key, (a, n) in tables.items()
                          if any(key != other and a < b + m and b < a + n
-                                for other, (b, m) in tables.items())}
+                                for other, (b, m) in tables.items())
+                         or any(a < b + m and b < a + n for b, m, _, _ in self.placed.values())}
             for key in conflicts:
                 del tables[key]
             where.update({key: a for key, (a, _) in tables.items()})
@@ -513,7 +524,32 @@ class Placement:
         self.tables = {key: value for key, value in tables.items()
                        if any(o == key[0] and needs[sym].get(key[1]) == value[0]
                               for sym, (_, _, o, _) in self.placed.items())}
+        self.scalar_pools = scalar_pools & self.tables.keys()
         self.objects = sorted({o for _, _, o, _ in self.placed.values()})
+
+    def scalar_pool(self, obj: dict, index: int, address: int) -> bool:
+        """Place one whole, relocation-free read-only input section without rewriting it.
+
+        Its address comes from the calling text's relocations, not a value search or
+        a configured address. Check the entire pool, including padding and unused
+        constants, against exactly one initialized retail data section/load segment.
+        Relocated pointers, mixed branch tables and writable pools stay unsupported.
+        """
+        sec = obj["sections"][index]
+        size, alignment = sec["size"], sec.get("align", 1)
+        if (sec["name"] not in (".rodata", ".rdata") or sec["type"] != elf.SHT_PROGBITS
+                or sec.get("flags", 0) != 2 or size <= 0 or len(sec["data"]) != size
+                or alignment <= 0 or alignment & (alignment - 1) or address % alignment
+                or obj["relocations"].get(index)
+                or any(s["section"] == index and s["type"] == 2 for s in obj["symbols"])):
+            return False
+        owners = [s for s in self.image["sections"] if s["type"] == elf.SHT_PROGBITS
+                  and s.get("flags", 0) & 2 and not s.get("flags", 0) & 4
+                  and s["name"] not in (".text", "core.text")
+                  and s["address"] <= address and address + size <= s["address"] + s["size"]]
+        loads = [s for s in self.image["segments"] if s["type"] == elf.PT_LOAD
+                 and s["address"] <= address and address + size <= s["address"] + s["filesz"]]
+        return len(owners) == len(loads) == 1 and self.retail(address, size) == sec["data"]
 
     def jump_table(self, obj: dict, index: int, address: int, path: Path, where: dict) -> bool:
         """Qualify a complete compiler-owned table, including every case destination.
@@ -629,22 +665,26 @@ def level_reference(number: int) -> Path:
     return path
 
 
-def split_table_data(text: str, tables: dict[int, tuple[int, str]]) -> tuple[list[tuple[str, str]], dict[str, str]]:
+def split_table_data(text: str, tables: dict[int, tuple[int, str]], *, scalar: bool = False
+                     ) -> tuple[list[tuple[str, str]], dict[str, str]]:
     """Replace measured whole-word data spans with compiler section inputs.
 
     Keep all surrounding assembly and retain names defined inside a replaced span
-    at their measured addresses. Fail closed on non-word directives or gaps.
+    at their measured addresses. Branch tables require one .word per annotated
+    record. Relocation-free scalar pools also accept numeric .byte/.short records;
+    records must be contiguous and fully contained, with no implicit padding.
     """
     lines = text.splitlines(keepends=True)
     pieces, aliases, current, pending = [], {}, [], []
     active, seen, consumed = None, set(), set()
     spans = sorted((a, a + n) for a, (n, _) in tables.items())
-    if any(a % 4 or end <= a or end % 4 for a, end in spans):
+    if any(end <= a or (not scalar and (a % 4 or end % 4)) for a, end in spans):
         sys.exit("invalid compiler jump table span")
     if any(end > following for (_, end), (following, _) in zip(spans, spans[1:])):
         sys.exit("overlapping compiler jump tables")
     for line in lines:
-        ins = INSTRUCTION.search(line)
+        ins = (re.search(r"/\*\s+[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})(?:\s+[0-9A-Fa-f]+)?\s*\*/", line)
+               if scalar else INSTRUCTION.search(line))
         if not ins:
             pending.append(line)
             continue
@@ -673,9 +713,20 @@ def split_table_data(text: str, tables: dict[int, tuple[int, str]]) -> tuple[lis
             pieces.append(("c", owner))
         if active:
             start, size, _ = active
-            if address != start + 4 * sum(1 for a in consumed if start <= a < start + size):
+            width = 4
+            if scalar:
+                directive = re.search(r"\*/\s*\.(byte|short|half|word)\s+([^;#\n]+)\s*$", line.rstrip())
+                if not directive:
+                    sys.exit("compiler scalar pool span is not fixed-size numeric data")
+                fields = [field.strip() for field in directive[2].split(",")]
+                if any(not re.fullmatch(r"-?(?:0[xX][0-9A-Fa-f]+|[0-9]+)", f) for f in fields):
+                    sys.exit("compiler scalar pool span is not fixed-size numeric data")
+                width = {"byte": 1, "short": 2, "half": 2, "word": 4}[directive[1]] * len(fields)
+            if address != start + sum(1 for a in consumed if start <= a < start + size):
                 sys.exit("noncontiguous compiler jump table span")
-            if not re.search(r"\*/\s*\.word\s+[^,;\n]+$", line.rstrip()):
+            if address + width > start + size:
+                sys.exit("compiler data record crosses its input-section boundary")
+            if not scalar and not re.search(r"\*/\s*\.word\s+[^,;\n]+$", line.rstrip()):
                 sys.exit("compiler jump table span is not whole-word data")
             for previous in pending:
                 label = re.fullmatch(r"\s*([A-Za-z_.$][\w.$]*):\s*", previous)
@@ -685,8 +736,8 @@ def split_table_data(text: str, tables: dict[int, tuple[int, str]]) -> tuple[lis
                       and not re.fullmatch(r"\s*\.globl\s+[A-Za-z_.$][\w.$]*\s*", previous)
                       and not re.fullmatch(r"\s*/\*.*?\*/\s*", previous)):
                     sys.exit("unsupported directive inside compiler jump table")
-            consumed.add(address)
-            if address + 4 == start + size:
+            consumed.update(range(address, address + width))
+            if address + width == start + size:
                 active = None
         else:
             current.extend(pending)
@@ -695,7 +746,7 @@ def split_table_data(text: str, tables: dict[int, tuple[int, str]]) -> tuple[lis
     current.extend(pending)
     if "".join(current).strip():
         pieces.append(("asm", "".join(current)))
-    if seen != tables.keys() or any(sum(1 for a in consumed if start <= a < start + n) * 4 != n
+    if seen != tables.keys() or any(sum(1 for a in consumed if start <= a < start + n) != n
                                     for start, (n, _) in tables.items()):
         sys.exit("incomplete compiler jump table span")
     return pieces, aliases
@@ -757,43 +808,49 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
             script = script.replace(old, "\n        ".join(inputs))
             script = re.sub(re.escape(old[:-len("(.text);")]) + r"\(\.(?:data|rodata|bss)\);", "", script)
         sources = kept
-        # Replace only qualified compiler table spans, retaining all unrelated data.
-        tables = {a: (n, f"{o.relative_to(directory, walk_up=True).as_posix()}({sec});")
-                  for (o, sec), (a, n) in placement.tables.items()}
-        kept = []
-        for source in sources:
-            text = source.read_text()
-            addresses = {int(m.group(1), 16) for m in INSTRUCTION.finditer(text)}
-            mine = {a: value for a, value in tables.items() if a in addresses}
-            if not mine:
-                kept.append(source)
-                continue
-            section = re.search(r'\.section\s+(\.\w+)', text)
-            if section is None or section.group(1) == ".text":
-                sys.exit("compiler jump table is not in a data assembly input")
-            old = ("build/asm/" + source.relative_to(directory / "asm_pp").as_posix()
-                   + f".o({section.group(1)});")
-            if script.count(old) != 1:
-                sys.exit(f"{name}: cannot find table input {old}")
-            pieces, labels = split_table_data(text, mine)
-            aliases.update(labels)
-            inputs = []
-            for k, (kind, body) in enumerate(pieces):
-                if kind == "c":
-                    inputs.append(body)
-                else:
-                    piece = directory / "asm_pp/pieces" / f"{source.stem}_data_{k}.s"
-                    piece.parent.mkdir(exist_ok=True)
-                    piece.write_text(f'.section {section.group(1)}, "wa"\n' + body)
-                    kept.append(piece)
-                    inputs.append("build/asm/" + piece.relative_to(directory / "asm_pp").as_posix()
-                                  + f".o({section.group(1)});")
-            script = script.replace(old, "\n        ".join(inputs))
-            for a in mine:
-                del tables[a]
-        if tables:
-            sys.exit(f"{name}: compiler jump tables missing from assembly data")
-        sources = kept
+        # Interleave original compiler data sections with the surrounding retail data.
+        # Separate passes preserve the branch-table directive checks while allowing
+        # relocation-free byte/halfword scalar pools in the same retail assembly file.
+        for scalar in (False, True):
+            tables = {a: (n, f"{o.relative_to(directory, walk_up=True).as_posix()}({sec});")
+                      for (o, sec), (a, n) in placement.tables.items()
+                      if ((o, sec) in placement.scalar_pools) == scalar}
+            kept = []
+            for source in sources:
+                text = source.read_text()
+                annotations = (re.compile(r"/\*\s+[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})(?:\s+[0-9A-Fa-f]+)?\s*\*/")
+                               if scalar else INSTRUCTION)
+                addresses = {int(m.group(1), 16) for m in annotations.finditer(text)}
+                mine = {a: value for a, value in tables.items() if a in addresses}
+                if not mine:
+                    kept.append(source)
+                    continue
+                section = re.search(r'\.section\s+(\.\w+)', text)
+                if section is None or section.group(1) == ".text":
+                    sys.exit("compiler data is not in a data assembly input")
+                old = ("build/asm/" + source.relative_to(directory / "asm_pp").as_posix()
+                       + f".o({section.group(1)});")
+                if script.count(old) != 1:
+                    sys.exit(f"{name}: cannot find data input {old}")
+                pieces, labels = split_table_data(text, mine, scalar=scalar)
+                aliases.update(labels)
+                inputs = []
+                for k, (kind, body) in enumerate(pieces):
+                    if kind == "c":
+                        inputs.append(body)
+                    else:
+                        piece = directory / "asm_pp/pieces" / f"{source.stem}_data_{k}.s"
+                        piece.parent.mkdir(exist_ok=True)
+                        piece.write_text(f'.section {section.group(1)}, "wa"\n' + body)
+                        kept.append(piece)
+                        inputs.append("build/asm/" + piece.relative_to(directory / "asm_pp").as_posix()
+                                      + f".o({section.group(1)});")
+                script = script.replace(old, "\n        ".join(inputs))
+                for a in mine:
+                    del tables[a]
+            if tables:
+                sys.exit(f"{name}: compiler data missing from assembly data")
+            sources = kept
         discard = "".join(f"        {o.relative_to(directory, walk_up=True).as_posix()}(*)\n" for o in placement.objects)
         end = script.rindex("}")
         script = script[:end] + "    /DISCARD/ :\n    {\n" + discard + "    }\n" + script[end:]

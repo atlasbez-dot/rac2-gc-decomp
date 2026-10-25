@@ -1,3 +1,12 @@
+/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measurement: 1480/1488 bytes, 0/27 US placements, frame 0x250.
+ * Change: The two zero-length ray branches now copy all 16 bytes, matching retail LQ/SQ; the previous draft copied only components 2/3. Core vertex transfers also use approved qcopy.
+ * Residual: Real split loop indices and no-force-mem tied; pointer-at-use measured 1476. Saved input/loop register allocation and scheduling still differ.
+ * Reopen: Obtain measured loop live-range evidence that reproduces the saved points/index allocation; preserve the complete ray copies and F13/F14 inputs.
+ * Earlier measurements/screens below are historical; they do not prohibit
+ * the currently approved shared transfer helpers or establish linked equality.
+ */
 /* Nonmatching: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_003973E8: 0 of 27 places match (src/levels/shared/L00_003973E8.c); us2: func_L00_003973E8: 0 of 27 places match (src/levels/shared/L00_003973E8.c); pal: func_L00_003973E8: 0 of 27 places match (src/levels/shared/L00_003973E8.c). Three manual trials; best1488/1488 frame0x250, first mismatch+4 saved registers. Real144-byte packets, aligned16-byte vectors andu64 texture return/state preserved. Retail usesF13 width/F14 extension, F12 unused. Reopen on loop lifetime/register allocation evidence. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -59,7 +68,7 @@ void func_L00_003973E8(Vector *points, u32 color, u32 outerColor, int count, flo
         else if (i == count - 2) { core.color[2] = D_L00_001AF344; core.color[3] = D_L00_001AF344; }
         else if (i == 2) { core.color[0] = coreColor; core.color[1] = coreColor; }
         func_00280B90(&core, 0, 0);
-        core.vertex[0].quad = core.vertex[2].quad; core.vertex[1].quad = core.vertex[3].quad;
+        qcopy(&core.vertex[0], &core.vertex[2]); qcopy(&core.vertex[1], &core.vertex[3]);
     }
     for (i = 0, current = points; i < segments; i++, current++) {
         func_00282CF0(&firstRay, current, D_L00_001B8DC0);
@@ -67,9 +76,9 @@ void func_L00_003973E8(Vector *points, u32 color, u32 outerColor, int count, flo
         firstLength = func_00282DF0(&firstRay);
         lastLength = func_00282DF0(&lastRay);
         if (lastLength < firstLength) {
-            if (lastLength == 0) { lastRay.f[2] = firstRay.f[2]; lastRay.f[3] = firstRay.f[3]; }
+            if (lastLength == 0) { qcopy(&lastRay, &firstRay); }
             else func_00282D30(&lastRay, &lastRay, firstLength / lastLength);
-        } else if (firstLength == 0) { firstRay.f[2] = lastRay.f[2]; firstRay.f[3] = lastRay.f[3]; }
+        } else if (firstLength == 0) { qcopy(&firstRay, &lastRay); }
         else func_00282D30(&firstRay, &firstRay, lastLength / firstLength);
         func_00282CC0(&first, D_L00_001B8DC0, &firstRay);
         func_00282CC0(&last, D_L00_001B8DC0, &lastRay);

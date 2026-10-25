@@ -1,3 +1,19 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/levels/23_damosel_orbit/L23_00426248-g8.c
+ * Game profile: -O2 -G8 -ffunction-sections
+ * Release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL catalogue absent (exit1).
+ * Current residual: 904/900 bytes. Register and stack-slot selection for incoming
+ * arguments, the five-slot reset/addressing and payload store scheduling differ. qcopy now
+ * preserves the five real vector transfers. The descending reset ties at 904;
+ * mno-split-addresses gives 888.
+ * Reopen only for: A measured source/storage explanation for slot-table address formation
+ * and incoming argument live ranges; no new cosmetic schedule sweep.
+ * Older notes below are historical. ASM marker and trial-only profiles were restored.
+ */
+
+#include "common.h"
+
 /* func_L23_00426248 (900 bytes, 1 place: 23:00426248) -- NEAR MISS, not integrated.
    This C compiles to 880 bytes against retail's 900 (-g8 unit, -O2 -G8): twenty bytes short;
    148 of retail's 225 words match in place, and everything after the local quad copy (the
@@ -30,10 +46,10 @@
    symbol D_L23_001BA500 with offsets (not two symbols) is what lets cc1 derive one address from
    the other. The statement order is the best of a hill-climb over the header statements. */
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef short s16;
-typedef int s32;
+
+
+
+
 typedef int TI128 __attribute__((mode(TI)));
 
 extern float D_L23_001B19FC __attribute__((sda));
@@ -62,7 +78,7 @@ void *func_L23_00426248(u8 *p0, u8 *p1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, 
     float d;
 
     if (D_L23_001B19FC == -1.0f) {
-        for (i = 0; i < 5; i++) {
+        for (i = 4; i >= 0; i--) {
             D_L23_001B3918[i] = 0;
         }
         D_L23_001B19FC = 0.0f;
@@ -84,33 +100,33 @@ void *func_L23_00426248(u8 *p0, u8 *p1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, 
         payload = *(u8 **)(obj + 0x68);
         obj[0x30] = 0xFF;
         *(s16 *)(obj + 0x32) = 0xFF;
-        *(s32 *)(payload + 0x3C) = i;
-        *(TI128 *)pos = *(TI128 *)p0;
-        *(float *)(obj + 0xEC) = 0.0f;
         obj[0x20] = 0;
-        *(s32 *)(payload + 0x24) = a4;
-        *(float *)(obj + 0xDC) = 0.0f;
-        *(float *)(obj + 0xCC) = 0.0f;
+        *(s32 *)(payload + 0x3C) = i;
+        qcopy(pos, p0);
         *(float *)(obj + 0x1C) = 1.0f;
-        *(float *)(payload + 0x14) = f;
-        *(TI128 *)(obj + 0xC0) = *(TI128 *)(p1 + 0xC0);
-        *(TI128 *)(obj + 0xE0) = *(TI128 *)(p1 + 0xE0);
-        *(TI128 *)(obj + 0xD0) = *(TI128 *)(p1 + 0xD0);
+        qcopy(obj + 0xC0, p1 + 0xC0);
+        qcopy(obj + 0xD0, p1 + 0xD0);
+        qcopy(obj + 0xE0, p1 + 0xE0);
+        *(float *)(obj + 0xCC) = 0.0f;
+        *(float *)(obj + 0xEC) = 0.0f;
+        *(float *)(obj + 0xDC) = 0.0f;
+        *(s32 *)(payload + 0x20) = a3;
+        *(s32 *)(payload + 0x24) = a4;
         *(s32 *)(payload + 0x28) = a5;
         *(s32 *)(payload + 0x2C) = a6;
-        *(s32 *)(payload + 0x34) = a9;
+        *(float *)(payload + 0x14) = f;
         *(s32 *)(payload + 0x30) = a7;
+        *(s32 *)(payload + 0x34) = a9;
         *(s32 *)(payload + 0x48) = a12;
-        *(s16 *)payload = 0x3C;
-        *(s32 *)(payload + 0x20) = a3;
-        *(float *)(payload + 0xC) = f * 4.0f;
         *(s16 *)(payload + 2) = 0x3C;
         *(float *)(payload + 8) = f + f;
+        *(float *)(payload + 0xC) = f * 4.0f;
         *(s32 *)(payload + 0x1C) = a10;
         *(s32 *)(payload + 0x38) = a11;
         *(s32 *)(payload + 0x18) = a8;
+        *(s16 *)payload = 0x3C;
         *(float *)(payload + 0x44) = func_002A78D8(65.0f, 80.0f);
-        local = *(TI128 *)pos;
+        qcopy(&local, pos);
         ((float *)&local)[3] = f * 3.0f;
         if (func_00283DB8(&local, 128.0f) == 1) {
             *(s16 *)(payload + 4) = 0x19;

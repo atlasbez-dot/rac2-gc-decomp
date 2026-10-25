@@ -61,7 +61,7 @@ void func_0011BFC8(int c) {
 
 INCLUDE_ASM("asm/core", func_0011C000);
 
-INCLUDE_ASM("asm/core", func_0011C090);
+/* func_0011C090 is in the dedicated 0011C090.c formatter unit. */
 
 INCLUDE_ASM("asm/core", func_0011C1F8);
 

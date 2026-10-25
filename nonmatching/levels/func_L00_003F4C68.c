@@ -1,26 +1,15 @@
-/* 2026-10-23 canonical/ABI repair, retained and not linked.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * us: 0 of 27 places match (src/levels/shared/L00_003F4C68-g8-qcopy.c); us2: 0 of 27 places match (src/levels/shared/L00_003F4C68-g8-qcopy.c); pal: func_L00_003F4C68 is in neither catalogue of pal.
- * Current repaired draft: 596/608 bytes in US and US2, 0/27 in each; absent in PAL.
- * func_002B4038(int, int) returns the integer equality predicate tested here. The retail
- * callee at level-00 0032A060 ends in xor/sltiu; it does not return a pointer.
- * These measurements supersede the earlier draft with nonexistent func_L00_0032A060.
- * Object-header stores, tuning-table addresses and allocation/scheduling still differ.
- * Tried independent header values, typed tuning fields and signed-short/modulo ABI corrections.
- * Reopen with original layout and source-order evidence.
- * Historical note below is retained; its no-C-attempt statement predates this draft.
+/*
+ * Retained manual near miss; not linked or counted.
+ * Final measured profile: -O2 -G8 -ffunction-sections.
+ * Final C / retail: 600 / 608 bytes.
+ * us:0/27 placements, exit1; us2:0/27 placements, exit1.
+ * pal: absent from catalogue, exit1; absence is not a match.
+ * 4 bounded source/profile trials; three natural source forms tie.
+ * Correct0x70 frame; mode/object-position saved-register allocation, header stores, tuning address formation and scheduling differ.
+ * Reopen only with: Independent header/layout or source-lifetime evidence that changes the mode/position allocator competition.
+ * Measured in the dedicated src unit before its marker/profile were restored; this body is retained unchanged modulo this comment.
+ * Historical draft and trial variants remain private. Behavior and strict linked equality remain unverified.
  */
-/* from src/levels/shared/L00_003EE100.c: not written this wave. Retail 608 bytes, 27 place(s), first word at L00:003f4c68.
- * Rule: MMI/LQ/SQ (op 0x1e).
- * No C attempt was made (wave-5 tour-2 discard rule).
- * Retail opens with:
- *   0x003f4c68  addiu       $sp, $sp, -0x70
- *   0x003f4c6c  addiu       $v0, $zero, -0x1
- *   0x003f4c70  sd          $s0, 0x20($sp)
- *   0x003f4c74  sd          $s3, 0x38($sp)
- *   0x003f4c78  daddu       $s0, $a2, $zero
- *   0x003f4c7c  sd          $s5, 0x48($sp)
- * Kept as data for the maintainers. */
 
 #include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
@@ -45,21 +34,26 @@ extern unsigned short D_L00_001B0938 __attribute__((sda));
 extern unsigned int D_L00_001B0934 __attribute__((sda));
 extern TI128 D_L00_001B8DC0;
 extern TI128 D_L00_001B8FF0;
+/* Only the measured header fields are viewed; this is not a whole-object size. */
+typedef struct { char prefix[0x30]; unsigned char stamp,enabled; short tag; } HeaderView;
 char *func_L00_003F4C68(char *position,char *velocity,int id,int mode)
 {
     TI128 direction, previous;
-    char *object,*state;
+    char *object,*state,*location;
     float frames;
+    HeaderView *header;
     unsigned char stamp;
     if (id == -1 || func_002B4038(0xc04,id) == 0) return 0;
     object=func_0029EFD0(0xcf7);
     if (object != 0) {
+        header=(HeaderView *)object;
+        location=object+0x10;
         stamp=0xff;
-        object[0x30]=stamp;
-        *(short *)(object+0x32)=stamp;
-        object[0x31]=1;
+        header->tag=stamp;
+        header->enabled=1;
+        header->stamp=stamp;
         state=*(char **)(object+0x68);
-        *(TI128 *)(object+0x10)=*(TI128 *)position;
+        qcopy(location,position);
         object[0x20]=0;
         func_003001E0(state,velocity,position);
         *(int *)(state+0x10)=func_00283CF0(128.0f / (D_L00_00262570[D_0013957F].speed*0.016666668f));
@@ -72,7 +66,7 @@ char *func_L00_003F4C68(char *position,char *velocity,int id,int mode)
         frames=func_00283CE0((short)D_L00_001B0938);
         *(int *)(state+0x28)=mode;
         *(float *)(state+0x24)=1.0f/frames;
-        func_002AFFD8(object+0x10,&direction,1);
+        func_002AFFD8(location,&direction,1);
         func_00282D30(&direction,&direction,-1.0f);
         func_L00_003F51A0(object,(char *)&direction);
         if (D_L00_001B0934 > 3) D_L00_001B0934=0;
@@ -80,12 +74,12 @@ char *func_L00_003F4C68(char *position,char *velocity,int id,int mode)
         D_L00_001B0934=((int)(D_L00_001B0934+1))%3;
         func_L00_003F5F90(object);
         if (mode == 1) {
-            *(TI128 *)(state+0x40)=D_L00_001B8DC0;
+            qcopy(state+0x40,&D_L00_001B8DC0);
             func_00282F20(state+0x30,&D_L00_001B8FF0,func_00282DF0(velocity));
         }
         if (mode == 2) {
-            previous=*(TI128 *)position;
-            func_00282CC0(object+0x10,position,velocity);
+            qcopy(&previous,position);
+            func_00282CC0(location,position,velocity);
             if (func_L00_003F5238(object,(char *)&previous) != 0) object[0x20]=2;
         }
     }

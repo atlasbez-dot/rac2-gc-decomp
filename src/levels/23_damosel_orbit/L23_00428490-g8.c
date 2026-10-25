@@ -1,66 +1,7 @@
-/* func_L23_00428490 (2152 bytes, 1 place: 23:00428490) -- NEAR MISS, not integrated.
-   state: 2152 bytes against retail's 2152 (538 instructions), compiled in the -G8 unit (it reads
-   about thirty words through $gp, D_L23_001B1A4C..D_L23_001B1AD4, and D_L23_001B1AE0 through
-   `lui $v1,0x1B`): it belongs in L23_0041E418-g8.c. 519 of the 538 instructions align with
-   retail; the first difference is at +0x194.
-   What it is: a beam drawer (the object arrives in the 6th argument, $t1): six textured quads
-   built with the boot vector helpers (func_00282CF0 sub, func_00282CC0 add, func_00282DD8 cross,
-   func_00282F20 scale-to-length) and drawn by func_00280B90, the (u, v) pairs scrolled by
-   vars->scroll and rotated by vars->spin, then two glows (func_00281EB8) at the object's position.
-   It is func_L23_00429430 with fields of the object's variables where that one reads globals.
-   What differs (one cause, measured):
-   - the quad copy after the first draw: retail issues the four colour moves, then
-     `lq $v0,0($s6); sq $v0,0($sp); lw $v1,0xF0($sp); lq $v0,0($s7); sq $v0,0($v1)`, and only then
-     the argument moves of the next call; this cc1 schedules the argument moves into the free ALU
-     slots between the stores (8 words in another order, and $a3/$v0 instead of $a0/$v0 for the
-     two colour loads).
-   - the object position after the second loop: retail keeps obj + 0x10 in $s0 to the end. Here
-     the reaching register GCSE makes for the later `obj + 0x10` is set at the end of the first
-     draw block, but sched1 hoists that copy to just after the first computation, so the two
-     conflict and the second one is spilled: `sw $s0,0xFC($sp)`, six `lw $aN,0xFC($sp)` instead of
-     `daddu $aN,$s0,$zero`, and the second loop's alignment nop one word later.
-   The cause: with the two copies written as an inline-asm quad copy after the four colour moves,
-   `__asm__ __volatile__ ("lq $2, 0(%1)\n\tsq $2, 0(%0)" : : "r"(dst), "r"(src) : "$2", "memory")`,
-   corner[0] = corner[2] first, then corner[1] = corner[3], the 0x801010 stores as rgba[3] then
-   rgba[2], and the corner addresses written as &q.corner[k] (no c1..c3), this C compiles to
-   retail's bytes: tools/check.py reported "1 of 1 places match" (a scratch copy, reverted). The
-   asm is a scheduling barrier: it keeps the copies and the argument moves in source order and
-   keeps sched1 from hoisting the GCSE copy of obj + 0x10 above it. This is the qcopy macro of
-   docs/COMPILER-NOTES.md ("Quadword copies through a held pointer reproduce retail exactly when
-   written as inline asm"), which src/ does not allow. An empty `do {} while (0)` between the
-   statements gives the same barrier (6 lines left on the twin) but is a steering construct; a
-   `do { copy } while (0)` macro doubles the references inside (loop depth), keeps c1 out of the
-   stack and spills other registers (112+ lines).
-   What the source needs, each measured on this function or its twin:
-   - each colour built by sequential `|=` in rgba[1]/rgba[3], then copied to rgba[0]/rgba[2]: one
-     `(a << 24) | (b << 16) | (g << 8) | r` expression is reassociated by fold into
-     ((a << 24) | r) | ((g << 8) | (b << 16)), and accumulating in rgba[0]/rgba[2] reverses the
-     store pairs.
-   - the variables through a struct (vars->spin): the next call's global argument load then moves
-     above the vars->spin store (a fixed scalar against a varying struct field).
-   - a second counter for the second loop: one `i` is one pseudo, $t1 in both loops; retail has
-     $t1 then $a0.
-   - the corner pointers c1..c3 and the vector pointers rel/axis/tip/side/base, set in that order
-     at the end of the first block: the copies then go through held pointers, and the address
-     computations come out in retail's order (&q.corner[k] gives direct stack offsets for plain C
-     copies; plain arrays without the pointers put c2/c3 before the vectors).
-   - obj + 0x10 written at each use: a `pos` variable is one long-lived pseudo below the five
-     vector pointers in priority, $s5 instead of $s0 (153 of 538 instructions unaligned).
-   - 0.017453294f (0x3C8EFA36) for pi/180; 180 orders of the six copy statements: the best leaves
-     the eight words above.
-*/
+#include "common.h"
 
-typedef unsigned char u8;
-
-typedef unsigned short u16;
-
-typedef short s16;
-
-typedef int s32;
-
-typedef long long s64;
-
-typedef unsigned int u32;
+/* Draw six beam quads and two endpoint glows from the object's beam state.
+ * The object pointer occupies the sixth integer argument slot. */
 
 typedef int TI128 __attribute__((mode(TI)));
 
@@ -76,7 +17,7 @@ typedef struct {
 
 /* the beam's own variables (the object's +0x68 block) */
 typedef struct {
-    float dir[4];
+    float dir[4] __attribute__((aligned(16)));
     float pad10[3];
     float spin;
     float pad20[2];
@@ -136,20 +77,17 @@ extern void func_00281EB8(u8 *, s32, u32, s32, float, float, float);
 
 void func_L23_00428490(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u8 *obj) {
     L23Quad q;
-    float vrel[4];
-    float vaxis[4];
-    float vtip[4];
-    float vside[4];
-    float vbase[4];
+    float vrel[4] __attribute__((aligned(16)));
+    float vaxis[4] __attribute__((aligned(16)));
+    float vtip[4] __attribute__((aligned(16)));
+    float vside[4] __attribute__((aligned(16)));
+    float vbase[4] __attribute__((aligned(16)));
     float t[2];
     float *rel;
     float *axis;
     float *tip;
     float *side;
     float *base;
-    float *c1;
-    float *c2;
-    float *c3;
     L23BeamVars *vars;
     float angle;
     float s;
@@ -183,9 +121,6 @@ void func_L23_00428490(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u8 *obj) {
     tip = vtip;
     side = vside;
     base = vbase;
-    c1 = (float *)&q.corner[1];
-    c2 = (float *)&q.corner[2];
-    c3 = (float *)&q.corner[3];
     for (i = 0; i < 4; i++) {
         q.uv[i][0] -= vars->scroll;
         if (q.uv[i][0] <= 7.0f) {
@@ -204,19 +139,19 @@ void func_L23_00428490(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u8 *obj) {
     func_00282F20(base, vars->dir, D_L23_001B1AE0);
     func_00282CC0(base, (float *)(obj + 0x10), base);
     func_00282CC0((float *)&q.corner[0], base, side);
-    func_00282CF0(c1, base, side);
-    func_00282CC0(c2, tip, side);
-    func_00282CF0(c3, tip, side);
+    func_00282CF0((float *)&q.corner[1], base, side);
+    func_00282CC0((float *)&q.corner[2], tip, side);
+    func_00282CF0((float *)&q.corner[3], tip, side);
     func_00280B90(&q, 0, 0);
 
-    q.rgba[1] = q.rgba[3];
-    q.corner[0] = *(TI128 *)c2;
     q.rgba[0] = q.rgba[2];
+    q.rgba[1] = q.rgba[3];
     q.rgba[3] = 0x801010;
     q.rgba[2] = 0x801010;
-    *(TI128 *)c1 = *(TI128 *)c3;
-    func_00282CC0(c2, c2, axis);
-    func_00282CC0(c3, c3, axis);
+    qcopy(&q.corner[0], &q.corner[2]);
+    qcopy(&q.corner[1], &q.corner[3]);
+    func_00282CC0((float *)&q.corner[2], (float *)&q.corner[2], axis);
+    func_00282CC0((float *)&q.corner[3], (float *)&q.corner[3], axis);
     func_00280B90(&q, 0, 0);
 
     func_00282F20(axis, vars->dir, -vars->back);
@@ -256,11 +191,11 @@ void func_L23_00428490(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u8 *obj) {
     func_00282F20(base, vars->dir, D_L23_001B1AE0);
     func_00282CC0(base, (float *)(obj + 0x10), base);
     func_00282CC0((float *)&q.corner[0], base, side);
-    func_00282CF0(c1, base, side);
+    func_00282CF0((float *)&q.corner[1], base, side);
     func_00282CC0(tip, base, axis);
     func_00282CC0(tip, tip, axis);
-    func_00282CC0(c2, tip, side);
-    func_00282CF0(c3, tip, side);
+    func_00282CC0((float *)&q.corner[2], tip, side);
+    func_00282CF0((float *)&q.corner[3], tip, side);
     func_00280B90(&q, 0, 0);
 
     q.rgba[1] = D_L23_001B1A60 << 24;
@@ -276,11 +211,11 @@ void func_L23_00428490(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u8 *obj) {
     func_00282F20(base, vars->dir, D_L23_001B1AD0);
     func_00282CC0(base, (float *)(obj + 0x10), base);
     func_00282CC0((float *)&q.corner[0], base, side);
-    func_00282CF0(c1, base, side);
+    func_00282CF0((float *)&q.corner[1], base, side);
     func_00282CC0(tip, base, axis);
     func_00282CC0(tip, tip, axis);
-    func_00282CC0(c2, tip, side);
-    func_00282CF0(c3, tip, side);
+    func_00282CC0((float *)&q.corner[2], tip, side);
+    func_00282CF0((float *)&q.corner[3], tip, side);
     func_00280B90(&q, 0, 0);
 
     q.rgba[1] = D_L23_001B1A68 << 24;
@@ -296,11 +231,11 @@ void func_L23_00428490(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u8 *obj) {
     func_00282F20(base, vars->dir, D_L23_001B1AD0);
     func_00282CC0(base, (float *)(obj + 0x10), base);
     func_00282CC0((float *)&q.corner[0], base, side);
-    func_00282CF0(c1, base, side);
+    func_00282CF0((float *)&q.corner[1], base, side);
     func_00282CC0(tip, base, axis);
     func_00282CC0(tip, tip, axis);
-    func_00282CC0(c2, tip, side);
-    func_00282CF0(c3, tip, side);
+    func_00282CC0((float *)&q.corner[2], tip, side);
+    func_00282CF0((float *)&q.corner[3], tip, side);
     func_00280B90(&q, 0, 0);
 
     q.rgba[1] = D_L23_001B1A64 << 24;
@@ -316,12 +251,12 @@ void func_L23_00428490(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u8 *obj) {
     func_00282F20(base, vars->dir, D_L23_001B1AD4);
     func_00282CC0(base, (float *)(obj + 0x10), base);
     func_00282CC0((float *)&q.corner[0], base, side);
-    func_00282CF0(c1, base, side);
+    func_00282CF0((float *)&q.corner[1], base, side);
     func_00282F20(axis, vars->dir, -0.6f);
     func_00282CC0(tip, base, axis);
     func_00282CC0(tip, tip, axis);
-    func_00282CC0(c2, tip, side);
-    func_00282CF0(c3, tip, side);
+    func_00282CC0((float *)&q.corner[2], tip, side);
+    func_00282CF0((float *)&q.corner[3], tip, side);
     func_00280B90(&q, 0, 0);
 
     func_00281EB8(obj + 0x10, D_L23_001B1A58, D_L23_001B1A5C, 1, vars->glow, 0.08f, func_002A7940());

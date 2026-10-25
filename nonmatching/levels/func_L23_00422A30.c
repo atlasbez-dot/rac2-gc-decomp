@@ -1,3 +1,19 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured standalone unit: src/levels/23_damosel_orbit/L23_00422A30-g8.c
+ * Game profile: -O2 -G8 -ffunction-sections
+ * Release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL catalogue absent (exit1).
+ * Current residual: 980/980 bytes. Only the final source-address addiu and
+ * global-destination lui are exchanged at +0x330/+0x334. A real source pointer ties;
+ * mno-split-addresses gives 972 and disabling sched2 changes earlier code. The three
+ * pose-row transfers intentionally remain ordinary folded TI assignments.
+ * Reopen only for: A concrete address lifetime/assembler model for the last global vector
+ * copy; retain both real relocation identities.
+ * Older notes below are historical. ASM marker and trial-only profiles were restored.
+ */
+
+#include "common.h"
+
 /* func_L23_00422A30 (level 23, 980 bytes) -- NEAR MISS, not integrated.
    state: 976 bytes against retail's 980 (`-O2 -G8 -ffunction-sections -frac2-qcopy`, a unit of its own: it
    reads $gp outside delay slots, hence -G8); 0 of 1 places match, about 78 words differ (instruction order
@@ -29,10 +45,10 @@
    tried without effect: -frac2-zero-ti-barrier is not involved (no clear in this body); default flags without
    qcopy give 956 bytes (the six register-address copies come out folded). */
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef short s16;
-typedef int s32;
+
+
+
+
 
 typedef int TI16 __attribute__((mode(TI)));
 
@@ -96,6 +112,7 @@ u8 *func_L23_00422A30(u8 *src, TI16 *pos, u8 *target, s32 a3, s32 a4) {
     TI16 c0;
     TI16 c1;
     TI16 c2;
+    TI16 *reverse;
 
     obj = func_0029EFD0(0x118F);
     if (obj != 0) {
@@ -111,7 +128,7 @@ u8 *func_L23_00422A30(u8 *src, TI16 *pos, u8 *target, s32 a3, s32 a4) {
         c2 = *(TI16 *)(src + 0xE0);
         *(TI16 *)(obj + 0xE0) = c2;
         *(u8 **)(st + 0x10) = src;
-        *(TI16 *)(obj + 0x10) = *pos;
+        qcopy(obj + 0x10, pos);
         *(s32 *)(st + 0x14) = 0x96;
         *(float *)(obj + 0x2C) = *(float *)(obj + 0x2C) + *(float *)(obj + 0x2C);
         st[0x28] = a3;
@@ -140,10 +157,10 @@ u8 *func_L23_00422A30(u8 *src, TI16 *pos, u8 *target, s32 a3, s32 a4) {
             st[0x29] = 1;
         }
         if (st[0x28] == 0 && *(s32 *)(st + 0x18) != 0) {
-            loc[0] = **(TI16 **)(st + 0x2C);
+            qcopy(&loc[0], *(void **)(st + 0x2C));
             func_L23_00418650(&loc[0], 0.0f);
             func_00282CF0(st + 0x30, *(u8 **)(st + 0x2C), obj + 0x10);
-            loc[1] = *(TI16 *)(obj + 0x10);
+            qcopy(&loc[1], obj + 0x10);
             func_L23_00418650(&loc[1], 0.0f);
             func_00282CF0(&loc[2], &loc[0], &loc[1]);
             flag = 0;
@@ -157,7 +174,7 @@ u8 *func_L23_00422A30(u8 *src, TI16 *pos, u8 *target, s32 a3, s32 a4) {
                     flag = 1;
                 }
             }
-            loc[3] = *(TI16 *)(obj + 0xC0);
+            qcopy(&loc[3], obj + 0xC0);
             dot = func_00282DB0(&loc[2], &loc[3]);
             if ((src == D_00189E20.f2290 && *(*(u8 **)(st + 0x18) + 0x31) == 0) ||
                 dot < D_L23_001B1928 || 50.0f < f22 || flag != 0 || func_L23_0041B948() != 0) {
@@ -167,10 +184,11 @@ u8 *func_L23_00422A30(u8 *src, TI16 *pos, u8 *target, s32 a3, s32 a4) {
                 if (*(s32 *)(st + 0x18) != 0) {
                     D_00189E20.f188C = st + 0x30;
                 } else if (D_00189E20.f2294 == 0x5B) {
-                    D_L23_001B1FB0 = *(TI16 *)(src + 0xE0);
+                    reverse = (TI16 *)(src + 0xE0);
+                    qcopy(&D_L23_001B1FB0, reverse);
                     func_00282D30(&D_L23_001B1FB0, &D_L23_001B1FB0, -1.0f);
                     D_00189E20.f188C = (u8 *)&D_L23_001B1FB0;
-                    *(TI16 *)(st + 0x30) = D_L23_001B1FB0;
+                    qcopy(st + 0x30, &D_L23_001B1FB0);
                     st[0x28] = 0;
                     *(s32 *)(st + 0x18) = 1;
                     st[0x29] = 0;

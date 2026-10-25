@@ -1,5 +1,41 @@
 # Compiler and assembler compatibility notes
 
+## Source methods shared with RAC1
+
+As of 25 October 2026, reviewed shared EE transfer helpers (`qcopy`, `qcopy_nc`,
+`qzero` in `include/common.h`) and original public runtime-library target
+primitives are permitted, following RAC1. Older plain-C-only observations remain
+measurements of those attempts, not a current ban on these routes. Quadword
+addresses must be 16-byte aligned. `qcopy` and `qzero` declare memory clobbers;
+`qcopy_nc` follows RAC1's non-clobbering variant and requires an independent
+check of surrounding memory dependencies. Do not replace a function with arbitrary
+inline assembly, pin registers or invent barriers/interfaces. Keep upstream
+provenance and licences, and recheck every affected function through the strict
+linked build.
+
+### Diagnosing allocation before changing source
+
+Run `python3 tools/regalloc.py func_XXXXXXXX --version us` on a current C
+definition, or add `--json` for structured output. The command compiles the actual
+source unit with its per-file profile in a unique private `build/regalloc/`
+directory, then repeats with allocator/loop/scheduling dump flags. The complete
+objects must be byte-identical; it never writes the production object cache or
+changes source or flags. A marker alone has no C allocation to diagnose.
+
+Reference counts, live lengths, call crossings, allocation queues, conflicts and
+hard-register assignments come from the dumps. The displayed priority
+`floor_log2(refs) * refs / live_length` is explicitly an inferred score. Missing
+or invalid metadata stays unknown. Dumps explain one source/profile; they do
+not compare retail or prove that a proposed change will match it.
+
+Use that evidence to shorten a real pointer lifetime, compute an address where
+it is used, or reconstruct a justified object/union view. Standard whole-file
+options such as `-fno-force-mem`, `-fno-sched-spec`, `-fno-sched-interblock` and
+`-fno-rerun-loop-opt` are diagnostic candidates for the relevant compiler pass,
+not a blanket profile. Confirm acceptance and improvement, isolate incompatible
+units, then recheck their existing C and all carrying releases. Stop a tied
+approach instead of manufacturing references or trying equivalent permutations.
+
 This reference groups qualified compiler mechanisms and useful C source shapes by
 topic. Open cases belong in [MATCHING-BLOCKERS.md](MATCHING-BLOCKERS.md). The source
 recipe, per-file flags and complete linked build take precedence over historical
@@ -227,8 +263,9 @@ matter; neither `sda` nor `nosda` is a universal opcode selector:
   prevented it in `func_00132DF0`; a sized two-element array provided the control.
   The declared size must fit the `-G` threshold, not merely exist: `extern float D[16]`
   (64 bytes) falls back to `lui`/`addiu` under `-G8`, while a two-element array takes
-  `addiu $r,$gp,offset` (`func_L00_003C8608`). Declare the smallest size that fits
-  and index past it.
+  `addiu $r,$gp,offset` (`func_L00_003C8608`). This describes a code-generation
+  effect, not permission to understate an object's extent. Declare its measured
+  size or leave it incomplete; never index outside a fabricated small array.
 - `nosda` can preserve an absolute access but can also add a temporary or hoist
   the address across a call. It is not neutral at -G8.
 - `-mno-split-addresses` changes pseudos, not all GP loads uniformly. An FP repair
@@ -317,7 +354,8 @@ zero-displacement `lq`/`sq` shape.
 This models the schedulers, not every optimizer effect of inline assembly. Incoming
 links retain producer latencies; interblock motion sees a store; jump2 can remove a
 move that a volatile operation retains. `func_002B50E0` retained three argument-move
-differences. Artificial clobbers, register pins and inline assembly remain forbidden.
+differences. Artificial clobbers and register pins remain forbidden; reviewed
+shared helpers and public runtime primitives follow the source-method rules above.
 
 24 October 2026: the barrier closed five retained near misses whose notes had named the
 missing inline-asm copy barrier: `func_00270EA8` (56 bytes), `func_00270E30` (116),
@@ -627,7 +665,13 @@ complete compiler `.rodata`/`.rdata` branch-table sections when every R_MIPS_32
 entry resolves to the correct already-placed C case destination. It interleaves
 the unchanged compiler section with the remaining retail data, then compares all
 loaded bytes. Dependencies are object-scoped; unrelated sections cannot satisfy
-them. Scalar/mixed pools and unsupported `.sdata` remain unplaceable. See
+them. Complete relocation-free scalar `.rodata`/`.rdata` sections are also
+accepted when their text-derived address, alignment and complete bytes agree
+with exactly one initialized retail data section and load segment. Conflicting
+addresses within an object, cross-object borrowing, overlapping claims, partial
+spans, and relocated/mixed pools are rejected. No generated section is rewritten;
+data credit is not inferred from placing it. Unsupported `.sdata` remains
+unplaceable. See
 [switch-table qualification and limits](MATCHING-BLOCKERS.md#blocker-06).
 
 A legacy table already in retail can use its measured symbol and computed goto;

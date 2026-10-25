@@ -418,7 +418,7 @@ BatchA_A09_s32 func_L18_003F8E80(BatchA_A09_u8 *s) {
     return r;
 }
 
-INCLUDE_ASM("asm/levels", func_L18_003F8EA8);
+/* func_L18_003F8EA8 is defined in L18_003F8EA8-qcopy.c. */
 
 extern void func_00335388(BatchA_A18_u8 *a0, BatchA_A18_s32 a1, BatchA_A18_s32 a2,
                           BatchA_A18_s32 a3);
@@ -651,7 +651,7 @@ BatchA_A18_s32 func_L18_004271C0(BatchA_A18_u8 *a0) {
     return 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L18_00427208);
+/* func_L18_00427208 is defined in L18_00427208-qcopy.c. */
 
 /* func_L18_004273F0 is matched in L18_004273F0-g8.c (built with -frac2-qcopy). */
 

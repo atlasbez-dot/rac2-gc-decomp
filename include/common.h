@@ -24,4 +24,26 @@ typedef double             f64;
 #define MACRO_ADDR __attribute__((section(".sdata")))
 #define SDATA(sym) __asm__(#sym "__gp") MACRO_ADDR
 
+/* Approved EE transfer helpers, adapted from rac1-decomp (GPL-3.0).
+ * Both addresses must be
+ * 16-byte aligned. Each helper really reads/writes memory; the clobber keeps
+ * surrounding C accesses correct. Arbitrary source barriers remain forbidden.
+ */
+static __inline__ void qcopy(void *dst, const void *src) {
+    __asm__ __volatile__("lq $2,0x0(%1)\n\tsq $2,0x0(%0)"
+                         : : "r"(dst), "r"(src) : "$2", "memory");
+}
+
+static __inline__ void qzero(void *dst) {
+    __asm__ __volatile__("sq $0,0x0(%0)" : : "r"(dst) : "memory");
+}
+
+/* RAC1's non-clobbering variant: callers must establish that surrounding C
+ * accesses do not depend on the copied memory. Keep qcopy as the default.
+ */
+static __inline__ void qcopy_nc(void *dst, const void *src) {
+    __asm__ __volatile__("lq $2,0x0(%1)\n\tsq $2,0x0(%0)"
+                         : : "r"(dst), "r"(src) : "$2");
+}
+
 #endif /* COMMON_H */

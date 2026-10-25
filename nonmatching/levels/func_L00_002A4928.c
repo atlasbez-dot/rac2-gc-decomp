@@ -1,3 +1,14 @@
+/* 2026-10-25 ADDRESS follow-up: retained best prior C, not matching.
+ * Baseline reproduced 1000/1008 bytes, 0/27 US placements. Approved qcopy
+ * transfers, no-force-mem and no-rerun-loop-opt each measured 1000 bytes.
+ * A truthful 0xB0 record/field-at-use loop measured 952 bytes and did not
+ * reproduce retail. Original independent pointer lifetimes are retained.
+ * Both seven-word gathers remain gathers around the resident clear; no
+ * volatile, artificial uses, missing stores or padding were introduced.
+ * Reopen only with independently measured resident-base alias/lifetime data
+ * or an allocator trace identifying a changed real pseudo. Other releases
+ * have no canonical catalogue entry; absence awards no matching credit.
+ */
 /* Retained reconstruction, 23 October 2026: 1000/1008 bytes, 0/27 USA v1.01.
  * The canonical name is absent from PAL and USA v2.00 catalogues.
  * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy.

@@ -1,14 +1,15 @@
-/* Manual C near miss retained on 2026-10-24; no exact-C credit.
- * Measured unit: src/game/002DE990.c
- * Game compiler profile: -O2 -G0 -ffunction-sections -frac2-qcopy
- * Compiled/US retail bytes: 1776/1728.
- * Actual release checks: US: 0/28 (exit 1); US2: 0/28 (exit 1); PAL: catalogue absent (exit 1).
- * Residual: Frame is 0x3760 as retail. Global-address materialization, loop allocation and scalar restore scheduling differ.
- * Reopen only for: A measured addressing/allocation fix for mixed 64-byte unaligned state and 224-byte aligned record copies.
- * The ASM marker and trial-only flags were restored after measurement.
+/* Retained manual C reconstruction; not linked and not credited as exact.
+ * Checked source: src/game/002DE990-copy.c
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy
+ * Retail US size: 1728 bytes.
+ * Final checks: us: 0/28, exit 1, 1736 compiled bytes; us2: 0/28, exit 1, 1736 compiled bytes; pal: catalogue absent, exit 1.
+ * Residual: 1736/1728 bytes with the correct 0x3760 frame. Explicit 32-byte chunks retain two live quadwords and replace the old 64-bit block-move kernel. Entry/global-base construction, index allocation, load order and loop padding still differ. Fourteen individual qcopy calls per record regress to 2264 bytes and were rejected.
+ * Reopen only with: A measured addressing/index or load-order policy for the two-live-quad chunk, preserving the unaligned 64-byte state copy and all reload/restore semantics.
+ * Reviewed EE helpers follow the source-method policy in AGENTS.md.
+ * No complete linked build or native runtime validation was performed here.
  */
+#include "common.h"
 
-/* Preserves the player tables around a data reload, then restores the live handles. */
 typedef unsigned int QuadDE990 __attribute__((mode(TI)));
 typedef struct RecordDE990 { QuadDE990 data[14]; } RecordDE990;
 typedef struct StateDE990 { unsigned char bytes[64]; } StateDE990;
@@ -56,9 +57,10 @@ void func_002DE990(int selected)
     unsigned char savedBlock[112];
     RecordDE990 first, second;
     int resident, hadCard, i;
+    QuadDE990 *copySource, *copyDestination, *copyEnd;
     unsigned char control;
-    D_001A79F8.bytes[0x3a] = 1;
     D_001A79F8.bytes[0x12]++;
+    D_001A79F8.bytes[0x3a] = 1;
     D_001A79F8.bytes[0x3b] = 0;
     resident = D_001A7AF0;
     hadCard = *(unsigned short *)(D_0018C958 + 0x84);
@@ -66,7 +68,17 @@ void func_002DE990(int selected)
     for (i = 0; i < 56; i++) {
         savedFlags[i] = D_001A7AF8[i];
         savedWords[i] = D_00139868[i];
-        savedRecords[i] = D_00239BA0[i];
+        copySource = D_00239BA0[i].data;
+        copyDestination = savedRecords[i].data;
+        copyEnd = copySource + 14;
+        do {
+            QuadDE990 firstQuad = copySource[0];
+            QuadDE990 secondQuad = copySource[1];
+            copyDestination[0] = firstQuad;
+            copyDestination[1] = secondQuad;
+            copySource += 2;
+            copyDestination += 2;
+        } while (copySource != copyEnd);
         savedSlots[i] = D_00139568[i];
     }
     for (i = 0; i < 32; i++) saved32[i] = D_001A7A60[i];
@@ -109,7 +121,17 @@ void func_002DE990(int selected)
     for (i = 0; i < 56; i++) {
         D_001A7AF8[i] = savedFlags[i];
         D_00139868[i] = savedWords[i];
-        D_00239BA0[i] = savedRecords[i];
+        copySource = savedRecords[i].data;
+        copyDestination = D_00239BA0[i].data;
+        copyEnd = copySource + 14;
+        do {
+            QuadDE990 firstQuad = copySource[0];
+            QuadDE990 secondQuad = copySource[1];
+            copyDestination[0] = firstQuad;
+            copyDestination[1] = secondQuad;
+            copySource += 2;
+            copyDestination += 2;
+        } while (copySource != copyEnd);
         D_00139568[i] = savedSlots[i];
         D_00139688[i] = *(unsigned short *)((unsigned char *)&D_00239BA0[D_00139568[i]] + 0x8e);
     }

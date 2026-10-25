@@ -21,9 +21,9 @@ void func_L07_0040FC50(void)
 
 /* func_L07_003F4970 is defined in L07_003F4578-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L07_003F4B08);
+/* func_L07_003F4B08 is defined in L07_003F4B08-copy.c. */
 
-INCLUDE_ASM("asm/levels", func_L07_003F4C18);
+/* func_L07_003F4C18 is defined in L07_003F4C18-copy.c. */
 
 INCLUDE_ASM("asm/levels", func_L07_003F4CC0);
 
@@ -111,7 +111,7 @@ u8 *func_L07_003F65E8(s32 group)
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L07_003F67B8);
+/* func_L07_003F67B8 is defined in L07_003F67B8-copy.c. */
 
 /* func_L07_003F68F0 is defined in L07_003F4578-g8.c (this unit has no $gp access for it). */
 
@@ -121,7 +121,7 @@ INCLUDE_ASM("asm/levels", func_L07_003F6C40);
 
 /* func_L07_003F6CF0 is defined in L07_003F4578-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L07_003F6DC0);
+/* func_L07_003F6DC0 is defined in L07_003F6DC0-copy.c. */
 
 INCLUDE_ASM("asm/levels", func_L07_003F7048);
 
@@ -171,7 +171,7 @@ extern void func_0029FC20(u8 *a, s32 b, void *c);
 
 extern void func_00283678(u8 *a, void *b);
 
-INCLUDE_ASM("asm/levels", func_L07_003F8010);
+/* func_L07_003F8010 is defined in L07_003F8010-copy.c. */
 
 INCLUDE_ASM("asm/levels", func_L07_003F80B8);
 
@@ -183,13 +183,13 @@ extern void func_00282CF0(u8 *a, u8 *b, u8 *c);
 
 extern void func_002AFDD8(u8 *a, u8 *b, u8 *c, s32 d);
 
-INCLUDE_ASM("asm/levels", func_L07_003F8828);
+/* func_L07_003F8828 is defined in L07_003F8828-copy.c. */
 
 extern void func_00283098(u8 *a, u8 *b, u8 *c);
 
 extern void func_00282CC0(u8 *a, u8 *b, u8 *c);
 
-INCLUDE_ASM("asm/levels", func_L07_003F8898);
+/* func_L07_003F8898 is defined in L07_003F8898-copy.c. */
 
 
 /* func_L07_003F8AB0 is defined in L07_003F4578-qcopy.c (this unit needs the grouped quadword copy). */

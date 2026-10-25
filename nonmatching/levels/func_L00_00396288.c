@@ -1,3 +1,12 @@
+/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measurement: 1556/1604 bytes, 0/27 US placements, frame 0x60.
+ * Change: Approved qcopy expresses the start/end transfers and qzero the measured 16-byte local clear. Target pointers and integer timer/light/fade/sound fields are retained.
+ * Residual: No-split-addresses hit GNU as assertion tc-mips.c:11867 and was removed. Branch/global base allocation and scheduling remain different.
+ * Reopen: Reopen with measured field/base lifetimes or a separately controlled assembler fix; do not shrink actual vector/light data extents.
+ * Earlier measurements/screens below are historical; they do not prohibit
+ * the currently approved shared transfer helpers or establish linked equality.
+ */
 /* Nonmatching: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_00396288: 0 of 27 places match (src/levels/shared/L00_00396288.c); us2: func_L00_00396288: 0 of 27 places match (src/levels/shared/L00_00396288.c); pal: absent. Two manual trials; final1552/1604 frame0x60. Corrected state+0x20 to target pointer (retail integer loads), removing spurious FP save. State timer/light/fade/sound are integers; full light allocator twoGPR/twoFP inputs preserved. Remaining global base sharing, branch/switch and register allocation differences; reopen with source layout evidence. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -46,9 +55,9 @@ void func_L00_00396288(char *actor) {
         if (beam->light == -1) beam->light = func_00291308(actor + 0x10, 0, 7.5f, 0);
         else if (beam->fade < 10) beam->fade++;
         active = 1;
-        beam->start.quad = *(Quad *)(actor + 0x10);
+        qcopy(&beam->start, actor + 0x10);
         beam->start.f[2] += 0.7f;
-        beam->end.quad = beam->start.quad;
+        qcopy(&beam->end, &beam->start);
         beam->length += (12.0f - beam->length) * 0.07f;
         if (*(int *)(player + 0x2294) == 1) {
             offset.f[0] = 1.2f; offset.f[1] = 0; offset.f[2] = 0;
@@ -109,7 +118,7 @@ void func_L00_00396288(char *actor) {
     case 2: case 4: case 5: default: break;
     }
     if (beam->light != -1) {
-        offset.quad = 0;
+        qzero(&offset);
         offset.f[0] = 2; offset.f[2] = 2;
         func_00283098(&offset, &offset, D_0018A550);
         D_L00_001C6F40[beam->light][4] = *(float *)(player + 0x80) + offset.f[0];

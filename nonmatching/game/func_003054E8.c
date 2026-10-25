@@ -1,3 +1,11 @@
+/* 25 October 2026 approved-helper experiment; original C below is preserved.
+ * Trial profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Trial checks: us: 0/28; us2: 0/28; pal: 0/28.
+ * 668/688 bytes, frame 0xA0. The real snapshot qcopy is retained, but loop address/induction and contact/damage setup allocation differ. A typed local table base tied; mno-split-addresses regressed to 664 bytes and was reverted.
+ * Reopen: New table-base/contact-field or induction evidence. The old reconstruction explicitly lacked a complete semantic qualification; do not infer native behavior from size or helper use.
+ * No exact, linked or native-runtime credit is claimed.
+ */
+
 /*
  * Retained handwritten near miss; historical evidence only.
  * No linked-image equality or complete retail semantics is established.

@@ -1,3 +1,12 @@
+/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measurement: 788/792 bytes, 0/27 US placements, frame 0x70.
+ * Change: Approved qcopy expresses all four real 16-byte transfers; the local start point is explicitly aligned. Both GPR pointers and both FP input values are preserved.
+ * Residual: Reversing the mode source fallthrough tied. No-split-addresses measured 776. Initialization/store scheduling, mode branch polarity and integer versus FP stores for zero W components remain different.
+ * Reopen: Reopen on a genuine zero-store/source layout idiom and resident field lifetime evidence; preserve both 64-byte matrices and the support-object API.
+ * Earlier measurements/screens below are historical; they do not prohibit
+ * the currently approved shared transfer helpers or establish linked equality.
+ */
 /* Nonmatching: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_00390FF8: 0 of 27 places match (src/levels/shared/L00_00390FF8-g8.c); us2: func_L00_00390FF8: 0 of 27 places match (src/levels/shared/L00_00390FF8-g8.c); pal: absent. Two source trials792 then788/792 bytes, original0x70 frame. Correct two GPR pointer plus two float incoming ABI, AD0B0 live support-object input, float vector length return and camera allocator pointer return. Typed resident view covers exact matrix/support/axis fields; real64-byte matrices. Remaining initialization scheduling/branch polarity and three zero W fields use integer stores versus retail COP1 stores. Reopen with source layout/zero-store evidence; no volatile/barrier tricks. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -26,7 +35,8 @@ extern int func_002FED90(void *, int, float, float, float);
 char *func_L00_00390FF8(char *owner, char *position, float yaw, float pitch) {
     char *actor = func_0029EFD0(0xAC);
     char *state;
-    float start[4], side[4];
+    float start[4] __attribute__((aligned(16)));
+    float side[4];
     if (actor) {
         state = *(char **)(actor + 0x68);
         D_L00_001B1BE8 = 1;
@@ -47,7 +57,7 @@ char *func_L00_00390FF8(char *owner, char *position, float yaw, float pitch) {
         *(float **)(state + 0x24) = D_00189E20.matrix[0];
         *(float **)(state + 0x28) = D_00189E20.matrix[1];
         *(char **)state = owner;
-        *(Quad *)(actor + 0x10) = *(Quad *)position;
+        qcopy(actor + 0x10, position);
         *(int *)(state + 8) = 0;
         *(int *)(state + 0xC) = 0;
         if (D_00189E20.supportObject && func_002AD0B0(D_00189E20.supportObject))
@@ -70,17 +80,17 @@ char *func_L00_00390FF8(char *owner, char *position, float yaw, float pitch) {
         *(float *)(state + 0x48) = D_L00_001AF0E4 * 0.016666668f;
         func_002AB650((u8 *)actor);
         *(int *)(state + 0x2C) = func_002E5CF8(0, 4, actor);
-        *(Quad *)start = *(Quad *)(owner + 0x10);
+        qcopy(start, owner + 0x10);
         start[2] = ((float *)position)[2];
         if (func_002761F8(start, position, 0, D_00189E20.object, 0)) {
             *(u8 *)(actor + 0xBC) = 1;
-            *(Quad *)(actor + 0x10) = *(Quad *)D_L00_001BF220;
+            qcopy(actor + 0x10, D_L00_001BF220);
         }
         D_L00_001B1A4C = 1;
         func_002B0CE0(6, 0, 1);
         if (D_L00_001A8FF0) {
             *(u16 *)(actor + 0x34) |= 0x100;
-            *(Quad *)(actor + 0xC0) = *(Quad *)D_00189E20.axis;
+            qcopy(actor + 0xC0, D_00189E20.axis);
             func_002AFFD8(actor + 0x10, actor + 0xE0, 1);
             func_00282DD8(side, actor + 0xC0, actor + 0xE0);
             func_00282F20(actor + 0xD0, side, 1.0f);

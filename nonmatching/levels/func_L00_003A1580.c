@@ -1,71 +1,11 @@
-/* Nonmatching reconstruction checked 23 October 2026.
+/* Retained nonmatching C; measured 25 October 2026.
  * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Final check.py coverage: us 0/27, us2 0/27; no candidate.
- * Manual beam-network reconstruction 2508/2532; repeated geometry blocks are explicit. Corrected the second phase step to retail 0x3ED37CC6 (0.4130613208f); rechecked both carrying releases.
- * Remaining: Owner/loop registers, transformed attachment/workspace lifetimes and repeated beam-call scheduling differ.
- * Reopen with a measured attachment/matrix layout and register-lifetime hypothesis.
- * Historical screening below is preserved, not treated as acceptance evidence.
+ * Final check.py coverage: us 0/27, us2 0/27, pal catalogue absent.
+ * 2508/2532 bytes. Explicit scalar initialization of the three matrix components is byte-neutral; owner/loop allocation first differs at +0xC, followed by attachment/workspace scheduling.
+ * Reopen: Verify the transformed-attachment and matrix lifetimes against the actual full stack layout and helper contracts; do not force save registers or pad the function.
+ * Shared EE transfer helpers are approved; their use is not matching evidence.
+ * Earlier complete drafts and all trial sources/logs are preserved privately.
  */
-
-/* func_L00_003A1580 - 2532 bytes, 27 place(s), level 00_aranos_tutorial,
-   retail at 0x003a1580. Screened with tools/w10_screen.py: 79 call(s)
-   [func_002FC560@003A15CC, func_L00_003A2138@003A15E4,
-   func_002A3F10@003A15FC, func_00283198@003A161C, func_00283180@003A1654,
-   func_00283180@003A1670, func_00283B98@003A169C, func_00283B98@003A16B4,
-   func_002830C0@003A1724, func_L00_003A2BB8@003A1744,
-   func_L00_003A25D8@003A1768, func_L00_003A25D8@003A178C,
-   func_L00_003A2BB8@003A17A0, func_002AA458@003A1814,
-   func_L00_003A25D8@003A1868, func_L00_003A25D8@003A18A4,
-   func_L00_003A2BB8@003A18B8, func_L00_003A25D8@003A18D4,
-   func_L00_003A25D8@003A18F0, func_L00_003A2BB8@003A1904,
-   func_L00_003A25D8@003A1920, func_L00_003A25D8@003A193C,
-   func_L00_003A2BB8@003A1950, func_L00_003A25D8@003A196C,
-   func_L00_003A25D8@003A1988, func_L00_003A2258@003A19A0,
-   func_L00_003A2408@003A19CC, func_00282CF0@003A19E0,
-   func_00282F20@003A19F0, func_00282DD8@003A1A00, func_00282F20@003A1A10,
-   func_00282DD8@003A1A20, func_00282F20@003A1A44, func_00282CC0@003A1A58,
-   func_L00_003A2258@003A1A6C, func_L00_003A25D8@003A1A88,
-   func_L00_003A25D8@003A1AA4, 0x1163b0@003A1AAC,
-   func_L00_003A2C60@003A1AF0, func_00282CF0@003A1B0C,
-   func_00282F20@003A1B1C, func_00282DD8@003A1B2C, func_00282F20@003A1B3C,
-   func_00282DD8@003A1B4C, func_00282F20@003A1B70, func_00282CC0@003A1B84,
-   func_L00_003A2258@003A1B9C, func_L00_003A25D8@003A1BC0,
-   func_L00_003A25D8@003A1BE4, 0x1163b0@003A1BEC,
-   func_L00_003A2C60@003A1C34, func_00282CF0@003A1C50,
-   func_00282F20@003A1C60, func_00282DD8@003A1C70, func_00282F20@003A1C80,
-   func_00282DD8@003A1C90, func_00282F20@003A1CB4, func_00282CC0@003A1CC8,
-   func_L00_003A2258@003A1CE0, func_L00_003A25D8@003A1D04,
-   func_L00_003A25D8@003A1D28, 0x1163b0@003A1D30,
-   func_L00_003A2C60@003A1D74, func_0029FCC0@003A1D98,
-   func_L00_003A2258@003A1DB8, func_L00_003A25D8@003A1DD4,
-   func_L00_003A25D8@003A1DF0, func_0029FCC0@003A1E00,
-   func_L00_003A2258@003A1E14, func_L00_003A25D8@003A1E30,
-   func_L00_003A25D8@003A1E4C, func_0029FCC0@003A1E5C,
-   func_L00_003A2258@003A1E70, func_L00_003A25D8@003A1E8C,
-   func_L00_003A25D8@003A1EA8, 0x1163b0@003A1EB0, 0x1163b0@003A1ED4,
-   func_L00_003A2C60@003A1F10, func_002FC560@003A1F20]; data addresses
-   materialised [0x50000, 0x240000, 0x3c750000, 0x290000, 0x3ecc0000,
-   0x3c740000, 0x3c770000, 0x3ed60000, 0x3ed30000, 0x3de10000, 0x7f7f0000,
-   0x3d4c0000, 0x7fff0000, 0x1b0000, 0x1b0000, 0x1b0000, 0x3e4c0000,
-   0x7f000000, 0x3e3e0000, 0x1b0000, 0x240000, 0x3d610000, 0x3ccc0000,
-   0x7f000000, 0x3dac0000, 0x1b0000, 0x7f7f0000, 0x7fff0000, 0x7f7f0000,
-   0x7fff0000, 0x7f7f0000, 0x7fff0000, 0x1b0000, 0x3eb30000, 0x1b0000,
-   0x1b0000, 0x3ee60000, 0x1b0000, 0x7f7f0000, 0x7fff0000, 0x1b0000,
-   0x3ee60000, 0x1b0000, 0x240000, 0x3d610000, 0x7f7f0000, 0x3ccc0000,
-   0x7fff0000, 0x1b0000, 0x3ee60000, 0x1b0000, 0x240000, 0x3d610000,
-   0x7f7f0000, 0x3ccc0000, 0x7fff0000, 0x240000, 0x240000, 0x3d610000,
-   0x3ccc0000, 0x7f7f0000, 0x7fff0000, 0x7f7f0000, 0x7fff0000, 0x7f7f0000,
-   0x7fff0000, 0x3a830000, 0x50000]; float constants [0x3f800000,
-   0xbf800000, 0x3e800000, 0x1b0000, 0x3f000000, 0x3f800000, 0x3f800000,
-   0x3f800000]; $gp-relative small data: no   saves: -; callee-saved
-   registers saved [-]; words plain C cannot emit [LQ/SQ 7AA20000@0x0254,
-   LQ/SQ 7C620000@0x0258]. Head: addiu $sp, $sp, -0x1C0 ; lui $a1, 0x5 ; ori
-   $a1, $a1, 0x3001 ; sd $s2, 0x160($sp) ; daddu $s2, $a0, $zero ; sd $s0,
-   0x150($sp). Not matched in this wave: the 128-bit copy needs an `lq`/`sq`
-   pair; plain C reaches it only through a `mode(TI)` local, and this cc1
-   folds the destination offset into the `sq` where retail materialises the
-   pointer first. What would unblock it: the exact source expression tree,
-   so this cc1 picks the same registers in the same order. */
 
 #include "common.h"
 typedef int VectorBits __attribute__((mode(TI)));
@@ -105,7 +45,9 @@ void func_L00_003A1580(void *object)
     state = *(char **)(moby + 0x68);
     func_L00_003A2138((int)moby, D_L00_0023B510[0], 4);
     func_002A3F10(moby, 1, &lookup, matrix);
-    *(VectorBits *)matrix[3] = 0;
+    matrix[3][0] = 0.0f;
+    matrix[3][1] = 0.0f;
+    matrix[3][2] = 0.0f;
     matrix[3][3] = 1.0f;
     D_L00_002947B0[1][0] = func_00283198(D_L00_001AF5F0) * 0.015f + 0.4f;
     D_L00_002947B0[1][2] = func_00283180(D_L00_001AF5F0) * 0.0149f;

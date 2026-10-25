@@ -16,7 +16,7 @@ INCLUDE_ASM("asm/levels", func_L16_00395250);
 
 INCLUDE_ASM("asm/levels", func_L16_00395858);
 
-INCLUDE_ASM("asm/levels", func_L16_003959B8);
+/* func_L16_003959B8 is in L16_003959B8.c. */
 
 extern char D_00189E20[];
 extern void func_002AFDD8(char *object, void *out, void *table, int a3);

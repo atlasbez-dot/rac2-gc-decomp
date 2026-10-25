@@ -1,3 +1,12 @@
+/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measurement: 1000/1000 bytes, 0/27 US placements, first mismatch +0x60; frame 0xE0.
+ * Change: The copied point has explicit 16-byte alignment and uses approved qcopy; the actual three particle API return banks and FP argument slots are preserved.
+ * Residual: No-force-mem measured 1004. Smoke call argument scheduling and the spark-loop preheader still differ despite equal size.
+ * Reopen: Reopen with measured smoke/counter argument-setup ordering, not false particle prototypes or invented dependencies.
+ * Earlier measurements/screens below are historical; they do not prohibit
+ * the currently approved shared transfer helpers or establish linked equality.
+ */
 /* Nonmatching: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_003914E0: 0 of 27 places match (src/levels/shared/L00_003914E0.c); us2: func_L00_003914E0: 0 of 27 places match (src/levels/shared/L00_003914E0.c); pal: absent. Four manual trials; best 1000/1000 bytes, frame0xE0, first mismatch+0x60. Natural preinitialized countdown matches saved flag/counter allocation, but smoke call scheduling and spark preheader differ. Reopen with original counter/expression scheduling evidence. Verified three particle APIs return allocated pointers, full five/two/one FP arguments retained. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -13,12 +22,13 @@ extern void *func_002BBCB0(void *, void *, int, int, int, int, int, int, float, 
 extern char *func_00308408(void *, void *, void *, int, int, int, int, int, float);
 /* Emits the tether's impact smoke, distance-weighted sparks and colored fragments. */
 void func_L00_003914E0(char *actor, int fragments) {
-    float point[4], delta[4], velocity[4];
+    float point[4] __attribute__((aligned(16)));
+    float delta[4], velocity[4];
     EffectPalette first, second;
     int i, count, startLife, endLife;
     int *firstColor, *lastColor;
     float distance, nearPenalty, speed;
-    *(Quad *)point = *(Quad *)(actor + 0x10);
+    qcopy(point, actor + 0x10);
     point[2] += 0.3f;
     i = 4;
     func_002BC768(point, 1, 0x40808080, 0.3f, 1.01f, 1.075f, 0.05f, 50000.0f);

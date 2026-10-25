@@ -1,28 +1,58 @@
-/* from src/core/0011FA70.c: the recovered libgcc2.c source is instruction-exact for 394 of
-   retail's 443 instructions, but this cc1 places six nops differently and schedules the
-   tail differently (candidate 1788 bytes against retail's 1772); the 256-byte __clz_tab
-   also needs .rodata at 0x13AC58, which tools/build.py cannot place */
-/*
- * libgcc libgcc2.c: __divdi3, the L_divdi3 member (GPL version 2-or-later with
- * the libgcc linking exception; the source is the public archive the qualified
- * compiler is built from, gnu-ee-binutils-gcc-1.1, gcc/libgcc2.c with
- * gcc/longlong.h).
- *
- * Checked as `sdk -O2 -G2 -ffunction-sections`: 1788 bytes against 1772. Non-nop
- * mnemonic streams are identical for the first 394 of 443 instructions and diverge only
- * from the umul_ppmm site (this cc1 emits mflo before mfhi, retail mfhi before mflo) and
- * in the closing __negdi2. Nops: retail 9, candidate 6 - owed to __udiv_qrnnd_c's
- * correction block, where retail puts `__r1 -= __m` in a beql delay slot (nullified on the
- * fall-through) and this cc1 keeps a straight-line copy, 7 instructions longer.
- *
- * For __mips__ longlong.h defines only umul_ppmm, so udiv_qrnnd falls back to
- * __udiv_qrnnd_c with UDIV_NEEDS_NORMALIZATION 1 and count_leading_zeros to the
- * table form; retail shows both: the 16-bit-digit divide at every udiv_qrnnd,
- * and `lbu` from __clz_tab. That table is this unit's own 256-byte copy, at
- * 0x13AC58 in retail (`lui $v0,0x14 ; addiu $v0,$v0,-0x53A8`); __moddi3 has its
- * own at 0x13AD58, so they are not shared. The entry points keep the names the
- * compiler's own sources carry: __negdi2 and __udivmoddi4 are the static
-   inline helpers libgcc2.c only gives those names to under L_divdi3. */
+/* GCC libgcc2.c and longlong.h, public GCC revision 31cf01446d (1999-09-09).
+ * __mips__ umul_ppmm is the original runtime-library target primitive,
+ * unchanged from public longlong.h:629-636. Other arithmetic is the active
+ * L_divdi3/L_moddi3 module reconstructed from the same public sources.
+ * GPL-2.0-or-later with the original libgcc linking exception below.
+ * License text: upstream GCC COPYING; see also project THIRD_PARTY_NOTICES.md.
+ * No proprietary SDK source is used.
+ */
+/* longlong.h -- definitions for mixed size 32/64 bit arithmetic.
+   Copyright (C) 1991, 92, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+
+   This definition file is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 2, or (at your option) any later version.
+
+   This definition file is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied
+   warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+   See the GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
+
+
+/* More subroutines needed by GCC output code on some machines.  */
+/* Compile this one with gcc.  */
+/* Copyright (C) 1989, 92-98, 1999 Free Software Foundation, Inc.
+
+This file is part of GNU CC.
+
+GNU CC is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+GNU CC is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU CC; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+/* As a special exception, if you link this library with other files,
+   some of which are compiled with GCC, to produce an executable,
+   this library does not by itself cause the resulting executable
+   to be covered by the GNU General Public License.
+   This exception does not however invalidate any other reasons why
+   the executable file might be covered by the GNU General Public License.  */
+
 
 typedef int SItype __attribute__ ((mode (SI)));
 typedef unsigned int USItype __attribute__ ((mode (SI)));
@@ -63,16 +93,22 @@ static const unsigned char __clz_tab[] = {
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-#define count_leading_zeros(count, x)                                       \
-    do {                                                                    \
-        USItype __xr = (x);                                                 \
-        USItype __a;                                                        \
-                                                                            \
-        __a = __xr < ((USItype) 1 << 2 * __BITS4)                           \
-              ? (__xr < ((USItype) 1 << __BITS4) ? 0 : __BITS4)             \
-              : (__xr < ((USItype) 1 << 3 * __BITS4) ? 2 * __BITS4 : 3 * __BITS4); \
-                                                                            \
-        (count) = SI_TYPE_SIZE - (__clz_tab[__xr >> __a] + __a);            \
+#define count_leading_zeros(count, x)                                                              \
+    do {                                                                                           \
+        USItype __xr = (x);                                                                        \
+        USItype __a;                                                                               \
+                                                                                                   \
+        if (SI_TYPE_SIZE <= 32) {                                                                  \
+            __a = __xr < ((USItype)1 << 2 * __BITS4)                                               \
+                      ? (__xr < ((USItype)1 << __BITS4) ? 0 : __BITS4)                             \
+                      : (__xr < ((USItype)1 << 3 * __BITS4) ? 2 * __BITS4 : 3 * __BITS4);          \
+        } else {                                                                                   \
+            for (__a = SI_TYPE_SIZE - 8; __a > 0; __a -= 8)                                        \
+                if (((__xr >> __a) & 0xff) != 0)                                                   \
+                    break;                                                                         \
+        }                                                                                          \
+                                                                                                   \
+        (count) = SI_TYPE_SIZE - (__clz_tab[__xr >> __a] + __a);                                   \
     } while (0)
 
 #define sub_ddmmss(sh, sl, ah, al, bh, bl)                                  \
@@ -83,13 +119,14 @@ static const unsigned char __clz_tab[] = {
         (sl) = __x;                                                         \
     } while (0)
 
-#define umul_ppmm(w1, w0, u, v)                                             \
-    do {                                                                    \
-        DIunion __w;                                                        \
-        __w.ll = (UDItype) (USItype) (u) * (UDItype) (USItype) (v);         \
-        (w1) = __w.s.high;                                                  \
-        (w0) = __w.s.low;                                                   \
-    } while (0)
+#define umul_ppmm(w1, w0, u, v) \
+  __asm__ ("multu %2,%3"						\
+	   : "=l" ((USItype) (w0)),					\
+	     "=h" ((USItype) (w1))					\
+	   : "d" ((USItype) (u)),					\
+	     "d" ((USItype) (v)))
+#define UMUL_TIME 10
+#define UDIV_TIME 100
 
 #define udiv_qrnnd(q, r, n1, n0, d)                                         \
     do {                                                                    \
