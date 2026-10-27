@@ -1,3 +1,18 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured unit: src/levels/02_maktar_nebula/L02_003F52B0.c
+ * Profile: -O2 -G0 -ffunction-sections
+ * Actual release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL 0/1 (exit1).
+ * Current residual: 220/220 bytes. Case zero still differs in four address/store setup
+ * words beginning at +0x5c. Approved qcopy and a genuine prefix view of the four-float
+ * effect-position field preserve the remaining body; three forms tie.
+ * Reopen only for: A concrete field/address lifetime hypothesis for the setup, not another
+ * store permutation sweep.
+ * Older notes below are historical. Marker and trial-only profiles were restored.
+ */
+
+#include "common.h"
+
 /* Near miss (small-function wave, level 2): 220 bytes, level 2 only.  With the opt-in `-frac2-qcopy`
  * profile (#262) in a unit of its own (src/levels/02_maktar_nebula/L02_003F52B0.c, flags `-O2 -G0
  * -ffunction-sections -frac2-qcopy`) the C below is retail's 220 bytes (the earlier record, without
@@ -43,10 +58,12 @@
  * order above.
  */
 
-typedef unsigned char u8;
+
 typedef int TI128 __attribute__((mode(TI)));
 
-extern char D_00189E20[];
+/* Prefix view of the effect-position field; not a complete global layout. */
+typedef struct { char pad[0xB0]; float effect_position[4]; } EffectPositionView;
+extern EffectPositionView D_00189E20;
 extern char D_L02_001B3210[];
 extern char *D_L02_001AD410 __attribute__((sda));
 extern void func_L02_003F5390(char *);
@@ -54,18 +71,18 @@ extern void func_L02_003F54D8(char *);
 extern void func_L02_003F56C0(char *);
 extern void func_L02_003F5710(char *);
 extern void func_002833B8(char *, float);
-extern void func_002A7750();
+extern void func_002A7750(u8 *, s32, s32);
 
 void func_L02_003F52B0(char *arg0) {
     switch (*(u8 *)(arg0 + 0x20)) {
     case 0: {
-        char *g = D_00189E20;
+        EffectPositionView *g = &D_00189E20;
 
-        *(float *)(g + 0xB4) = 200.0f;
-        *(float *)(g + 0xB8) = 500.0f;
-        *(float *)(g + 0xB0) = 500.0f;
-        *(float *)(g + 0xBC) = 1.0f;
-        *(TI128 *)D_L02_001B3210 = *(TI128 *)(g + 0xB0);
+        g->effect_position[1] = 200.0f;
+        g->effect_position[2] = 500.0f;
+        g->effect_position[0] = 500.0f;
+        g->effect_position[3] = 1.0f;
+        qcopy(D_L02_001B3210, g->effect_position);
         *(u8 *)(arg0 + 0x30) = 0xFF;
         func_L02_003F5390(arg0);
         func_002833B8(D_L02_001AD410 + 0x40, 1.0f);

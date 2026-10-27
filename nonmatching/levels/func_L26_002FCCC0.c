@@ -1,22 +1,18 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 absent from catalogue; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh checks on the qualified current compiler, 2026-10-25.
+ * Profile: -O2 -G32 -Wa,-G32 -ffunction-sections
+ * Coverage: US: 0/1; US2: absent from catalogue; PAL: absent from catalogue.
+ * Compiled text: 632 bytes; retail text: 672 bytes.
+ * Remaining difference: Frame 0xD0 matches. The full 64-byte transform is explicitly aligned as
+ * four vectors; the complete 32-byte input table is retained. qzero reproduces the observed SQ-
+ * zero operation, but the body remains 632 bytes versus 672 with global addressing and loop
+ * scheduling differences.
+ * Reopen when: Independent source evidence for the global/loop model; preserve the observed delay-
+ * slot object ID load and all transform rows.
  */
 
-/*
- * Manual C reconstruction retained after bounded retail comparison.
- * Profile: -O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Measured text: 636 bytes; retail: 672 bytes. Stack frame 0xD0; retail 0xD0.
- * Final coverage: US 0/1, US2 absent, PAL absent. Absences are not matches.
- * 1 measured source/profile forms. Table/null control flow, base allocation and mixed
- * GP/absolute current-level accesses differ. The transform is 64 bytes and the two input
- * vectors form a real 32-byte array. The ninth BAA28 argument is -1 on the stack. Reopen on
- * source control flow and actual lifetimes; do not introduce a second identity for the
- * current-level word.
- * All carrying checks are nonmatches (exit 1); no linked-build credit.
- */
+#include "common.h"
 
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
@@ -43,7 +39,7 @@ extern char *func_002BAA28(void *, void *, void *, unsigned int, unsigned int, i
 extern int func_00283CF0(float);
 
 void func_L26_002FCCC0(void) {
-    float transform[16];
+    Vector transform[4];
     Vector position;
     Vector velocity;
     Vector acceleration;
@@ -74,12 +70,12 @@ void func_L26_002FCCC0(void) {
     if (D_001A79F0 == 26 && *(int *)(hero + 0x30) == 0 && *(int *)(hero + 0x34) < 260) {
         object = *(char **)(hero + 0x198);
         func_0029FC20(object, 0, (char *)transform);
-        *(Quad *)(transform + 12) = *(Quad *)(object + 0x10);
+        qcopy((transform + 3), (object + 0x10));
         for (i = 0; i < 8; i++) {
             func_002830C0(&position, D_L26_001A9450[i & 1], transform);
             func_00282F20(&velocity, transform, 0.06666667f);
             velocity.f[3] = D_L26_001A9420;
-            acceleration.q = 0;
+            qzero(&acceleration);
             acceleration.f[3] = D_L26_001A9424;
             color = func_00283D38(D_L26_001A9428, D_L26_001A942C, func_002A7878(0.0f, 1.0f));
             duration = func_002A7820(D_L26_001A9430, D_L26_001A9434);

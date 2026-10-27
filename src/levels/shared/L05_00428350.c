@@ -113,7 +113,7 @@ void func_L05_0042E4E8(char *a0)
 
 INCLUDE_ASM("asm/levels", func_L05_0042F4E8);
 
-INCLUDE_ASM("asm/levels", func_L05_00430318);
+/* func_L05_00430318 is defined in x-qcopy.c. */
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L05_00430BF0(Vec16_Fc936841d *object, int index)
@@ -128,27 +128,22 @@ void func_L05_00430BF0(Vec16_Fc936841d *object, int index)
 /* Creates the 0x10E3 object and copies the caller's transforms into it. */
 INCLUDE_ASM("asm/levels", func_L05_00432080);
 
-INCLUDE_ASM("asm/levels", func_L05_00432158);
+/* func_L05_00432158 is matched in its own unit, src/levels/shared/L05_00432158.c (-frac2-qcopy -frac2-qcopy-barrier -fno-strength-reduce). */
 
 
 INCLUDE_ASM("asm/levels", func_L05_00441D40);
 
-INCLUDE_ASM("asm/levels", func_L05_00441EA0);
 
 INCLUDE_ASM("asm/levels", func_L05_00441F30);
 
 INCLUDE_ASM("asm/levels", func_L05_00442398);
 
-/* Blends the negated angle into the object's transform through the level's matrix table. */
-INCLUDE_ASM("asm/levels", func_L05_004424B8);
-
 INCLUDE_ASM("asm/levels", func_L05_00442560);
 
 /* func_L05_00442720 is matched in L05_00442720.c (built with -mno-split-addresses). */
 
-INCLUDE_ASM("asm/levels", func_L05_004427A8);
+/* func_L05_004427A8 is defined in L05_004427A8-flags.c. */
 
-INCLUDE_ASM("asm/levels", func_L05_00442828);
 
 INCLUDE_ASM("asm/levels", func_L05_00442880);
 
@@ -208,13 +203,8 @@ int func_L05_00445980(void)
 
 INCLUDE_ASM("asm/levels", func_L05_004459B0);
 
-INCLUDE_ASM("asm/levels", func_L05_00445A98);
-
 INCLUDE_ASM("asm/levels", func_L05_00445B58);
 
 INCLUDE_ASM("asm/levels", func_L05_00445C38);
 
 INCLUDE_ASM("asm/levels", func_L05_00445D60);
-
-/* While the level is idle, checks the object's table bit before starting the encounter. */
-INCLUDE_ASM("asm/levels", func_L05_00445F90);

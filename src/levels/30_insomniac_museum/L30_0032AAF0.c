@@ -228,13 +228,12 @@ void func_L30_003BE678(char *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L30_003C7180);
 
 INCLUDE_ASM("asm/levels", func_L30_003D9CA8);
 
 INCLUDE_ASM("asm/levels", func_L30_003D9E60);
 
-INCLUDE_ASM("asm/levels", func_L30_003DA040);
+/* func_L30_003DA040 is matched in its own unit, src/levels/shared/L30_003DA040-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L30_003E1BA0);
 

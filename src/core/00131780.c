@@ -277,7 +277,7 @@ void func_00132B58(int value, long fourth, int fifth) {
 
 INCLUDE_ASM("asm/core", func_00132C48);
 
-INCLUDE_ASM("asm/core", func_00132DF0);
+/* func_00132DF0 is defined in 00132DF0-g8.c. */
 
 
 INCLUDE_ASM("asm/core", func_00133108);

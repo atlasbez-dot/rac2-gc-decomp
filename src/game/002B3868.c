@@ -69,7 +69,6 @@ int func_002B3B20(char *p, char *q, float f12, float f13)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002B3BA8);
 
 
 typedef struct {

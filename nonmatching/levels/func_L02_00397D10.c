@@ -1,34 +1,20 @@
-/* NEAR MISS: 1,044 bytes, the size of retail's, but about 35 of 261 words differ (level 2 only). The per-frame
-   step of a moving object, the sibling of func_L02_00398128 (same query record, same hit record at
-   D_L02_001C0940, same two direction vectors): after the probe (func_002761F8) a hit that is not "blocked"
-   (func_00278E78 == 0) while state+8 is negative spawns a sixteen-particle burst (func_002BFB38, speed and
-   angle from func_002A7878 / func_002A7940) at the object's x/y and the hit's z, with func_00312D58 as the
-   effect; otherwise the hit record decides the flag byte at +0xBC exactly as in func_L02_00398128, and
-   func_L00_0038DE70 gets the two vectors at the end.
-   Needs a unit of its own, src/levels/02_maktar_nebula/L02_00397D10-g8.c: -G8 (the two burst pointers
-   D_L02_001B3D30 / D_L02_001B3D38 are `lw ...($gp)` outside a delay slot, declared `sda` with a size of at most
-   8) and the `-frac2-qcopy` profile (three 16-byte copies through register addresses), so the config/cflags.txt
-   line is `-O2 -G8 -ffunction-sections -frac2-qcopy`.
-   What matches: the frame (0xE0) and the order of the locals (copy of the position at sp+0, the two direction
-   vectors at sp+0x10/0x20, the query record at sp+0x30, the burst position/velocity at sp+0x60/0x70), every call
-   with its arguments (func_00312D58 takes the burst position as its first argument), the sixteen-iteration
-   loop with its `nop` slot, the likely-branch slots, retail's recompute of the hit record's address after the
-   join (the second `rec = &D_L02_001C0940;`), and the two-register load of the player pointer (D_0018C0B0 is
-   `nosda` in a -G8 unit).
-   What differs, all scheduling or allocation around the lq/sq pairs (the same wall as func_L02_00398128 and
-   func_L02_0033C760): retail issues the first zero store `sq $v0,0x10($sp)` among the prologue saves and keeps
-   the argument moves of the calls that follow each pair (`daddu $a0,$s1,$zero` ... `daddu $a2,$s1,$zero`;
-   `daddu $a0,$s0,$zero` / `daddu $a1,$s0,$zero`) behind the pair, where this compile hoists them above it; the
-   temporaries of the record-height load differ ($a0/$a1/$v1 in retail); the %hi copy and the hit object swap
-   $a0/$a1; and three address computations (`addiu $s4,$sp,0x70`, `addiu $s0,$sp,0x10`, the `swc1 $f20,0x38`
-   store) sit one slot apart. Retail looks as if its lq/sq pairs were scheduling barriers. */
+/*
+ * Complete manual reconstruction retained as nonmatching; no exact-C, linked-build
+ * or runtime credit. Fresh worker checks on 2026-10-25, base dcfcd1f90746f3fbba715825d25bf19e88bf875c.
+ * Tested profile: -O2 -G8 -ffunction-sections -frac2-qcopy
+ * Coverage: US: 0/1 placements; US2: 0/1 placements; PAL: absent from both catalogues.
+ * US compiled size: 1044 bytes; retail: 1044 bytes.
+ * Remaining difference: Same 1044-byte size; first differing instruction at +0xEC in class-table height calculation. Byte-base/stride temporaries and query-field scheduling still differ; later hit/spawn allocation also differs.
+ * Reopen only with: A qualified class-table access shape or genuine object/probe lifetime that explains the retail A0/A1/V0/V1 allocation, rather than another declaration-order permutation.
+ * Earlier complete variants and command logs are preserved privately.
+ */
 #include "include_asm.h"
 #include "common.h"
 
 typedef int TI128 __attribute__((mode(TI)));
 
 typedef struct {
-    float pos[4];
+    float pos[4] __attribute__((aligned(16)));
     char *owner;
     int flags;
     u8 mode;
@@ -86,42 +72,48 @@ extern L02_Hit D_L02_001C0940;
 extern void *D_L02_001B3D30 __attribute__((sda));
 extern void *D_L02_001B3D38 __attribute__((sda));
 
+typedef union { TI128 quad; float f[4]; } L02_WorkVector;
+typedef struct { L02_WorkVector c,a,b; L02_Probe probe; L02_WorkVector dpos,dvel; } L02_Workspace;
+
 void func_L02_00397D10(char *self) {
-    float c[4], a[4], b[4];
-    L02_Probe probe;
-    float dpos[4], dvel[4];
+    L02_Workspace local;
+
     char *state;
     char *fx;
     float *pv;
     int i, n;
     float ang, spd;
 
-    *(TI128 *)a = 0;
-    *(TI128 *)b = 0;
-    a[2] = 0.033333335f;
-    b[2] = 1.0f;
+    *(TI128 *)local.a.f = 0;
+    local.a.f[2] = 0.033333335f;
     state = *(char **)(self + 0x68);
-    *(TI128 *)c = *(TI128 *)(self + 0x10);
+    *(TI128 *)local.b.f = 0;
+    local.b.f[2] = 1.0f;
+    qcopy(local.c.f,self + 0x10);
     func_00282CC0(self + 0x10, state, self + 0x10);
     func_002FEE70(*(int *)(state + 0x1C), state, 0);
     func_00300190(self + 0x10, self + 0x10);
     func_00300248(state, state);
     func_002FE880(self + 0x10, state, 0.0030555557f);
     func_L00_0038F178(self);
-    probe.owner = self;
-    probe.flags = 0x830000;
+    local.probe.owner = self;
+    local.probe.flags = 0x830000;
     if (*(int *)(state + 0x18) < 0x122)
-        probe.flags = 0x830001;
-    probe.one = 1;
-    probe.height = D_L02_00264A70[D_00139574].height;
-    *(TI128 *)probe.pos = *(TI128 *)state;
-    func_00282F70(probe.pos, probe.pos, 1.0f);
-    probe.mode = 2;
-    probe.pos[3] = 5627.9248046875f;
-    probe.type = *(u16 *)(self + 0xAA);
-    probe.pos[2] = 1.0f;
-    probe.on = 1;
-    if (func_002761F8(c, self + 0x10, 0x10, self, &probe) != 0) {
+        local.probe.flags = 0x830001;
+    local.probe.one = 1;
+    {
+        unsigned int classIndex=D_00139574;
+        L02_Rec *classTable=D_L02_00264A70;
+        local.probe.height=classTable[classIndex].height;
+    }
+    qcopy(local.probe.pos,state);
+    func_00282F70(local.probe.pos, local.probe.pos, 1.0f);
+    local.probe.mode = 2;
+    local.probe.pos[3] = 5627.9248046875f;
+    local.probe.type = *(u16 *)(self + 0xAA);
+    local.probe.pos[2] = 1.0f;
+    local.probe.on = 1;
+    if (func_002761F8(local.c.f, self + 0x10, 0x10, self, &local.probe) != 0) {
         char *rec;
 
         if (func_00278E78() == 0 && *(float *)(state + 8) < 0.0f) {
@@ -130,49 +122,56 @@ void func_L02_00397D10(char *self) {
             *(int *)(state + 0x14) = 1;
             func_00282C88(state);
             *(float *)(state + 8) = -0.025000002f;
-            dpos[0] = *(float *)(self + 0x10);
-            dpos[1] = *(float *)(self + 0x14);
-            dpos[2] = D_L02_001C0940.pos[2];
-            fx = func_00312D58(dpos, 2.0f);
+            local.dpos.f[0] = *(float *)(self + 0x10);
+            local.dpos.f[1] = *(float *)(self + 0x14);
+            local.dpos.f[2] = D_L02_001C0940.pos[2];
+            fx = func_00312D58(local.dpos.f, 2.0f);
             if (fx != 0)
                 *(u8 *)(fx + 0x23) = 0x70;
-            pv = dvel;
+            pv = local.dvel.f;
             for (i = 15; i >= 0; i--) {
                 ang = func_002A7940();
                 spd = func_002A7878(0.0f, 0.050000004f);
-                dvel[0] = func_00283180(ang) * spd;
-                dvel[1] = func_00283198(ang) * spd;
-                dvel[2] = func_002A7878(0.050000004f, 0.10833334f);
+                local.dvel.f[0] = func_00283180(ang) * spd;
+                local.dvel.f[1] = func_00283198(ang) * spd;
+                local.dvel.f[2] = func_002A7878(0.050000004f, 0.10833334f);
                 n = func_002A7820(0x5A, 0x78);
-                func_002BFB38(dpos, pv, func_002A77E0(2), n);
+                func_002BFB38(local.dpos.f, pv, func_002A77E0(2), n);
             }
             goto flag;
         }
         rec = (char *)&D_L02_001C0940;
         if (*(char **)(rec + 0x18) != 0) {
-            if ((*(char **)(rec + 0x18) == D_0018C0B0 || *(s16 *)(*(char **)(rec + 0x18) + 0xAA) == 0xC0) &&
+            char *hitObject=*(char **)(rec + 0x18);
+            if ((hitObject == D_0018C0B0 || *(s16 *)(hitObject + 0xAA) == 0xC0) &&
                 *(int *)(state + 0x18) >= 0x122)
                 goto flag;
             rec = (char *)&D_L02_001C0940;
-            if (!(*(int *)(*(char **)(rec + 0x18) + 0x64) != D_L02_001AC850 ||
-                  *(s16 *)(*(char **)(rec + 0x18) + 0xAA) == 0x336))
+            {
+            char *classObject=*(char **)(rec + 0x18);
+            if (!(*(int *)(classObject + 0x64) != D_L02_001AC850 ||
+                  *(s16 *)(classObject + 0xAA) == 0x336))
                 goto flag;
+            }
         } else if (*(int *)(rec + 0x1C) <= 0) {
             goto flag;
         }
         *(u8 *)(self + 0xBC) = 1;
-        *(TI128 *)(self + 0x10) = *(TI128 *)(rec + 0x20);
+        {
+                    char *hitPosition=rec + 0x20;
+                    qcopy(self + 0x10,hitPosition);
+                }
         rec += 0x40;
-        func_00283028(a, state, rec);
-        func_00282F20(a, a, 0.033333335f);
-        func_00282F20(b, rec, 1.0f);
+        func_00283028(local.a.f, state, rec);
+        func_00282F20(local.a.f, local.a.f, 0.033333335f);
+        func_00282F20(local.b.f, rec, 1.0f);
     } else if (func_00282948(state + 0x18) != 0) {
         *(u8 *)(self + 0xBC) = 1;
-        func_00282CC0(a, a, state);
+        func_00282CC0(local.a.f, local.a.f, state);
     }
 flag:
     if (*(u8 *)(self + 0xBC) != 0) {
         func_002FEE50(*(int *)(state + 0x1C));
-        func_L00_0038DE70(self, a, b);
+        func_L00_0038DE70(self, local.a.f, local.b.f);
     }
 }

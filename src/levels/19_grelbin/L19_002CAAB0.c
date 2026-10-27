@@ -2,8 +2,6 @@
 
 extern int D_L19_001A8F00 __attribute__((sda));
 
-INCLUDE_ASM("asm/levels", func_L19_002CAAB0);
-
 INCLUDE_ASM("asm/levels", func_L19_002FA1A8);
 
 INCLUDE_ASM("asm/levels", func_L19_00380918);
@@ -25,6 +23,5 @@ INCLUDE_ASM("asm/levels", func_L19_0038B998);
 
 INCLUDE_ASM("asm/levels", func_L19_00390F78);
 
-INCLUDE_ASM("asm/levels", func_L19_003C7618);
 
 INCLUDE_ASM("asm/levels", func_L19_003D2E38);

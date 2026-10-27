@@ -1,14 +1,9 @@
-/* Retained manual C reconstruction, 25 October 2026; not matching.
- * Profile: -O2 -G0 -ffunction-sections -g.
- * 884/880 bytes under -O2 -G0 -ffunction-sections -g. A single normalized radius ratio and
- * shared result path reduce the old 924-byte body; the existing debug-label profile restores the
- * two pre-division nops. Candidate-pointer allocation and final return/restore scheduling still
- * differ. A non-clobbering-copy probe tied and was discarded. Reopen with independent pointer-
- * lifetime or return-layout evidence.
- * Checks: us: func_L18_0035D238: 0 of 3 places match; us2: func_L18_0035D238: 0 of 3 places
- * match; pal: func_L18_0035D238: 0 of 3 places match.
- * No linked build or runtime validation. This header was added after candidate checks; the
- * copied standalone file was not recompiled after retention.
+/* M7, 26 October 2026: 880/880 bytes under -O2 -G0 -ffunction-sections -g, one word off.
+ * The final 0.01 threshold applies only on the outer start/end/closest paths (the inner
+ * pair returns its error directly) and the second candidate goes through a pointer local
+ * (no gcse copy into $s5). Left: the bc1f over `secondError = 0` lands on the hazard nop
+ * in retail (+0x21C, label before the nop) but after it here (label after gas's flush nop).
+ * Ternary, braces, same-line and radius*0.01 spellings tie. 0 of 3 places in us/us2.
  */
 
 #include "common.h"
@@ -27,6 +22,7 @@ float func_L18_0035D238(float radius, float *out, float *reference, float *point
     } vectors;
     float along, distance, length, reach, firstT, secondT;
     float firstError, secondError, threshold;
+    float *second;
     func_00282CF0(vectors.offset, start, point);
     func_00282CF0(vectors.segment, end, start);
     length = func_00282DB0(vectors.segment, vectors.segment);
@@ -49,18 +45,20 @@ float func_L18_0035D238(float radius, float *out, float *reference, float *point
         firstError = func_00282C48(func_00282E48(vectors.first, point) - radius);
         threshold = radius * 0.01f;
         if (firstError < threshold) firstError = 0.0f;
-        func_00282D30(vectors.second, vectors.segment, secondT);
-        func_00282CC0(vectors.second, vectors.second, start);
-        secondError = func_00282C48(func_00282E48(vectors.second, point) - radius);
+        second = vectors.second;
+        func_00282D30(second, vectors.segment, secondT);
+        func_00282CC0(second, second, start);
+        secondError = func_00282C48(func_00282E48(second, point) - radius);
         if (secondError < threshold) secondError = 0.0f;
-        if (firstError < secondError || (firstError == secondError && func_00282E48(vectors.first, reference) < func_00282E48(vectors.second, reference))) {
+        if (firstError < secondError || (firstError == secondError && func_00282E48(vectors.first, reference) < func_00282E48(second, reference))) {
             qcopy(out, vectors.first);
             distance = firstError;
         } else {
-            qcopy(out, vectors.second);
+            qcopy(out, second);
             distance = secondError;
         }
-    } else if (along < 0.0f) {
+    } else {
+    if (along < 0.0f) {
         qcopy(out, start);
         distance = func_00282C48(func_00282E48(out, point) - radius);
     } else if (along > 1.0f) {
@@ -70,5 +68,6 @@ float func_L18_0035D238(float radius, float *out, float *reference, float *point
         qcopy(out, vectors.closest);
     }
     if (distance < radius * 0.01f) distance = 0.0f;
+    }
     return distance;
 }

@@ -1,43 +1,18 @@
-/* func_L16_00410CC0 (380 bytes, 1 place) -- NEAR MISS, not integrated.
-   state: 368 bytes against retail's 380; the frame is smaller than retail's 0x90 and
-   the register allocation differs, so the bytes do not match.
-   check.py (16_snivelak), with the source below:
-     16_snivelak: 368 bytes, expected 380
-   The table of short rows is reached through $gp (retail: `addiu $a0, $gp, 0x2720`),
-   so the body needs a -G8 unit: `extern s16 D_L16_001B1710[4] __attribute__((sda));`
-   gives the one-instruction form.
-   What is measured and right:
-   - the pointer table of the handle's index is at 0x1FE7C0 in level 16 (`lui $v0,0x20;
-     addiu $v0,$v0,-0x1840`), so `extern u32 D_L16_001FE7C0[];` reproduces it.
-   - the 16-byte copies are `lq`/`sq`, which this cc1 emits for a `mode(TI)` local;
-     the state at the frame's base and the working buffer at +0x10 are two distinct
-     locals, and the winning row is copied from the buffer into the state.
-   - the row loop walks the eight rows of the short table and stops at the first
-     row whose first word is -1; the inner loop counts the entries it looked at and
-     stops after four, and the value that wins is written to the handle's +0x1F4,
-     +0x1F8 and +0x1FC.
-   Not matched: retail spills the row index and the destination pointer to the frame
-   and recomputes the row address from the reloaded index every row, this source
-   keeps both in registers and strength-reduces the address; retail's frame is 0x90
-   against this source's smaller one.
-   Next idea: the register pressure that makes retail spill the row index has to
-   come from one more live value in the source; the two 16-byte locals and the
-   handle, the table entry, the argument and the two floats are all live across the
-   two calls. */
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G64 -ffunction-sections -Wa,-G64
+ * 376/380 bytes; 0/1 placements in us, us2 and pal.
+ * Residual: The 0x90 frame and full vector transfers agree, but row/next-index liveness and inner-loop allocation/order differ. The threshold is 2001, and a sentinel skips only its row.
+ * Reopen: Independent row-index and endpoint-offset lifetime evidence, preserving the measured 64-byte accessed table prefix.
+ * Trial-only markers and profiles are restored after checking.
+ */
 
-typedef unsigned char u8;
-
-typedef unsigned int u32;
-
-typedef signed short s16;
-
-typedef signed int s32;
-
-typedef float f32;
-
+#include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
 
-extern s16 D_L16_001B1710[4] __attribute__((sda));
+/* Partial table view: retail visits up to eight four-short rows. GP access
+ * is independently evidenced; this is not a complete global extent claim. */
+typedef struct { s16 row[8][4]; } RowTablePrefix;
+extern RowTablePrefix D_L16_001B1710 __attribute__((sda));
 
 extern u32 D_L16_001FE7C0[];
 
@@ -63,15 +38,15 @@ void func_L16_00410CC0(u8 *arg0, u8 *arg1)
     s16 *r;
 
     s4 = *(u32 **)(arg0 + 0x68);
-    best = 2000.0f;
+    best = 2001.0f;
     fp = *(u8 **)(D_L16_001FE7C0 + s4[92]);
-    state = *(TI128 *)arg1;
+    qcopy(&state, arg1);
     dest = (u8 *)s4 + 0x200;
     for (row = 0; row < 8; row++) {
-        r = D_L16_001B1710 + row * 4;
+        r = D_L16_001B1710.row[row];
         v = r[0];
         if (v == -1)
-            break;
+            continue;
         count = 0;
         for (;;) {
             if (v < row) {
@@ -84,7 +59,7 @@ void func_L16_00410CC0(u8 *arg0, u8 *arg1)
                     s4[0x7E] = v;
                     *(f32 *)((u8 *)s4 + 0x1FC) = f;
                     s4[0x7D] = row;
-                    state = work;
+                    qcopy(&state, &work);
                 }
                 count++;
             }
@@ -95,5 +70,5 @@ void func_L16_00410CC0(u8 *arg0, u8 *arg1)
                 break;
         }
     }
-    *(TI128 *)dest = state;
+    qcopy(dest, &state);
 }

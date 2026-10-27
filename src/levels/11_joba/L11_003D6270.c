@@ -60,7 +60,6 @@ extern void func_L11_003F3CB8(u8 *arg0);
 
 INCLUDE_ASM("asm/levels", func_L11_003D6270);
 
-INCLUDE_ASM("asm/levels", func_L11_003D90C0);
 
 INCLUDE_ASM("asm/levels", func_L11_003DCEB0);
 
@@ -137,7 +136,6 @@ f32 func_L11_003F2F00(f32 *arg0, f32 *arg1, f32 *arg2) {
          - (arg0[1] - arg2[1]) * (arg1[0] - arg2[0]);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_003F2E38);
 
 void func_L11_003F3098(u8 *arg0) {
     func_L11_003F31C0(arg0);
@@ -197,8 +195,6 @@ void func_L11_003F31C0(u8 *arg0) {
     }
     *(s32 *)(s0 + 0x290) = -1;
 }
-
-INCLUDE_ASM("asm/levels", func_L11_003F2F38);
 
 INCLUDE_ASM("asm/levels", func_L11_003F3258);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "include_asm.h"
 
 extern void func_002B60B0(char *, float, float, float, float);
 extern void func_002A7470(char *, int, int, int);
@@ -18,9 +19,8 @@ extern void func_324560(char *a0);
 extern void func_L11_00441978(s32 a0, int a1);
 extern void func_323688(char *a0, char *a1);
 extern void func_00282A60(char *a0, int a1, int a2);
-extern void func_L11_00449330();
-
 typedef int TI128 __attribute__((mode(TI)));
+extern void func_L11_00449330(char *self, TI128 *pos);
 extern char *func_3224B0(int a0);
 extern void func_324F00(char *a0);
 extern void func_3362A8(char *a0, s32 a1, int a2, int a3);
@@ -35,13 +35,13 @@ extern void func_32EB98(void *a0, void *a1);
 extern s32 func_441868(s32 a0, s32 a1);
 extern s32 func_33C800(char *a0, s32 a1, s32 a2, s32 a3, float f12, float f13);
 
+
 INCLUDE_ASM("asm/levels", func_L11_004465F8);
 
 INCLUDE_ASM("asm/levels", func_L11_00446C78);
 
 INCLUDE_ASM("asm/levels", func_L11_00446EB8);
 
-INCLUDE_ASM("asm/levels", func_L11_00447018);
 
 INCLUDE_ASM("asm/levels", func_L11_004471A8);
 
@@ -78,7 +78,7 @@ void func_L11_00448908(char *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00448AA8);
+/* func_L11_00448AA8 is in L11_00448AA8.c. */
 
 s32 func_L11_00448CE0(char *a0)
 {
@@ -260,7 +260,8 @@ void func_L11_004492A0(char *a0)
     *(s32 *)(*(char **)((char *)(long)*(s32 *)(s0 + 0x354) + 0x68) + 0x3C) = 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00449330);
+/* func_L11_00449330 is in L11_00449330.c: PAL's level 11 has other code at its place,
+   so the calls to it from this unit go through its symbol. */
 
 void func_L11_004496A0(char *object, int mode, int active) {
     char *state = *(char **)(object + 0x68);
@@ -388,7 +389,7 @@ void func_L11_00449970(char *a0, int a1, int a2)
         func_L11_00449878(a0);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00449AD8);
+/* func_L11_00449AD8 is defined in L11_00449AD8-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L11_00449C70);
 
@@ -408,14 +409,39 @@ void func_L11_0044C0F0(char *a0)
 
 /* advances the sub-object's ring cursor, hands the new slot of the 0x370 table to the scene
    manager, and refreshes the matching slot of the 0x270 table from the live 0x4A4 record */
-INCLUDE_ASM("asm/levels", func_L11_0044C180);
+/* func_L11_0044C180 is defined in L11_0044C180-helpers.c. */
 
 /* func_L11_0044C220 is defined in L11_004465F8-g8.c (its globals are reached through $gp). */
 
 /* state handler: clears the 0x490 word while the frame byte is out of the 0..3 window, otherwise
    arms the 0x4CA gate through the 0xB8 handle and runs the 100-unit smash into it */
 /*W23B*/
-INCLUDE_ASM("asm/levels", func_L11_0044C268);
+/* Same body as func_L02_003F16F0, with this function's own callees. */
+void func_L11_0044C268(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    if (*(unsigned char *)(arg0 + 0x20) < 4) {
+        *(int *)(state + 0x490) = 0;
+        goto done;
+    }
+
+    if (*(short *)(state + 0x4CA) == 1) {
+        *(short *)(state + 0x4C8) =
+            func_002B3BA8(arg0, *(int *)(state + 0x4C4), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x490) = *(int *)(state + 0x220);
+    } else {
+        if (func_L11_00441868(*(int *)(arg0 + 0xB8), *(short *)(arg0 + 0xAA)) == 0)
+            goto done;
+        *(short *)(state + 0x4CA) = 1;
+        *(short *)(state + 0x4C8) =
+            func_002B3BA8(arg0, *(int *)(state + 0x4C4), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x490) = *(int *)(state + 0x220);
+    }
+    return;
+
+done:
+    *(short *)(state + 0x4CA) = 0;
+}
 /*W23E*/
 
 
@@ -511,7 +537,7 @@ void func_L11_0044C4F0(char *object) {
     *(u16 *)(object + 0x34) = (*(u16 *)(object + 0x34) & 0xEFFF) | 0x47;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_0044C688);
+/* func_L11_0044C688 is defined in L11_0044C688-helpers.c. */
 
 void func_L11_0044C818(char *a0)
 {
@@ -623,7 +649,7 @@ void func_L11_00452DF8(char *object) {
 }
 
 
-INCLUDE_ASM("asm/levels", func_L11_00452F30);
+/* func_L11_00452F30 is defined in L11_00452F30-helpers.c. */
 
 void func_L11_004530C0(char *a0)
 {

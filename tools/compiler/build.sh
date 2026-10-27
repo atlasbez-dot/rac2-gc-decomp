@@ -41,10 +41,13 @@ done
 patch -R -p1 -s < "$HERE"/patches/0001-r5900-quad-saves.patch   # the retail saves in 8-byte slots
 git apply --whitespace=nowarn "$HERE"/patches/0058-*.patch       # the opt-in -mastra-quad-saves switch
 git apply --whitespace=nowarn "$HERE"/patches/0059-*.patch       # per-object sign-bit seed selection
+git apply --whitespace=nowarn "$HERE"/patches/0060-*.patch       # leading-ones dli: lui-anchored first field
 T=$HERE/transformers
 python3 $T/neutralise_timode_anchor.py gcc/config/mips/mips.c
 python3 $T/enable_loop_padding.py gcc/config/mips/mips.h
+python3 $T/ti_one_gpr.py gcc/config/mips/mips.h
 python3 $T/count_trap_length.py gcc/config/mips/mips.c
+python3 $T/count_block_move_length.py gcc/config/mips/mips.c
 python3 $T/ascending_save_order.py gcc/config/mips/mips.c
 python3 $T/reorder_save_blocks.py gcc/config/mips/mips.c
 python3 $T/u4_mtc1_helper.py gas/config/tc-mips.c
@@ -57,6 +60,8 @@ python3 $T/pad_div_erratum_nops.py gas/config/tc-mips.c
 python3 $T/neutralise_div_dslot.py gcc
 python3 $T/pad_div_erratum_branch.py gas/config/tc-mips.c >/dev/null
 python3 $T/r5900_mfc1_interlock.py gas/config/tc-mips.c
+python3 $T/swap_branch_slots.py gas/config/tc-mips.c
+python3 $T/inline_li_d.py gas/config/tc-mips.c
 python3 $T/tidy_condjump_fallthru.py gcc/flow.c
 python3 $T/zero_ti_store_barrier.py gcc/haifa-sched.c
 python3 $T/gcse_unsplit_edges.py gcc/gcse.c
@@ -66,17 +71,26 @@ python3 $T/hazard_labels.py .
 python3 $T/qcopy_barrier.py gcc
 python3 $T/no_annulled_wide_stores.py gcc/reorg.c
 python3 $T/zero_ti_por.py gcc
+python3 $T/no_null_pointer_checks.py gcc
+python3 $T/gcse_store_kills_loads.py gcc/gcse.c
+python3 $T/reload_reg_used_guard.py gcc/reload1.c
+python3 $T/trap_delay_barrier.py gcc/reorg.c
+python3 $T/trap_redundant_barrier.py gcc/reorg.c
+python3 $T/count_asm_words.py gcc/config/mips/mips.c
+python3 $T/no_recombine_givs.py gcc/loop.c
 sha256sum --check --quiet <<'SUMS'
-78eba27106cd3a183125df8380d4ee19e38de6506d8fd416b34fb3460d142704  gcc/config/mips/mips.c
-d43a3f2274e1ca640c1f877b9aa2a82b2e337298d7d0ebf7e5498fe91b3523f4  gcc/config/mips/mips.h
+f8563063b5311e7ab2b2b29e9959afd6d8d79d017e896724483a3b073837d2da  gcc/config/mips/mips.c
+e25f1a54bfdcc6c96e1c8ba9c9b977f15738ca8554393920e6af33c2d3a3f7bc  gcc/config/mips/mips.h
 790a54f4772853284ab43a7afc9f592913da8f012b46d43abf5f2a3660467eef  gcc/config/mips/mips.md
-a12ae81a7e222259d50148ae8e27592cd88ba32715077172a5984804245ea840  gcc/toplev.c
+d75635500f55f4c7c626e925f6e8146c4e33d3865314eca4ae9bb3860fe7eeab  gcc/toplev.c
 3098888cc26ac83c936a8d505662b6ba1aa9039811e89c534f4ea8f1a851e7d6  gcc/haifa-sched.c
-57ed3b11b677ad163a189adf26b0c32b1c856123403de158a08859644bc1b637  gcc/reorg.c
-f89153488b2d94ae782195c577a4f7e15fda0b9455852cc25f70d7f759912a5d  gcc/flags.h
-02f386e5e25a90684b912fbb11ce1a634a40a80dbefc93b20b0546259e1f8bfc  gcc/gcse.c
+e57d41902ac5792fea91c8fb54b529c042004542bc0eef6f1fea866acb3cb233  gcc/reorg.c
+5bc40b011473cd756c2a6128b6106fd2e96569c8e92bba1a8f9bc00f166feac2  gcc/flags.h
+feb3bd29dd08e1d1b1db78861d580c55f161a55e63cedd368e873c48bc36982d  gcc/gcse.c
 ba947e44256e3d5144e353a4976aac931a4941acc8dcb1dc0fda99fa8b7b504a  gcc/flow.c
-89227b294163fdd860f559d67c1e4bce6ea2b3b1c86f16a3812401f7b187e1ff  gas/config/tc-mips.c
+319eba2cdeb963cd02b47cc8e2fe2a5d509a36670ecb1f6d8216f817e1fd9cdb  gas/config/tc-mips.c
+a790ca0e7cc378af98fa3f942734c7217cc91f2d2db2f6c2d62d69de8780e1e6  gcc/reload1.c
+2f6ffa23d379d620ec38db4e527b2cbd5583865195cd8b364aa2c1ce07433faf  gcc/loop.c
 SUMS
 
 # bison 1.28: the 1999 grammars need its skeleton.
@@ -110,11 +124,22 @@ mkdir -p "$OUT/include" && cp "$W/src/gcc/ginclude/"*.h "$OUT/include/"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_zero_ti_store.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_gcse_unsplit_edges.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_keep_block_order.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_gcse_store_kills_loads.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_trap_delay_barrier.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_trap_redundant_barrier.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_swap_branch_slots.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_div_label_after_call.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_count_asm_words.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_no_recombine_givs.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_qcopy.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_qcopy_barrier.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_no_annulled_wide_stores.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_zero_ti_por.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_ti_one_gpr.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_reload_reg_used_guard.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_no_null_pointer_checks.py"
 python3 "$ROOT/tests/test_qcopy_rtl.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_dli_masks.py"
 RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_hazard_labels.py"
+RAC2_COMPILER_ROOT="$OUT" python3 "$ROOT/tests/test_block_move_loop.py"
 echo "compiler in $OUT"

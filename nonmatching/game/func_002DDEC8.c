@@ -1,41 +1,67 @@
-/* func_002DDEC8 (520 bytes, boot 0x2DDEC8, 28 places)
- *
- * Draft, not compiled: the body is decoded, the table walk is not reproduced yet.
- *
- * The body: it takes no argument.  It reads a 64-bit word at +0x1C0 of the
- * block at 0x140000 - 0x7E80 and tests its low nibble against 6; if it is not 6
- * it clears a word through `$gp` (-0x3350) and leaves.  Otherwise it reads the
- * word at +0x1C4, tests the mask 0xF0A0, and leaves when it is zero.  It then
- * reads the word through `$gp` (-0x3350) and leaves when it is below 0x14, and
- * it walks a set of bits in the word: 0x1000, 0x4000, 0x8000, 0x2000 and 0x80
- * each give a value 0, 1, 2, 3 and 5 (with a `movn` for the last), the value
- * is scaled by 2 and used as an index into the table at 0x1B2028, and twenty
- * halfwords are written into it with a `movn`/`beql` chain.  Three calls
- * finish the body.
- *
- * The unit has to be built with -G8: the body reads a word through `$gp`
- * (-0x3350) and the table at 0x1B2028 is small data.
- *
- * What has to be reproduced: the order of the bit tests (each in the delay slot
- * of the next branch), the `movn` that picks 4 against 5, the index arithmetic
- * and the twenty halfword stores.
- *
- * What would unblock it: the bit-test chain's shape (the retail keeps the
- * assignment in the delay slot of the branch, which the level 20 wave found to
- * be a wall for if/else but reachable with two separate `if` statements), and
- * the table's index arithmetic.
+/* M12, 2026-10-26: complete C, not linked. -O2 -G8. 532/520 bytes (us boot, 28 places).
+ * The top level (if/else on the pad mode, the bit chain, the five unlock ranges) matches retail.
+ * Residual: the code search loops. Retail does no strength reduction in the inner loop (mult
+ * j*i and sll j,1 every pass, test at the top after j++), compares table[0] with codes[(u8)i]
+ * before it, and keeps the outer bound 147 in a register (slt), so the bound is likely a
+ * variable. A goto inner loop gets the mult but still walks the table pointer.
  */
-typedef unsigned short u16;
+#include "common.h"
+typedef union { u8 b[0x200]; u32 u[0x80]; u64 d[0x40]; } Pad;
+extern char D_00138180[];
+extern int D_001ABCA0 __attribute__((sda));
+extern short D_001B2028[];
+extern u8 D_00261C08[];
+extern u8 D_001A7B30[] MACRO_ADDR;
+extern u8 D_001A7AF8[] MACRO_ADDR;
+extern u8 D_001395B8[] MACRO_ADDR;
+extern u8 D_001A7A60[] MACRO_ADDR;
+extern int D_001A8CEC MACRO_ADDR;
+extern void func_002AD7B8(int);
+extern int func_002E5E58(int, unsigned int, void *);
+extern void func_002B0A18(int, int);
 
-extern u16 ref_L00_001B2028_00[];
-
-void func_002DDEC8(void)
-{
-    u16 *table = ref_L00_001B2028_00;
-    int index = 0;
-    int i;
-
-    for (i = 0; i < 20; i++)
-        table[i] = 0;
-    table[index] = 0;
+/* Records the pressed button into the cheat buffer and, once it is full, unlocks the code it spells. */
+void func_002DDEC8(void) {
+    u32 buttons;
+    int value, i, j, match, found;
+    if ((((Pad *)D_00138180)->d[0x1C0 / 8] & 0xF) == 6) {
+        buttons = ((Pad *)D_00138180)->u[0x1C4 / 4];
+        if (!(buttons & 0xF0A0)) return;
+        if (D_001ABCA0 >= 20) return;
+        if (buttons & 0x1000) value = 0;
+        else if (buttons & 0x4000) value = 1;
+        else if (buttons & 0x8000) value = 2;
+        else if (buttons & 0x2000) value = 3;
+        else value = (buttons & 0x80) ? 4 : 5;
+        D_001B2028[D_001ABCA0] = value;
+        D_001ABCA0++;
+        if (D_001ABCA0 != 20) return;
+        found = -1;
+        for (i = 2; i < 147; i++) {
+            match = 1;
+            if (D_001B2028[0] == D_00261C08[(u8)i]) {
+                for (j = 1; j < 20; j++) {
+                    if (D_001B2028[j] != D_00261C08[(u8)(j * i + i)]) { match = 0; break; }
+                }
+            } else match = 0;
+            if (match) { found = i - 2; break; }
+        }
+        if (found == -1) return;
+        if (found < 56) {
+            D_001A7B30[found] = 1;
+            D_001A7AF8[found] = 1;
+        } else if ((unsigned)(found - 56) < 18) {
+            func_002AD7B8(found - 55);
+        } else if ((unsigned)(found - 74) < 6) {
+            D_001395B8[found - 74] = 1;
+        } else if ((unsigned)(found - 80) < 30) {
+            if (!D_001A7A60[found - 80]) {
+                D_001A7A60[found - 80] = 1;
+                func_002E5E58(1, 0, 0);
+                func_002B0A18(0x1233, -1);
+                D_001A8CEC = 1;
+            }
+        }
+    } else
+        D_001ABCA0 = 0;
 }

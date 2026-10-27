@@ -119,16 +119,7 @@ def parse_dumps(name: str, lreg: str, greg: str) -> dict:
 
 def split_flags(flags: str) -> tuple[list[str], list[str]]:
     """Mirror compile_c's separate frontend/assembler handling, including SDK profiles."""
-    compiler, assembler = [], []
-    for arg in shlex.split(flags[3:] if flags.startswith("sdk") else flags):
-        if arg == "-Wa" or arg.startswith("-Wa,"):
-            forwarded = arg[4:].split(",")
-            if not all(forwarded):
-                raise ValueError("-Wa, requires nonempty comma-separated assembler arguments")
-            assembler.extend(forwarded)
-        else:
-            compiler.append(arg)
-    return compiler, assembler
+    return build.split_flags(flags)
 
 
 def compile_script(source: Path, work: Path, flags: str, dumps: tuple[str, ...]) -> str:

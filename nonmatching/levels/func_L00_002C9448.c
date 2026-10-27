@@ -14,6 +14,13 @@
  * against retail: integer conversion, atan and angle difference return banks, input-history
  * output pointers, pointer-returning target search and the ignored incoming value 21 are
  * preserved.
+ * M34 2026-10-26: the computed goto is now a real switch, one case per retail table entry
+ * (10; 12/15/17/31; 13; 22/65; 46; 53; the rest default), bodies in table-address order.
+ * Size is unchanged at 2900/2940: the switch reproduces the dispatch exactly, so the gap is
+ * elsewhere. One located cause: in the mode-11 test retail keeps the redundant second
+ * `attack_mode != 3` test after the 18.0 check and its own reload of animation_frame before
+ * the 20.0 check; this compiler's CSE (follow-jumps) folds the second test and cross-jumps the
+ * two compare tails, whether written as nested ifs or one || chain.
  * Reopen with independently justified control-flow/live-range evidence for the buffered action
  * branches. Do not classify por, vector copies or instruction scheduling as handwritten
  * assembly. No strict linked build was run.
@@ -109,7 +116,6 @@ extern unsigned char D_00139568[];
 extern unsigned char D_001A7B2E[];
 extern int D_001A739C[];
 extern int D_L00_001A7CC4;
-extern void *D_L00_002A0640[];
 typedef struct { char pad[12]; int first_frame, trigger_frame; char rest[24]; } AnimationRange;
 extern AnimationRange D_L00_0025D990[];
 typedef struct { char pad[20]; int sound; char rest[200]; } EffectDefinition;
@@ -139,9 +145,6 @@ extern int func_00282948(int *);
 /* Selects context-sensitive hero actions from buffered input and nearby targets. */
 int func_L00_002C9448(void)
 {
-    /* The dispatch reads the retail table; this array retains its destination labels. */
-    static void *cases[] = { &&state_10, &&state_22, &&state_46, &&state_13,
-                            &&state_12, &&state_53, &&state_other };
     float point[4];
     int input_age, action_age, detach_age;
     int previous_frame, action, frame_window, difference, state;
@@ -164,11 +167,8 @@ int func_L00_002C9448(void)
     state = D_00189E20.action;
     previous_frame = D_00189E20.frame;
     mask = D_00189E20.buttons;
-    if ((u32)(state - 10) < 56)
-        goto *D_L00_002A0640[state - 10];
-    goto state_other;
-
-state_10:
+    switch (state) {
+    case 10:
     if (D_00189E20.action_locked) goto state_other;
     if (D_00189E20.state < 2 || (D_00189E20.state == 4 && D_00189E20.grounded)) {
         if (func_L00_0032EF10(mask, 10, &input_age)) {
@@ -253,7 +253,8 @@ clear_action:
     D_00189E20.attack_pending = 0;
     goto state_other;
 
-state_22:
+    case 22:
+    case 65:
     if (D_00189E20.mode == 1 || D_00189E20.mode == 29) goto state_other;
     if (!(D_00189E20.state < 2 || D_00189E20.state == 12 ||
           (D_00189E20.state == 4 && D_00189E20.grounded))) goto state_other;
@@ -268,7 +269,7 @@ state_22:
         func_002E5DA0(0, 0, D_00189E20.owner, D_L00_00262570[D_00139568[state]].sound);
     goto state_other;
 
-state_46:
+    case 46:
     if (!(D_00138320[1] & mask)) goto state_other;
     if (D_00189E20.aim_target) {
         D_00189E20.aim_target = 0;
@@ -292,7 +293,7 @@ state_46:
     }
     goto state_other;
 
-state_13:
+    case 13:
     func_L00_002C3BB0();
     func_L00_002C3E18();
     func_L00_002C40C0();
@@ -331,7 +332,10 @@ state_13:
     }
     goto state_other;
 
-state_12:
+    case 12:
+    case 15:
+    case 17:
+    case 31:
     if (!((D_00189E20.state == 0 && D_00189E20.mode != 29) || D_00189E20.state == 1 ||
           D_00189E20.state == 12 || D_00189E20.state == 5 || D_00189E20.state == 15 ||
           (D_00189E20.state == 4 && D_00189E20.alternate_ready) ||
@@ -352,7 +356,7 @@ state_12:
         func_002E5CF8(0, 0, D_00189E20.object);
     goto state_other;
 
-state_53:
+    case 53:
     if (!(D_00189E20.state < 2 || (D_00189E20.state == 4 && D_00189E20.grounded)))
         goto state_other;
     if (D_00189E20.mode != 1) {
@@ -365,6 +369,7 @@ state_53:
         }
     }
     goto state_other;
+    }
 
 state_other:
     if (D_00189E20.frame == previous_frame && D_001A7B2E[0] && D_001A739C[0] == 54 &&

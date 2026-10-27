@@ -1,6 +1,6 @@
 #include "include_asm.h"
 
-INCLUDE_ASM("asm/levels", func_L00_003DC2D0);
+/* func_L00_003DC2D0 is matched in its own unit, src/levels/shared/L00_003DC2D0.c (default flags). */
 
 extern int D_L00_001B043C __attribute__((sda));
 

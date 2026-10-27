@@ -1,27 +1,16 @@
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -Wa,-G8 -g -frac2-qcopy
- * -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 absent from catalogue; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -Wa,-G8 -g.
+ * 2424/2476 bytes; us: 0/1 placements; us2: absent from catalogue; pal: absent from catalogue.
+ * Only the genuine 16-byte position snapshot uses qcopy. The ButtonPair remains eight bytes, all
+ * nondefault dispatcher cases and unordered FP guards remain, and existing mixed-bank contracts are
+ * preserved. Branch layout, register allocation and repeated resident-field loads still differ.
+ * Reopen with real action-helper memory effects and original branch/local lifetimes; do not replay
+ * the earlier eight equivalent CFG/flag forms or enlarge the button pair.
+ * Original variants, retail context and allocator diagnostics remain private.
+ * No exact-C, linked-build or runtime credit is claimed.
  */
+#include "common.h"
 
-/* NONMATCHING: complete manual reconstruction of the buffered-action dispatcher.
- * Retail US: 2476 bytes. Final isolated candidate: 2420 bytes, 0/1 placements,
- * tools/check.py exit 1. US2/PAL have no catalogue entry (exit 1).
- * Profile: -O2 -G8 -ffunction-sections -Wa,-G8 -g -frac2-qcopy -frac2-qcopy-barrier.
- * Eight bounded source/profile trials: raw offsets 2420; typed resident view
- * 2416; delayed snapshots 2424; local layout 2424; direct transitions 2432;
- * -fno-gcse 2480; ordered FP comparisons 2420; input pair view 2420.
- * One transient edit typo did not compile and was corrected before measuring.
- * Remaining: branch layout, register allocation, repeated field loads and
- * address materialization. Reopen with a justified source-control-flow form.
- * Live helper audit: AE888 takes three GPR and four FP inputs; 83CF0 takes
- * the animation-frame value in f12. Retail comparisons preserve unordered cases.
- * The 56-entry dispatch was observed in retail; every nondefault case in
- * the verified reference view is reconstructed here.
- * This is reference C only; the active source keeps its INCLUDE_ASM marker.
- */
 typedef int Quadword __attribute__((mode(TI)));
 /* A measured resident view, not a claim about the full allocation size. */
 typedef struct ActionView {
@@ -271,7 +260,7 @@ clearPending:
                                       0.52359885f, 0.6981318f);
             D_00189E20.target = object;
             if (object) {
-                position = *(Quadword *)(object + 0x10);
+                qcopy(&position, object + 0x10);
                 ((float *)&position)[2] += 0.5f;
                 if (func_002761F8(&position, D_00189E20.origin, 2, object, 0)) {
                     D_00189E20.target = 0;

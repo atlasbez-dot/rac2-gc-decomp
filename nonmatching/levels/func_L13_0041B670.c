@@ -1,54 +1,53 @@
-/* func_L13_0041B670 - 1004 bytes, 2 place(s), level 13_boldan, retail at
-   0x0041b670. Screened with tools/w10_screen.py: 11 call(s)
-   [func_L13_0041BA60@0041B740, func_002E5CF8@0041B774,
-   func_L00_002D40A0@0041B794, func_002A8C28@0041B7C8,
-   func_L00_002D40F0@0041B7D8, func_L00_002B9D60@0041B8D0,
-   func_002E5CF8@0041B90C, func_00288CB0@0041B948,
-   func_L00_002E6CF0@0041B980, func_002AA2E8@0041B998,
-   func_002AA548@0041BA20]; data addresses materialised [0x2b0000, 0x190000,
-   0x190000, 0x190000, 0x140000, 0x10000, 0x3ff90000, 0x420000, 0x1b0000,
-   0x1a0000, 0x1a0000, 0x3e4c0000, 0x190000, 0x3ff90000, 0x3ff90000,
-   0x420000, 0x3d880000, 0x39910000, 0x39910000, 0x3c880000]; float
-   constants [0x1a0000, 0x3fc00000, 0x41a00000, 0x3f800000, 0x3f800000];
-   $gp-relative small data: no   saves: -; callee-saved registers saved [-];
-   words plain C cannot emit [LQ/SQ 78620000@0x0230, LQ/SQ 7FA20000@0x0234].
-   Head: addiu $sp, $sp, -0x50 ; sd $s3, 0x28($sp) ; sd $s0, 0x10($sp) ;
-   daddu $s3, $a0, $zero ; sd $s1, 0x18($sp) ; sd $s4, 0x30($sp). Not
-   matched in this wave: the 128-bit copy needs an `lq`/`sq` pair; plain C
-   reaches it only through a `mode(TI)` local, and this cc1 folds the
-   destination offset into the `sq` where retail materialises the pointer
-   first. What would unblock it: the exact source expression tree, so this
-   cc1 picks the same registers in the same order. */
+/* M21 2026-10-26: 1004 of 1004 bytes with -O2 -G16 -Wa,-G16 -ffunction-sections (us level 13).
+   Same code as retail except one global-alloc swap: retail keeps the object in $s3 and the
+   destination ring in $s4; here the other way round (27 words, register only). What closed
+   the rest: a switch in jump-table order with case 0 last (closing falls into it), struct
+   views for ring/state/hero (hero target at 0x33C through D_00189E20), 256-byte ring records,
+   D_00138324 and D_0018C0D5 as incomplete arrays, per-arm func_00288CB0 calls on `locked`
+   (no movz, no re-test of busy), and store orders. Tried for the swap: if/else destination,
+   char-pointer and pointer-plus spellings, inner-block declarations, TI copy. Permuter queued. */
 
-/* Manual C reconstruction, retained after bounded retail comparison.
- * This body supersedes the historical screening conclusions above.
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Measured text: 1000 bytes; retail: 1004 bytes. US 0/2; US2/PAL absent from their
- * catalogues (not matches).
- * 1 distinct measured forms. Retail 1004 bytes; frame 0x50 matches, object/context
- * registers and mixed GP/absolute resident addressing differ. Reopen with a new
- * state-machine source/lifetime hypothesis. The 12-byte motion record uses G16 truthfully;
- * the current-level global keeps one identity.
- * All carrying checks ended as nonmatches (exit 1); no linked-build credit.
- */
+#include "common.h"
 
-typedef int Quad __attribute__((mode(TI)));
-typedef struct { float x, y, z, w; } Vector;
-typedef struct { float acceleration, deceleration, speed; } MotionSettings;
-extern int D_001A79F0 __attribute__((sda));
+typedef struct { float acceleration, deceleration, speed; } MotionSettings_L13;
+typedef struct {
+    int primary, secondary, flagA, flagB;   /* 0x00 */
+    char pad10[0x10];
+    float f20, f24;                         /* 0x20 */
+    int i28, i2C;                           /* 0x28 */
+    char pad30[4];
+    float timer;                            /* 0x34 */
+    int enabled, busy, locked;              /* 0x38 */
+} RingState_L13;
+typedef struct {
+    char pad0[0x10];
+    float position[4];                      /* 0x10 */
+    u8 mode;                                /* 0x20 */
+    char pad21[0x68 - 0x21];
+    RingState_L13 *state;                   /* 0x68 */
+    char pad6C[0xF0 - 0x6C];
+    char fF0[8];                            /* 0xF0 */
+    float fF8;                              /* 0xF8 */
+    char padFC[4];
+} Ring_L13;
+typedef struct {
+    char pad0[0x33C];
+    Ring_L13 *target;                       /* 0x33C */
+    char pad340[0x34E - 0x340];
+    short busy;                             /* 0x34E */
+} Hero_L13_0041B670;
+extern Hero_L13_0041B670 D_00189E20;
+extern int D_001A79F0;
 extern unsigned char D_0019B2E8[];
-extern char *D_0018A15C;
-extern short D_0018A16E;
-extern unsigned int D_00138324;
-extern int D_L13_001A8FB4 __attribute__((sda));
-extern char *D_L13_001B291C;
-extern unsigned char D_0018C0D5;
-extern MotionSettings D_L13_001B16D8 __attribute__((sda));
-extern void *D_L13_002ADB50[5];
-extern void func_L13_0041BA60(char *);
-extern int func_002E5CF8(int, int, char *);
-extern void func_L00_002D40A0(Vector *, int, float);
-extern int func_002A8C28(char *, void *, int, int, float, float, float, int, int);
+extern unsigned int D_00138324[];
+extern int D_L13_001A8FB4;
+extern Ring_L13 *D_L13_001B291C;
+extern unsigned char D_0018C0D5[];
+extern MotionSettings_L13 D_L13_001B16D8 __attribute__((sda));
+extern void func_L13_0041BA60(Ring_L13 *);
+extern int func_002E5CF8(int, int, Ring_L13 *);
+extern void func_L00_002D40A0(float *, int, float);
+extern int func_002A8C28(void *, void *, int, int, int, int, float, float, float);
 extern int func_L00_002D40F0(void);
 extern void func_L00_002B9D60(void *, void *, int, int);
 extern void func_00288CB0(int, int);
@@ -57,97 +56,101 @@ extern void func_L00_002E6CF0(void (*)(void *), void *);
 extern float func_002AA2E8(float *, float, float);
 extern float func_002AA548(float *, float *, float, float, float, float);
 
-void func_L13_0041B670(char *object) {
-    static void *modes[5] = {&&idle, &&ready, &&waiting, &&opening, &&closing};
-    float position[4];
-    char *state = *(char **)(object + 0x68);
-    char *destination;
-    char *target_state;
+void func_L13_0041B670(Ring_L13 *object)
+{
+    float position[4] __attribute__((aligned(16)));
+    RingState_L13 *state = object->state;
+    Ring_L13 *destination;
+    RingState_L13 *target_state;
     int code;
-    unsigned int mode;
-    if (*(int *)(state + 0x38) == 0) return;
-    mode = *(unsigned char *)(object + 0x20);
-    if (mode < 5) goto *D_L13_002ADB50[mode];
-    return;
-ready:
-    if (*(int *)(state + 8) >= 0 &&
-        !(D_0019B2E8[*(int *)(state + 8) + D_001A79F0 * 16] & 0x80)) return;
-    if (*(int *)state == -1 && *(int *)(state + 0x40) == 0 && *(int *)(state + 0x3C) == 0) return;
-    if (D_0018A15C != object || D_0018A16E != 0) return;
-    func_L13_0041BA60(object);
-    if (!(D_00138324 & 0x10)) return;
-    if (D_L13_001A8FB4 == 11) {
-        func_002E5CF8(0, 0, object);
-        *(unsigned char *)(object + 0x20) = 2;
-        *(int *)(state + 0x2C) = 0;
-        *(int *)(state + 0x28) = 0;
-        func_L00_002D40A0((Vector *)(object + 0x10), 0, *(float *)(object + 0xF8));
-        func_002A8C28(object, object + 0x10, 0x10000, 0, 1.5f, 20.0f, 1.0f, 1, 0);
-    }
-    return;
-waiting:
-    code = func_L00_002D40F0();
-    if (code == 2) {
-        *(float *)(state + 0x34) = 1.95f;
-        *(unsigned char *)(object + 0x20) = 3;
-    } else if (code == 0) {
-        *(unsigned char *)(object + 0x20) = 4;
-    }
-    return;
-opening:
-    if (*(float *)(state + 0x34) == 0.0f) {
-        if (*(int *)(state + 0x3C) == 0 && *(int *)(state + 0x40) == 0) {
-            destination = D_L13_001B291C + *(int *)state * 256;
-            if (*(int *)(state + 4) != -1 &&
-                (D_0019B2E8[*(int *)(state + 0xC) + D_001A79F0 * 16] & 0x80))
-                destination = D_L13_001B291C + *(int *)(state + 4) * 256;
-            target_state = *(char **)(destination + 0x68);
-            *(Quad *)position = *(Quad *)(destination + 0x10);
-            position[2] += 0.2f;
-            func_L00_002B9D60(position, destination + 0xF0, 0, 1);
-            D_0018C0D5 = 1;
-            *(unsigned char *)(destination + 0x20) = 4;
-            *(float *)(target_state + 0x34) = 0.0f;
-            *(int *)(target_state + 0x28) = 0;
-            *(int *)(target_state + 0x2C) = 0;
-            *(float *)(target_state + 0x24) = 1.0f;
-            *(float *)(target_state + 0x20) = 1.0f;
-            func_002E5CF8(1, 0, destination);
-            *(unsigned char *)(object + 0x20) = 1;
-            *(float *)(state + 0x34) = 1.95f;
-            *(int *)(state + 0x20) = 0;
-            *(int *)(state + 0x24) = 0;
-            *(int *)(state + 0x28) = 0;
-            *(int *)(state + 0x2C) = 0;
-        } else {
-            code = (*(int *)(state + 0x3C) && !*(int *)(state + 0x40)) ? 21 : 13;
-            func_00288CB0(code, 1);
+
+    if (state->enabled == 0)
+        return;
+    switch (object->mode) {
+    case 1:
+        if (state->flagA >= 0 && !(D_0019B2E8[state->flagA + D_001A79F0 * 16] & 0x80))
+            return;
+        if (state->primary == -1 && state->locked == 0 && state->busy == 0)
+            return;
+        if (D_00189E20.target != object || D_00189E20.busy != 0)
+            return;
+        func_L13_0041BA60(object);
+        if (!(D_00138324[0] & 0x10))
+            return;
+        if (D_L13_001A8FB4 == 11) {
+            func_002E5CF8(0, 0, object);
+            object->mode = 2;
+            state->i28 = 0;
+            state->i2C = 0;
+            func_L00_002D40A0(object->position, 0, object->fF8);
+            func_002A8C28(object, object->position, 0x10000, 0, 1, 0, 1.5f, 20.0f, 1.0f);
         }
         return;
-    }
-    func_L00_002E6CF0(func_L13_0041BAE0, object);
-    func_002AA2E8((float *)(state + 0x34), 0.0f, 0.06666667f);
-    return;
-closing:
-    if (*(float *)(state + 0x34) < 1.95f) {
+    case 2:
+        code = func_L00_002D40F0();
+        if (code == 2) {
+            state->timer = 1.95f;
+            object->mode = 3;
+        } else if (code == 0) {
+            object->mode = 4;
+        }
+        return;
+    case 3:
+        if (state->timer == 0.0f) {
+            if (state->busy == 0 && state->locked == 0) {
+                destination = &D_L13_001B291C[state->primary];
+                if (state->secondary != -1 && (D_0019B2E8[state->flagB + D_001A79F0 * 16] & 0x80))
+                    destination = &D_L13_001B291C[state->secondary];
+                target_state = destination->state;
+                qcopy(position, destination->position);
+                position[2] += 0.2f;
+                func_L00_002B9D60(position, destination->fF0, 0, 1);
+                D_0018C0D5[0] = 1;
+                destination->mode = 4;
+                target_state->timer = 0.0f;
+                target_state->i28 = 0;
+                target_state->i2C = 0;
+                target_state->f20 = 1.0f;
+                target_state->f24 = 1.0f;
+                func_002E5CF8(1, 0, destination);
+                object->mode = 1;
+                state->timer = 1.95f;
+                state->f24 = 0;
+                state->i28 = 0;
+                state->i2C = 0;
+                state->f20 = 0;
+            } else {
+                if (state->locked)
+                    func_00288CB0(13, 1);
+                else
+                    func_00288CB0(21, 1);
+            }
+            return;
+        }
         func_L00_002E6CF0(func_L13_0041BAE0, object);
-        func_002AA2E8((float *)(state + 0x34), 1.95f, 0.06666667f);
+        func_002AA2E8(&state->timer, 0.0f, 0.06666667f);
         return;
+    case 4:
+        if (state->timer < 1.95f) {
+            func_L00_002E6CF0(func_L13_0041BAE0, object);
+            func_002AA2E8(&state->timer, 1.95f, 0.06666667f);
+            return;
+        }
+        if (state->f24 > 0.0f) {
+            func_002AA548(&state->f24, (float *)&state->i28, 0.0f,
+                D_L13_001B16D8.acceleration * 0.00027777778f,
+                D_L13_001B16D8.deceleration * 0.00027777778f,
+                D_L13_001B16D8.speed * 0.016666668f);
+            return;
+        }
+        if (state->f20 > 0.0f) {
+            func_002AA548(&state->f20, (float *)&state->i2C, 0.0f,
+                D_L13_001B16D8.acceleration * 0.00027777778f,
+                D_L13_001B16D8.deceleration * 0.00027777778f,
+                D_L13_001B16D8.speed * 0.016666668f);
+            return;
+        }
+    case 0:
+        object->mode = 1;
     }
-    if (*(float *)(state + 0x24) > 0.0f) {
-        func_002AA548((float *)(state + 0x24), (float *)(state + 0x28), 0.0f,
-            D_L13_001B16D8.acceleration * 0.00027777778f,
-            D_L13_001B16D8.deceleration * 0.00027777778f,
-            D_L13_001B16D8.speed * 0.016666668f);
-        return;
-    }
-    if (*(float *)(state + 0x20) > 0.0f) {
-        func_002AA548((float *)(state + 0x20), (float *)(state + 0x2C), 0.0f,
-            D_L13_001B16D8.acceleration * 0.00027777778f,
-            D_L13_001B16D8.deceleration * 0.00027777778f,
-            D_L13_001B16D8.speed * 0.016666668f);
-        return;
-    }
-idle:
-    *(unsigned char *)(object + 0x20) = 1;
 }

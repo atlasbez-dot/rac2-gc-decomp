@@ -1,3 +1,12 @@
+/* Complete reconstruction of func_L00_003EFA98 and its sibling func_L00_003EFD00; not linked.
+ * Profile: -O2 -G8 -ffunction-sections. 612/612 bytes, us 0/27.
+ * 26 October 2026 (M10): statement-order search over the setup block took 117 to 88 differing
+ * lines (colour stores high first; note the search also put matrix[1]'s init call first, which is
+ * a search artifact to re-check). Left: retail allocates object to $s1 and data to $s2 (ours
+ * $s6/$s1), keeps 0.25 in f20 only after the first identity call, hoists D_L00_0029AF40 into
+ * $fp, and gives u/v to $s3/$s4 the other way round.
+ */
+#include "common.h"
 typedef struct { float x, y, z, w; } Vector;
 typedef struct {
     Vector vertices[4];
@@ -49,18 +58,18 @@ void func_L00_003EFA98(char *object)
     packet.state = 0xFF9000000260L;
     packet.zero = 0;
     object += 0x10;
-    func_00282C88(&matrix[0]);
     quarter = 0.25f;
     func_00282C88(&matrix[1]);
+    func_00282C88(&matrix[0]);
     func_00282C88(&matrix[2]);
     matrix[0].x = *(float *)(data + 0x10) + *(float *)(data + 0x10);
     matrix[1].y = *(float *)(data + 0x10) + *(float *)(data + 0x10);
     matrix[2].z = *(float *)(data + 0x10) * quarter;
     color = D_L00_001B0888 + (*(unsigned int *)(data + 0x24) << 24);
-    packet.colors[0] = color;
-    packet.colors[1] = color;
-    packet.colors[2] = color;
     packet.colors[3] = color;
+    packet.colors[2] = color;
+    packet.colors[1] = color;
+    packet.colors[0] = color;
     func_002AFFD8(object, (char *)&offset, 1);
     func_00282D30(&offset, &offset, quarter);
     u_base = (char *)&packet + 0x50;
@@ -87,6 +96,7 @@ void func_L00_003EFA98(char *object)
         func_00280B90(&packet, 0, 0);
     }
 }
+
 
 void func_L00_003EFD00(char *object)
 {

@@ -111,8 +111,8 @@ extern f32 D_L04_001B1E04;
 extern f32 D_L04_001B1E08;
 extern void func_3325E0(void *a0, void *a1, void *a2);
 
-/* func_L04_004389C0 needs this unit's -G8 profile (it reads D_001A79F0 through
-   $gp); its C is retained in nonmatching/levels/func_L04_004389C0.c. */
+/* func_L04_004389C0 reads D_001A79F0 through $gp; it is in
+   src/levels/04_barlow/L04_004389C0-g8.c. */
 
 /* The level's list of live objects: the count is at +0x44 and the entries at +0x18C. */
 typedef struct {

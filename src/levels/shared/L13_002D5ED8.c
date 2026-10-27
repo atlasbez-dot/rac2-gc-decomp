@@ -1,6 +1,6 @@
 #include "include_asm.h"
 
-INCLUDE_ASM("asm/levels", func_L13_002D5ED8);
+/* func_L13_002D5ED8 is in the sibling file L13_002D5ED8-decider.c (its own profile). */
 
 #ifndef RAC2_T_TABLE_389848
 #define RAC2_T_TABLE_389848
@@ -112,8 +112,59 @@ void func_L13_0038C1B8(Obj_38C1B8 *a0)
 
 INCLUDE_ASM("asm/levels", func_L13_003C5908);
 
-INCLUDE_ASM("asm/levels", func_L13_003ECD48);
+static __inline__ void qcopy(void *dst, const void *src) {
+    __asm__ __volatile__("lq $2,0x0(%1)\n\tsq $2,0x0(%0)"
+                         : : "r"(dst), "r"(src) : "$2", "memory");
+}
 
-INCLUDE_ASM("asm/levels", func_L13_003ECEA8);
+extern int func_002B0ED8(void *, void *, int);
+extern int func_002E5CF8(int, int, char *);
+extern void func_00282F20(void *, void *, float);
+extern void func_00282CC0(void *, void *, void *);
+extern void *func_0032C700(void *, int, int, int, int, int, int, int, float, float, int, int, int, int);
+extern void func_0029F338(void *);
+
+typedef struct {
+    unsigned char pad0[0x20];
+    float f20;
+    unsigned char pad24[0x50 - 0x24];
+    unsigned char sub50[0x11];
+    unsigned char b61;
+    unsigned char b62;
+    unsigned char pad63[0x6A - 0x63];
+    unsigned char b6A;
+    unsigned char pad6B[0xA8 - 0x6B];
+    float fA8;
+} L13_CD48Vars;
+
+void func_L13_003ECD48(unsigned char *m)
+{
+    L13_CD48Vars *v = *(L13_CD48Vars **)(m + 0x68);
+    float p[4] __attribute__((aligned(16)));
+    float b[4] __attribute__((aligned(16)));
+    float a[4] __attribute__((aligned(16)));
+
+    if (m[0x20] == 0) {
+        func_L13_00389848((Obj_389848 *)m);
+        m[0x20] = 1;
+    }
+    v->b6A = 2;
+    v->fA8 = 0.01f;
+    v->b61 = 0xFF;
+    v->b62 = 0xFF;
+    if (func_002B0ED8(m, v->sub50, 0) != 0) {
+        func_002E5CF8(0, 0, (char *)m);
+    }
+    if (v->f20 <= 0.0f) {
+        qcopy(p, m + 0x10);
+        func_00282F20(a, m + 0xD0, -2.0f);
+        func_00282CC0(p, a, p);
+        func_00282F20(b, m + 0xC0, 1.5f);
+        func_00282CC0(p, b, p);
+        func_0032C700(p, 0, 0x19, 0x14, 0x14, 0x14, 0x2D, 1, 0.75f, 20.0f, 1, 0, 0, 0);
+        func_0029F338(m);
+    }
+}
+
 
 INCLUDE_ASM("asm/levels", func_L13_00406E30);

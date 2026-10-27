@@ -61,11 +61,9 @@ INCLUDE_ASM("asm/levels", func_L16_003C32F8);
 
 INCLUDE_ASM("asm/levels", func_L16_004051A8);
 
-INCLUDE_ASM("asm/levels", func_L16_00405818);
 
 INCLUDE_ASM("asm/levels", func_L16_00406080);
 
-INCLUDE_ASM("asm/levels", func_L16_00406550);
 
 INCLUDE_ASM("asm/levels", func_L16_0040BED0);
 
@@ -79,7 +77,6 @@ extern char *D_L16_001B2B1C __attribute__((sda));
 
 INCLUDE_ASM("asm/levels", func_L16_00413850);
 
-INCLUDE_ASM("asm/levels", func_L16_00414038);
 
 INCLUDE_ASM("asm/levels", func_L16_0041F950);
 

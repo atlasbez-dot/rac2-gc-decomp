@@ -88,6 +88,34 @@ does not apply to a separately named method just because its full code is identi
 Both original and shortened identity collisions preserve existing names and kinds,
 and replay checks all corrected copies against their measured identity.
 
+A further 71 open catalogue rows (46 with an 8-byte prefix, 25 with 12 to 104 bytes) were
+corrected the same way. In every placement of each row the prefix follows a completed
+`jr $ra` and its delay slot (only filler words in between), no branch, jump or
+address pair reaches it, and a GCC `addiu $sp,$sp,-N` prologue follows it; 45 of the 71
+have a call, branch, address pair or data pointer at the shortened entry and 26 have
+no static reference. Where the prefix holds non-filler
+words (a leftover store or compare followed by a nop), these are unreachable tails of
+the preceding body and stay in assembly like the rest.
+
+Seven core functions (`func_0011F9E4`, `func_00125D94`, `func_00126104`, `func_00126DBC`
+skip 4 bytes; `func_00127340` and `func_00128F48` skip 8; `func_001246D0` skips 16) were corrected
+the same way. Each prefix follows a completed `jr $ra` and its delay slot, holds only linker
+filler (0xCDCDCDCD) or unreachable leftovers, and every jump, address pair or data pointer that
+reaches the function already targets the shortened entry.
+
+Three more rows were corrected on 26 October 2026: `func_00120354` and `func_00130A8C` skip
+4 bytes (one 0xCDCDCDCD fill word; two data words point at `func_00120354`'s shortened
+entry), and `func_0028FF50` skips 8 (a leftover `sw $v0,0x6C($a1)` and a nop after the
+previous body's completed return) in the boot and its 27 level copies, in USA v1.01 and
+v2.00 (PAL has no such row). Each prefix follows a completed `jr $ra` and its delay slot.
+`func_L00_00428EE0` skips 24 bytes of filler in all 15 of its levels and in every release,
+leaving an 8-byte `return 0` method that a data pointer in each level reaches.
+
+One open row is two functions and still needs a split: `func_00115E28` (64 bytes) is
+`abort` at +0 followed by a separate noreturn assert-style printer at `00115E38`, which
+four `jal`s reach. Splitting it adds a boot row and changes the function count, so it
+is left as one row for now.
+
 Release-specific rows have their own named corrections. `tools/carry.py --entries`
 repairs established extents while retaining their existing identities and kinds,
 rather than renaming them for the new address or merging identical short methods.

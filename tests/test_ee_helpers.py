@@ -15,9 +15,9 @@ import elf
 class HelperDeclarations(unittest.TestCase):
     def test_memory_clobbers_distinguish_the_copy_variants(self):
         text = (ROOT / "include/common.h").read_text()
-        for name in ("qcopy", "qzero", "qcopy_nc"):
+        for name in ("qcopy", "qzero", "qcopy_nc", "qzero_nc"):
             body = re.search(r"void " + name + r"\([^)]*\)\s*\{(.*?)\n\}", text, re.S).group(1)
-            self.assertEqual('"memory"' in body, name != "qcopy_nc")
+            self.assertEqual('"memory"' in body, name not in ("qcopy_nc", "qzero_nc"))
             self.assertNotIn('""', body)
         self.assertIn("16-byte aligned", text)
 

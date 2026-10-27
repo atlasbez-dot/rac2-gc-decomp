@@ -218,7 +218,6 @@ void func_L00_002FC7A0(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002FC980);
 
-INCLUDE_ASM("asm/levels", func_L00_002FCF18);
 
 void func_L00_002FD308(unsigned long long argument)
 {
@@ -249,7 +248,7 @@ void func_L00_002FD400(void)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002FD480);
+/* func_L00_002FD480 is matched in its own unit, src/levels/shared/L00_002FD480-g8-qcopy.c (-O2 -G8 -ffunction-sections -frac2-qcopy). */
 
 
 INCLUDE_ASM("asm/levels", func_L00_002FE268);
@@ -327,9 +326,8 @@ int func_L00_003046D0(int index)
     return 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00304AE8);
+/* func_L00_00304AE8 is defined in L00_002FC7A0-g8.c (-G8 small data). */
 
-INCLUDE_ASM("asm/levels", func_L00_00305600);
 
 
 INCLUDE_ASM("asm/levels", func_L00_003080D0);
@@ -974,24 +972,20 @@ int func_L00_0030E010(int argument)
 /* shared native body of family e7046bc951256c7e */
 void func_L00_00310048(void)
 {
-    unsigned char *p = D_L05_001B2520;
+    unsigned char *p;
     int seen = 0;
-    unsigned int limit;
+
     D_L05_001B2440 = 0;
-    while (p < D_L05_001B2524) {
-        limit = D_L05_001B2048;
-        do {
-            if ((p[32] >= 254 && *(unsigned int *)(p + 160) <= limit) || seen) {
-                D_L05_001B2440 = D_L05_001B2440 + 1;
-                seen = (p[32] == 0xff) ? 1 : seen;
-            }
-            p += 256;
-        } while (p < D_L05_001B2524);
+    for (p = D_L05_001B2520; p < D_L05_001B2524; p += 256) {
+        if ((p[32] >= 254 && *(unsigned int *)(p + 160) <= D_L05_001B2048) || seen) {
+            D_L05_001B2440++;
+            if (p[32] == 0xff)
+                seen = 1;
+        }
     }
 }
 
 
-INCLUDE_ASM("asm/levels", func_L00_00310748);
 
 /* rac1-decomp src/overlays/shared/mobyfunc_0024FD50.c: func_L00_0024FFE8 */
 void func_L00_00310838(unsigned char *a, int dx, int dy) {
@@ -1053,8 +1047,6 @@ void func_L00_00310C88(LvlSlotCtx *ctx, LvlSlotNode **handle)
 }
 
 INCLUDE_ASM("asm/levels", func_L00_00310D30);
-
-INCLUDE_ASM("asm/levels", func_L00_00311080);
 
 INCLUDE_ASM("asm/levels", func_L00_003110E8);
 

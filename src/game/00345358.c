@@ -463,8 +463,6 @@ void func_003495D8(f32 weight, f32 x, f32 y, f32 z, f32 w, JammingParameterRows 
     object->weights[index] = weight;
 }
 
-INCLUDE_ASM("asm/game", func_00349610);
-
 void func_00349628(int param_1, int param_2) {
     *(int *)(param_1 + 0x84) = param_2;
 }

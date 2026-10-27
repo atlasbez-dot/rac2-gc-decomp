@@ -42,7 +42,7 @@ INCLUDE_ASM("asm/levels", func_L01_003CB540);
 
 INCLUDE_ASM("asm/levels", func_L01_003CB668);
 
-INCLUDE_ASM("asm/levels", func_L01_003CBCD8);
+/* func_L01_003CBCD8 is in L01_003CBCD8-qcopy.c. */
 
 /* Frees the object at 0xD8 of the object at 0x68 and clears its 0xDC flag. */
 void func_L01_003CBFA8(u8 *a0)
@@ -89,7 +89,6 @@ void func_L01_003CC898(u8 *a0, u32 a1, u32 a2, u8 a3, u8 *a4)
     *s1 = 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L01_003CC930);
 
 INCLUDE_ASM("asm/levels", func_L01_003CDB40);
 
@@ -218,8 +217,6 @@ void func_L01_003CDEA8(u8 *a0)
 
 INCLUDE_ASM("asm/levels", func_L01_003CE228);
 
-INCLUDE_ASM("asm/levels", func_L01_003CE7D8);
-
 INCLUDE_ASM("asm/levels", func_L01_003CE868);
 
 INCLUDE_ASM("asm/levels", func_L01_003CEDA0);
@@ -244,7 +241,7 @@ INCLUDE_ASM("asm/levels", func_L01_003D8830);
 
 INCLUDE_ASM("asm/levels", func_L01_003D8AD0);
 
-INCLUDE_ASM("asm/levels", func_L01_003D8C00);
+/* func_L01_003D8C00 is defined in L01_003D8C00-qcopy-barrier.c. */
 
 INCLUDE_ASM("asm/levels", func_L01_003D8E80);
 

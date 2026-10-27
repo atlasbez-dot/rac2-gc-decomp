@@ -1,33 +1,20 @@
 /*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Reported final C / retail: 5384 / 5412 bytes; size equality is not a match.
- * us: 0/1 placements; 5384/5412 bytes.
- * us2: absent from catalogue (not a match).
- * pal: absent from catalogue (not a match).
- * Residual: 28 bytes short; frame 0x80 vs retail0x70. Extra saved s5 holds state+0x2c0 waypoint across case3 calls; retail rematerializes this pointer. Not an effect-tuning-base issue.
- * Reopening condition: Concrete lifetime/control-flow change avoiding the saved waypoint pointer, followed by exact comparison.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ * Retained complete manual reconstruction; not linked or counted.
+ * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections
+ * Retail: 5412 bytes; compiled: 5308 bytes.
+ * Final coverage: us: 0/1; us2: catalogue absent; pal: catalogue absent.
+ * Residual: 5308/5412 bytes with the correct 0x70 frame after ordinary folded loads at
+ * the observed owner/previous-position events. The full locomotion/paired-throw state
+ * machine remains. Current retail actually keeps waypoint state+0x2C0 in S4 across case
+ * 3 calls; the old claim that it always rematerializes was false. Register roles, branch
+ * sharing and schedules still differ; full retail semantics is not yet qualified.
+ * Reopen: A concrete remaining owner/state/cursor lifetime witness. Helper-only 5388
+ * bytes used frame0x80; disabling GCSE gave 5344 with frame0x60 and was rejected.
+ * Diagnostics identified separate self+0x10, waypoint+0x2C0 and previous-position+0x2D0
+ * pseudos; do not repeat the disproved waypoint-rematerialization assumption.
  */
+#include "common.h"
 
-/* Nonmatching manual reconstruction of the first Maktar sentry state machine.
- * Retail US: 5412 bytes; final trial: 5384 bytes, 0/1 placements, exit 1.
- * US2 and PAL do not carry this canonical function in their catalogues.
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy
- *          -frac2-qcopy-barrier.
- * Four bounded trials: qcopy/barrier 5384, qcopy 5380, ordinary copies 5236,
- * and the explicit waypoint view 5384. Final frame 0x80 differs from 0x70.
- * The extra s5 preserves state+0x2c0 across case-three calls; retail instead
- * rematerializes it. This is not the effect-tuning base. Reopen with a proven
- * local lifetime/control-flow change that removes that saved waypoint pointer.
- * All states, paired throw cases and the common final update are retained.
- * WaypointView and EffectTuning are partial measured views, not full layouts.
- * The callback and FC248 leaf declarations retain observed extra caller slots;
- * their current leaves ignore those slots, so no invented fixed ABI is used.
- */
-typedef unsigned char u8;
 typedef int Quadword __attribute__((mode(TI)));
 typedef struct { u8 prefix[0x2C0]; float waypoint[4]; float previousPosition[4]; } WaypointView;
 /* Partial current dispatch context; the payload's full extent is not inferred. */
@@ -36,7 +23,8 @@ typedef struct {
 } Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext;
 typedef unsigned long Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchFlags;
 typedef struct { u8 prefix[0x20]; float amount; int reserved24; int kind; int detail; } EffectTuning;
-extern EffectTuning D_L02_001BA500;
+extern u8 D_L02_001BA500[];
+#define EFFECT ((EffectTuning *)D_L02_001BA500)
 extern float D_L02_001B3F58 __attribute__((sda));
 extern float D_L02_001B01B0[4] __attribute__((sda));
 extern float D_L02_001B01C0[4] __attribute__((sda));
@@ -58,7 +46,7 @@ extern void func_L02_003D5B90(char *);
 /* The retail callback site supplies a parent even though this leaf ignores it. */
 extern int func_L00_0042AB40();
 extern void func_002A7470(char *, int, int, int);
-extern void func_002A7750(u8 *, u8, int);
+extern void func_002A7750(u8 *, s32, s32);
 extern void func_L02_003D4ED0(char *);
 extern void func_L02_003D4FD0(char *, Quadword *, float, float);
 extern float func_002A7878(float, float);
@@ -69,7 +57,7 @@ extern void func_L02_003FC020(char *, char *);
 extern void func_002B5258(char *);
 extern void func_L02_003D4AF0(char *, int);
 extern float func_L02_002F21C0(void *, void *);
-extern void func_L01_00321178(char *, char *);
+extern int func_L01_00321178(char *, char *);
 extern float func_00283C80(float, float);
 extern void func_L02_003D69F0(void);
 extern void func_L02_003D5118(char *, int);
@@ -78,7 +66,7 @@ extern int func_L02_003D4D00(char *);
 extern int func_L02_003D4A60(char *);
 extern Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchFlags func_002B1C20(void *, Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext *);
 /* Extra caller slots are retained at this legacy entry; its leaf ignores them. */
-extern void func_L02_003FC248();
+extern void func_L02_003FC248(void *, int, int);
 extern int func_002E5E58(int, int, void *);
 extern void func_002B0A18(int, int);
 extern void func_L01_003E9CF8(char *, int, void (*)(char *));
@@ -98,13 +86,14 @@ extern void func_L02_003D46B8(char *);
 #define W(o) (*(unsigned int *)(state+(o)))
 #define F(o) (*(float *)(state+(o)))
 #define P(o) (*(char **)(state+(o)))
-#define SET_MODE(m,r) func_002A7750((u8 *)self,(u8)(m),(r))
+#define SET_MODE(m,r) func_002A7750((u8 *)self,(m),(r))
 
 /* Drive the large Maktar sentry's locomotion and paired throw sequences. */
 void func_L02_003D2DE0(char *self)
 {
     char *state=*(char **)(self+0x68);
-    float target[4], position[4];
+    float target[4] __attribute__((aligned(16)));
+    float position[4] __attribute__((aligned(16)));
     float distance, yaw, frame, value;
     int result, nextMode, hand, animation;
     unsigned long events;
@@ -113,7 +102,7 @@ void func_L02_003D2DE0(char *self)
 
     D_L02_001B3F58=0.7853981633974483f;
     func_L02_003D4308(self);
-    *(Quadword *)target=*(Quadword *)(P(0x30C)+0x10);
+    qcopy(target, P(0x30C)+0x10);
     distance=func_00282E80(self+0x10,target);
     yaw=func_00283248(target[0]-*(float *)(self+0x10),target[1]-*(float *)(self+0x14));
     frame=func_0029F530(self);
@@ -148,8 +137,8 @@ void func_L02_003D2DE0(char *self)
                 func_L02_003D4FD0(self,(Quadword *)position,yaw,0.0f);
             } else {
                 if (self[0x43]!=9) func_002A7470(self,9,0,10);
-                self[0x95]=2; *(Quadword *)(state+0x2D0)=*(Quadword *)(self+0x10);
-                *(Quadword *)((WaypointView *)state)->waypoint=*(Quadword *)D_L02_001B01D0;
+                self[0x95]=2; qcopy(state+0x2D0, self+0x10);
+                qcopy(((WaypointView *)state)->waypoint, D_L02_001B01D0);
             }
         }
         if (func_00282E80(self+0x10,D_L02_001B01B0)<18.0f) { H(0x32E)=0; SET_MODE(20,2); }
@@ -157,10 +146,10 @@ void func_L02_003D2DE0(char *self)
     case 3:
         if (func_002B3868((u8 *)self)) {
             if (self[0x43]!=9) func_002A7470(self,9,0,10);
-            *(Quadword *)(state+0x2D0)=*(Quadword *)(self+0x10);
+            qcopy(state+0x2D0, self+0x10);
             value=func_002A7878(20.0f,40.0f)*0.017453294f;
             if (func_002A77E0(2)) value=-value;
-            F(0x308)=value; *(Quadword *)((WaypointView *)state)->waypoint=*(Quadword *)D_L02_001B01C0;
+            F(0x308)=value; qcopy(((WaypointView *)state)->waypoint, D_L02_001B01C0);
             func_L02_003D4A48(self); func_L02_003DB880(P(0x310));
             func_L02_003FC020(*(char **)(self+0xB8),P(0x310));
         }
@@ -181,7 +170,7 @@ void func_L02_003D2DE0(char *self)
             func_L01_00321178(self,(char *)target);
         else func_L02_003D4AF0(self,1);
         if ((self[0x42]==1 && frame>1.0f && frame<3.0f) || (frame>16.0f && frame<18.0f)) {
-            D_L02_001BA500.amount=0.05f; D_L02_001BA500.kind=25; D_L02_001BA500.detail=0;
+            EFFECT->amount=0.05f; EFFECT->kind=25; EFFECT->detail=0;
         }
         if (distance<9.0f && func_00283C80(yaw,*(float *)(self+0xF8))<0.087266475f
                 && frame>3.0f && frame<15.0f) SET_MODE(7,1);
@@ -213,9 +202,9 @@ void func_L02_003D2DE0(char *self)
             if (events&2) SET_MODE((func_L02_003D4D00(self) || func_L02_003D4A60(self)) ? 19 : 6,1);
         } else if (frame<=95.0f || frame>=97.0f) {
             if (frame>110.0f) SET_MODE(9,-1);
-        } else { D_L02_001BA500.amount=0.4f; D_L02_001BA500.kind=25; D_L02_001BA500.detail=0; }
+        } else { EFFECT->amount=0.4f; EFFECT->kind=25; EFFECT->detail=0; }
         if (func_00282E80(self+0x10,D_L02_001B01B0)>18.0f)
-            *(Quadword *)(self+0x10)=*(Quadword *)position;
+            qcopy(self+0x10, position);
         break;
     case 9:
         if (func_002B3868((u8 *)self)) {
@@ -243,7 +232,7 @@ void func_L02_003D2DE0(char *self)
     case 11:
         if (func_002B3868((u8 *)self)) {
             if (self[0x43]!=9) func_002A7470(self,9,0,10);
-            H(0x31C)=0; *(Quadword *)(state+0x2D0)=*(Quadword *)(self+0x10);
+            H(0x31C)=0; qcopy(state+0x2D0, self+0x10);
             value=func_002A7878(20.0f,40.0f)*0.017453294f;
             if (func_002A77E0(2)) value=-value;
             F(0x308)=value;
@@ -357,7 +346,7 @@ void func_L02_003D2DE0(char *self)
             if (!H(0x32C)) SET_MODE(6,1);
             else { func_002A7470(self,4,0,3); B(0x7A)=0; SET_MODE(8,3); }
             if (self[0x42]==18 && frame>8.0f && frame<10.0f) {
-                D_L02_001BA500.amount=0.2f; D_L02_001BA500.kind=25; D_L02_001BA500.detail=0;
+                EFFECT->amount=0.2f; EFFECT->kind=25; EFFECT->detail=0;
             }
         }
         break;

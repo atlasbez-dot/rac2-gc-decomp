@@ -27,7 +27,6 @@ extern int D_L15_001B152C;
 extern u8 D_L15_001395B8[];
 
 /* Copies the four clamped channel bytes into the render block's colour slots. */
-INCLUDE_ASM("asm/levels", func_L15_00432008);
 
 extern char *func_002A9640(char *a0, int a1, int a2);
 extern void func_002AB8C0(char *a0, char *a1);

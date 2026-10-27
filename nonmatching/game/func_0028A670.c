@@ -1,14 +1,12 @@
-/* Retained manual C reconstruction; not linked and not credited as matching.
- * Checked source: src/game/0028A670.c
- * Profile: -O2 -G0 -ffunction-sections
- * Retail US extent: 1192 bytes.
- * us: 0/28 (exit 1, 1208 compiled bytes); us2: 0/28 (exit 1, 1208 compiled bytes); pal: catalogue absent (exit 1).
- * Residual: 1208/1192 bytes. The frame is 0xB0, but GPR allocation, table-copy setup and color/draw scheduling differ. The first positive-color transition deliberately uses 0x60290000, as retail does.
- * Reopen only with: A measured source/storage model for the local widths and separately stored draw colors, or a qualified compiler change affecting this exact allocation pattern.
- * No complete linked build was run for this candidate.
- */
-#include "include_asm.h"
-typedef unsigned long u64;
+/* M21 2026-10-26: 1188 of 1192 bytes with -O2 -G8 -ffunction-sections (us, level 00),
+   ~92 lines off (was ~164). Fixed: func_00283D38 returns a 32-bit value (no dsll32/dsra32),
+   case 1's second colour pair is 0x0029A1FF/0x6029A1FF (cross-jumped with case 2), the -G8
+   profile gives retail's macro loads of D_001B23A4/D_001A8CFC, case 3 assigns its constants
+   in its own order. Left: global allocation; retail keeps row in $s2, colour in $s3, yy in
+   $s1 and spills count/first/second to the stack; here second takes $fp. */
+
+#include "common.h"
+
 typedef struct { int value, timer, age; short reserved, state; } CounterTransition;
 typedef struct { float value[7]; } CounterWidths;
 extern CounterTransition D_001B1928[2];
@@ -16,56 +14,93 @@ extern float D_001A8DE0[];
 extern char D_001A8E00[];
 extern unsigned char *D_001A8CFC;
 extern float D_001B23A4;
-extern u64 func_00283D38(unsigned int, unsigned int, float);
+extern unsigned int func_00283D38(unsigned int, unsigned int, float);
 extern int func_00115DA8(char *, char *, ...);
 extern int func_001157AC(char *);
 extern int func_00336D50(unsigned char *, int);
 extern void func_00300A00(char *, int, float, float, float, float, float);
-extern void func_0027F980(int, int, u64, unsigned char *, int);
+extern void func_0027F980(int, int, unsigned int, unsigned char *, int);
+
 void func_0028A670(void)
 {
     char text[16];
-    CounterWidths widths = *(CounterWidths *)D_001A8DE0;
-    int count = 1;
-    unsigned int first = 0, second = 0;
-    CounterTransition *row = D_001B1928;
-    u64 color = 0;
-    int x = 0, y = 0, firstX = 0, firstY = 0, secondX = 0, secondY = 0;
-    float fade, scale = 0.0f, width;
+    CounterWidths widths;
+    int firstX, secondX, firstY, x, secondY, y;
+    unsigned int color;
+    CounterTransition *row;
+    int count;
+    unsigned int first, second;
+    float fade, scale, width;
     int len, yy;
+
+    row = D_001B1928;
+    color = 0;
+    y = 0;
+    secondY = 0;
+    x = 0;
+    firstY = 0;
+    secondX = 0;
+    widths = *(CounterWidths *)D_001A8DE0;
+    count = 1;
+    scale = 0.0f;
+    first = 0;
+    second = 0;
     do {
         firstX = 0;
         switch (row->state) {
         case 1:
             fade = (float)row->age * 0.0714285746f;
-            first = func_00283D38(0x00f0c070, 0x55f0c070, fade);
-            second = func_00283D38(0x00442d00, 0x60442d00, fade);
+            first = func_00283D38(0x00F0C070, 0x55F0C070, fade);
+            second = func_00283D38(0x00442D00, 0x60442D00, fade);
             if (row->value < 0)
-                color = func_00283D38(0x001010f0, 0x801010f0, fade);
+                color = func_00283D38(0x001010F0, 0x801010F0, fade);
             else
-                color = func_00283D38(0x0029a1ff, 0x60290000, fade);
-            x = 442; y = 36; firstX = 499; firstY = 2; secondX = 499; secondY = 2; scale = 1.0f;
+                color = func_00283D38(0x0029A1FF, 0x6029A1FF, fade);
+            firstX = 499;
+            firstY = 2;
+            secondX = 499;
+            secondY = 2;
+            x = 442;
+            scale = 1.0f;
+            y = 36;
             break;
         case 2:
-            if (row->timer < 14) fade = (float)row->timer * 0.0714285746f;
-            else fade = 1.0f;
-            first = 0x55f0c070; second = 0x60442d00;
-            if (row->value < 0)
-                color = func_00283D38(0x001010f0, 0x801010f0, fade);
+            if (row->timer < 14)
+                fade = (float)row->timer * 0.0714285746f;
             else
-                color = func_00283D38(0x8000ffff, 0x6029a1ff, fade);
-            x = 442; y = 36; firstX = 499; firstY = 2; secondX = 499; secondY = 2; scale = 1.0f;
+                fade = 1.0f;
+            first = 0x55F0C070;
+            second = 0x60442D00;
+            if (row->value < 0)
+                color = func_00283D38(0x001010F0, 0x801010F0, fade);
+            else
+                color = func_00283D38(0x8000FFFF, 0x6029A1FF, fade);
+            firstX = 499;
+            firstY = 2;
+            secondX = 499;
+            secondY = 2;
+            x = 442;
+            scale = 1.0f;
+            y = 36;
             break;
         case 3:
-            if (row->timer < 7) fade = 1.0f;
-            else fade = 1.0f - ((float)row->timer - 7.0f) * 0.142857149f;
-            first = func_00283D38(0x00f0c070, 0x55f0c070, fade);
-            second = func_00283D38(0x00442d00, 0x60442d00, fade);
-            if (row->value < 0)
-                color = func_00283D38(0x001010f0, 0x801010f0, fade);
+            if (row->timer < 7)
+                fade = 1.0f;
             else
-                color = func_00283D38(0x0029a1ff, 0x6029a1ff, fade);
-            x = 442; y = 36; firstX = 499; firstY = 2; secondX = 499; secondY = 2; scale = 1.0f;
+                fade = 1.0f - ((float)row->timer - 7.0f) * 0.142857149f;
+            first = func_00283D38(0x00F0C070, 0x55F0C070, fade);
+            second = func_00283D38(0x00442D00, 0x60442D00, fade);
+            if (row->value < 0)
+                color = func_00283D38(0x001010F0, 0x801010F0, fade);
+            else
+                color = func_00283D38(0x0029A1FF, 0x6029A1FF, fade);
+            x = 442;
+            scale = 1.0f;
+            y = 36;
+            firstX = 499;
+            firstY = 2;
+            secondX = 499;
+            secondY = 2;
             break;
         }
         if (firstX) {

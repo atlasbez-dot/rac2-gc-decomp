@@ -110,6 +110,4 @@ void func_L11_002C51D0(void)
     func_L11_002D8EF8(0x78, 1);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_002CB130);
 
-INCLUDE_ASM("asm/levels", func_L11_002D22C8);

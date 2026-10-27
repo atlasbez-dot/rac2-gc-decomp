@@ -80,9 +80,7 @@ int func_L04_003EDFF0(unsigned char *a0, char *a1)
 
 INCLUDE_ASM("asm/levels", func_L04_003EE090);
 
-INCLUDE_ASM("asm/levels", func_L04_003EE7C0);
 
-INCLUDE_ASM("asm/levels", func_L04_003F1388);
 
 void func_L04_003F5F30(unsigned char *a0) {
     unsigned char *obj = *(unsigned char **)(a0 + 0x68);
@@ -114,7 +112,6 @@ void func_L04_003F5F30(unsigned char *a0) {
     *(float *)(obj + 0x50) = 2.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L04_003F6008);
 
 INCLUDE_ASM("asm/levels", func_L04_003F6200);
 
@@ -148,7 +145,6 @@ void func_L04_003F8FA0(unsigned char *a0) {
     *(float *)(obj + 0x4C) = 2.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L04_003F9078);
 
 INCLUDE_ASM("asm/levels", func_L04_003F9320);
 
@@ -170,7 +166,60 @@ INCLUDE_ASM("asm/levels", func_L04_003FBD80);
 
 INCLUDE_ASM("asm/levels", func_L04_003FBEF8);
 
-INCLUDE_ASM("asm/levels", func_L04_003FC678);
+typedef struct {
+    unsigned char pad0[0x74];
+    unsigned char active;
+    unsigned char pad75[0x88 - 0x75];
+    void *owner;
+} L04_C678Slot;
+typedef int L04_C678Quad __attribute__((mode(TI)));
+
+typedef struct {
+    unsigned char pad0[0x74];
+    unsigned char *owner;
+    int timer;
+    float age;
+} L04_C678Vars;
+
+extern int func_00282948(void *);
+extern int func_00283CF0(float);
+extern void func_0029F338(void *);
+extern float func_002AA800(void *, int, float, float);
+extern void func_002E59F8(int);
+extern void func_L00_002E6DB8(void *, void *);
+extern void func_L04_003FB990(unsigned char *, L04_C678Vars *);
+extern void func_L04_003FBEF8(void);
+extern unsigned char D_00188660[];
+extern int D_L04_001B0488 __attribute__((sda));
+
+void func_L04_003FC678(unsigned char *m)
+{
+    L04_C678Vars *v = *(L04_C678Vars **)(m + 0x68);
+    int s;
+    L04_C678Slot *e;
+
+    *(L04_C678Quad *)(m + 0x10) = *(L04_C678Quad *)(v->owner + 0x10);
+    func_002AA800(m + 0xF8, 0, *(float *)(v->owner + 0xF8), 0.026179943f);
+    v->age = v->age + 1.0f;
+    if (v->timer != 0 && func_00282948(&v->timer) != 0) {
+        s = D_L04_001B0488;
+        if (s != -1) {
+            e = (L04_C678Slot *)(D_00188660 + s * 0x70);
+            if (e->owner == v->owner && e->active != 0) {
+                func_002E59F8(s);
+            }
+        }
+        D_L04_001B0488 = -1;
+        func_0029F338(m);
+        return;
+    }
+    if (30.0f < v->age && v->timer == 0) {
+        v->timer = func_00283CF0(15.0f);
+    } else {
+        func_L04_003FB990(m, v);
+    }
+    func_L00_002E6DB8(func_L04_003FBEF8, m);
+}
 
 void *func_L04_00400A18(unsigned char *a0, void *a1, float f12) {
     unsigned char *obj = func_0029EFD0(a1);

@@ -16,6 +16,28 @@ The retail code was built with GNU EE-GCC 2.9-ee-991111b. `build.sh` rebuilds it
   next block, as GCC 2.95 does. `zero_ti_store_barrier.py` adds the opt-in
   `-frac2-zero-ti-barrier` model of the inferred quadword-clear macro
   (docs/COMPILER-NOTES.md); default compilation retains ordinary scheduling.
+  `ti_one_gpr.py` makes reload count a TImode value as one general register on the R5900,
+  as `HARD_REGNO_NREGS` already does, so quadword reloads (a `por` zero for `sq`) take
+  single spill registers as retail's do; it is unconditional (docs/COMPILER-NOTES.md).
+  `reload_reg_used_guard.py` puts back the archive's test that keeps reload from inheriting
+  a value into a register a pseudo of the insn holds, which patch 0047 drops; it is
+  unconditional (docs/COMPILER-NOTES.md).
+  `gcse_store_kills_loads.py` gives gcse GCC 2.95.3's memory model, where every store kills
+  every load, in place of this tree's alias-analysis queries; it is unconditional too.
+  `trap_delay_barrier.py` ends reorg's backward delay-slot search at a division guard
+  (`trap_if`), as at a jump, as retail's compiler does; it is unconditional too.
+  `swap_branch_slots.py` adds the opt-in assembler option `--r5900-swap-branch-slots`: gas
+  fills a reorder-mode delay slot from the previous instruction, as the GNU as that built the
+  SDK libraries does (this tree's swap guard reads `&&` for `&` and never swaps). SDK units
+  pass it as `-Wa,--r5900-swap-branch-slots` (docs/COMPILER-NOTES.md).
+  `inline_li_d.py` makes gas build every `li.d` into a 64-bit general register inline
+  (load_register's dli form) instead of pooling the values that lack a zero 16-bit chunk in
+  each half in `.lit8`, as the game's own code does; this is the default. The SDK objects
+  pool, so `tools/build.py` passes the opt-out `--r5900-pool-li-d` to every `sdk`-profile unit
+  (docs/COMPILER-NOTES.md).
+  `no_recombine_givs.py` drops strength_reduce's call to `recombine_givs` (loop.c), as the
+  gcc-2.95 release branch did, so address givs stay on the giv combine_givs chose, as in
+  retail; it is unconditional too.
   `gcse_unsplit_edges.py` and `keep_block_order.py` add the opt-in
   `-frac2-gcse-unsplit-edges` and `-frac2-keep-block-order`, which leave out two
   Cygnus-local pieces of this tree that GCC 2.95 does not have.
@@ -156,6 +178,15 @@ arguments and forwards them to the assembler explicitly. The complete flag
 string and assembler binary remain part of the object-cache key. Empty options
 are rejected, and the tests exercise actual argument transport for both
 frontends, default/explicit profiles, invalid values and unchanged controls.
+
+`no_null_pointer_checks.py` adds `-frac2-no-null-pointer-checks`: the two Cygnus
+`delete_null_pointer_checks` calls in rest_of_compilation are skipped, as GCC 2.95 has neither.
+With `-frac2-keep-block-order` no block count runs before cse, so a call that ends a block whose
+label cse later threads away leaves no `(use (const_int 0))` behind to move through the merged
+block (func_L20_002CD928 case 0x7C). It is off by default, enabled per unit in
+`config/cflags.txt`, and `-fno-rac2-no-null-pointer-checks` disables it;
+`tests/test_no_null_pointer_checks.py` covers the anchors, the default/disabled equality and an
+authored check the pass deletes.
 
 `build.sh` stops unless `mips.c`, `mips.h`, `mips.md`, `toplev.c`, `flags.h`,
 `haifa-sched.c`, `gcse.c`, `flow.c`, `reorg.c` and `tc-mips.c` hash as it

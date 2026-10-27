@@ -1,17 +1,13 @@
 /* Plain-C texture descriptor and upload-queue reconstruction; not matched.
- * Retail: 1356 bytes, 28 placements. Qualified default G8 profile: 1356 bytes,
- * 0/28 matches; first differing instruction is at +0x418. The instruction
- * comparison agrees before that offset with relocation positions excluded;
- * this is not partial match credit or proof of runtime behavior.
- *
- * Nine bounded compiles: initial body 1336 bytes; grouping independent descriptor
- * fields reached 1340; signed 16-bit field expansion and the raw upload layout
- * reached 1360; named descriptor components reached 1356. The final three
- * source views produced identical instructions. The remaining block differs
- * in temporary allocation and scheduling of descriptor fields/upload stores.
- * Reopen with evidence that changes those lifetimes or the relevant compiler/
- * assembler behavior, not another equivalent cast or declaration permutation.
- * EE-GCC uses 64-bit long here; retain that width when adapting the data model.
+ * Profile: -O2 -G8 -ffunction-sections. 1356/1356 bytes (16 lines off), us 0/28.
+ * 26 October 2026 (M10): the descriptor word as a linear or-chain over separate statements in a
+ * fresh temp, and the upload stores in climbed order, take it from 45 to 18 differing lines. Left:
+ * pure scheduling in the descriptor block (the height load and palette-bits pair come early) and
+ * the palette constant register pair (a0/v1). Expression forms of palette_bits, the height local
+ * and the sign constant compile identically. In the permuter farm.
+ * 26 October 2026 (M14): upload stores in retail order (palette at +6 right after +0, texture at
+ * +14 last) fix the store block: 16 lines left, all in the descriptor block. A statement-order
+ * climb over the descriptor block finds nothing better.
  */
 #include "include_asm.h"
 
@@ -126,14 +122,13 @@ TextureBits func_0027C878(int id)
         TextureEntry *entry = &ref_0027C878_04[id];
         if (entry->bits == 0) {
             int base = D_001A72D0;
-            int palette = base >> 8;
-            int texture;
             int width = (short)entry->width_shift;
             int shift = width - 6;
-            int count, height;
-            long column_bits, width_bits, height_bits, palette_bits;
+            int palette, texture, count, height;
+            long bits, column_bits, width_bits, height_bits, palette_bits;
             if (shift < 0)
                 shift = 0;
+            palette = base >> 8;
             base += 0x400;
             texture = base >> 8;
             column_bits = (long)texture | ((long)(1 << shift) << 14);
@@ -142,18 +137,22 @@ TextureBits func_0027C878(int id)
             height_bits = (long)((TextureBits)entry->height_shift << 48) >> 18;
             palette_bits = ((long)palette << 37) | (0x8000L << 19);
             D_001A72D0 = base + (1 << (width + height));
-            entry->bits = column_bits | width_bits | height_bits | palette_bits |
-                          (-9223372036854775807L - 1);
+            bits = column_bits;
+            bits |= width_bits;
+            bits |= height_bits;
+            bits |= palette_bits;
+            bits |= (-9223372036854775807L - 1);
+            entry->bits = bits;
             count = ref_0027C878_05;
             if (count < 64) {
                 char *upload = ref_0027C878_07 + (count << 4);
-                *(short *)(upload + 6) = palette;
                 *(unsigned int *)(upload + 0) = (unsigned int)(ref_0027C878_06 + (entry->second_offset << 4));
+                *(short *)(upload + 6) = palette;
                 *(short *)(upload + 4) = 0;
                 *(unsigned int *)(ref_0027C878_07 + (count << 4) + 8) = (unsigned int)(ref_0027C878_06 + (entry->first_offset << 4));
-                *(short *)(upload + 14) = texture;
-                *(unsigned char *)(upload + 13) = entry->height_shift;
                 *(unsigned char *)(upload + 12) = entry->width_shift;
+                *(unsigned char *)(upload + 13) = entry->height_shift;
+                *(short *)(upload + 14) = texture;
                 ref_0027C878_05 = count + 1;
             }
         }

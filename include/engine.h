@@ -64,4 +64,13 @@ typedef struct Rac2MobyCollisionView32 {
 /* Catalogue symbol; QueueMobyImpact in names.h is a descriptive alias. */
 void func_002A8E20(void *target, const Rac2Impact32 *impact);
 
+/*
+ * Moves *position towards target (src/game/002AA800.c). Under the EABI the
+ * two pointers take $a0 and $a1, the floats $f12-$f15 and direction $a2,
+ * whatever their order in the list; this order is the one retail's callers
+ * set the registers up in (level 20 and 23 bodies only match with it).
+ */
+float func_002AA898(float *position, float target, float *velocity,
+                    float acceleration, float damping, float limit, int direction);
+
 #endif /* ENGINE_H */

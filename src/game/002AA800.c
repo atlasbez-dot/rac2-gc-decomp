@@ -131,8 +131,8 @@ void func_002AA800 (float *p, int a1, float fx, float fl)
 extern void func_002AA198(float *, float, float, float, float);
 extern float func_00282C48(float);
 
-float func_002AA898(float *position, float *velocity, int direction,
-                   float target, float acceleration, float damping, float limit)
+float func_002AA898(float *position, float target, float *velocity,
+                   float acceleration, float damping, float limit, int direction)
 {
     float distance;
     float residual;
@@ -428,7 +428,6 @@ void func_002AB8C0(void *owner, u8 *obj)
 }
 
 
-INCLUDE_ASM("asm/game", func_002ABB18);
 
 
 extern char *g_mobyTableBase __attribute__((sda));
@@ -563,14 +562,12 @@ int func_002ACD38(void *object)
 }
 
 
-INCLUDE_ASM("asm/game", func_002ACDE8);
 
 extern void func_00282F20(float *dst, float *src, float scale);
 extern float func_00282C10(float x);
 
 void func_002ACE78(float *p, float *src, float x) { func_00282F20(p, src, x); p[3] = func_00282C10(1.0f - x * x); }
 
-INCLUDE_ASM("asm/game", func_002ACEC0);
 
 INCLUDE_ASM("asm/game", func_002ACF68);
 
@@ -581,7 +578,6 @@ s32 func_002AD0B0(u8 *a0) {
  return (*(s32 **)(a0+0x68))[2];
 }
 
-INCLUDE_ASM("asm/game", func_002AD0E0);
 
 /* func_002AD250 is in 002AD250-rc2.c (it needs the grouped 128-bit copy). */
 
@@ -688,11 +684,9 @@ int func_002AE730(float *v, int *out)
     return r;
 }
 
-INCLUDE_ASM("asm/game", func_002AE838);
 
-INCLUDE_ASM("asm/game", func_002AE8C0);
+/* func_002AE8C0 uses the quadword-copy profile in 002AE8C0-qcopy.c. */
 
-INCLUDE_ASM("asm/game", func_002AEAE0);
 
 extern float func_0029F530(void *);
 extern float func_002AEAE0(int, float);
@@ -750,9 +744,31 @@ void func_002AF000(float *p, float a, float b, float c)
 }
 
 
-INCLUDE_ASM("asm/game", func_002AF0A8);
+typedef struct { int items[21]; } Table_002AF0A8;
 
-INCLUDE_ASM("asm/game", func_002AF1D0);
+extern const Table_002AF0A8 D_0026CB30;
+
+extern void func_002B0A18(int, int);
+
+extern void func_002B0CE0(int, int, int);
+
+/* Plays the entry of the 21-entry table the clamped index picks; entry 3 goes through the
+   other player. */
+void func_002AF0A8(int index)
+{
+    Table_002AF0A8 table = D_0026CB30;
+
+    if (index < 0)
+        index = 0;
+    if (index > 20)
+        index = 20;
+    if (index == 3)
+        func_002B0A18(table.items[3], 0xF0);
+    else
+        func_002B0CE0(8, table.items[index], 0xB4);
+}
+
+/* func_002AF1D0 is matched in its own unit, src/game/002AF1D0-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */
 
 float func_002AF2E8(char *a0, char *a1, int *a2,
                                        float p1, float p2, float p3, float p4)

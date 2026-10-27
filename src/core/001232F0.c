@@ -496,7 +496,6 @@ unsigned char *func_00123578(unsigned char *input, int *output) {
     return input;
 }
 
-INCLUDE_ASM("asm/core", func_001236C8);
 
 typedef struct {
     int **records;

@@ -1,14 +1,9 @@
-/* Nonmatching reconstruction of func_L00_003F8280 (retail 1324 bytes).
- * Measured 2026-10-23: 1304 bytes, 0/27 placements in US, US2 and PAL.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- *          -frac2-zero-ti-por.
- * Two pointer-expression forms tied. Remaining allocation/liveness differences
- * include an extra saved GPR and projection UV cursors. Reopen with evidence
- * for the original cursor declarations; no matching or linked credit claimed.
- * The 144-byte packet, 64-byte frame and 48-byte rotation are complete views.
- * The scratch union represents sequential rotation/projection roles.
- * 00280B90 consumes a0-a2 and has no result assignment at its exits; vector
- * helpers were qualified directly against retail, including full frame reads.
+/* Nonmatching C: Build the facing quad, optionally rotate its basis and project its second draw pass.
+ * Tested profile: -O2 -G0 -ffunction-sections.
+ * Measured US size: 1304 bytes; retail: 1324 bytes.
+ * Placement checks: US, US2 and PAL: 0/27 each.
+ * Remaining: An extra saved register and the projection UV cursor lifetimes still differ.
+ * Reopen with independent projection cursor lifetimes; preserve the complete 144-byte packet, 64-byte basis and disjoint 48-byte rotation scratch.
  */
 #include "common.h"
 
@@ -70,7 +65,7 @@ void func_L00_003F8280(Vector *position, float size, float offset, float roll,
     packet.uv[2][1] = 0.0f;
     packet.uv[3][0] = 1.0f;
     packet.uv[3][1] = 1.0f;
-    frame.position.word = position->word;
+    qcopy(&frame.position, position);
     func_00282CF0(&frame.row[0], &D_L00_001B8DC0, &frame.position);
     func_00282F20(&frame.row[0], &frame.row[0], 1.0f);
     func_00282DD8(&frame.row[1], &frame.row[0], &D_0018A0E0);
@@ -99,7 +94,7 @@ void func_L00_003F8280(Vector *position, float size, float offset, float roll,
     func_002FC560(0x47, 0x31001ULL);
     func_00280B90(&packet, 0, 0);
     if (mode != 0) {
-        scratch.projection.center.word = packet.vertex[0].word;
+        qcopy(&scratch.projection.center, &packet.vertex[0]);
         vertex = &packet.vertex[1];
         count = 2;
         do {

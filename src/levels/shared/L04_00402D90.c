@@ -25,7 +25,6 @@ INCLUDE_ASM("asm/levels", func_L04_004073E8);
 
 INCLUDE_ASM("asm/levels", func_L04_004077A0);
 
-INCLUDE_ASM("asm/levels", func_L04_0040A090);
 
 /* A04-table-select-76 freshly exact-verified under family reservation */
 BatchA_A04_u32 func_L04_0040A1D0(BatchA_A04_u8 *a0) {

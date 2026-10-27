@@ -15,7 +15,6 @@ void func_L00_002D7140(u8 *object) {
   func_0026FF08(1.1243411302566528f,0.005f,0.2f,0.0f,0,3);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002D71A0);
 
 extern char D_L00_001B8C80[];
 extern float D_L00_001BD370;

@@ -1,3 +1,19 @@
+/* Current final accounting: 356/360 bytes; us0/28 and us2 0/28, exit1; PAL absent, exit1, not a match. Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-gcse. Full retained body was checked in its temporary unit; markers and trial profiles were restored afterward. No strict build or native-behavior claim. */
+
+/* Single sentinel-spelling control: assigning-1 through the existing unsigned byte type still becomes RTL byte255 before CSE1; the complete object is unchanged. The original255 spelling is retained below. */
+
+/* 25 October 2026 diagnostic follow-up; retained near miss, not linked.
+ * Initial RTL constructs separate halfword and byte255 values. CSE1 removes the
+ * byte definition and reuses a lowpart of the halfword value, before allocation.
+ * The position/vector/count allocation scores also tie in the measured dumps.
+ * Restoring the missing instruction could change that tie, but this is an isolated
+ * sensitivity model, not a compiled fix or proof of the original source.
+ * The colour setter touches the separate64-bit colour field; it does not establish
+ * a different flag width or justify using its incidental return for the byte flag.
+ * Reopen only on independent cross-mode CSE or real source-lifetime evidence with
+ * controls. Do not repeat typed-field/short-argument/helper/flag sweeps.
+ */
+
 /* Retained near miss: 356 bytes versus 360 retail bytes; 0/28 places match.
  * Trial profile: -O2 -G0 -ffunction-sections -frac2-qcopy
  *                -frac2-qcopy-barrier -fno-gcse.

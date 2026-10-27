@@ -29,7 +29,7 @@ extern int func_002ACBC8(void *, int);
 
 extern int func_L00_002E3B38(int);
 
-extern void func_0026FEB8(void *, int, int);
+extern void func_0026FEB8(void *, ...);
 
 extern unsigned char D_00189EA0[];
 
@@ -223,7 +223,83 @@ void func_L00_003EAEF8(char *object) {
 
 INCLUDE_ASM("asm/levels", func_L00_003EB0C0);
 
-INCLUDE_ASM("asm/levels", func_L00_003EB400);
+extern int func_002A8508(int, int);
+
+extern unsigned char *D_L00_001B1E9C __attribute__((sda));
+
+extern int D_L00_001FA920[];
+
+extern int D_L00_001B0720[];
+
+extern int D_L00_001B0738[];
+
+/* Four-id switch: wait for the resident check, flip bit 0x43 of every record the first
+   list of each of the four ids names and arm D_L00_001B0720; wait again, clear those bits
+   and arm D_L00_001B0738. */
+void func_L00_003EB400(char *self)
+{
+    int i;
+    char *state = *(char **)(self + 0x68);
+
+    if (*(unsigned char *)(self + 0x20) == 0) {
+        if (func_002ACBC8(D_00189EA0, *(int *)(state + 0x10)))
+            *(unsigned char *)(self + 0x20) = 1;
+    }
+    if (*(unsigned char *)(self + 0x20) == 1) {
+        int i;
+        for (i = 0; i < 4; i++) {
+            int id;
+            unsigned short *p;
+            char *entry;
+            char *records;
+            char *row;
+
+            row = (char *)state + i * 4;
+            id = *(int *)row;
+            if (D_L00_001FA920[id] == 0)
+                continue;
+            if (func_002A8508(id, -1) < 2)
+                continue;
+            records = D_L00_001B1E9C;
+            p = (unsigned short *)D_L00_001FA920[*(int *)(state + i * 4)];
+            do {
+                entry = records + (*p & 0x7FFF) * 256;
+                *(unsigned short *)(entry + 0x34) |= 0x43;
+            } while ((short)*p++ >= 0);
+        }
+        func_0026FEB8(D_L00_001B0720);
+        *(unsigned char *)(self + 0x20) = 2;
+    }
+    if (*(unsigned char *)(self + 0x20) == 2) {
+        if (func_002ACBC8(D_00189EA0, *(int *)(state + 0x10)) == 0)
+            *(unsigned char *)(self + 0x20) = 3;
+    }
+    if (*(unsigned char *)(self + 0x20) == 3) {
+        int i;
+        for (i = 0; i < 4; i++) {
+            int id;
+            unsigned short *p;
+            char *entry;
+            char *records;
+            char *row;
+
+            row = (char *)state + i * 4;
+            id = *(int *)row;
+            if (D_L00_001FA920[id] == 0)
+                continue;
+            if (func_002A8508(id, -1) < 2)
+                continue;
+            records = D_L00_001B1E9C;
+            p = (unsigned short *)D_L00_001FA920[*(int *)(state + i * 4)];
+            do {
+                entry = records + (*p & 0x7FFF) * 256;
+                *(unsigned short *)(entry + 0x34) &= 0xFFBC;
+            } while ((short)*p++ >= 0);
+        }
+        func_0026FEB8(D_L00_001B0738);
+        *(unsigned char *)(self + 0x20) = 0;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L00_003EB610);
 
@@ -234,7 +310,7 @@ INCLUDE_ASM("asm/levels", func_L00_003EB8E8);
 
 INCLUDE_ASM("asm/levels", func_L00_003EBC68);
 
-INCLUDE_ASM("asm/levels", func_L00_003EC078);
+/* func_L00_003EC078 is defined in L00_003EC078-zero-ti-por-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003EC140);
 
@@ -246,7 +322,7 @@ void func_L00_003ECB00(void)
         D_L00_001B0798[i] = 0;
 }
 
-
+/* func_L00_003ECB38 is retained in L00_003ECB38-rc2.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003ECC90);
 
@@ -254,7 +330,6 @@ INCLUDE_ASM("asm/levels", func_L00_003ECD80);
 
 INCLUDE_ASM("asm/levels", func_L00_003ED198);
 
-INCLUDE_ASM("asm/levels", func_L00_003ED850);
 
 extern void func_00282CF0(char *local, char *first, char *second);
 

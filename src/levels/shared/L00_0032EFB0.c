@@ -80,7 +80,6 @@ void func_L00_00336548(char *p)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00338AE0);
 
 /* func_L00_00338D28 is matched in L00_00338D28.c (built with -frac2-qcopy). */
 
@@ -106,14 +105,11 @@ INCLUDE_ASM("asm/levels", func_L00_0033AA40);
 
 /* func_L00_0033BA68 is matched in L00_0033BA68.c (built with -frac2-qcopy). */
 
-INCLUDE_ASM("asm/levels", func_L00_0033C0D0);
-
 INCLUDE_ASM("asm/levels", func_L00_0033C238);
 
 
 
 
-INCLUDE_ASM("asm/levels", func_L00_0033E220);
 
 INCLUDE_ASM("asm/levels", func_L00_0033E3B8);
 
@@ -121,6 +117,5 @@ INCLUDE_ASM("asm/levels", func_L00_0033E3B8);
 
 INCLUDE_ASM("asm/levels", func_L00_0033EA00);
 
-INCLUDE_ASM("asm/levels", func_L00_0033EC48);
 
 INCLUDE_ASM("asm/levels", func_L00_0033EE38);

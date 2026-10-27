@@ -197,7 +197,51 @@ void func_L00_003E4948(void)
     ref_L00_003E4948_00();
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003E4968);
+extern void func_00282D30(void *, void *, float);
+extern void func_00282CC0(void *, void *, void *);
+extern float func_002A78D8(float, float);
+extern int func_002A77E0(int);
+extern void *func_002C65A0(void *, void *, int, unsigned int, int, int, int, float, float, float, int);
+extern char D_L00_001FE940[];
+extern char D_L00_001A8F20[] __attribute__((sda));
+void func_L00_003E4968(char *a0) {
+    float a[4];
+    float b[4];
+    float c[4];
+    float d[4];
+    char *tbl;
+    int n;
+    char *r;
+    char *v;
+    float big;
+    int i;
+
+    v = *(char **)(a0 + 0x68);
+    { float *p = (float *)(v + 0x14);
+    a[0] = p[0];
+    a[1] = p[1];
+    a[2] = p[2]; }
+    a[3] = 0.0f;
+    func_00282D30(b, a0 + 0xD0, -0.1f);
+    func_00282CC0(a, a, b);
+    func_00282D30(c, a0 + 0xE0, 0.15f);
+    func_00282CC0(a, a, c);
+    func_00282D30(c, a0 + 0xE0, -0.033333335f);
+    tbl = D_L00_001FE940;
+    for (i = 8; i >= 0; i--) {
+        d[0] = a[0] + func_002A78D8(0.0f, 0.1f);
+        d[1] = a[1] + func_002A78D8(0.0f, 0.1f);
+        d[2] = a[2] + func_002A78D8(0.0f, 0.1f);
+        n = func_002A77E0(0xFF);
+        big = 42000.0f;
+        func_002C65A0(d, D_L00_001A8F20, 4, 0x808080, n, 0x7F, 0x7F, big, big, 0.0f, 1);
+        big = 273000.0f;
+        r = func_002C65A0(a, D_L00_001A8F20, 4, 0x406080, n, 0x10, 0x10, big, big, 0.0f, 1);
+        if (r != 0)
+            *(unsigned char *)(r + 2) = *(unsigned char *)(*(unsigned *)(tbl + 0xD4));
+        func_00282CC0(a, a, c);
+    }
+}
 
 /* func_L00_003E4B80 is defined in L00_003E4B80-g.c. */
 
@@ -284,9 +328,26 @@ void func_L00_003E6710(char *object)
 
 INCLUDE_ASM("asm/levels", func_L00_003E6778);
 
-INCLUDE_ASM("asm/levels", func_L00_003E6C10);
 
-INCLUDE_ASM("asm/levels", func_L00_003E6F48);
+extern char *D_L00_001B2BB8 __attribute__((sda));
+extern void ref_L00_003E6F48_01(char *rec, float f1, int a1, int a2, int a3,
+                                float f2, int a4, float f3);
+
+/* Same body as func_L00_003F09A0, with this function's own callees. */
+extern char *ref_L00_003E6F48_00 __attribute__((sda));
+void func_L00_003E6F48(char *obj)
+{
+    char *rec;
+    int i;
+
+    for (i = 0; i < 320; i++) {
+        rec = (char *)(i * 128 + (int)ref_L00_003E6F48_00);
+        if (*(int *)(rec + 0x7C) == (int)obj)
+            ref_L00_003E6F48_01(rec, *(float *)(rec + 0x48), *(int *)(rec + 0x68),
+                                *(int *)(rec + 0x60), 46, *(float *)(rec + 0x34),
+                                *(int *)(rec + 0x70), 0.25f);
+    }
+}
 
 /* resets a state record: zero words, plus/minus one float flags and two 64-bit fields in the retail store order */
 void func_L00_003E6FC8(char *p)
@@ -329,7 +390,6 @@ void func_L00_003E7050(char *p, float scale)
 }
 
 /* func_L00_003E70B8 is defined in L00_003E70B8.c. */
-INCLUDE_ASM("asm/levels", func_L00_003E7270);
 
 /* func_L00_003E7650 is defined in L00_003E7650-qcopy.c. */
 
@@ -388,10 +448,6 @@ void func_L00_003E9660(int unused, float *p, int n)
         v += 32;
     } while (--count != 0);
 }
-
-INCLUDE_ASM("asm/levels", func_L00_003E9780);
-
-
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L00_003E9A98(Vec16_Fc936841d *object, int index)

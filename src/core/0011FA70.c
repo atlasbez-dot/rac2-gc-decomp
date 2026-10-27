@@ -95,4 +95,3 @@ void func_0011FC48(void) {
 
 /* func_0011FC68 is in 0011FC68.c, its own public libgcc module. */
 
-INCLUDE_ASM("asm/core", func_00120354);

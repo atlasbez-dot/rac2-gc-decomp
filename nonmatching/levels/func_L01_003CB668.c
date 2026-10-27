@@ -1,19 +1,25 @@
-/* Retained manual C reconstruction; not linked and not credited as matching.
- * Checked source: src/levels/01_oozla/L01_003CB668-g8.c
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Retail US extent: 1648 bytes.
- * us: 0/1 (exit 1, 1720 compiled bytes); us2: 0/1 (exit 1, 1720 compiled bytes); pal: 0/1 (exit 1, 1720 compiled bytes).
- * Residual: 1720/1648 bytes. The frame is 0xC0. Phase/height loop induction, palette/normal allocation and packet-copy address motion differ. The 9x9 seams and all twenty template quadwords are retained.
- * Reopen only with: A measured row/cursor model that reproduces the lattice induction and allocation, or a qualified compiler update for those observed patterns.
- * No complete linked build was run for this candidate.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
+ * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 1656/1648 bytes; us: 0/1 placements; us2: 0/1 placements; pal: 0/1 placements.
+ * All twenty complete template quadwords, nine-by-nine seams and full normal vectors remain. Shared
+ * packet append copies have genuine memory effects. Complete16-byte GP constants use
+ * G16/assemblerG16; the other observed absolute constants and this routine packet cursor remain
+ * absolute. The packed-color result uses its 32-bit bank. Frame 0xc0 agrees, but phase/height
+ * induction, palette/normal allocation and cursor scheduling differ.
+ * Reopen with measured row/cursor lifetimes and exact packet source dependencies. Do not shrink the
+ * constants to force small data or drop template entries.
+ * Original variants, retail context and allocator diagnostics remain private.
+ * No exact-C, linked-build or runtime credit is claimed.
  */
-#include "include_asm.h"
+#include "common.h"
+
+
 typedef unsigned int Quad __attribute__((mode(TI)));
 extern void func_L01_003CAFE0(void), func_L01_003CB540(void);
 extern float func_00283180(float), func_00283198(float), func_00283B98(float, float);
 extern void func_00282DD8(float *, float *, float *), func_00282F20(float *, float *, float);
 extern float func_00282DB0(float *, float *);
-extern unsigned long func_00283D38(unsigned int, unsigned int, float);
+extern u32 func_00283D38(unsigned int, unsigned int, float);
 extern int D_L01_001B2088;
 extern float D_L01_001B0370 __attribute__((sda)), D_L01_001B0378 __attribute__((sda));
 extern int D_L01_001B0374 __attribute__((sda)), D_L01_001B037C __attribute__((sda));
@@ -22,11 +28,14 @@ extern float D_L01_001B0388 __attribute__((sda)), D_L01_001B038C __attribute__((
 extern short D_L01_00297580[][9][4];
 extern unsigned int D_L01_00297960[][9];
 extern unsigned char *D_L01_001B036C __attribute__((sda));
-extern unsigned char *D_L01_001B2CC8 __attribute__((sda));
-extern Quad D_L01_001B01E0, D_L01_001B01F0, D_L01_001B0200, D_L01_001B0210;
+/* This routine uses absolute accesses to the real packet cursor. */
+extern unsigned char *D_L01_001B2CC8 NOT_SDA;
+/* All are complete 16-byte constants; their observed address forms differ. */
+extern Quad D_L01_001B01E0 __attribute__((sda));
+extern Quad D_L01_001B01F0 NOT_SDA, D_L01_001B0200 NOT_SDA, D_L01_001B0210 NOT_SDA;
 extern Quad D_L01_001B0220 __attribute__((sda)), D_L01_001B0230 __attribute__((sda));
 extern Quad D_L01_001B0260 __attribute__((sda)), D_L01_001B0290 __attribute__((sda));
-#define APPEND_QUAD(value) do { *(Quad *)D_L01_001B2CC8 = (value); D_L01_001B2CC8 += 16; } while (0)
+#define APPEND_QUAD(value) do { qcopy(D_L01_001B2CC8, &(value)); D_L01_001B2CC8 += 16; } while (0)
 void func_L01_003CB668(void)
 {
     int i, j;

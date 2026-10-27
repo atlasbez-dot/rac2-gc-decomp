@@ -1,9 +1,12 @@
-/* Measured with -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por. US:
-   01_oozla: 772 bytes, expected 776; 0/1 placements. US2: 0/1 placements. PAL: canonical function
-   absent. Five source/profile trials. Typed damage and collision records improve global field
-   addressing. Remaining initial zero-store scheduling and collision-branch differences. Zero-TI
-   barrier and no-split-addresses profiles did not close the gap. Reopen with an exact witness for the
-   two initial vector clears.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-zero-ti-por.
+ * 768/776 bytes; 0/1 USA v1.01 and USA v2.00 places.
+ * The canonical function is absent from the PAL catalogue.
+ * Remaining: The two real vector copies are recovered. Scalar damage-index allocation and
+ * collision branches/global-base lifetime remain different. The zero vectors
+ * retain ordinary TI initialization and the evidenced por profile.
+ * Reopen with: Independent collision-record lifetime/branch evidence; the original
+ * zero stores are now reproduced without replacing them with sq-zero helpers.
  */
 
 #include "common.h"
@@ -22,7 +25,7 @@ typedef struct { u8 pad[0x70]; float damage; u8 tail[0x6C]; } OozlaDamage;
 extern OozlaDamage D_L01_002637A0[];
 typedef struct { u8 pad[0x18]; u8 *other; int count; OozlaQuad position; u8 pad2[0x10]; float normal[4]; } OozlaCollision;
 extern OozlaCollision D_L01_001BF900;
-extern char *D_0018C0B0;
+extern char *D_0018C0B0 NOT_SDA;
 extern void *D_L01_001AC810;
 extern void func_00282CC0(void *, void *, void *);
 extern void func_002AFFD8(void *, void *, int);
@@ -47,7 +50,7 @@ void func_L01_003839F0(u8 *object)
     *(OozlaQuad *)rotation = 0;
     movement[2] = 0.033333335f;
     rotation[2] = 1.0f;
-    *(OozlaQuad *)previous = *(OozlaQuad *)(object + 0x10);
+    qcopy(previous, (object + 0x10));
     func_00282CC0(object + 0x10, object + 0x10, state);
     func_002AFFD8(object + 0x10, unused, 0);
     func_00282D30(unused, unused, 0.000305555585f);
@@ -57,7 +60,7 @@ void func_L01_003839F0(u8 *object)
     if (*(int *)(state + 0x18) < 290) hit.flags = 0x830001;
     hit.damage = D_L01_002637A0[D_00139574].damage;
     hit.enabled = 1;
-    *(OozlaQuad *)hit.direction = *(OozlaQuad *)state;
+    qcopy(hit.direction, state);
     func_00282F70(hit.direction, hit.direction, 1.0f);
     hit.type = 2;
     hit.direction[3] = 5627.9248046875f;
@@ -73,14 +76,14 @@ void func_L01_003839F0(u8 *object)
             }
             if (*(void **)(other + 0x64) != D_L01_001AC810 || *(short *)(other + 0xAA) == 0x336) {
                 object[0xBC] = 1;
-                *(OozlaQuad *)(object + 0x10) = D_L01_001BF900.position;
+                qcopy(object + 0x10, &D_L01_001BF900.position);
                 func_00283028(movement, state, D_L01_001BF900.normal);
                 func_00282F20(movement, movement, 0.033333335f);
                 func_00282F20(rotation, D_L01_001BF900.normal, 1.0f);
             }
         } else if (D_L01_001BF900.count > 0) {
             object[0xBC] = 1;
-            *(OozlaQuad *)(object + 0x10) = D_L01_001BF900.position;
+            qcopy(object + 0x10, &D_L01_001BF900.position);
             func_00283028(movement, state, D_L01_001BF900.normal);
             func_00282F20(movement, movement, 0.033333335f);
             func_00282F20(rotation, D_L01_001BF900.normal, 1.0f);

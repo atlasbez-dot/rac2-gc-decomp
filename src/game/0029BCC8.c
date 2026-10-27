@@ -511,14 +511,77 @@ INCLUDE_ASM("asm/game", func_0029D7C0);
 
 INCLUDE_ASM("asm/game", func_0029D830);
 
-INCLUDE_ASM("asm/game", func_0029D9D0);
+extern void *D_0026CA90[];
+extern unsigned char D_001A7BC8[];
+extern unsigned char D_001A7AF8[];
+extern unsigned char D_001A7B30[];
+extern unsigned char D_001395B8[];
+extern unsigned int D_00139768[];
+extern unsigned char D_0019B278[];
+extern int D_001C51D0[];
+extern int func_002FC010(int, int);
 
-INCLUDE_ASM("asm/game", func_0029DB28);
+typedef struct { int first, second, third, fourth; } ProgressBand;
+extern ProgressBand D_00139A28[];
+
+/* Progress-condition dispatcher. The retail dispatch reads the code-address table it
+   already has at D_0026CA90 (twelve entries, one per condition) and jumps through it;
+   `cases` only keeps the labels alive. The bodies are laid out in the retail's order,
+   which puts the ninth condition's bit test before the eighth one's table lookup. */
+int func_0029D9D0(short kind, int arg)
+{
+    static void *cases[12] = {&&L0, &&L1, &&L2, &&L3, &&L4, &&L5, &&L6, &&L7, &&L9, &&L8, &&L10, &&L11};
+    int k = kind;
+
+    if ((unsigned)k >= 12)
+        goto L11;
+    goto *D_0026CA90[k];
+L0:
+    return 1;
+L1:
+    return D_001A7BC8[arg] != 0;
+L2:
+    return D_001A7AF8[arg] != 0;
+L3:
+    return D_001A7B30[arg] != 0;
+L4:
+    if (arg < 0x72)
+        return D_00139A28[arg].fourth != 0;
+    goto L11;
+L5:
+    if (arg < 0x72)
+        return D_00139A28[arg].fourth >= 2;
+    goto L11;
+L6:
+    return D_001395B8[arg] != 0;
+L7:
+    return ((int (*)(void))arg)() != 0;
+L9: {
+    unsigned int mask = 1u << (arg & 0x1F);
+    return (D_00139768[(unsigned)arg >> 2] & mask) != 0;
+}
+L8:
+    return D_0019B278[(arg & 0xFFFF) + (arg >> 16) * 4] != 0;
+L10:
+    return func_002FC010(D_001C51D0[0], arg);
+L11:
+    return 0;
+}
+
 
 
 INCLUDE_ASM("asm/game", func_0029DC90);
 
-INCLUDE_ASM("asm/game", func_0029DCD0);
+extern int D_001397C4[];
+extern unsigned char D_001395D5[];
+
+int func_0029DCD0(void) {
+    if (D_001397C4[0] < 0) {
+        if (D_001395D5[0] != 0)
+            return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/game", func_0029DD30);
 

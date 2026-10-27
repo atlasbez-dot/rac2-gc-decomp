@@ -1,23 +1,10 @@
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-zero-ti-por.
- * Prior worker coverage: US 0/1; US2 absent from catalogue; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+/* Nonmatching C: Dispatch the object state machine, movement, animation and effect callbacks.
+ * Tested profile: -O2 -G8 -ffunction-sections -frac2-zero-ti-por.
+ * Measured US size: 4036 bytes; retail: 4016 bytes.
+ * Placement checks: US: 0/1; US2 and PAL: absent from their catalogues.
+ * Remaining: Register allocation, address construction and instruction scheduling still differ throughout the dispatch.
+ * Reopen with a bounded lifetime hypothesis for the dispatch state; preserve the canonical pointer return and 8 GPR, 2 FP, 4 stack argument contract of func_0032C700.
  */
-
-/* Nonmatching manual reconstruction.
-   Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-zero-ti-por
-   4040 bytes, expected 4016; frame 0xB0 agrees, US fails.
-   Nine bounded semantic/profile trials included local initialization, ordered FP,
-   physical switch order and float/TI/union vector copies; closest source retained.
-   Cases 12 and 13 both exit, verified in the 13-entry retail table at 0x2AB130.
-   func_002A90C8 receives four GPR arguments and a live damage float in f12;
-   the current wrapper declaration omits that forwarded float. Its repair belongs
-   to integration, and the measured caller argument is preserved here.
-   func_002A8C28 and func_0032C700 have inferred ignored-result contracts;
-   six GPR plus three FP, and twelve GPR plus two FP inputs respectively.
-   Reopen with a new stack-vector scheduling or shared-switch-tail hypothesis.
-*/
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 typedef struct Moby_003BF9B0 Moby_003BF9B0;
@@ -33,7 +20,7 @@ typedef struct {
 extern int D_L23_001B1424,D_L23_001B36F0;
 extern u8 *D_L23_001B36B0,*D_0018C0B0;
 extern float D_L23_001B36A4,D_L23_001B36F4,D_L23_001B36F8;
-extern float D_L23_001B36D0[4],D_00189EA0[4],D_L23_001C0AA0[4];
+extern float D_L23_001B36D0[4] __attribute__((aligned(16))),D_00189EA0[] __attribute__((aligned(16))),D_L23_001C0AA0[] __attribute__((aligned(16)));
 extern u8 D_00189F00[];
 extern int D_L23_001B3708;
 extern float D_L23_001AFA14 __attribute__((sda));
@@ -56,7 +43,7 @@ extern int func_L23_0041E548(void),func_L23_0041E418(void);
 extern int func_002A90C8(int,int,int,int,float);
 extern int func_002A8F70(int,int,int,int,int,float);
 extern int func_002A8C28(void *,void *,int,int,int,int,float,float,float);
-extern int func_0032C700(void *,int,int,int,int,int,int,int,int,int,int,int,float,float);
+extern u8 *func_0032C700(void *,int,int,int,int,int,int,int,float,float,int,int,int,void *);
 extern void func_L23_003C1960(char *),func_L23_003C1988(char *);
 extern void func_L23_003C0028(char *),func_L23_003C00D0(char *);
 extern void func_L23_003C1B58(char *),func_L23_003C1AE8(char *);
@@ -81,7 +68,7 @@ extern int func_002B3868(u8 *),func_002B3890(u8 *);
 extern int func_L00_0035F5A0(int,int,int);
 extern void func_L23_003BFFC0(char *,int,int,int,int,float);
 extern void func_L23_003BFE90(char *,float,int,int);
-extern void func_002A7750(u8 *,u8,int);
+extern void func_002A7750(u8 *,s32,int);
 extern void func_L00_002E6CF0(void (*)(void *),void *);
 extern void func_L11_003404E0(char *);
 extern int func_002761F8(void *,void *,int,void *,void *);
@@ -93,7 +80,7 @@ extern int func_L00_002D6900(unsigned int);
 
 void func_L23_003BEA00(u8 *object)
 {
-    float difference[4],point[4],local[4];
+    float difference[4] __attribute__((aligned(16))),point[4] __attribute__((aligned(16))),local[4] __attribute__((aligned(16)));
     char *state=*(char **)(object+0x68);
     int facing,selected,index,mask;
     unsigned long flags;
@@ -117,7 +104,7 @@ void func_L23_003BEA00(u8 *object)
         S(state,0x324)=0;
         if (distance<range)
             S(state,0x324)=func_L23_003C0A60(object,object+0x10,D_00189EA0);
-        *(Quad *)(state+0x300)=*(Quad *)(object+0x10);
+        qcopy((state+0x300), (object+0x10));
         func_L23_00418650(state+0x300,0.0f);
     }
     if (object[0x95]==3) {
@@ -137,15 +124,15 @@ void func_L23_003BEA00(u8 *object)
         }
         if ((U(state,0x178)&1) && S(state,0x2A4)==0) {
             func_002E5DA0(5,0,(char *)object,0x7E5);
-            func_0032C700(P(state,0x2A0)+0x10,1,35,20,20,20,45,1,1,0,0,0,2.5f,20.0f);
+            func_0032C700(P(state,0x2A0)+0x10,1,35,20,20,20,45,1,2.5f,20.0f,1,0,0,0);
             S(state,0x2A4)=1;
             if (P(state,0x38)==(char *)D_0018C0B0) {
-                *(Quad *)difference=*(Quad *)(object+0x10);
+                qcopy(difference, (object+0x10));
                 func_L23_00418650((char *)difference,0.0f);
                 index=func_L23_0041E418();
                 if (index!=-1) func_L22_003A3C70((int)D_00189EA0,index);
             }
-            *(Quad *)(object+0x10)=*(Quad *)D_00189EA0;
+            qcopy((object+0x10), D_00189EA0);
             func_L23_00418650((char *)object+0x10,-D_L23_001B36A4+-D_L23_001B36A4);
         }
         if (flags&1) func_L23_003C0028((char *)object);
@@ -153,7 +140,7 @@ void func_L23_003BEA00(u8 *object)
             func_L00_0035F5A0(31,0,0);
             func_L23_003BFFC0((char *)object,8,0,4,2,1.0f);
             S(state,0x26)=25; S(state,0x2A6)=0;
-            func_0032C700(P(state,0x2A0)+0x10,0,10,15,15,15,15,0,0,0,0,0,1.0f,20.0f);
+            func_0032C700(P(state,0x2A0)+0x10,0,10,15,15,15,15,0,1.0f,20.0f,0,0,0,0);
         } else if (flags&2) func_002A7750(object,5,0);
     }
     switch (object[0x20]) {
@@ -283,7 +270,7 @@ void func_L23_003BEA00(u8 *object)
             func_00282D30(point,point,15.0f); point[3]=5627.9248f;
             func_002A8F70((int)D_0018C0B0,(int)object,0x10007,(int)(object+0x10),(int)point,D_L23_001B36F8);
             func_L00_002D6900(43);
-            func_0032C700(D_L23_001B36D0,1,10,10,10,10,45,0,0,1,0,0,1.2f,20.0f);
+            func_0032C700(D_L23_001B36D0,1,10,10,10,10,45,0,1.2f,20.0f,0,1,0,0);
             S(state,0x3BE)=1;
         }
         func_002A7750(object,11,2);

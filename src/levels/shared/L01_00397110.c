@@ -4,11 +4,10 @@ INCLUDE_ASM("asm/levels", func_L01_00397110);
 
 INCLUDE_ASM("asm/levels", func_L01_003973A0);
 
-INCLUDE_ASM("asm/levels", func_L01_00397870);
 
 INCLUDE_ASM("asm/levels", func_L01_00397A28);
 
-INCLUDE_ASM("asm/levels", func_L01_00397C98);
+/* func_L01_00397C98 is defined in L01_00397C98-qcopy-qcopy-barrier.c. */
 
 extern int D_001A79F0 __attribute__((sda));
 
@@ -65,7 +64,6 @@ void func_L01_00399098(char *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L01_003990E8);
 
 INCLUDE_ASM("asm/levels", func_L01_00399510);
 
@@ -148,8 +146,6 @@ INCLUDE_ASM("asm/levels", func_L01_004132D8);
 extern char *D_001B9510;
 
 extern float func_2E3618(char *);
-
-INCLUDE_ASM("asm/levels", func_L01_0042A568);
 
 extern char D_001B9380[];
 

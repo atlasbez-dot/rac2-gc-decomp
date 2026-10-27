@@ -1,36 +1,14 @@
-/* func_L13_00439820 - 588 bytes, 3 place(s), level 13_boldan, retail at
-   0x00439820. Screened with tools/w10_screen.py: 8 call(s)
-   [func_00282E48@00439904, func_L00_00341FA8@00439990,
-   func_00282CF0@004399D0, func_00282DF0@004399D8, func_00282F20@004399FC,
-   func_00282CF0@00439A10, func_00282DB0@00439A1C,
-   func_L13_004388C8@00439A38]; data addresses materialised [0x1b0000,
-   0x1c0000, 0x200000, 0x200000, 0x190000]; float constants [0x3f800000,
-   0x41a00000]; $gp-relative small data: no   saves: -; callee-saved
-   registers saved [-]; words plain C cannot emit [LQ/SQ 78820000@0x0054,
-   LQ/SQ 7CC20000@0x0058, LQ/SQ 78A20000@0x005c, LQ/SQ 7E620000@0x0060,
-   LQ/SQ 78620000@0x006c, LQ/SQ 7C820000@0x0070, LQ/SQ 78A20000@0x007c,
-   LQ/SQ 7C620000@0x0080, LQ/SQ 7A620000@0x0088, LQ/SQ 7C820000@0x008c].
-   Head: addiu $sp, $sp, -0x90 ; lui $a3, 0x1B ; lw $a3, 0x22C4($a3) ; sd
-   $s3, 0x58($sp) ; lui $v0, 0x1C ; sd $s0, 0x40($sp). Not matched in this
-   wave: the 128-bit copy needs an `lq`/`sq` pair; plain C reaches it only
-   through a `mode(TI)` local, and this cc1 folds the destination offset
-   into the `sq` where retail materialises the pointer first. What would
-   unblock it: the exact source expression tree, so this cc1 picks the same
-   registers in the same order. */
-
-/* Manual C reconstruction, retained after bounded retail comparison.
- * This body supersedes the historical screening conclusions above.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Measured text: 588 bytes; retail: 588 bytes. US/US2/PAL: 0/3 placements in each carrying
- * release.
- * 2 distinct measured forms. Equal size; first difference +0x8: global pointer and
- * saved-register allocation. -mno-split-addresses produced 584 bytes and was reverted.
- * Reopen with a new real source-lifetime/address-expression hypothesis.
- * All carrying checks ended as nonmatches (exit 1); no linked-build credit.
+/* Nonmatching C: Copy the camera frame, measure the selected path segments and initialize the path direction flag.
+ * Tested profile: -O2 -G0 -ffunction-sections.
+ * Measured US size: 588 bytes; retail: 588 bytes.
+ * Placement checks: US, US2 and PAL: 0/3 each.
+ * Remaining: The first placed instruction difference is at +0x8 in global-pointer loading and saved-register allocation.
+ * Reopen with independent settings/source-pointer lifetime evidence; retain all five complete 16-byte transfers and the variable-length path records.
  */
+#include "common.h"
 
 typedef int Quad __attribute__((mode(TI)));
-/* Sixteen-byte path header; vector records follow with a runtime count. */
+
 typedef struct { int count; int reserved[3]; float point[0][4]; } CameraPath;
 extern char *D_L13_001B22C4;
 extern char *D_L13_001B9914;
@@ -45,21 +23,22 @@ extern float func_00282DB0(void *, void *);
 extern void func_L13_004388C8(char *);
 
 void func_L13_00439820(char *camera) {
-    float projected[4];
-    float tangent[4];
-    float difference[4];
+    float projected[4] __attribute__((aligned(16)));
+    float tangent[4] __attribute__((aligned(16)));
+    float difference[4] __attribute__((aligned(16)));
     int segment;
     float fraction;
-    char *source = D_L13_001B9914;
+    char *source;
     char *settings = *(char **)(D_L13_001B22C4 + *(short *)(camera + 0x84) * 32 + 0x1C);
     CameraPath *path;
     int i;
     int next;
-    *(Quad *)(camera + 0x30) = *(Quad *)(source + 0x30);
-    *(Quad *)camera = *(Quad *)source;
-    *(Quad *)(camera + 0x10) = *(Quad *)(source + 0x10);
-    *(Quad *)(camera + 0x20) = *(Quad *)(source + 0x20);
-    *(Quad *)(camera + 0x40) = *(Quad *)camera;
+    source = D_L13_001B9914;
+    qcopy(camera + 0x30, source + 0x30);
+    qcopy(camera, source);
+    qcopy(camera + 0x10, source + 0x10);
+    qcopy(camera + 0x20, source + 0x20);
+    qcopy(camera + 0x40, camera);
     if (*(int *)(settings + 0x20) >= 0) {
         path = D_L13_001FE580[*(int *)(settings + 0x20)];
         for (i = 0; i < path->count; i++) {

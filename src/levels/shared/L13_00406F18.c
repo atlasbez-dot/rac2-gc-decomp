@@ -46,8 +46,6 @@ extern void func_00283098(char *, char *, char *);
 
 extern char D_L13_001BFD00[];
 
-INCLUDE_ASM("asm/levels", func_L13_00406F18);
-
 INCLUDE_ASM("asm/levels", func_L13_00409008);
 
 void func_L13_004094D0(char *a0, char *a1, char *a2)
@@ -272,8 +270,6 @@ s32 func_L13_0040A638(u8 *a0)
     }
     return 2;
 }
-
-INCLUDE_ASM("asm/levels", func_L13_0040A720);
 
 INCLUDE_ASM("asm/levels", func_L13_0040C3A0);
 

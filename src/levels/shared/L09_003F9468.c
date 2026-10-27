@@ -81,7 +81,6 @@ void func_L09_003F9468(DobboPartsObject252 *object)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003F9568);
 
 INCLUDE_ASM("asm/levels", func_L09_003F9708);
 
@@ -107,7 +106,6 @@ INCLUDE_ASM("asm/levels", func_L09_003F9A70);
 
 INCLUDE_ASM("asm/levels", func_L09_003F9D08);
 
-INCLUDE_ASM("asm/levels", func_L09_003FA080);
 
 /* computes a local target direction and stores bounded horizontal and vertical angles through the original math helpers */
 void func_L09_004051F8(NativeAngleOwner *owner) {

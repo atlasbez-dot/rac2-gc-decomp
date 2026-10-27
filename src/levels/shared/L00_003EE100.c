@@ -161,7 +161,6 @@ int func_L00_003EE228(char *object)
     return 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003EE4C0);
 
 /* When the context flag at offset 0x24 is nonzero, pass scale 1.0, the context, its vector at offset 0x10 and mode zero to the bound helper; original game role is unknown. */
 void func_L00_003EE8E8(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
@@ -172,11 +171,9 @@ void func_L00_003EE8E8(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003EE920);
-
 /* func_L00_003EED10 uses its dedicated quadword-copy profile. */
 
-INCLUDE_ASM("asm/levels", func_L00_003EEE20);
+/* func_L00_003EEE20 is defined in L00_003EEE20-g.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003EEE90);
 
@@ -256,7 +253,6 @@ void func_L00_003F0130(char *obj)
 
 INCLUDE_ASM("asm/levels", func_L00_003F0198);
 
-INCLUDE_ASM("asm/levels", func_L00_003F0680);
 
 extern char *D_L00_001B2BB8 __attribute__((sda));
 
@@ -616,7 +612,7 @@ void func_L00_003F3160(char *obj)
 
 /* func_L00_003F34D8 is in L00_003F34D8-qcopy.c (its own file: the quadword-copy profile). */
 
-INCLUDE_ASM("asm/levels", func_L00_003F3518);
+/* func_L00_003F3518 is defined in L00_003F3518-helpers.c. */
 
 extern void ref_L00_003F37A0_00(void *p, char *obj);
 
@@ -672,15 +668,11 @@ void func_L00_003F3A88(Obj_L00_003F3A88 *obj)
 
 INCLUDE_ASM("asm/levels", func_L00_003F3AD0);
 
-INCLUDE_ASM("asm/levels", func_L00_003F3D70);
 
 INCLUDE_ASM("asm/levels", func_L00_003F4210);
 
 /* func_L00_003F4B68 uses its dedicated quadword-copy profile. */
 
-INCLUDE_ASM("asm/levels", func_L00_003F4C68);
-
-INCLUDE_ASM("asm/levels", func_L00_003F4EC8);
 
 /* Computes two sub-record addresses of a 192-byte block and hands three of its sub-records to four helpers, threading a second argument through two of them. */
 void func_L00_003F51A0(char *obj, char *arg)
@@ -745,7 +737,6 @@ INCLUDE_ASM("asm/levels", func_L00_003F5870);
 
 INCLUDE_ASM("asm/levels", func_L00_003F5B10);
 
-INCLUDE_ASM("asm/levels", func_L00_003F5F90);
 
 /* func_L00_003F6168 is in L00_003F6168-helpers-g8.c. */
 
@@ -783,7 +774,6 @@ int func_L00_003F6A58(int *a0)
     return count;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F6B10);
 
 extern void func_002AD0E0(char *a0, char *a1, char *a2, char *a3, char *a4, char *a5);
 
@@ -810,7 +800,6 @@ void func_L00_003F71E8(char *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003F7268);
 
 INCLUDE_ASM("asm/levels", func_L00_003F8280);
 

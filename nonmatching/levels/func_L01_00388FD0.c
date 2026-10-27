@@ -1,39 +1,17 @@
 /*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy.
- * Reported final C / retail: 5696 / 5868 bytes; size equality is not a match.
- * us: 0/1 placements; 5696/5868 bytes.
- * us2: 0/1 placements; 5696/5868 bytes.
- * pal: absent from catalogue (not a match).
- * Residual: Final5696/5868bytes,frame0x460vs0x440,firstmismatch+0;scheduling/register/source-shape differences.
- * Reopening condition: Demonstrated frame/register-allocation or original temporary-lifetime source shape remedy; noISAorcatalogueblockerclaimed.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ * Retained complete manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections
+ * 5668/5868 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: The complete two-target/four-trail body retains 128 ignored pointers, all 20 arc
+ * entries, contact buffers and fork arrays. The cooldown is 32-bit; fork timers stay 16-bit. Two
+ * real target-side vector-call branches recover part of the CFG, but frame 0x450 versus0x440, an
+ * extra FPR and phase/scheduling residues remain.
+ * Reopen: Independent selection/target/collision scalar lifetimes explaining the extra FPR and
+ * frame, without reducing arrays or overlaying live packets.
+ * Trial-only source markers and profiles are restored after checking.
  */
 
-/* Unmatched complete manual reconstruction of the two-target arc and four trails.
- * Retained profile: -O2 -G8 -ffunction-sections -frac2-qcopy.
- * Final US and US2: 5696 bytes versus 5868, 0/1 placements, exit 1.
- * PAL has no entry for this canonical function. First mismatch is +0;
- * frame 0x460 versus retail 0x440, with scheduling/allocation differences.
- * Seven bounded trials covered normal G8 (5392), qcopy (5560), qcopy-barrier
- * (5552), explicit target-damage blocks (5672), live configuration reloads
- * (5736), reused dead target temporaries (5696), and nested packet scopes (5704).
- * The retained form keeps ordered floating comparisons, fresh configuration
- * reads after helper calls, and the full measured contact/vector/trail extents.
- * R5900 mult/madd results are ordinary array index/address arithmetic; no stale
- * HI input, manufactured aliases, assembly, output patches, or register pins.
- * AB1F0's canonical signed 32-bit word is explicitly interpreted as a nullable
- * data pointer where retail dereferences it. 77F48 returns a 32-bit count;
- * C2210 returns an object pointer and consumes three FP plus seven GPR inputs.
- * Packet records are partial measured layouts, not claims of original names.
- * The remaining obstacle is source shape and temporary lifetime. Reopen with a
- * demonstrated frame/register-allocation remedy. Behavior and linked-image
- * equality remain unverified; no exact-C credit is claimed.
- */
-typedef unsigned int u32;
-typedef unsigned long long u64;
+#include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
 typedef struct { int a,b,c,d; } __attribute__((aligned(16))) Quad16;
 typedef union { TI128 q; float v[4]; } Vector;
@@ -53,7 +31,8 @@ extern unsigned char D_L01_002637A0[][0xE0];
 extern int D_L01_001A9030[];
 extern Vector D_L01_001B94C0;
 extern float D_L01_001B94D8[];
-extern short D_L01_001B2E00[];
+/* The cooldown uses the int32 timer helper; fork timers below are int16. */
+extern int D_L01_001B2E00 NOT_SDA;
 extern short D_L01_001B2E08[4], D_L01_001B2E10[4], D_L01_001B2E18[4], D_L01_001B2E20[4];
 extern char *D_L01_001BF918;
 extern Vector D_L01_001BF920;
@@ -90,14 +69,14 @@ extern float func_00282DB0(void *,void *),func_00282DF0(void *),func_00282E20(vo
 extern void func_00282DD8(void *,void *,void *),func_00282F20(void *,void *,float);
 extern float func_00283180(float),func_00283198(float),func_002831B0(float),func_00283248(float,float);
 extern float func_00283B98(float,float),func_00283BE0(float,float),func_00283C80(float,float),func_00283CE0(int);
-extern int func_00283CF0(float),func_00282948(void *),func_00282978(void *);
+extern int func_00283CF0(float),func_00282948(int *),func_00282978(short *);
 extern int func_002A77E0(int),func_002A7820(int,int);
 extern float func_002A7878(float,float),func_002A78D8(float,float),func_002ABB18(float);
 extern void func_002A8C00(char *,int,int,float,Quad16 *);
 extern void func_002A8E20(void *,void *);
 extern void func_002ACEC0(void *,void *,void *,float);
 extern void func_00300190(void *,void *);
-extern int func_002761F8(void *,void *,int,void *,int);
+extern int func_002761F8(void *,void *,int,void *,void *);
 extern int func_00277F48(void *,int,void *,void *,float);
 extern void *func_002C2210(void *,int,u32,int,int,void *,int,float,float,float);
 #define I(p,o) (*(int *)((char *)(p)+(o)))
@@ -116,7 +95,7 @@ void func_L01_00388FD0(unsigned char *object)
     char **scan;
     Vector *point, *branch;
     float best_score = 0.0f, second_score = 0.0f;
-    float segment_length = D_L01_001AF094, first_distance = 0.0f;
+    float segment_length = D_L01_001AF094, first_distance;
     float distance, camera_angle, player_angle, score, a, b, c, amplitude, jitter, amount, blend, sign;
     int enabled, i, j, k, hit_segment = 0, ignored_count = 0, segments, index, life;
     enabled = D_L01_002637A0[D_0013957A][4] != 0;
@@ -175,7 +154,7 @@ void func_L01_00388FD0(unsigned char *object)
     if (best) {
         if (!P(context,0x20)) {
             H(context,0x40) = 0; P(context,0x20) = best;
-            if (func_00282948(D_L01_001B2E00)) D_L01_001B2E00[0] = 10;
+            if (func_00282948(&D_L01_001B2E00)) D_L01_001B2E00 = 10;
         } else runner_up = best;
     }
     if (runner_up && enabled) {
@@ -184,10 +163,11 @@ void func_L01_00388FD0(unsigned char *object)
             H(context,0x42) = 0; P(context,0x38) = runner_up;
         }
     }
+    first_distance = 0.0f;
     if (P(context,0x20)) {
         hit = P(context,0x20);
         data = (char *)func_002AB1F0((unsigned char *)hit);
-        first_target.q = *(TI128 *)(hit+0x10);
+        qcopy(&first_target, hit+0x10);
         func_00282D30(&second_target,hit+0xE0,F(data,0x10));
         func_00282CC0(&first_target,&first_target,&second_target);
         first_distance = func_00282E48(context,&first_target);
@@ -196,7 +176,7 @@ void func_L01_00388FD0(unsigned char *object)
     if (P(context,0x38)) {
         hit = P(context,0x38);
         data = (char *)func_002AB1F0((unsigned char *)hit);
-        second_target.q = *(TI128 *)(hit+0x10);
+        qcopy(&second_target, hit+0x10);
         func_00282D30(&temporary,hit+0xE0,F(data,0x10));
         func_00282CC0(&second_target,&second_target,&temporary);
         segment_length = first_distance+func_00282E48(&first_target,&second_target);
@@ -215,8 +195,8 @@ void func_L01_00388FD0(unsigned char *object)
         func_002ACEC0(&direction,&direction,&cross,0.17453295f);
     }
     func_00282D30(&tangent,&direction,segment_length);
-    D_L01_0023A050[0].q = *(TI128 *)context;
-    D_L01_0023A190[0].q = *(TI128 *)context;
+    qcopy(&D_L01_0023A050[0], context);
+    qcopy(&D_L01_0023A190[0], context);
     for (i=1; i<20; ++i) {
         point = &D_L01_0023A050[i]; branch = &D_L01_0023A190[i];
         a = func_00283CE0(i);
@@ -229,11 +209,11 @@ void func_L01_00388FD0(unsigned char *object)
         func_00282CF0(&cross,point,&D_L01_0023A050[i-1]);
         func_00282D08(&blended,&cross,&tangent,0.85f);
         distance = func_00282DF0(&blended);
-        if (distance == 0.0f) point->q = D_L01_0023A050[i-1].q;
+        if (distance == 0.0f) qcopy(point, &D_L01_0023A050[i-1]);
         else {
             func_00282D30(&blended,&blended,segment_length/distance);
             func_00282CC0(point,&D_L01_0023A050[i-1],&blended);
-            tangent.q = blended.q;
+            qcopy(&tangent, &blended);
         }
         point->v[2] += jitter;
         func_00282CF0(&cross,point,&D_L01_0023A050[i-1]);
@@ -249,7 +229,8 @@ void func_L01_00388FD0(unsigned char *object)
                     func_00282D08(&tangent,&tangent,&target_delta,blend);
                 }
             } else {
-                func_00282CF0(&target_delta,i<10 ? &first_target : &second_target,point);
+                if (i < 10) func_00282CF0(&target_delta, &first_target, point);
+                else func_00282CF0(&target_delta, &second_target, point);
                 distance=func_00282DF0(&target_delta);
                 if (distance != 0.0f) {
                     if (i==9 || i==19) { blend=0.7f; segment_length=distance; }
@@ -261,7 +242,7 @@ void func_L01_00388FD0(unsigned char *object)
                 }
             }
         }
-        branch->q = point->q;
+        qcopy(branch, point);
         if (i<10) {
             a=func_002ABB18(D_L01_001AF0B4+(float)i*D_L01_001AF0BC);
             b=func_002ABB18(D_L01_001AF0C8+(float)i*D_L01_001AF0D0);
@@ -272,12 +253,12 @@ void func_L01_00388FD0(unsigned char *object)
             b=func_00283B98(func_00283248(cross.v[0],cross.v[1]),1.5707965f);
             c=func_00283180(a)*D_L01_001AF0C4;
             offset.v[0]=func_00283180(b)*c; offset.v[1]=func_00283198(b)*c; offset.v[2]=0.0f;
-            D_L01_0023A320[i].q=offset.q;
+            qcopy(&D_L01_0023A320[i], &offset);
             func_00282CC0(branch,branch,&offset);
         } else {
             branch->v[2]+=D_L01_0023A460[21-i];
             func_00282CC0(branch,branch,&D_L01_0023A320[21-i]);
-            offset.q=D_L01_0023A320[i].q;
+            qcopy(&offset, &D_L01_0023A320[i]);
         }
         if (i>1 && (i==19 || !(i&1))) {
             func_00282CF0(&temporary,point,&D_L01_001B94C0);
@@ -291,7 +272,7 @@ void func_L01_00388FD0(unsigned char *object)
             if (distance==0.0f) temporary.v[2]=1.0f;
             else func_00282D30(&temporary,&temporary,1.0f/distance);
             temporary.v[3]=5627.9248046875f;
-            packet.normal=temporary;
+            qcopy(&packet.normal, &temporary);
             hit_segment=func_002761F8(&D_L01_0023A050[i-2],point,0x10,object,0);
             if (hit_segment) {
                 hit=D_L01_001BF918;
@@ -301,9 +282,9 @@ void func_L01_00388FD0(unsigned char *object)
                     else { hit_segment=0; ignored[ignored_count++]=hit; I(hit,0x98)=0; }
                 }
                 if (hit_segment) {
-                    point->q=D_L01_001BF920.q;
+                    qcopy(point, &D_L01_001BF920);
                     H(context,0x3E)=i;
-                    *(TI128 *)(context+0x10)=D_L01_001BF920.q;
+                    qcopy(context+0x10, &D_L01_001BF920);
                     if (!D_L01_001BF918) { P(context,0x20)=0; H(context,0x40)=0; }
                     break;
                 }
@@ -311,7 +292,7 @@ void func_L01_00388FD0(unsigned char *object)
         }
     }
     for (j=0;j<ignored_count;++j) I(ignored[j],0x98)=I(P(ignored[j],0x24),0x10);
-    if (!hit_segment) *(TI128 *)(context+0x10)=D_L01_0023A050[19].q;
+    if (!hit_segment) qcopy(context+0x10, &D_L01_0023A050[19]);
     hit=P(context,0x20);
     if (hit && !U(context,0x40) && !U(context,0x44)) {
         func_00282CF0(&target_delta,hit+0x10,&D_L01_001B94C0);
@@ -347,8 +328,8 @@ void func_L01_00388FD0(unsigned char *object)
         H(context,0x46)=data && H(data,4)==1 ? 1 : 5;
     }
     for (i=0;i<4;++i) {
-        if (i<2) { second_packet.normal.q=*(TI128 *)context; amount=0.4f; }
-        else { second_packet.normal.q=*(TI128 *)(context+0x10); amount=0.5f; }
+        if (i<2) { qcopy(&second_packet.normal, context); amount=0.4f; }
+        else { qcopy(&second_packet.normal, context+0x10); amount=0.5f; }
         if (!func_00282978(&D_L01_001B2E08[i])) {
             for (j=0;j<4;++j) {
                 func_00282CF0(&previous_offsets[j],&D_L01_0023A4B0[i][j+1],&D_L01_0023A4B0[i][j]);
@@ -356,7 +337,7 @@ void func_L01_00388FD0(unsigned char *object)
                 previous_offsets[j].v[1]+=func_002A78D8(0.0f,0.1f);
                 previous_offsets[j].v[2]+=func_002A78D8(0.0f,0.1f);
             }
-            D_L01_0023A4B0[i][0].q=second_packet.normal.q;
+            qcopy(&D_L01_0023A4B0[i][0], &second_packet.normal);
             for (j=0;j<4;++j) func_00282CC0(&D_L01_0023A4B0[i][j+1],&D_L01_0023A4B0[i][j],&previous_offsets[j]);
             index=D_L01_001B2E08[i]-D_L01_001B2E20[i]; if (index<0) index=-index;
             a=func_00283CE0(index); b=func_00283CE0(15);
@@ -368,7 +349,7 @@ void func_L01_00388FD0(unsigned char *object)
             func_00282D30(&target_delta,&direction,amount);
             func_002ACEC0(&target_delta,&target_delta,D_00189E20+0x740,b);
             func_002ACEC0(&target_delta,&target_delta,D_00189E20+0x750,a);
-            D_L01_0023A4B0[i][0].q=second_packet.normal.q;
+            qcopy(&D_L01_0023A4B0[i][0], &second_packet.normal);
             func_00282CC0(&D_L01_0023A4B0[i][1],&second_packet.normal,&target_delta);
             sign=1.0f;
             for (j=0;j<3;++j) {

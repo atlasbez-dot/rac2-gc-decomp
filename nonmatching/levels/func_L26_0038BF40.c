@@ -1,24 +1,18 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -frac2-zero-ti-por -mno-split-addresses.
- * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh checks on the qualified current compiler, 2026-10-25.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-zero-ti-por -mno-split-addresses
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 776 bytes; retail text: 776 bytes.
+ * Remaining difference: Frame 0xC0 matches and the first 216 bytes agree after relocation
+ * normalization. Storing base flags before the conditional override fixes the earlier entry
+ * allocation. Material-record address formation diverges at +0xD8; later context field scheduling
+ * and collision-result base reuse differ.
+ * Reopen when: Recover the actual character-parameter and collision-result source layouts,
+ * including canonical base symbols and their valid extents.
  */
 
-/*
- * Manual C reconstruction retained after bounded retail comparison.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por
- * -mno-split-addresses
- * Measured text: 772 bytes; retail: 776 bytes. Stack frame 0xC0; retail 0xC0.
- * Final coverage: US 0/1, US2 0/1, PAL absent. Absences are not matches.
- * 3 measured source/profile forms. The four-byte size gap does not describe all instruction
- * differences: object/context GPR allocation and scheduling still differ throughout. Keeping
- * actor and world hit handling separate recovered 60 bytes, and -mno-split-addresses added
- * four more. The collision helper copies 40 bytes; the unwritten final field remains part of
- * the real context. Reopen on object/context lifetimes and branch scheduling.
- * All carrying checks are nonmatches (exit 1); no linked-build credit.
- */
+#include "common.h"
 
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
@@ -65,16 +59,17 @@ void func_L26_0038BF40(char *object) {
     force.f[2] = 0.033333335f;
     normal.q = 0;
     normal.f[2] = 1.0f;
-    previous.q = *(Quad *)(object + 0x10);
+    qcopy(&previous, (object + 0x10));
     func_00282CC0(object + 0x10, object + 0x10, private);
     func_002AFFD8(object + 0x10, (char *)&direction, 0);
     func_00282D30(&direction, &direction, 0.0003055556f);
     func_L00_0038F3D8(object);
-    context.flags = *(int *)(private + 0x18) < 290 ? 0x830001 : 0x830000;
+    context.owner = object;
+    context.flags = 0x830000;
+    if (*(int *)(private + 0x18) < 290) context.flags = 0x830001;
     context.tail[0] = 1;
     context.material = *(float *)(D_L26_002622F0 + (unsigned int)D_00139574 * 0xE0 + 0x70);
-    context.direction.q = *(Quad *)private;
-    context.owner = object;
+    qcopy(&context.direction, private);
     func_00282F70(&context.direction, &context.direction, 1.0f);
     context.id = *(unsigned short *)(object + 0xAA);
     context.mode = 2;
@@ -90,13 +85,13 @@ void func_L26_0038BF40(char *object) {
             if (*(void **)(hit + 0x64) == D_L26_001AC810 && *(short *)(hit + 0xAA) != 0x336)
                 goto finish;
             object[0xBC] = 1;
-            *(Quad *)(object + 0x10) = D_L26_001BEFE0.q;
+            qcopy((object + 0x10), &D_L26_001BEFE0);
             func_00283028(&force, private, &D_L26_001BF000);
             func_00282F20(&force, &force, 0.033333335f);
         } else {
             if (D_L26_001BEFDC < 1) goto finish;
             object[0xBC] = 1;
-            *(Quad *)(object + 0x10) = D_L26_001BEFE0.q;
+            qcopy((object + 0x10), &D_L26_001BEFE0);
             func_00283028(&force, private, &D_L26_001BF000);
             func_00282F20(&force, &force, 0.033333335f);
         }

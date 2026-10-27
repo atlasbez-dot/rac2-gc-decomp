@@ -1,28 +1,14 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Retained complete manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections -mno-split-addresses
+ * 1856/1848 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: The 0x50 retail frame and saved-register count are recovered, but resident/settings
+ * base lifetimes, copy/store and scalar scheduling remain different.
+ * Reopen: Independent resident/settings address-at-use lifetime evidence preserving all
+ * direction save/override/restore operations.
+ * Trial-only source markers and profiles are restored after checking.
  */
 
-/*
- * Retained manual reconstruction, 23 October 2026; NOT MATCHING.
- *
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- *
- * Meaningful bounded trials: 5.
- *
- * USA v1.01 and USA v2.00: 1852/1848 bytes, 0/1 placements each; PAL does not carry this
- * canonical name. Frame 0x60 versus 0x50 and one extra saved GPR remain. Typed resident/settings
- * prefixes describe only observed fields; the settings record reaches its full 16-byte direction
- * vector. Combining the final damping selection recovered one shared call. A debug-info profile
- * tied the result and was discarded.
- *
- * Reopen with independent source lifetime evidence for the saved resident base and phase-local
- * direction pointers.
- *
- * No strict linked build or runtime validation is claimed.
- */
 #include "common.h"
 
 typedef int DriveVector __attribute__((mode(TI)));
@@ -91,7 +77,7 @@ void func_L01_002B7360(void)
 
     if (state == 10) {
         func_L00_002B54F8(0.7f, 0.0f);
-        D_00189E20.pendingResult = D_00189E20.pending;
+        qcopy(&D_00189E20.pendingResult, &D_00189E20.pending);
         D_00189E20.targetSpeed = D_00189E20.planarDistance;
     } else if (state == 16) {
         float speed;
@@ -120,7 +106,7 @@ void func_L01_002B7360(void)
         func_00283098(&D_00189E20.velocity, &local, &D_00189E20);
     } else if (state == 11) {
         D_00189E20.heading = D_00189E20.targetHeading;
-        D_00189E20.direction = D_00189E20.targetDirection;
+        qcopy(&D_00189E20.direction, &D_00189E20.targetDirection);
         func_L00_002B3EF8(0, 0.04f, 0.2f, 0.11635530f);
         if (D_00189E20.transition == 3) D_00189E20.targetSpeed = 0.0f;
         else D_00189E20.targetSpeed = D_00189E20.inputSpeed;
@@ -155,10 +141,10 @@ void func_L01_002B7360(void)
             ((float *)&D_00189E20.velocity)[1] += component * amount;
         }
         func_L00_002B54F8(0.7f, 0.0f);
-        D_00189E20.pendingResult = D_00189E20.pending;
+        qcopy(&D_00189E20.pendingResult, &D_00189E20.pending);
     } else if (state == 17) {
         D_00189E20.heading = ((float *)&D_00189E20.jumpDirection)[3];
-        D_00189E20.direction = D_00189E20.jumpDirection;
+        qcopy(&D_00189E20.direction, &D_00189E20.jumpDirection);
         if (D_00189E20.frame > 9) func_L00_002B3EF8(-1, 0.042f, 0.2f, 0.19780402f);
         if (D_00189E20.frame > 8) {
             if (D_00189E20.request == 0) {
@@ -177,21 +163,21 @@ void func_L01_002B7360(void)
         func_L00_002B3EF8(0, 0.04f, 0.2f, D_00189E20.acceleration);
         D_00189E20.targetSpeed = 0.0f;
     } else {
-        local = D_00189E20.direction;
+        qcopy(&local, &D_00189E20.direction);
         oldHeading = D_00189E20.heading;
         if (D_00189E20.overrideDirection != 0) {
             D_00189E20.heading = D_L01_001B9380.heading;
-            D_00189E20.direction = D_L01_001B9380.direction;
+            qcopy(&D_00189E20.direction, &D_L01_001B9380.direction);
         }
         func_L00_002B3EF8(0, 0.04f, 0.2f, D_00189E20.acceleration);
         if (D_00189E20.overrideDirection != 0) {
             D_00189E20.savedHeading = oldHeading;
-            D_00189E20.savedDirection = local;
+            qcopy(&D_00189E20.savedDirection, &local);
             D_00189E20.heading = oldHeading;
-            D_00189E20.direction = D_00189E20.savedDirection;
+            qcopy(&D_00189E20.direction, &D_00189E20.savedDirection);
         }
         func_L00_002B54F8(0.7f, 0.0f);
-        D_00189E20.pendingResult = D_00189E20.pending;
+        qcopy(&D_00189E20.pendingResult, &D_00189E20.pending);
         {
         float damping = 0.0055555557f;
         if (D_00189E20.speed < D_L01_001A7DC0 * 0.00333333365f) {

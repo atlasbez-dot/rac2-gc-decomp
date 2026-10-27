@@ -1,20 +1,9 @@
-/* func_002A0250 - 172 bytes, 28 places (the boot and every level).
-   Screened in wave 13 (worker g4): 3 call(s), 0 $gp-relative small-data access(es), 0 MMI lq/sq word(s), 0 64-bit daddu copy(ies), 0 float constant(s).
-   Near miss: the body has the retail size (172 bytes), the same three calls, the same
-   statement order and the same stores; two differences are left.
-   1. the u16 at 0x10FFB0: retail materialises its address into $v0 before the prologue and
-      loads through it ("lui $v0,0x11 ; lhu $a1,-0x50($v0)"), this cc1 materialises it into
-      the destination register $a1 and only after the prologue ("addiu $sp,$sp,-0x10 ;
-      lui $a1,0x11 ; lhu $a1,-0x50($a1)");
-   2. the second half: this cc1 hoists the "p + 0x10" of the packet pointer to the top of
-      the block, retail computes it after the last load.
-   The unit needs -G8 (with -G0 this cc1 common-subexpression-eliminated the lui of the
-   0x1Bxxxx data into one register, 168 bytes against the retail 172).  Every 0x1Bxxxx word
-   of this body is 0x1B19DC in the levels and 0x1B169C in the boot, so it needs a ref_ name.
-   Not matched in wave 13 (worker g4): the register allocation and the scheduling of those two
-   instructions were not reproduced. */
-
+/* func_002A0250: Opus closer M1 near miss, 26 October 2026.
+   Profile: -O2 -G8 -ffunction-sections, own -g8 unit.
+   172/172 bytes, 13 differing. Naming the u16 at 0x10FFB0 as `D_0010FFB0[]` gives the retail head exactly. Left: in the tail retail stores the old packet pointer early and increments it in place in $v0; 1,080 statement orders and 192 type combinations did not move it. */
+#include "common.h"
 extern char D_0010FFC0[];
+extern unsigned short D_0010FFB0[];
 extern char D_00100080[];
 extern int ref_002A0250_00;
 extern char *ref_002A0250_01;
@@ -34,7 +23,7 @@ void func_002A0250(void)
 {
     char *p;
 
-    func_002FC410((unsigned int)D_0010FFC0, *(unsigned short *)0x10FFB0);
+    func_002FC410((unsigned int)D_0010FFC0, D_0010FFB0[0]);
     ref_002A0250_00 = 6;
     func_002FC070((int)D_00100080);
     func_002FC560(0x47, 0x5360B);

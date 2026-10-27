@@ -87,7 +87,6 @@ INCLUDE_ASM("asm/levels", func_L18_004350E0);
 
 INCLUDE_ASM("asm/levels", func_L18_004354F8);
 
-INCLUDE_ASM("asm/levels", func_L18_004359A8);
 
 INCLUDE_ASM("asm/levels", func_L18_00435B10);
 
@@ -124,11 +123,10 @@ INCLUDE_ASM("asm/levels", func_L18_0043C778);
 
 INCLUDE_ASM("asm/levels", func_L18_0043CAF8);
 
-INCLUDE_ASM("asm/levels", func_L18_0043F130);
+/* func_L18_0043F130 is defined in L18_0043F130-qcopy-barrier.c. */
 
 INCLUDE_ASM("asm/levels", func_L18_0043F308);
 
-INCLUDE_ASM("asm/levels", func_L18_0043FB08);
 
 INCLUDE_ASM("asm/levels", func_L18_0043FC70);
 
@@ -139,5 +137,3 @@ INCLUDE_ASM("asm/levels", func_L18_00441050);
 INCLUDE_ASM("asm/levels", func_L18_00441438);
 
 INCLUDE_ASM("asm/levels", func_L18_00447128);
-
-

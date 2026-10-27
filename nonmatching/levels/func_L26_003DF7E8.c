@@ -1,21 +1,18 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 0/1; PAL 0/1.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh checks on the qualified current compiler, 2026-10-25.
+ * Profile: -O2 -G32 -Wa,-G32 -ffunction-sections
+ * Coverage: US: 0/1; US2: 0/1; PAL: 0/1.
+ * Compiled text: 784 bytes; retail text: 784 bytes.
+ * Remaining difference: The full 144-byte packet and 32-byte UV table remain intact. Body size 784
+ * and frame 0x100 match, but private-pointer ownership is fp rather than retail s7 and state
+ * packing/address lifetimes diverge from +4. Sequential state packing changes code without
+ * resolving the mismatch.
+ * Reopen when: Recover packet-field packing and cursor lifetimes from additional callers or source
+ * evidence; no fabricated UV extent or GP alias.
  */
 
-/*
- * Manual C reconstruction retained after bounded retail comparison.
- * Profile: -O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Measured text: 784 bytes; retail: 784 bytes. Stack frame 0x100; retail 0x100.
- * Final coverage: US 0/1, US2 0/1, PAL 0/1. Absences are not matches.
- * 1 measured source/profile forms. Equal text size; first mismatch +0x4, especially fp versus
- * s7 ownership and pointer allocation. The packet is 144 bytes and its UV table is a complete
- * 32-byte array. Retail mixes GP and absolute UV accesses; no interior alias was introduced.
- * Reopen with a new truthful pointer-walk/address-expression hypothesis.
- * All carrying checks are nonmatches (exit 1); no linked-build credit.
- */
+#include "common.h"
 
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
@@ -56,7 +53,7 @@ void func_L26_003DF7E8(char *object) {
         ((unsigned long long)(long long)D_L26_001B06AC[4] << 34);
     for (face = 0; face < 64; face++) {
         for (j = 0; j < 4; j++) {
-            packet.vertex[j].q = D_L26_0029ABD0[D_L26_0029B3D0[face][j * 3]].q;
+            qcopy(&packet.vertex[j], &D_L26_0029ABD0[D_L26_0029B3D0[face][j * 3]]);
             packet.uv[j][1] = D_L26_001B0688[j][1];
         }
         for (j = 0; j < 4; j++) {

@@ -1,22 +1,30 @@
-/* Manual reconstruction, 2026-10-23; retained, not linked.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
- * us: 16_snivelak: 1068 bytes, expected 1056; func_L16_00417990: 0 of 1 places match (src/levels/16_snivelak/L16_00417990-g8-qcopy.c)
- * us2: 16_snivelak: 1068 bytes, expected 1056; func_L16_00417990: 0 of 1 places match (src/levels/16_snivelak/L16_00417990-g8-qcopy.c)
- * pal: func_L16_00417990 is in neither catalogue of pal; func_L16_00417990 is in neither catalogue of pal
- * 1068/1056 bytes in both USA releases. Effects/settings addressing and source/argument scheduling remain different. Preserves the measured GPR t0-t3 and complete stack tails, exact float banks and opt-in TI zeroing. Reopen with original effect parameter/declaration evidence.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-zero-ti-por.
+ * Compiled 1068 bytes; retail 1056 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: The 0xA0 frame and initial por/SQ stores agree. Effects/settings address
+ * calculation and FP argument allocation still differ. The shared qzero experiment leaves the
+ * size at 1068 and does not reproduce the measured materialized zero; the ordinary TImode clear
+ * with the qualified zero-ti-por profile is retained. State transitions take a full-width
+ * integer, and the child constructor retains its actual pointer return.
+ * Reopen: A verified effect parameter/storage witness explaining the mixed GP/absolute settings
+ * and live FP arguments.
  */
+
 #include "common.h"
 typedef int Vector128 __attribute__((mode(TI)));
 extern void func_00282D30(void *,void *,float);
 extern char *func_L00_0033E220(void *,void *,unsigned int,int,int,int,int,int,float,float);
 extern void *func_002A9640(void *,unsigned int,int);
-extern void func_002A7750(unsigned char *,unsigned char,int);
+extern void func_002A7750(unsigned char *,int,int);
 extern void func_L00_0032A258(void *,void *,void *,void *,int,int,int,int,int,int,int);
 extern void func_L00_002EC248(void *,void *,void *,int,int,float,float,float,float,float);
 extern void func_L00_00324F18(char *,char *,float,float,float);
 extern void func_002ABBB8(void *,void *,void *,int,int,int,int,int,int,int,int,int,float,float,float,float,float,float,float);
 extern void func_002B9180(void *);
-extern void func_L00_00326620(void *,int,int);
+extern char *func_L00_00326620(char *,int,int);
 extern int func_00282948(int *);
 extern int func_002A7820(int,int);
 extern char D_L16_001B1BF0[],D_L16_001B1BE8[],D_L16_001B1BE0[];

@@ -27,7 +27,19 @@ int func_001315E0(void) {
     return r1_D_001331D8[4] == 0x54;
 }
 
-INCLUDE_ASM("asm/core", func_00131620);
+extern unsigned char D_00138152 NOT_SDA;
+
+extern void func_0011ACD0(unsigned int *);
+
+int func_00131620(void) {
+    unsigned int local;
+
+    if (func_001315E0() != 0) {
+        return D_00138152;
+    }
+    func_0011ACD0(&local);
+    return (local >> 1) & 3;
+}
 
 
 /* rac1-decomp src/core/0012CC90.c: func_0012D3F0 */

@@ -1,18 +1,25 @@
-/* Nonmatching reconstruction, 23 October 2026.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Final check.py coverage: us 0/1, us2 0/1, pal 0/1; no linked build run.
- * Default 1408/1424; qcopy/barrier 1416/1424.
- * Remaining: Vector/member addresses, state-transition branches and sound-handle registers differ.
- * Reopen with a validated moving-platform vector/address lifetime witness.
+/*
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G0 -ffunction-sections
+ * Coverage: US: 0/1; US2: 0/1; PAL: 0/1.
+ * Compiled text: 1416 bytes; retail: 1424 bytes.
+ * Remaining difference: The complete aligned vectors and canonical 32-bit sound-owner argument are
+ * retained. Frame 0x70 matches, but the body remains 1416/1424. A canonical player vector and a
+ * measured sound-entry view did not resolve sound-handle allocation or state-transition
+ * scheduling.
+ * Reopen when: A verified platform/sound address-lifetime model; avoid arbitrary instruction
+ * padding or prototype permutations.
  */
+
 #include "common.h"
 typedef int VectorBits __attribute__((mode(TI)));
+typedef float Vector[4] __attribute__((aligned(16)));
 extern char D_00188660[];
-extern char D_00189EA0[];
-extern float D_00189EA8;
+extern Vector D_00189EA0;
 extern int func_L00_00324120(void *);
 extern void func_002A7750(void *, int, int);
-extern int func_002E59B0(void *, int);
+extern int func_002E59B0(int, int);
 extern int func_002E5CF8(int, int, void *);
 extern void func_002E59F8(int);
 extern int func_002ACBC8(void *, int);
@@ -26,16 +33,16 @@ extern void func_002AD6F0(void *, void *, void *, void *);
 /* Move a platform between its two paths according to the player's height. */
 void func_L06_00401820(char *moby)
 {
-    float oldPosition[4], oldRotation[4], movement[4];
+    Vector oldPosition, oldRotation, movement;
     char *state = *(char **)(moby + 0x68);
     char *sound;
     int handle;
-    *(VectorBits *)oldPosition = *(VectorBits *)(moby + 0x10);
-    *(VectorBits *)oldRotation = *(VectorBits *)(moby + 0xF0);
+    qcopy(oldPosition, (moby + 0x10));
+    qcopy(oldRotation, (moby + 0xF0));
     switch (*(unsigned char *)(moby + 0x20)) {
     case 0:
         *(int *)(state + 0x5C) |= 1;
-        *(VectorBits *)(state + 0x60) = *(VectorBits *)(moby + 0x10);
+        qcopy((state + 0x60), (moby + 0x10));
         *(unsigned char *)(moby + 0x20) = 1;
         *(int *)(state + 0x88) = -1;
         *(int *)(state + 0x80) = 0;
@@ -45,21 +52,21 @@ void func_L06_00401820(char *moby)
         if (func_L00_00324120(moby)) {
             if (*(int *)(state + 0x80) == 0) {
                 func_002A7750(moby, 3, -1);
-                if (!func_002E59B0(moby, *(int *)(state + 0x88)))
+                if (!func_002E59B0((int)moby, *(int *)(state + 0x88)))
                     *(int *)(state + 0x88) = func_002E5CF8(0, 4, moby);
             } else {
                 func_002A7750(moby, 2, -1);
-                if (!func_002E59B0(moby, *(int *)(state + 0x88)))
+                if (!func_002E59B0((int)moby, *(int *)(state + 0x88)))
                     *(int *)(state + 0x88) = func_002E5CF8(1, 4, moby);
             }
         }
-        if (D_00189EA8 < 55.0f && *(int *)(state + 0x80) == 0) {
-            if (!func_002E59B0(moby, *(int *)(state + 0x88)))
+        if (D_00189EA0[2] < 55.0f && *(int *)(state + 0x80) == 0) {
+            if (!func_002E59B0((int)moby, *(int *)(state + 0x88)))
                 *(int *)(state + 0x88) = func_002E5CF8(0, 4, moby);
             func_002A7750(moby, 3, -1);
-        } else if (D_00189EA8 > 57.0f && *(int *)(state + 0x80) == 1 &&
+        } else if (D_00189EA0[2] > 57.0f && *(int *)(state + 0x80) == 1 &&
                    func_002ACBC8(D_00189EA0, *(int *)(state + 0x8C))) {
-            if (!func_002E59B0(moby, *(int *)(state + 0x88)))
+            if (!func_002E59B0((int)moby, *(int *)(state + 0x88)))
                 *(int *)(state + 0x88) = func_002E5CF8(1, 4, moby);
             func_002A7750(moby, 2, -1);
         }
@@ -76,7 +83,7 @@ void func_L06_00401820(char *moby)
                 }
                 *(int *)(state + 0x88) = -1;
                 func_002A7750(moby, 1, -1);
-                *(VectorBits *)(moby + 0x10) = *(VectorBits *)(state + 0x60);
+                qcopy((moby + 0x10), (state + 0x60));
                 *(int *)(state + 0x84) = 0;
             } else {
                 goto stop;
@@ -111,7 +118,7 @@ void func_L06_00401820(char *moby)
         }
         if (*(float *)(moby + 0x18) < 53.0f &&
             func_002ACBC8(D_00189EA0, *(int *)(state + 0x8C)) &&
-            D_00189EA8 < *(float *)(moby + 0x18))
+            D_00189EA0[2] < *(float *)(moby + 0x18))
             break;
         movement[0] = func_00283180(*(float *)(moby + 0xF8) - 1.57079649f) * 0.05f;
         movement[1] = func_00283198(*(float *)(moby + 0xF8) - 1.57079649f) * 0.05f;

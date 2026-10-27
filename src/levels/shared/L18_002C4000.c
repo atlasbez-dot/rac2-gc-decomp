@@ -18,7 +18,7 @@ extern void func_00335668(BatchA_A18_u8 *a0, BatchA_A18_s32 a1, BatchA_A18_s32 a
 
 extern BatchA_A18_u8 D_0018C0D4;
 
-INCLUDE_ASM("asm/levels", func_L18_002C4000);
+/* func_L18_002C4000 is defined in L18_002C4000-hero.c. */
 
 /* func_L18_002C41F0 is defined in L18_002C4000-g8.c (this unit has $gp access for it). */
 
@@ -46,9 +46,9 @@ void func_L18_002E4090(BatchA_A18_s32 a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L18_002E42F8);
+/* func_L18_002E42F8 is defined in L18_002E42F8-flags-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L18_002F1098);
+/* func_L18_002F1098 is matched in its own unit, L18_002F1098-g8.c. */
 
 extern void func_0027F1D8(void *a0, void *a1, const char *a2);
 extern char D_L18_00296510[];
@@ -114,7 +114,6 @@ INCLUDE_ASM("asm/levels", func_L18_0035D5F8);
 
 /* func_L18_003F50D8 is matched in L18_003F50D8.c (built with -mno-split-addresses). */
 
-INCLUDE_ASM("asm/levels", func_L18_003F5198);
 
 INCLUDE_ASM("asm/levels", func_L18_003F53D8);
 
@@ -437,8 +436,6 @@ void func_L18_003F8FA8(BatchA_A18_u8 *a0) {
 
 INCLUDE_ASM("asm/levels", func_L18_003F9DA0);
 
-INCLUDE_ASM("asm/levels", func_L18_003F9E50);
-
 
 extern void func_L18_003FC9B8(unsigned char *a0);
 extern void func_L18_003F7988(unsigned char *a0);
@@ -507,7 +504,7 @@ INCLUDE_ASM("asm/levels", func_L18_003FAE50);
 
 /* func_L18_003FB500 lives in L18_003FB500.c. */
 
-INCLUDE_ASM("asm/levels", func_L18_003FB5E8);
+/* func_L18_003FB5E8 is matched in its own unit, src/levels/shared/L18_003FB5E8-qcopy.c (-frac2-qcopy). */
 
 void func_L18_003FC958(BatchA_A18_u8 *a0, BatchA_A18_s32 a1) {
     if (a1 != 0) {
@@ -530,7 +527,6 @@ INCLUDE_ASM("asm/levels", func_L18_003FCA38);
 
 INCLUDE_ASM("asm/levels", func_L18_003FD630);
 
-INCLUDE_ASM("asm/levels", func_L18_003FD730);
 
 /* store -1 into field 0x74 of the object at s[0x68] */
 void func_L18_003FE010(BatchA_A18_u8 *s) {
@@ -575,7 +571,7 @@ void func_L18_00426F28(BatchA_A18_u8 *a0, BatchA_A18_s32 a1, BatchA_A18_s32 a2, 
     }
 }
 
-extern void func_002B60B0(float a0, float a1, float a2, float a3);
+extern void *func_002B60B0(BatchA_A18_u8 *, float, float, float, float);
 extern void func_00282948(void *a0);
 
 /* the object's scale angles are re-submitted in degrees, then the matrix is rebuilt */
@@ -583,7 +579,7 @@ void func_L18_00426F78(BatchA_A18_u8 *a0) {
     BatchA_A18_u8 *p = *(BatchA_A18_u8 **)(a0 + 0x68);
     if (a0[0x21] != 0xFF) {
         if (*(BatchA_A18_u8 *)(p + 0x39F) != 0) {
-            func_002B60B0(0.00027777778450399637f * *(float *)(p + 0x3C4),
+            func_002B60B0(a0, 0.00027777778450399637f * *(float *)(p + 0x3C4),
                           0.01666666753590107f * *(float *)(p + 0x3C0),
                           4.848137450608192e-06f * *(float *)(p + 0x3D4),
                           0.0002908882452175021f * *(float *)(p + 0x3D0));

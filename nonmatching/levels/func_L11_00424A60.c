@@ -1,20 +1,19 @@
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 absent from catalogue; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 3372 bytes; retail 3364 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: canonical name absent; no match credit.
+ * pal: canonical name absent; no match credit.
+ * Remaining: The complete initialization, linked-object updates and damage/removal controller
+ * remain. Shared qcopy preserves every position/state snapshot, object-table entries use actual
+ * pointer fields and the state-transition helper uses full-width integer arguments. Recomputing
+ * object position at use gives 3372 bytes against 3364; the 0x70 frame remains larger than
+ * retail 0x50. The 60 static call sites remain, with differing branch-block order and
+ * constant/pointer lifetimes.
+ * Reopen: Independent original local/state lifetime evidence explaining the smaller 0x50 frame;
+ * preserve actual pointer/FP returns and the canonical seven-input func_002B3670 contract.
  */
 
-/* Nonmatching reconstruction of func_L11_00424A60 (retail 3364 bytes).
- * Measured 2026-10-23: 3364 bytes, 0/1 US; absent in US2 and PAL catalogues.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * A later position-pointer form was 3372 bytes. The final source keeps real
- * pointer/float returns and the seven-input canonical002B3670 interface.
- * Retail frame 0x50 versus 0x70 generated: saved GPR/FPR allocation, constant
- * lifetimes and mixed absolute/GP accesses to the same globals remain.
- * Reopen with original local declarations/alias evidence; no false scalar
- * extents or aliases were introduced. No exact or linked credit claimed.
- */
 #include "common.h"
 
 typedef unsigned int QuadWord __attribute__((mode(TI)));
@@ -31,7 +30,7 @@ typedef union { QuadWord word; float v[4]; } Vector;
 extern int D_L11_001AED04;
 extern int D_L11_001AED00 __attribute__((sda));
 extern int D_L11_001B30C8 __attribute__((sda));
-extern int D_L11_001B359C;
+extern char *D_L11_001B359C;
 extern int D_L11_001B35B8;
 extern unsigned short *D_L11_001FC420[];
 extern Vector D_L11_001BA8C0;
@@ -44,7 +43,7 @@ extern float func_002A78D8(float, float);
 extern int func_002A77E0(int);
 extern void func_L00_003294F0(unsigned char *, int);
 extern void *func_002B60B0(unsigned char *, float, float, float, float);
-extern void func_002A7750(unsigned char *, unsigned char, int);
+extern void func_002A7750(unsigned char *, int, int);
 extern void func_002A7470(void *, int, int, int);
 extern char *func_0029EFD0(int);
 extern void func_002A0F48(void *);
@@ -67,7 +66,6 @@ int func_L11_00424A60(unsigned char *object)
 {
     Vector hit_position;
     char *state = POINTER(object, 0x68);
-    char *position = (char *)object + 0x10;
     char *linked, *other_state;
     unsigned short *ids;
     unsigned short id;
@@ -78,7 +76,7 @@ int func_L11_00424A60(unsigned char *object)
         BYTE(object, 0x30) = 0x80;
         ++D_L11_001AED04;
         POINTER(state, 0x18) = state + 0x140;
-        REAL(object, 0x18) = func_002A89A8(position, 0, 0.5f);
+        REAL(object, 0x18) = func_002A89A8(((char *)object+0x10), 0, 0.5f);
         WORD(state, 0x554) = 0;
         WORD(state, 0x560) = 0;
         WORD(state, 0x568) = 0;
@@ -140,11 +138,11 @@ int func_L11_00424A60(unsigned char *object)
             if (BYTE(object, 0x43) != 0x24) func_002A7470(object, 0x24, 0, 0);
             kind = WORD(state, 0x540);
             if (kind == 1) {
-                WORD(state, 0x55c) = D_L11_001B359C + WORD(state, 0x544) * 0x100;
+                POINTER(state, 0x55c) = D_L11_001B359C + WORD(state, 0x544) * 0x100;
                 func_002A7750(object, 5, 0);
                 if (BYTE(object, 0x43) != 0x1c) func_002A7470(object, 0x1c, 0, 0);
             } else if (kind == 2) {
-                WORD(state, 0x55c) = D_L11_001B359C + WORD(state, 0x544) * 0x100;
+                POINTER(state, 0x55c) = D_L11_001B359C + WORD(state, 0x544) * 0x100;
                 func_002A7750(object, 5, 0);
                 if (BYTE(object, 0x43) != 0x1e) func_002A7470(object, 0x1e, 5, 0);
             } else if (kind == 3) {
@@ -186,8 +184,8 @@ int func_L11_00424A60(unsigned char *object)
             }
             linked = (char *)(D_L11_001B359C + WORD(state, 0x270) * 0x100);
             POINTER(state, 0x274) = linked;
-            QUAD(object, 0x10) = QUAD(linked, 0x10);
-            QUAD(object, 0xf0) = QUAD(linked, 0xf0);
+            qcopy((char *)(object)+0x10, (char *)(linked)+0x10);
+            qcopy((char *)(object)+0xf0, (char *)(linked)+0xf0);
             WORD(object, 0x98) = 0;
             UHALF(object, 0x34) &= 0xafff;
             POINTER(POINTER(linked, 0x68), 0x27c) = (char *)object;
@@ -196,7 +194,7 @@ int func_L11_00424A60(unsigned char *object)
             BYTE(POINTER(state, 0x280), 0x30) = BYTE(object, 0x30);
             BYTE(POINTER(state, 0x280), 0x31) = 0;
             func_002A0F48(POINTER(state, 0x280));
-            QUAD(POINTER(state, 0x280), 0x10) = QUAD(object, 0x10);
+            qcopy((char *)(POINTER(state, 0x280))+0x10, (char *)(object)+0x10);
             REAL(POINTER(state, 0x280), 0x18) += 0.75f;
             POINTER(state, 0x278) = func_0029EFD0(0xff9);
             if (POINTER(state, 0x278) == 0) return 1;
@@ -219,12 +217,12 @@ int func_L11_00424A60(unsigned char *object)
             func_002AF1D0(object, POINTER(state, 0x278), 1, 0);
             WORD(state, 0x290) = 0;
         }
-        QUAD(state, 0x110) = QUAD(object, 0x10);
+        qcopy((char *)(state)+0x110, (char *)(object)+0x10);
         REAL(state, 0x120) = 1.0f;
         REAL(state, 0x12c) = 8.0f;
         REAL(state, 0x130) = 10.0f;
     }
-    if (BYTE(object, 0x31) != 0 && func_00282E48(position, &D_L11_001BA8C0) < 24.0f) {
+    if (BYTE(object, 0x31) != 0 && func_00282E48(((char *)object+0x10), &D_L11_001BA8C0) < 24.0f) {
         func_002A93B0(object);
         BYTE(object, 0x6f) = 0x16;
     }
@@ -317,11 +315,11 @@ int func_L11_00424A60(unsigned char *object)
     HALF(state, 0x264) = func_002B3670(object, (int *)(state + 0x268), WORD(state, 0x250),
                                     WORD(state, 0x254), 0, REAL(state, 0x258), REAL(state, 0x25c));
     if (BYTE(object, 0x95) != 4 && BYTE(object, 0x20) != 0x25) {
-        ground = func_002A89A8(position, 0, 0.5f);
+        ground = func_002A89A8(((char *)object+0x10), 0, 0.5f);
         REAL(object, 0x18) -= 0.31333333253860473633f;
         if (REAL(object, 0x18) < ground) REAL(object, 0x18) = ground;
     }
-    ground = func_002A89A8(position, 0, 0.5f);
+    ground = func_002A89A8(((char *)object+0x10), 0, 0.5f);
     if (REAL(object, 0x18) - ground > 20.0f && ground < REAL(object, 0x18) && BYTE(object, 0x95) != 5) {
         func_002A7750(object, 0x25, 9);
         if (BYTE(object, 0x43) != 0x23) func_002A7470(object, 0x23, 0, 10);

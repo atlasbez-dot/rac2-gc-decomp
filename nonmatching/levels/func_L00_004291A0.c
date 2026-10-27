@@ -1,12 +1,9 @@
-/* Retained manual C reconstruction; not linked or counted.
- * Retail: 964 bytes. Checked trial: src/levels/shared/L00_004291A0.c
- * Profile: -O2 -G0 -ffunction-sections -fno-strength-reduce -frac2-qcopy -frac2-qcopy-barrier
- * us: 0/11 placements (exit 1), 952 compiled bytes
- * us2: 0/11 placements (exit 1), 952 compiled bytes
- * pal: explicit catalogue absence (exit 1); no credit
- * Residual: The 0x90-byte frame agrees after disabling strength reduction and qualifying TI copies, but path-index live ranges, modulo/call scheduling and four transform copies differ.
- * Reopen: Recover the original separate path-walk/weight-walk locals or a measured aggregate address-lifetime shape.
- * The ASM marker and trial-only file profile were restored after checks.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections -fno-strength-reduce
+ * 952/964 bytes; 0/11 placements in us and us2; pal has no catalogue entry.
+ * Residual: The 0x90 frame agrees, but loop address lifetimes, modulo/call scheduling and saved-register allocation differ.
+ * Reopen: Independent path/weight cursor lifetime evidence or a matched counterpart with the same measured path records.
+ * Trial source markers and per-file flags are restored after checking.
  */
 
 #include "common.h"
@@ -21,60 +18,93 @@ extern float func_00283CE0(int x);
 extern void func_00282C88(InitQuad *v);
 extern int func_L00_002C42E0(int event, int value);
 
+/* Partial records follow only the fields used by the two path walks.
+ * Retail reserves eight weight/index slots and assumes at most eight accepted
+ * entries; it does not add a bounds check to the path scan. */
+typedef struct {
+    u8 unknown00[0x20];
+    int pathIndex;
+    int secondPathIndex;
+    u8 unknown28[0x10];
+    u8 active;
+    u8 unknown39;
+    short duration;
+    float speed;
+    u8 unknown40[0xC];
+    int eventGate;
+    int initialized;
+    u8 unknown54[0xC];
+    float weights[8];
+    int indices[8];
+} PathConfig;
+typedef struct {
+    int first;
+    int second;
+    float distance;
+    float secondDistance;
+    int current;
+    short node;
+    short duration;
+} MotionPrefix;
+
 void func_L00_004291A0(u8 *object)
 {
-    u8 *data = *(u8 **)(D_L00_001B1844 + *(short *)(object + 0x84) * 32 + 0x1c);
-    u8 *motion = *(u8 **)(object + 0x70) + 0x40;
+    PathConfig *data = *(PathConfig **)(D_L00_001B1844 + *(short *)(object + 0x84) * 32 + 0x1c);
+    MotionPrefix *motion = (MotionPrefix *)(*(u8 **)(object + 0x70) + 0x40);
     u8 *pathState;
     u8 *path;
-    float *weight = (float *)(data + 0x60);
-    int *indices = (int *)(data + 0x80);
+    float *weightBase = data->weights;
+    int *indices = data->indices;
     int accepted = 0;
     int i;
+    int *reset;
     float distance;
     float *entry;
     InitQuad *transform;
-    data[0x38] = 1;
-    *(int *)(motion + 0) = 0;
-    *(int *)(motion + 4) = 0;
-    *(int *)(motion + 8) = 0;
-    *(int *)(motion + 0xc) = 0;
-    *(int *)(motion + 0x10) = 0;
-    *(short *)(motion + 0x14) = 0;
-    *(short *)(motion + 0x16) = *(short *)(data + 0x3a);
+    data->active = 1;
+    motion->first = 0;
+    motion->second = 0;
+    motion->distance = 0;
+    motion->secondDistance = 0;
+    motion->current = 0;
+    motion->node = 0;
+    motion->duration = data->duration;
     pathState = *(u8 **)(object + 0x70) + 0x58;
+    reset = data->indices;
     for (i = 7; i >= 0; i--) {
-        *(int *)(data + 0x60 + (7 - i) * 4) = 0;
-        indices[7 - i] = -1;
+        *(float *)((u8 *)reset - 0x20) = 0.0f;
+        *reset++ = -1;
     }
     *(float *)(pathState + 0x30) = func_00283248(1.0f, *(float *)(D_L00_001BD2C0 + 0xb0)) * 2.0f;
-    if (*(int *)(data + 0x50) == 0 && *(int *)(data + 0x20) >= 0) {
-        path = D_L00_001FDA80[*(int *)(data + 0x20)];
+    if (data->initialized == 0 && data->pathIndex >= 0) {
+        float *weightCursor = weightBase;
+        path = D_L00_001FDA80[data->pathIndex];
         for (i = 0; i < *(int *)path; i++) {
-            entry = (float *)(path + 0x10 + i * 16);
+            int byteOffset = i * 16;
+            entry = (float *)(path + 0x10 + byteOffset);
             if (entry[3] > 0.0f) {
-                *weight = entry[3];
+                *weightCursor = entry[3];
                 if (entry[3] > 180.0f)
-                    *weight = *(float *)(pathState + 0x30) * 57.2957763671875f;
-                weight++;
+                    *weightCursor = *(float *)(pathState + 0x30) * 57.2957763671875f;
+                weightCursor++;
                 indices[accepted++] = i;
             }
             distance = func_00282E48(entry, (float *)(path + 0x10 + ((i + 1) % *(int *)path) * 16));
             entry[3] = distance;
             if (i < *(int *)path - 1)
-                *(float *)(motion + 8) += distance;
+                motion->distance += distance;
         }
     }
-    if (*(short *)(data + 0x3a) > 0)
-        *(float *)(data + 0x3c) = (*(float *)(motion + 8) / func_00283CE0(*(short *)(data + 0x3a))) * 60.0f;
-    if (*(int *)(data + 0x24) >= 0) {
-        path = D_L00_001FDA80[*(int *)(data + 0x24)];
+    if (data->duration > 0)
+        data->speed = (motion->distance / func_00283CE0(data->duration)) * 60.0f;
+    if (data->secondPathIndex >= 0) {
+        path = D_L00_001FDA80[data->secondPathIndex];
         for (i = 0; i < *(int *)path; i++) {
             entry = (float *)(path + 0x10 + i * 16);
             distance = func_00282E48(entry, (float *)(path + 0x10 + ((i + 1) % *(int *)path) * 16));
             entry[3] = distance;
             if (i < *(int *)path - 1)
-                *(float *)(motion + 0xc) += distance;
+                motion->secondDistance += distance;
         }
     }
     path = *(u8 **)(object + 0x70);
@@ -86,11 +116,11 @@ void func_L00_004291A0(u8 *object)
     *(float *)(path + 0x24) = 0.2f;
     func_00282C88((InitQuad *)(path + 0x30));
     transform = *(InitQuad **)(D_L00_001B8C80 + 0x194);
-    *(InitQuad *)(object + 0x30) = transform[3];
-    *(InitQuad *)object = transform[0];
-    *(InitQuad *)(object + 0x10) = transform[1];
-    *(InitQuad *)(object + 0x20) = transform[2];
-    if (*(int *)(data + 0x4c) == 0)
+    qcopy(object + 0x30, transform + 3);
+    qcopy(object, transform);
+    qcopy(object + 0x10, transform + 1);
+    qcopy(object + 0x20, transform + 2);
+    if (data->eventGate == 0)
         func_L00_002C42E0(0x6f, 1);
-    *(int *)(data + 0x50) = 1;
+    data->initialized = 1;
 }

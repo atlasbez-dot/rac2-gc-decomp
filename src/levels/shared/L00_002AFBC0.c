@@ -76,7 +76,7 @@ extern int func_002830C0(float *, char *, char *);
 
 extern float func_00283248_1(float, float);
 
-extern float func_002AA898(float *, char *, int, float, float, float, float);
+extern float func_002AA898(float *, float, char *, float, float, float, int);
 
 extern void func_L00_002B3DC0_1(float, float, float);
 
@@ -223,7 +223,6 @@ INCLUDE_ASM("asm/levels", func_L00_002B1350);
 
 INCLUDE_ASM("asm/levels", func_L00_002B1F90);
 
-INCLUDE_ASM("asm/levels", func_L00_002B2120);
 
 INCLUDE_ASM("asm/levels", func_L00_002B2200);
 
@@ -350,7 +349,6 @@ void func_L00_002B39D8(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002B39F0);
 
-INCLUDE_ASM("asm/levels", func_L00_002B3D10);
 
 /* builds one 64-byte block from a 3-float vector of the incoming scalars and another from a static table record one element in, combines them, then scales the result again from that record */
 void func_L00_002B3DC0(f32 a1, f32 a2, f32 a3) {
@@ -377,7 +375,7 @@ void func_L00_002B3E40(int a0, float a1, float a2, float a3)
     func_002830C0(tmp, p, p - 336);
     r = func_00283248_1(tmp[0], tmp[1]);
     out = 0.0f;
-    *(float *)(p + 24) = func_002AA898(&out, p + 20, a0, r, a1, a2, a3);
+    *(float *)(p + 24) = func_002AA898(&out, r, p + 20, a1, a2, a3, a0);
     func_L00_002B3DC0_1(0.0f, 0.0f, out);
 }
 
@@ -385,7 +383,7 @@ void func_L00_002B3EF8(int a0, float x, float y, float z) {
     if (D_00189E20.flag != 0)
         func_L00_002B3E40(a0, x, y, z);
     else
-        D_00189E20.f1A8 = func_002AA898(&D_00189E20.f98, (char *)&D_00189E20.f1A4, a0, D_00189E20.f1A0, x, y, z);
+        D_00189E20.f1A8 = func_002AA898(&D_00189E20.f98, D_00189E20.f1A0, (char *)&D_00189E20.f1A4, x, y, z, a0);
 }
 
 
@@ -398,7 +396,6 @@ void func_L00_002B41B8(float x, float y) {
         func_002AA2E8(&D_00189E20.f1B4, D_00189E20.f1B0, y);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002B4208);
 
 extern char D_00189F10[];
 
@@ -437,11 +434,9 @@ void func_L00_002B54F8(float x, float y) {
         func_00282F20(p, p, r - y);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002B5590);
 
 INCLUDE_ASM("asm/levels", func_L00_002B55F0);
 
-INCLUDE_ASM("asm/levels", func_L00_002B5A88);
 
 INCLUDE_ASM("asm/levels", func_L00_002B5B60);
 

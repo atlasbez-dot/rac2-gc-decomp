@@ -1,43 +1,19 @@
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -frac2-zero-ti-barrier.
- * Prior worker coverage: US 0/5; US2 absent from catalogue; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
+ * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-
+ * barrier.
+ * 1640/1604 bytes; us: 0/5 placements; us2: absent from catalogue; pal: absent from catalogue.
+ * The complete two-state controller retains all constructor stack-tail inputs, pointer returns,
+ * full 16-byte color constants and the corrected G16 addressing profile. New helper copies and
+ * clears preserve real memory effects, but color-branch sharing and clear-loop reload/alias
+ * lowering differ.
+ * Reopen with independent object/alias and color-branch lifetime evidence; do not shrink constants,
+ * simplify sentinel reads or invent barriers.
+ * Original complete variants and allocator diagnostics are preserved privately.
+ * No candidate or linked-build credit is claimed.
  */
+#include "common.h"
 
-/* Supplement requalification, 23 October 2026. Not matched or linked.
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-barrier
- * USA: 1632/1604 bytes; zero placements match.
- * The constant at AFEA0 is now a real 16-byte TImode object, qualified with G16 and assembler G16. AFEB0 remains an absolute 16-byte object. The pointer-returning 0032C700 declaration preserves all real stack inputs. Resident mode identity is canonical; observed absolute loads use nosda.
- * The corrected extent does not fix the color-pair branch scheduling/cross-jump or the clear-loop alias/reload pattern. The zero-TI barrier control also remains 1632/1604, 0/5.
- * Reopen: An independently qualified copy/clear alias model and color-branch allocation witness, without shrinking constants or replaying old loop variants.
- * Historical notes below describe the earlier source/profile and remain provenance.
- */
 
-/* Historical analysis (summary).
- * Historical manual analysis retained the two-state spawned-object controller and measured
- * 1632/1604 bytes across five US placements. It isolated three vector-copy address lifetimes,
- * color-pair branch sharing and the clear-loop alias/reload pattern. Ordinary source variants
- * did not recover those interactions; scratch assembly experiments are not valid retained C or
- * match evidence. The newer truthful 16-byte constant extent, pointer-return constructor
- * contract and G16 profile above supersede the old small-data assumptions. The detailed
- * instruction excerpts and earlier draft remain private.
- */
-
-#include "include_asm.h"
-
-typedef unsigned char u8;
-
-typedef unsigned short u16;
-
-typedef unsigned int u32;
-
-typedef short s16;
-
-typedef int s32;
-
-typedef float f32;
 
 typedef int Rac2TI128 __attribute__((mode(TI)));
 
@@ -166,28 +142,28 @@ void func_L00_003C27A0(u8 *self)
                 }
             }
         }
-        *(Rac2TI128 *)st->home = *(Rac2TI128 *)(self + 0x10);
+        qcopy(st->home, self + 0x10);
         st->home[3] = st->x44;
         self[0x20] = 1;
         break;
     case 1:
         if (st->moby != 0 && (e = st->target) != 0) {
-            *(Rac2TI128 *)(st->moby + 0x10) = *(Rac2TI128 *)(e + 0x30);
+            qcopy(st->moby + 0x10, e + 0x30);
             *(f32 *)(st->moby + 0xF8) = func_00283248(*(f32 *)e, *(f32 *)(e + 4));
             if (func_002A9640(st->moby, 0x10000, 0) != 0) {
                 *(f32 *)(st->moby + 0x2C) = *(f32 *)(*(u8 **)(st->moby + 0x24) + 0x24) * 1.35f;
                 func_002833F0(st->moby + 0xC0, st->moby + 0xF0);
                 if (func_00282C48(*(f32 *)(st->moby + 0xF8)) > 1.6f) {
-                    cols[0] = D_L00_001AFEB0;
-                    cols[1] = D_L00_001AFEA0;
+                    qcopy(&cols[0], &D_L00_001AFEB0);
+                    qcopy(&cols[1], &D_L00_001AFEA0);
                 } else {
-                    cols[0] = D_L00_001AFEA0;
-                    cols[1] = D_L00_001AFEB0;
+                    qcopy(&cols[0], &D_L00_001AFEA0);
+                    qcopy(&cols[1], &D_L00_001AFEB0);
                 }
                 func_L00_0032A530(st->moby, cols, D_L00_001AFE98, D_L00_001AFE90, 0, 0, -1, 1, 0xFFFE, 0xFF, 0);
                 func_L00_00321878(st->moby, 30, 50, 2, -1, func_002A7820(3, 5), 0.0f);
                 func_002E5DA0(0, 0, st->moby, 0xE9B);
-                here = *(Vec_L00_003C27A0 *)(self + 0x10);
+                qcopy(&here, self + 0x10);
                 func_L00_003C2DE8((char *)st->moby, (char *)&here, 1.5f, 0.116666675f);
                 func_0032C700(st->moby + 0x10, 0, 25, 20, 20, 20, 45, 0, 0.85f, 20.0f, 1, 0, 0, 0);
                 for (r = D_L00_001A9014[st->group];
@@ -203,7 +179,7 @@ void func_L00_003C27A0(u8 *self)
                     if (f == 0)
                         break;
                     for (i = 0; i < 3; i++) {
-                        *(Rac2TI128 *)f = 0;
+                        qzero(f);
                         f += 16;
                     }
                 }

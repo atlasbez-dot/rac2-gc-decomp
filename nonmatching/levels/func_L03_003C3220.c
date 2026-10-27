@@ -1,16 +1,9 @@
-/* Later ABI audit: func_0032C700 returns an object pointer and its final stack
- * slot is a nullable pointer. The declaration below is corrected accordingly.
- * These declaration-only edits were not remeasured; numerical residuals below
- * describe the earlier tested source, not a new result.
- */
-
-/* Reconstructed 2026-10-23; -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
- * us: 0/2, us2: 0/2, pal: absent.
- * 3772/3992 bytes, 0xA0 frame versus retail 0xB0.
- * Initialization branches, group traversal and state dispatch allocate and schedule differently.
- * Retail stack arguments of func_0032C700 (1,0,0,0) are preserved, as well as all eight GPR and two FP inputs.
- * Reopen with a verified original state/initialization layout.
- * Semantic equivalence beyond reconstructed control/data flow is not independently validated.
+/* Nonmatching C: Initialize the object and its child, update challenge progress and dispatch the requested target action.
+ * Tested profile: -O2 -G8 -ffunction-sections.
+ * Measured US size: 3768 bytes; retail: 3992 bytes.
+ * Placement checks: US and US2: 0/2 each; PAL: absent from the catalogue.
+ * Remaining: Dispatch block placement, shared transitions and register allocation remain different.
+ * Reopen with independent state and child-pointer lifetime evidence; keep the complete vectors, canonical pointer returns and full effect-call argument banks.
  */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -29,7 +22,7 @@ extern int D_L03_001B2548;
 extern int D_L03_001B2A38 __attribute__((sda));
 extern u16 *D_L03_001FB5A0[];
 extern u8 *D_L03_001B2A1C __attribute__((sda));
-extern float D_00189EA0[4], D_L03_001B9980[4];
+extern float D_00189EA0[], D_L03_001B9980[];
 extern int func_002A77E0(int);
 extern int func_002A7820(int, int);
 extern float func_002A89A8(u8 *, int, float);
@@ -37,18 +30,18 @@ extern u8 *func_0029EFD0(int);
 extern void func_002B37E8(void *, void *);
 extern void func_00282F20(void *, void *, float);
 extern void func_00282CC0(void *, void *, void *);
-extern void func_002A7750(u8 *, u8, int);
+extern void func_002A7750(u8 *, s32, s32);
 extern void func_002A7470(u8 *, int, int, int);
-extern void func_L03_00419A60(int, void *, int);
+extern void func_L03_00419A60(u32, u8 *, s32);
 extern float func_00282E48(void *, void *);
 extern float func_00282E80(void *, void *);
 extern void func_002A93B0(void *);
 extern void func_L03_0032AD10(int);
 extern void *func_002A9640(void *, u32, int);
 extern int func_00282C30(int);
-extern void *func_0032C700(float, float, void *, int, int, int, int, int, int, int, int, int, int, void *);
-extern void func_002B0A68(char *, int, int, unsigned char, float, float, float, float);
-extern void func_L03_003C5668(void *, void *, void *);
+extern u8 *func_0032C700(void *,int,int,int,int,int,int,int,float,float,int,int,int,void *);
+extern void func_002B0A68(char *, int, float *, unsigned char, float, float, float, float);
+extern float *func_L03_003C5668(u8 *, float *, float *);
 extern void func_L02_002EF388(void *, void *, void *, int, int);
 extern u8 *func_L03_003C5128(u8 *);
 extern u8 *func_L03_003C52D0(u8 *);
@@ -67,7 +60,7 @@ extern int func_L03_003C5CE8(void *);
 extern void func_L03_003C5EE8(void *);
 #define ANIM_COUNT(p, offset) (*(u8 *)(*(u8 **)(*(u8 **)((p) + 0x24) + (offset)) + 0x10))
 
-/* Initializes the object, updates group objectives and dispatches requested behavior. */
+
 void func_L03_003C3220(u8 *object)
 {
     StateVector point, first, second;
@@ -155,13 +148,13 @@ void func_L03_003C3220(u8 *object)
             point.f[2] = 0.5f;
             D_L03_001AFEF8 = D_L03_001B2548;
             func_00282CC0(&point, &point, object + 0x10);
-            func_0032C700(0.25f, 20.0f, object + 0x10, 0, 5, 5, 5, 10, 20, 0, 1, 0, 0, 0);
+            func_0032C700(object+0x10,0,5,5,5,10,20,0,0.25f,20.0f,1,0,0,0);
             if (*(s16 *)(object + 0xAA) == 0x964)
-                func_002B0A68((char *)object, 15, (int)(state + 0x1B0), 255, 3.0f, 6.0f, 3.0f, 6.0f);
+                func_002B0A68((char *)object, 15, (float *)(state + 0x1B0), 255, 3.0f, 6.0f, 3.0f, 6.0f);
             func_002A7750(object, 4, 1);
-            *(Quad *)(state + 0x1B0) = 0;
+            qzero(state + 0x1B0);
             *(int *)(state + 0x1E8) = -1;
-            func_L03_003C5668(object, &first, &second);
+            func_L03_003C5668(object, first.f, second.f);
             func_L02_002EF388(object, &first, &second, 0, 0);
         }
         object[0xA8] = 255;
@@ -260,7 +253,7 @@ void func_L03_003C3220(u8 *object)
             if (!func_L03_00419BD8(*(u32 *)(state + 0x220), object + 0x10, &point)) {
                 *(u8 **)(state + 0x358) = 0; return;
             }
-            *(Quad *)(state + 0x340) = point.q;
+            qcopy(state + 0x340, &point);
             func_002A7750(object, 12, 3);
             if (object[0x43] != 2) func_002A7470(object, 2, 0, 10);
         }
@@ -293,8 +286,8 @@ void func_L03_003C3220(u8 *object)
             if (object[0x43] != 2) func_002A7470(object, 2, 0, 10);
             func_L03_003CAAF0(*(u8 **)(state + 0x358), &point, &first);
             if (func_L03_00419BD8(*(u32 *)(state + 0x220), object + 0x10, &point))
-                *(Quad *)(state + 0x340) = point.q;
-            else *(Quad *)(state + 0x340) = first.q;
+                qcopy(state + 0x340, &point);
+            else qcopy(state + 0x340, &first);
         } else if (object[0x20] == 14) {
             func_002A7750(object, 4, 1);
             if (object[0x43]) func_002A7470(object, 0, 0, 20);

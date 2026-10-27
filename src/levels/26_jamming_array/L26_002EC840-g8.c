@@ -45,4 +45,5 @@ void func_L26_003D4AE8(u8 *a0) {
 }
 
 /* Walks the record's live list and flags every entry whose id matches. */
-INCLUDE_ASM("asm/levels", func_L26_003DC128);
+/* func_L26_003DC128 is defined in L02_003CE9A8-g8.c. */
+

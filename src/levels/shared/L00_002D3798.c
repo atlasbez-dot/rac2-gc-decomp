@@ -322,7 +322,6 @@ void func_L00_002D3CF8(float *dst, void *src, float scale)
 
 INCLUDE_ASM("asm/levels", func_L00_002D3D98);
 
-INCLUDE_ASM("asm/levels", func_L00_002D3EA8);
 
 #ifndef RAC2_T_ENTRY_262570
 #define RAC2_T_ENTRY_262570
@@ -372,7 +371,6 @@ unsigned long func_L00_002D3FB0(unsigned long param_1)
   return param_1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002D3FB8);
 
 extern unsigned char D_L00_00139568[];
 

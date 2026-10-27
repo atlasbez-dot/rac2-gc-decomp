@@ -23,4 +23,4 @@ int func_L00_002E3B38(int x)
 INCLUDE_ASM("asm/levels", func_L00_002E3BA0);
 
 
-INCLUDE_ASM("asm/levels", func_L00_002E54E0);
+/* func_L00_002E54E0 is matched in its own unit, src/levels/shared/L00_002E54E0-g8.c (-O2 -G8 -ffunction-sections). */

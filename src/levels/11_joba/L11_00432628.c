@@ -27,10 +27,6 @@ void func_L11_00434AA8(char *p)
     func_L11_00434D00(p, &v);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00434AF8);
-
-INCLUDE_ASM("asm/levels", func_L11_00434D00);
-
 INCLUDE_ASM("asm/levels", func_L11_00434F48);
 
 INCLUDE_ASM("asm/levels", func_L11_00435228);
@@ -42,7 +38,34 @@ INCLUDE_ASM("asm/levels", func_L11_00436350);
 INCLUDE_ASM("asm/levels", func_L11_00436768);
 
 /* Re-arms the measured stage guard, then clears it. */
-INCLUDE_ASM("asm/levels", func_L11_00436850);
+extern int func_002B3BA8_6850(char *, int, float, float, int, int);
+
+/* Same body as func_L02_003F16F0, with this function's own callees. */
+void func_L11_00436850(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    if (*(unsigned char *)(arg0 + 0x20) < 4) {
+        *(int *)(state + 0x270) = 0;
+        goto done;
+    }
+
+    if (*(short *)(state + 0x282) == 1) {
+        *(short *)(state + 0x280) =
+            func_002B3BA8_6850(arg0, *(int *)(state + 0x27C), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x270) = *(int *)(state + 0x200);
+    } else {
+        if (func_L11_00441868(*(int *)(arg0 + 0xB8), *(short *)(arg0 + 0xAA)) == 0)
+            goto done;
+        *(short *)(state + 0x282) = 1;
+        *(short *)(state + 0x280) =
+            func_002B3BA8_6850(arg0, *(int *)(state + 0x27C), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x270) = *(int *)(state + 0x200);
+    }
+    return;
+
+done:
+    *(short *)(state + 0x282) = 0;
+}
 
 extern void func_002B60B0(char *, float, float, float, float);
 extern void func_002A7470(void *, int, int, int);
@@ -127,7 +150,7 @@ void func_L11_00436A78(char *obj)
     *(unsigned short *)(obj + 0x34) = (*(unsigned short *)(obj + 0x34) & 0xEFFF) | 0x47;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00436B78);
+/* func_L11_00436B78 is defined in L11_00436B78-flags.c. */
 
 INCLUDE_ASM("asm/levels", func_L11_00436D08);
 

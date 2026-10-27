@@ -100,7 +100,7 @@ class CompilationTests(unittest.TestCase):
                                        "sdk -O0 -G2 -Wa,-G2", ("-dl",))
         self.assertIn("/xgcc", text)
         self.assertIn("-S -O0 -G2 -dl", text)
-        self.assertIn("/as -G2", text)
+        self.assertIn("/as --r5900-pool-li-d -G2", text)
         with self.assertRaises(ValueError):
             regalloc.split_flags("-O2 -Wa,-G2,")
 

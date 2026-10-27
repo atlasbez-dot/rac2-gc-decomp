@@ -36,7 +36,7 @@ extern s32 func_002761F8(void *, void *, s32, u8 *, s32);
 
 extern s32 func_00277258(void *, s32, u8 *, float);
 
-extern s32 func_00277F48(void *, s32, u8 *, void *, float);
+extern s32 func_00277F48(float, void *, s32, u8 *, void *);
 
 extern void func_00282D30(void *, void *, float);
 
@@ -94,7 +94,7 @@ void func_L23_00428CF8(u8 *moby) {
                         if (*(s32 *)(base + 0x18) == D_0018C0B0) {
                             func_L00_0035F5A0(0x20, 0, 0);
                         }
-                        func_00277F48(moby + 0x10, 0, moby, &hit2, 0.6f);
+                        func_00277F48(0.6f, moby + 0x10, 0, moby, &hit2);
                         if (moby[0xBC] == 0) {
                             func_002A7750(moby, 1, -1);
                         }

@@ -1,56 +1,32 @@
+/* func_002D08C8 (100 bytes, 28 places), closer M2: matches at all 28 places under
+ *     src/game/002D08C8-g8.c	-O2 -G8 -ffunction-sections
+ * but only with D_001A7A0A declared volatile (as src/game/002CD8C0-g8.c declares it):
+ * retail leaves the delay slot of the third test a nop, and a plain byte load of the
+ * flag is copied into that slot as a $gp load (plain, incomplete, MACRO_ADDR and sized
+ * sda arrays all measured). Everything else is plain C: the 0x1F2848 store sits before
+ * the inner tests (retail runs it in a non-likely delay slot), the four stores are one
+ * sda int[4] (assembler macro form), and the two $gp words differ between the boot and
+ * the levels, hence ref_ names. Land it if the lead accepts the volatile flag. */
 #include "common.h"
 
-/* Near miss: the candidate is 96 bytes against retail's 100 and the whole
- * shape is right (four nested tests, the stores of 1 and the return of 0),
- * but the register allocation and the schedule of the delay slots differ.
- *
- * Retail keeps the value 1 in `$a0` across the three blocks and computes the
- * address of the first store early, in the delay slot of the first branch
- * (`lui $v1,0x1F`), so that the store itself is a single instruction
- * (`sw $a0,0x2848($v1)`) that fits in the delay slot of the second branch.
- * This cc1 keeps the value in `$v1` (the register its own allocator picks),
- * materialises it again after each load that clobbers it, and leaves the
- * stores as `lui`+`sw` pairs, so one of them cannot be scheduled into a
- * delay slot - and the one that does goes `$gp`-relative, which retail does
- * not do.
- *
- * The addresses are per-program values (0x001A8CFC and 0x001A904C for the
- * first test in the boot and in level 00), so they are `ref_` symbols and
- * the small-data ones carry the `sda` attribute; the unit needs `-G8`.
- */
-
-extern int ref_L00_002D08C8_01;
-
-extern int ref_L00_002D08C8_02 __attribute__((sda));
-
-extern int ref_L00_002D08C8_03;
-
-extern int ref_L00_002D08C8_04;
-
-extern int ref_L00_002D08C8_05 __attribute__((sda));
-
-extern int ref_L00_002D08C8_06;
-
-extern int ref_L00_002D08C8_07;
-
-extern int ref_L00_002D08C8_08;
-
+extern int D_001A8CFC;
+extern int ref_002D08C8_01 __attribute__((sda));
+extern int D_001F2848[];
+extern int D_001ABA0C[4] __attribute__((sda));
+extern int ref_002D08C8_02 __attribute__((sda));
 extern volatile unsigned char D_001A7A0A;
 
 int func_002D08C8(void)
 {
-    int one = 1;
-
-    if (ref_L00_002D08C8_01 != 0) {
-        if (ref_L00_002D08C8_02 != 0) {
-            ref_L00_002D08C8_03 = one;
-            ref_L00_002D08C8_04 = one;
-        }
-        if (ref_L00_002D08C8_05 != 0)
-            ref_L00_002D08C8_06 = one;
+    if (D_001A8CFC != 0) {
+        D_001F2848[0] = 1;
+        if (ref_002D08C8_01 != 0)
+            D_001ABA0C[1] = 1;
+        if (ref_002D08C8_02 != 0)
+            D_001ABA0C[2] = 1;
         if (D_001A7A0A != 0) {
-            ref_L00_002D08C8_07 = one;
-            ref_L00_002D08C8_08 = one;
+            D_001ABA0C[0] = 1;
+            D_001ABA0C[3] = 1;
         }
     }
     return 0;

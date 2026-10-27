@@ -19,7 +19,7 @@ extern void func_00283098(void *, void *, void *);
 extern void func_00282CC0(void *, void *, void *);
 extern void func_002E59F8(int);
 
-INCLUDE_ASM("asm/levels", func_L20_00449178);
+/* func_L20_00449178 is defined in L20_00449178-state-g8.c. */
 
 /* func_L20_00449338 is defined in L20_00449178-g8.c (it reaches data through $gp). */
 

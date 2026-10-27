@@ -175,13 +175,13 @@ INCLUDE_ASM("asm/game", func_0032FDC0);
 
 /* func_0032FEA8 uses small data in 0032EB28-g8.c. */
 
+
 INCLUDE_ASM("asm/game", func_0032FFD8);
 
 INCLUDE_ASM("asm/game", func_00330150);
 
 INCLUDE_ASM("asm/game", func_003304D8);
 
-INCLUDE_ASM("asm/game", func_003309A0);
 
 /* func_00330BC0 uses small data in 0032EB28-g8.c. */
 
@@ -195,7 +195,28 @@ INCLUDE_ASM("asm/game", func_00331238);
 
 INCLUDE_ASM("asm/game", func_003313E0);
 
-INCLUDE_ASM("asm/game", func_00331580);
+extern f32 func_002A78D8(f32 low, f32 high);
+extern s32 func_00283CF0(f32 value);
+extern u8 *func_002C16C0(f32 *pos, f32 *sym, s32 a2, s32 a3, u32 color, s32 alpha, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+extern f32 D_001A8BD0[] __attribute__((sda));
+extern u8 *D_001F26B0;
+void func_00331580(f32 *pos, f32 scale)
+{
+    f32 v[3];
+    f32 size = scale * 6300.0f;
+    u8 *effect;
+    s32 i;
+    for (i = 1; i >= 0; i--) {
+    v[0] = pos[0] + func_002A78D8(0.0f, 0.04f);
+    v[1] = pos[1] + func_002A78D8(0.0f, 0.04f);
+    v[2] = pos[2] + func_002A78D8(0.0f, 0.04f);
+    func_002C16C0(v, D_001A8BD0, 15, 0x5F, 0x7F7F7F, func_00283CF0(func_002A78D8(1.0f, 3.0f)), size, 500.0f, 1.0f, 0.0f, 0.0f);
+    }
+    effect = func_002C16C0(v, D_001A8BD0, 15, 0x7F, 0x407FFF, func_00283CF0(func_002A78D8(1.0f, -1.0f)), size * 0.8f, 500.0f, 1.0f, 0.0f, 0.0f);
+    if (effect != 0) {
+        effect[2] = D_001F26B0[5];
+    }
+}
 
 /* func_00331718 uses small data in 0032EB28-g8.c. */
 
@@ -220,7 +241,6 @@ void func_003323F0(int a0) {
 INCLUDE_ASM("asm/game", func_00332440);
 
 
-INCLUDE_ASM("asm/game", func_00332590);
 
 INCLUDE_ASM("asm/game", func_00332658);
 
@@ -286,10 +306,54 @@ INCLUDE_ASM("asm/game", func_00334550);
 
 
 
-INCLUDE_ASM("asm/game", func_00334730);
+static __inline__ void qcopy(void *dst, const void *src) {
+    __asm__ __volatile__("lq $2,0x0(%1)\n\tsq $2,0x0(%0)"
+                         : : "r"(dst), "r"(src) : "$2", "memory");
+}
+
+typedef int L_34730TI __attribute__((mode(TI)));
+typedef union { unsigned char b[0x2600]; short h[0x1300]; int i[0x980]; float f[0x980]; } L_34730Hero;
+extern L_34730TI func_00334710(int, L_34730TI *);
+extern int func_002761F8(void *, void *, int, void *, void *);
+extern void func_00282CC0(void *, void *, void *);
+extern void func_00282D30(void *, void *, float);
+extern char D_001B53A0[];
+extern float D_001BAFA0[];
+
+int func_00334730(float *out, int flag)
+{
+    float base[4] __attribute__((aligned(16)));
+    float near[4] __attribute__((aligned(16)));
+    float far[4] __attribute__((aligned(16)));
+    float ofs[4] __attribute__((aligned(16)));
+    L_34730Hero *hero = (L_34730Hero *)&D_00189E20;
+    float f;
+    char *cam = D_001B53A0;
+
+    if (hero->h[0x34C / 2] == 0) {
+        func_00334710(((int *)cam)[-4], (L_34730TI *)out);
+        return 1;
+    }
+    func_00334710(((int *)cam)[-4], (L_34730TI *)base);
+    f = hero->f[0x31C / 4];
+    if (f >= 30.0f || flag == 0) {
+        func_00282D30(ofs, cam + 0x30, 0.2f);
+        func_00282CC0(near, base, ofs);
+        func_00282D30(ofs, cam + 0x30, -30.0f);
+        func_00282CC0(far, base, ofs);
+        if (func_002761F8(near, far, 0x12, (void *)hero->i[0x2290 / 4], 0) != 0) {
+            qcopy(out, D_001BAFA0);
+            return 0;
+        }
+        qcopy(out, base);
+        return -1;
+    }
+    func_00282D30(near, cam + 0x30, -f);
+    func_00282CC0(out, base, near);
+    return 1;
+}
 
 
-INCLUDE_ASM("asm/game", func_003348A8);
 
 void func_003349E8(void *owner, int flag, float value)
 {
@@ -307,13 +371,39 @@ void func_003349E8(void *owner, int flag, float value)
 
 INCLUDE_ASM("asm/game", func_00334A88);
 
-INCLUDE_ASM("asm/game", func_003351B0);
+typedef int TI __attribute__((mode(TI)));
+extern void *D_0026E810[7];
+extern TI func_00334710(int, TI *);
+extern void func_00282CC0(void *, void *, void *);
+
+int func_003351B0(char *self, void *src, void *dst, int mode)
+{
+    static void *arms[7] = {&&transformed, &&direct, &&zero, &&zero, &&zero, &&zero, &&zero};
+    TI local;
+    int ret = 1;
+    char *vector = *(char **)(self + 0x70) + 0x60;
+    if ((unsigned int)(mode - 1) >= 7) goto direct;
+    goto *D_0026E810[mode - 1];
+zero:
+    func_00282CC0(dst, src, vector);
+    ret = 0;
+    goto done;
+transformed:
+    func_00334710((int)self, &local);
+    func_00282CC0(dst, src, &local);
+    goto done;
+direct:
+    func_00282CC0(dst, src, vector);
+done:
+    return ret;
+}
 
 INCLUDE_ASM("asm/game", func_00335270);
 
 /* func_00335370 is defined in 00335370-copy.c. */
 
 /* func_003353C8 uses the quadword-copy profile in 0032EB28-qcopy.c. */
+
 
 
 INCLUDE_ASM("asm/game", func_00335438);
@@ -349,8 +439,6 @@ void func_003355A8(int mode)
 }
 
 INCLUDE_ASM("asm/game", func_003356E8);
-
-INCLUDE_ASM("asm/game", func_00335798);
 
 void func_00335840(void) {
     func_002704D0();
@@ -406,7 +494,6 @@ void func_00335B80(s32 *unused, s32 *dst, s32 *left, s32 *right, f32 scale) {
     dst[3] = func_00283D38(left[3], right[3], scale);
 }
 
-INCLUDE_ASM("asm/game", func_00335C10);
 
 INCLUDE_ASM("asm/game", func_00335C60);
 

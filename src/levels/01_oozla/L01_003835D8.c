@@ -21,7 +21,7 @@ INCLUDE_ASM("asm/levels", func_L01_003A5BB8);
 
 INCLUDE_ASM("asm/levels", func_L01_003A6028);
 
-INCLUDE_ASM("asm/levels", func_L01_003A6280);
+/* func_L01_003A6280 is defined in L01_003A6280-helper-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L01_003A6350);
 
@@ -38,7 +38,6 @@ void func_L01_003A6448(float *arg0, float *arg1) {
         *arg1 = -1.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L01_003A64F0);
 
 INCLUDE_ASM("asm/levels", func_L01_003A6638);
 
@@ -52,7 +51,7 @@ INCLUDE_ASM("asm/levels", func_L01_003B1F08);
 
 extern void func_00115484(void *, int, int);
 
-extern int func_00277F48(char *, int, char *, int, float);
+extern int func_00277F48(float, char *, int, char *, int);
 
 extern void *D_L01_001C3980[];
 
@@ -63,7 +62,7 @@ void func_L01_003B45D8(void *arg0, void **arg1, int *arg2) {
 
     func_00115484(arg1, 0, 4);
     *arg2 = 0;
-    count = func_00277F48((char *)arg0 + 0x10, 1, (char *)arg0, 0, 3.5f);
+    count = func_00277F48(3.5f, (char *)arg0 + 0x10, 1, (char *)arg0, 0);
     if (count <= 0)
         return;
     for (i = 0; i < count; i++) {
@@ -93,7 +92,6 @@ void func_L01_003B46C8(char **arg0, int *arg1) {
     } while (i < *arg1);
 }
 
-INCLUDE_ASM("asm/levels", func_L01_003B4700);
 
 /* func_L01_003B49D8 and func_L01_003B4AD0 live in L01_003B49D8.c: their clamp needs
    -ffast-math (the retail's min.s), which is a per-file flag. */

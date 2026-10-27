@@ -36,9 +36,7 @@ extern void func_32D0F0(void *, int, float);
 
 extern float func_2EF670(float, float);
 
-INCLUDE_ASM("asm/levels", func_L03_002AB5C8);
 
-INCLUDE_ASM("asm/levels", func_L03_002AD540);
 
 /* func_L03_002ADC00 is in its dedicated zero-vector profile unit. */
 
@@ -119,11 +117,9 @@ ASM_FUNC("asm/levels", func_L03_002EFB60);
 
 INCLUDE_ASM("asm/levels", func_L03_00326458);
 
-INCLUDE_ASM("asm/levels", func_L03_003268C0);
 
 INCLUDE_ASM("asm/levels", func_L03_00329EF0);
 
-INCLUDE_ASM("asm/levels", func_L03_0032AB20);
 
 /* func_L03_00339128 is defined in L03_00339128-qcopy.c. */
 
@@ -137,13 +133,11 @@ void func_L03_00339268(unsigned char *a0) {
 
 INCLUDE_ASM("asm/levels", func_L03_003564C0);
 
-INCLUDE_ASM("asm/levels", func_L03_0038A6D8);
 
 INCLUDE_ASM("asm/levels", func_L03_0038AB30);
 
 /* func_L03_0038B238 is defined in L03_002AB5C8-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L03_0038B2E8);
 
 void func_L03_0038B390(unsigned char *a0, int a1, int a2, int a3) {
     unsigned char *p = a0;
@@ -167,7 +161,6 @@ void func_L03_0038B390(unsigned char *a0, int a1, int a2, int a3) {
 
 INCLUDE_ASM("asm/levels", func_L03_0038B408);
 
-INCLUDE_ASM("asm/levels", func_L03_0038B4E8);
 
 
 INCLUDE_ASM("asm/levels", func_L03_0038B5D8);
@@ -182,7 +175,6 @@ void func_L03_00393228(unsigned char *a0) {
             func_2B8300(1, 0x3F, a0);
 }
 
-INCLUDE_ASM("asm/levels", func_L03_003A40A0);
 
 int func_L03_003A4978(unsigned char *p) { return p[0x20] == 1; }
 
@@ -214,7 +206,6 @@ int func_L03_003C41B8(unsigned char *a0, int a1, int a2) {
 
 /* func_L03_003C4578 is defined in L03_002AB5C8-g8.c (it reads $gp data). */
 
-INCLUDE_ASM("asm/levels", func_L03_003C4800);
 
 /* func_L03_003C4A10 is defined in L03_002AB5C8-g8.c (it reads $gp data). */
 

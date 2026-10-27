@@ -8,7 +8,6 @@ INCLUDE_ASM("asm/game", func_00308DB8);
 
 INCLUDE_ASM("asm/game", func_003092A0);
 
-INCLUDE_ASM("asm/game", func_00309718);
 
 INCLUDE_ASM("asm/game", func_0030A188);
 
@@ -18,7 +17,6 @@ INCLUDE_ASM("asm/game", func_0030BBA0);
 
 INCLUDE_ASM("asm/game", func_0030C188);
 
-INCLUDE_ASM("asm/game", func_0030C440);
 
 
 
@@ -26,7 +24,7 @@ INCLUDE_ASM("asm/game", func_0030CAD0);
 
 INCLUDE_ASM("asm/game", func_0030CCD0);
 
-INCLUDE_ASM("asm/game", func_0030D430);
+/* func_0030D430 is matched in its own unit, src/game/0030D430-g8.c. */
 
 INCLUDE_ASM("asm/game", func_0030D5B8);
 
@@ -34,7 +32,6 @@ INCLUDE_ASM("asm/game", func_0030DB88);
 
 INCLUDE_ASM("asm/game", func_0030DE88);
 
-INCLUDE_ASM("asm/game", func_0030E030);
 
 
 extern char *func_002A9640(char *, int, int);

@@ -1,66 +1,62 @@
-/* Near miss: the straight-line tuning-block filler is 512 bytes against retail's 520 in the
-   plain -O2 -G0 profile, and 520/520 with the body's field reads split as here. What differs:
-   retail materialises both 16-byte-copy addresses (`addiu $a0,$s1,0x10`, `addiu $v1,$s0,0x300`)
-   before the lq/sq where this cc1 folds the offsets into the lq/sq; the small integer constants
-   land in different argument registers ($a2/$a0/$a1 against $a3/$a1/$a2); and the scheduler puts
-   the two constant loads for func_002A7878 ahead of the register saves here. The two calibrated
-   literals are 1.333f (0x3FAA9FBE) and 0.17453295f (0x3E32B8C4); 1.3332518f and
-   0.17453297972679138f are the usual wrong spellings. The -0x344 field is re-read from memory
-   after the call, so the source stores it and reads the field back. */
+/* func_L09_00404C50: near miss, 540 B vs 520 (about five instructions). The field set, the qcopy position copy and every call match, including
+   the real argument lists the older draft missed: func_002A7878 takes the position pointer, func_002A78D8 takes the integers 0xB, 2 and 3
+   before its two floats, func_002A7940 takes 0xB4 and 0x78. Left: retail loads the integers 0xB, 2 and 3 once into $a0/$a1/$a2 before the stores and
+   reuses them for the byte and word stores, where this build loads them again for the call. Own unit: -O2 -G8 -ffunction-sections -frac2-qcopy. */
+#include "common.h"
 
-extern float func_002A7878(float, float);
+extern float D_L09_001B13F4 __attribute__((sda));
+extern float func_002A7878(char *, float, float);
 extern int func_00283CF0(float);
-extern void func_002A78D8(float, float);
-extern float func_002A7940(void);
+extern float func_002A78D8(int, int, int, float, float);
+extern float func_002A7940(int, int);
 extern void func_002A7750(char *, int, int);
 extern void func_002A7470(char *, int, int, int);
-extern float D_L09_001B13F4 __attribute__((sda));
 
-typedef int TI128 __attribute__((mode(TI)));
-
-/* Fills the kind's tuning block at +0x300 and the actor's angles from the stored one. */
-void func_L09_00404C50(char *a0)
+/* Initialises a burst emitter: copies the object position, rolls its size and lifetimes and loads the particle defaults. */
+void func_L09_00404C50(char *obj)
 {
-    char *s1 = a0;
-    char *s0 = *(char **)(a0 + 0x68);
-    float f1;
+    char *rec = *(char **)(obj + 0x68);
+    float size, spin;
+    int life, kind, count;
 
-    *(TI128 *)(s0 + 0x300) = *(TI128 *)(s1 + 0x10);
-    *(float *)(s0 + 0x344) = func_002A7878(1.0f, 1.333f);
-    *(float *)(s1 + 0x2C) =
-        *(float *)(*(char **)(s1 + 0x24) + 0x24) * *(float *)(s0 + 0x344);
-    *(unsigned char *)(s0 + 0x48) = func_00283CF0(15.0f);
-    *(unsigned char *)(s0 + 0x4A) = func_00283CF0(4.0f);
-    f1 = *(float *)(s0 + 0x344) * 0.1f;
-    *(float *)(s0 + 0x84) = 0.2f;
-    *(unsigned char *)(s0 + 0x28) = 3;
-    *(float *)(s0 + 0x134) = 0.05f;
-    *(float *)(s0 + 0x104) = f1;
-    *(float *)(s0 + 0x110) = 0.17453295f;
-    *(float *)(s0 + 0x130) = 0.5260310173034668f;
-    *(int *)(s0 + 0x98) = 3;
-    *(float *)(s0 + 0x80) = 0.2f;
-    *(unsigned char *)(s0 + 0x60) = 11;
-    *(float *)(s0 + 0x30) = 0.333000004291534f;
-    *(unsigned char *)(s0 + 0x2A) = 2;
-    *(float *)(s0 + 0x100) = *(float *)(s0 + 0x344) * 0.3f;
-    *(float *)(s0 + 0x10C) = 0.1f;
-    *(int *)(s0 + 0x138) = *(int *)(s0 + 0x138) | 0x80;
-    *(float *)(s0 + 0x108) = 0.1f;
-    *(float *)(s0 + 0x8C) = 0.4f;
-    func_002A78D8(18.0f, 22.0f);
-    *(unsigned char *)(s0 + 0x1E8) = 7;
-    *(unsigned char *)(s0 + 0x1E9) = 6;
-    *(unsigned short *)(s0 + 0x1E2) = 0x78;
-    *(int *)(s0 + 0x13C) = *(int *)(s0 + 0x234);
-    *(unsigned short *)(s0 + 0x1E4) = 0xB4;
-    *(float *)(s0 + 0x1D4) = 0.875f;
-    *(float *)(s0 + 0x1D0) = D_L09_001B13F4 * 0.01666666753590107f;
-    *(float *)(s0 + 0x1DC) = 0.4f * 0.01745329238474369f;
-    *(float *)(s0 + 0x348) = func_002A7940();
-    func_002A7750(s1, 1, 0);
-    if (*(unsigned char *)(s1 + 0x43))
-        func_002A7470(s1, 0, 0, 0);
-    *(int *)(s1 + 0x9C) = 12;
-    *(unsigned short *)(s1 + 0x34) = *(unsigned short *)(s1 + 0x34) | 0x1000;
+    qcopy(rec + 0x300, obj + 0x10);
+    size = func_002A7878(obj + 0x10, 1.0f, 1.333f);
+    *(float *)(rec + 0x344) = size;
+    *(float *)(obj + 0x2C) = *(float *)(*(char **)(obj + 0x24) + 0x24) * size;
+    *(u8 *)(rec + 0x48) = func_00283CF0(15.0f);
+    *(u8 *)(rec + 0x4A) = func_00283CF0(4.0f);
+    life = 0xB;
+    kind = 2;
+    count = 3;
+    *(float *)(rec + 0x84) = 0.2f;
+    *(u8 *)(rec + 0x28) = count;
+    *(float *)(rec + 0x134) = 0.05f;
+    *(float *)(rec + 0x104) = *(float *)(rec + 0x344) * 0.1f;
+    *(float *)(rec + 0x110) = 0.17453295f;
+    *(float *)(rec + 0x130) = 0.52359885f;
+    *(s32 *)(rec + 0x98) = count;
+    *(float *)(rec + 0x80) = 0.2f;
+    *(u8 *)(rec + 0x60) = life;
+    *(float *)(rec + 0x30) = 0.333f;
+    *(u8 *)(rec + 0x2A) = kind;
+    *(float *)(rec + 0x100) = *(float *)(rec + 0x344) * 0.3f;
+    *(float *)(rec + 0x10C) = 0.1f;
+    *(s32 *)(rec + 0x138) |= 0x80;
+    *(float *)(rec + 0x108) = 0.1f;
+    *(float *)(rec + 0x8C) = 0.4f;
+    spin = func_002A78D8(life, kind, count, 18.0f, 22.0f);
+    *(u8 *)(rec + 0x1E8) = 7;
+    *(u8 *)(rec + 0x1E9) = 6;
+    *(short *)(rec + 0x1E2) = 0x78;
+    *(s32 *)(rec + 0x13C) = *(s32 *)(rec + 0x234);
+    *(short *)(rec + 0x1E4) = 0xB4;
+    *(float *)(rec + 0x1D4) = 1.75f;
+    *(float *)(rec + 0x1D0) = D_L09_001B13F4 * 0.016666668f;
+    *(float *)(rec + 0x1DC) = spin * 0.017453294f;
+    *(float *)(rec + 0x348) = func_002A7940(0xB4, 0x78);
+    func_002A7750(obj, 1, 0);
+    if (*(u8 *)(obj + 0x43) != 0)
+        func_002A7470(obj, 0, 0, 0);
+    *(s32 *)(obj + 0x9C) = 0xC;
+    *(unsigned short *)(obj + 0x34) |= 0x1000;
 }

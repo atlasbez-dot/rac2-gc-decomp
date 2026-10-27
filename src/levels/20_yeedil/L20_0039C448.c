@@ -32,13 +32,10 @@ extern float D_L20_0023E670[];
 
 extern char *func_0029EFD0(int);
 
-INCLUDE_ASM("asm/levels", func_L20_0039C540);
-
 INCLUDE_ASM("asm/levels", func_L20_0039C5D0);
 
-INCLUDE_ASM("asm/levels", func_L20_0039C8C8);
+/* func_L20_0039C8C8 is defined in L20_0039C8C8.c. */
 
-INCLUDE_ASM("asm/levels", func_L20_0039CC10);
 
 INCLUDE_ASM("asm/levels", func_L20_0039CF58);
 
@@ -99,8 +96,6 @@ void func_L20_0039DB50(char *arg0, int arg1, int arg2, float f12) {
 }
 
 INCLUDE_ASM("asm/levels", func_L20_0039DBC8);
-
-INCLUDE_ASM("asm/levels", func_L20_0039DCF8);
 
 extern void func_0029F338(int);
 
@@ -317,7 +312,6 @@ void func_L20_003C0350(char *arg0) {
 
 INCLUDE_ASM("asm/levels", func_L20_003E6728);
 
-INCLUDE_ASM("asm/levels", func_L20_003E6FA0);
 
 /* func_L20_00408D98 is defined in L20_0039C448-g8.c (it reaches a global through $gp). */
 

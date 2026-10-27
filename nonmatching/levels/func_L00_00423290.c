@@ -1,3 +1,4 @@
+/* 26 October 2026 (M24): -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses, 356/360 bytes: retail keeps a copy of the object pointer (daddu $s2, $s1) and reuses its register for +0x60; the +0xB0/+0xF0 pointers are formed after the first calls. */
 /* func_L00_00423290 - NOT MATCHED, best attempt - 360 bytes expected, 27 places.
  * last check.py line: "func_L00_00423290: 0 of 27 places match (src/levels/shared/L00_004224D0.c)"
  * with "00_aranos_tutorial: 356 bytes, expected 360" - the body is 356 bytes of the
@@ -26,6 +27,11 @@
  *
  * The first copy's destination is the object's +0x60 (the retail's `sq $v0, 0($s1)`
  * with $s1 = obj+0x60), not the +0x160; the deposit below says so. */
+typedef int HeroQ __attribute__((mode(TI)));
+typedef union { unsigned char b[0x2600]; signed char c[0x2600]; short h[0x1300]; unsigned short uh[0x1300]; int i[0x980]; unsigned int u[0x980]; float f[0x980]; char *ptr[0x980]; HeroQ q[0x260]; } Hero;
+extern unsigned char D_00189E20[];
+#define H ((Hero *)D_00189E20)
+
 
 #include "include_asm.h"
 
@@ -44,9 +50,9 @@ extern float func_00282DB0_1(char *local, char *p);
 
 extern void func_00282C88(void *a);
 
-extern char D_0018A0E0[];
 
-extern char D_00189EA0[];
+
+
 
 void func_L00_00423290(char *a0)
 {
@@ -64,12 +70,10 @@ void func_L00_00423290(char *a0)
     if (*(short *)(a0 + 0x86) != 0)
         return;
 
-    hero = D_0018A0E0;
+    hero = (&H->c[704]);
     obj = *(char **)(a0 + 0x70);
-    v60 = obj + 0x60;
-    vB0 = obj + 0xB0;
-    vF0 = obj + 0xF0;
     v160 = obj + 0x160;
+    v60 = obj + 0x60;
 
     func_00282D30(buf0, hero, -1.0f);
     /* The hero's position, 0x240 below the facing direction the call above uses. */
@@ -77,6 +81,8 @@ void func_L00_00423290(char *a0)
     *(V4_F0fba48d3 *)v60 = *(V4_F0fba48d3 *)hero;
     dst = (V4_F0fba48d3 *)(obj + 0xC0);
     *dst = *(V4_F0fba48d3 *)v60;
+    vB0 = obj + 0xB0;
+    vF0 = obj + 0xF0;
     func_00282D30(obj + 0x70, buf0, func_00282DB0_1(v60, buf0));
     func_00282C88(obj + 0xD0);
     func_00282C88(obj + 0xE0);

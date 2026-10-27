@@ -10,7 +10,7 @@ typedef int s32;
 
 INCLUDE_ASM("asm/levels", func_L23_0041E538);
 
-INCLUDE_ASM("asm/levels", func_L23_0041E5B0);
+/* func_L23_0041E5B0 is defined in its dedicated source unit. */
 
 INCLUDE_ASM("asm/levels", func_L23_00422540);
 
@@ -117,15 +117,13 @@ void func_L23_004278B0(u8 *arg0) {
 
 /* func_L23_00427CE8 is matched in L23_00427CE8-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
-INCLUDE_ASM("asm/levels", func_L23_004280D8);
-
 /* func_L23_00428490 is defined in L23_00428490-g8.c. */
 
 /* func_L23_00428CF8 is matched in L23_00428CF8-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier -frac2-no-annulled-wide-stores). */
 
 INCLUDE_ASM("asm/levels", func_L23_00429098);
 
-INCLUDE_ASM("asm/levels", func_L23_00429430);
+/* func_L23_00429430 is defined in its dedicated source unit. */
 
 
 /* func_L23_00429DC8 is matched in L23_00429DC8-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por). */

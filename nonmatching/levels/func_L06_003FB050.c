@@ -1,15 +1,23 @@
-/* Nonmatching reconstruction, 23 October 2026.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Final check.py coverage: us 0/1, us2 0/1; no linked build run.
- * Default 1312/1356; qcopy/barrier 1352/1356.
- * Remaining: Retail jump table is referenced canonically, but sound-handle registers, player base and branches still differ.
- * Reopen with a validated sound-table/player aggregate source model.
+/*
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G0 -ffunction-sections
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 1360 bytes; retail: 1356 bytes.
+ * Remaining difference: A real five-state switch replaces the external computed-goto and unused
+ * label-table workaround. The resident-player position prefix fixes its base formation; frame 0x60
+ * matches. The body is 1360/1356; sound-handle address/register ownership and branches remain
+ * different. A 0x70-stride sound-entry view did not solve it and was retained privately.
+ * Reopen when: Recover sound-manager/header address lifetimes and source branching without
+ * narrowing the sound-state predicate or rewriting the compiled jump table.
  */
+
 #include "common.h"
 typedef int VectorBits __attribute__((mode(TI)));
-extern void *D_L06_002E1D80[];
+typedef float Vector[4] __attribute__((aligned(16)));
 extern char D_00188660[];
-extern char D_00189E20[];
+typedef struct { unsigned char prefix[0x80]; Vector position; } PlayerPosition;
+extern PlayerPosition D_00189E20;
 extern char *D_L06_001BFC98;
 extern int D_L06_001B2348;
 extern void func_002E59F8(int);
@@ -24,31 +32,28 @@ extern void func_002AD6F0(void *, void *, void *, void *);
 /* Raise and lower a platform while maintaining its motion sound. */
 void func_L06_003FB050(char *moby)
 {
-    static void *cases[] = {&&initial, &&idle, &&lower, &&raise, &&stop};
-    float oldPosition[4], oldRotation[4], delta[4];
+    Vector oldPosition, oldRotation, delta;
     char *state = *(char **)(moby + 0x68);
     char *sound;
     int handle, phase, brightness;
     float time, wave;
     unsigned int selection;
-    *(VectorBits *)oldPosition = *(VectorBits *)(moby + 0x10);
-    *(VectorBits *)oldRotation = *(VectorBits *)(moby + 0xF0);
+    qcopy(oldPosition, (moby + 0x10));
+    qcopy(oldRotation, (moby + 0xF0));
     selection = *(unsigned char *)(moby + 0x20);
-    if (selection < 5)
-        goto *D_L06_002E1D80[selection];
-    goto done;
-initial:
+    switch (selection) {
+    case 0:
     *(int *)(state + 0x7C) = *(int *)(state + 0x78);
     *(int *)(state + 0x5C) |= 1;
-    *(VectorBits *)(state + 0x90) = *(VectorBits *)(moby + 0x10);
-    *(VectorBits *)(state + 0x80) = *(VectorBits *)(state + 0x90);
+    qcopy((state + 0x90), (moby + 0x10));
+    qcopy((state + 0x80), (state + 0x90));
     *(float *)(state + 0x88) = *(float *)(state + 0x98) - *(float *)(state + 0x68);
     *(int *)(state + 0x60) = *(int *)(state + 0x74);
     *(unsigned char *)(moby + 0x20) = 1;
     *(int *)(state + 0xB0) = -1;
     *(int *)(state + 0x64) = 0;
     goto done;
-idle:
+    case 1:
     handle = *(int *)(state + 0xB0);
     if (handle != -1) {
         sound = D_00188660 + handle * 0x70;
@@ -62,14 +67,14 @@ idle:
         else
             func_002A7750(moby, 3, -1);
     }
-    if (*(float *)(moby + 0x18) - *(float *)(D_00189E20 + 0x88) > 3.0f &&
+    if (*(float *)(moby + 0x18) - D_00189E20.position[2] > 3.0f &&
         *(float *)(moby + 0x18) == *(float *)(state + 0x98))
         func_002A7750(moby, 2, -1);
-    else if (*(float *)(moby + 0x18) - *(float *)(D_00189E20 + 0x88) < -3.0f &&
+    else if (*(float *)(moby + 0x18) - D_00189E20.position[2] < -3.0f &&
              *(float *)(moby + 0x18) == *(float *)(state + 0x88))
         func_002A7750(moby, 3, -1);
     goto done;
-lower:
+    case 2:
     if (*(float *)(moby + 0x18) <= *(float *)(state + 0x88)) {
     handle = *(int *)(state + 0xB0);
     if (handle != -1) {
@@ -83,7 +88,7 @@ lower:
         goto done;
     }
     if (func_00277258(moby + 0x10, 1, moby, 2.1f) &&
-        *(float *)(moby + 0x18) > *(float *)(D_00189E20 + 0x88) &&
+        *(float *)(moby + 0x18) > D_00189E20.position[2] &&
         (!D_L06_001BFC98 || *(short *)(D_L06_001BFC98 + 0xAA) != 0xEA3))
         goto stop;
     sound = D_00188660 + *(int *)(state + 0xB0) * 0x70;
@@ -92,7 +97,7 @@ lower:
     func_002AA548(moby + 0x18, state + 0x64, *(float *)(state + 0x88),
                   0.001944444492f, 0.001666666707f, 0.1000000089f);
     goto done;
-raise:
+    case 3:
     func_002AA548(moby + 0x18, state + 0x64, *(float *)(state + 0x98),
                   0.001944444492f, 0.001666666707f, 0.1000000089f);
     if (*(float *)(moby + 0x18) >= *(float *)(state + 0x98)) {
@@ -115,6 +120,7 @@ raise:
     }
     goto done;
 stop:
+    case 4:
     handle = *(int *)(state + 0xB0);
     if (handle != -1) {
         sound = D_00188660 + handle * 0x70;
@@ -122,6 +128,7 @@ stop:
             func_002E59F8(handle);
     }
     *(int *)(state + 0xB0) = -1;
+    }
 done:
     time = (float)D_L06_001B2348 * (1.0f / 60.0f);
     phase = (int)time;

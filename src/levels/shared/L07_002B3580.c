@@ -9,8 +9,6 @@ INCLUDE_ASM("asm/levels", func_L07_002B5738);
 
 /* func_L07_00321D68 is in its qualified quadword-copy unit. */
 
-INCLUDE_ASM("asm/levels", func_L07_00323038);
-
 
 int func_L07_00338D20(int a0)
 {
@@ -31,7 +29,6 @@ INCLUDE_ASM("asm/levels", func_L07_003844C0);
 
 INCLUDE_ASM("asm/levels", func_L07_003848D8);
 
-INCLUDE_ASM("asm/levels", func_L07_003BA4D0);
 
 extern unsigned short *D_L07_001FAD60[];
 

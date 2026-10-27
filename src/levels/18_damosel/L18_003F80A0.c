@@ -59,8 +59,6 @@ INCLUDE_ASM("asm/levels", func_L18_003FB308);
 
 INCLUDE_ASM("asm/levels", func_L18_003FB620);
 
-INCLUDE_ASM("asm/levels", func_L18_003FB708);
-
 INCLUDE_ASM("asm/levels", func_L18_003FD858);
 
 extern u16 *D_L18_001FB320[];
@@ -210,7 +208,6 @@ INCLUDE_ASM("asm/levels", func_L18_0042F308);
 
 extern int *D_L18_001FE480[];
 
-INCLUDE_ASM("asm/levels", func_L18_0042F688);
 
 extern void func_002A7750(u8 *arg0, s32 arg1, s32 arg2);
 
@@ -250,7 +247,6 @@ INCLUDE_ASM("asm/levels", func_L18_004302B0);
 
 /* func_L18_004308F0 is matched in L18_004308F0.c (built with -frac2-hazard-labels). */
 
-INCLUDE_ASM("asm/levels", func_L18_00430E58);
 
 INCLUDE_ASM("asm/levels", func_L18_00432070);
 

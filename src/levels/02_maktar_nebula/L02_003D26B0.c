@@ -162,8 +162,6 @@ int func_L02_003D4A60(char *arg0) {
     return hit;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003D4AF0);
-
 int func_L02_003D4D00(char *arg0) {
     char *state = *(char **)(arg0 + 0x68);
     short timer = *(short *)(state + 0x32E);
@@ -213,8 +211,6 @@ void func_L02_003D4FD0(char *arg0, TI128 *arg1, float arg2, float arg3) {
 }
 
 /* func_L02_003D5118 is matched in L02_003D5118.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
-
-INCLUDE_ASM("asm/levels", func_L02_003D52A8);
 
 void func_L02_003D5570(char *arg0) {
     char *state = *(char **)(arg0 + 0x68);
@@ -384,7 +380,7 @@ void func_L02_003D6538(char *arg0) {
 
 /* func_L02_003D6570 is matched in L02_003D6570-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
-INCLUDE_ASM("asm/levels", func_L02_003D6690);
+/* func_L02_003D6690 is defined in L02_003D6690-helpers-g8.c. */
 
 /* func_L02_003D6A20 is matched in L02_003D6A20-g8.c (built with -frac2-qcopy -frac2-qcopy-barrier -g). */
 
@@ -529,7 +525,6 @@ void func_L02_003D9608(char *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003D9728);
 
 INCLUDE_ASM("asm/levels", func_L02_003D9E68);
 
@@ -543,7 +538,7 @@ extern void func_00282D30(void *, void *, float);
 
 extern void func_002A8C00(void *, char *, int, void *, float);
 
-extern int func_00277F48(void *, int, char *, void *, float);
+extern int func_00277F48(float, void *, int, char *, void *);
 
 typedef struct {
     char pad0[0x18];
@@ -602,8 +597,8 @@ void func_L02_003DAB68(char *arg0) {
             rec.b18 = 0;
             rec.b19 = 1;
             rec.h1a = *(unsigned short *)(arg0 + 0xAA);
-            func_00277F48(hit, 0, arg0, &rec, 0.65f);
-            func_00277F48(v1, 0, arg0, &rec, 0.95f);
+            func_00277F48(0.65f, hit, 0, arg0, &rec);
+            func_00277F48(0.95f, v1, 0, arg0, &rec);
         }
         *(int *)((*(int *)(*(char **)(arg0 + 0x68) + 0x244) << 8) + D_L02_001B359C + 0x98) = saved;
     }

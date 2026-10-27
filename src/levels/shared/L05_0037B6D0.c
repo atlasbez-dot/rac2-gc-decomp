@@ -198,7 +198,6 @@ void func_L05_0037D6E8(void)
 }
 
 
-INCLUDE_ASM("asm/levels", func_L05_0037D7D8);
 
 INCLUDE_ASM("asm/levels", func_L05_0037DA58);
 
@@ -210,7 +209,6 @@ INCLUDE_ASM("asm/levels", func_L05_00397F48);
 
 INCLUDE_ASM("asm/levels", func_L05_00398018);
 
-INCLUDE_ASM("asm/levels", func_L05_00398378);
 
 INCLUDE_ASM("asm/levels", func_L05_00398618);
 
@@ -222,7 +220,6 @@ INCLUDE_ASM("asm/levels", func_L05_00399268);
 
 INCLUDE_ASM("asm/levels", func_L05_003CD1A8);
 
-INCLUDE_ASM("asm/levels", func_L05_003CD280);
 
 void func_L05_003CD4C0(char *object)
 {
@@ -253,7 +250,6 @@ void func_L05_003CD4C0(char *object)
     *(float *)(state + 0x38) = 3.5f;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_003CD598);
 
 INCLUDE_ASM("asm/levels", func_L05_003CEFA0);
 
@@ -262,8 +258,6 @@ INCLUDE_ASM("asm/levels", func_L05_003CF040);
 INCLUDE_ASM("asm/levels", func_L05_003CF350);
 
 INCLUDE_ASM("asm/levels", func_L05_003CFAB8);
-
-INCLUDE_ASM("asm/levels", func_L05_003CFB90);
 
 int func_L05_003CFC28(int a0)
 {
@@ -277,8 +271,6 @@ INCLUDE_ASM("asm/levels", func_L05_003CFC48);
 INCLUDE_ASM("asm/levels", func_L05_003CFCF0);
 
 INCLUDE_ASM("asm/levels", func_L05_003CFF90);
-
-INCLUDE_ASM("asm/levels", func_L05_003D02C8);
 
 extern int D_L05_00221D10[];
 
@@ -315,9 +307,8 @@ void func_L05_003D0320(char *obj)
     func_306630(obj + 0x10, table + 0x30, obj + 0x10);
 }
 
-INCLUDE_ASM("asm/levels", func_L05_003D0538);
 
-INCLUDE_ASM("asm/levels", func_L05_003D0728);
+/* func_L05_003D0728 is in the sibling unit L05_003D0728-g8.c. */
 
 void func_L05_003D08C0(float *a0, char *a1)
 {
@@ -437,7 +428,31 @@ INCLUDE_ASM("asm/levels", func_L05_003D1368);
 
 INCLUDE_ASM("asm/levels", func_L05_003D15E8);
 
-INCLUDE_ASM("asm/levels", func_L05_003D18E0);
+void func_L05_003D18E0(char *obj)
+{
+    char *sub = *(char **)(obj + 0x68);
+    char *table;
+    float a, b, c;
+
+    *(unsigned char *)(obj + 0x20) = 1;
+    *(unsigned short *)(obj + 0x34) = *(unsigned short *)(obj + 0x34) | 0x100;
+    *(int *)(func_379CA0(obj) + 0x148) = 5;
+    func_37AEC0(obj, 1);
+    table = D_L05_001B2614 + D_L05_00221D10[0] * 128;
+    *(float *)(sub + 0x180) = 5.0f;
+    *(int *)(sub + 0x2F0) = -1;
+    *(int *)(sub + 0x2F4) = -1;
+    *(int *)(sub + 0x268) = 0;
+    *(float *)(obj + 0x2C) = 0.04f;
+    a = func_332B50(0.0f, *(float *)table);
+    b = func_332C18();
+    c = func_332C18();
+    func_33B330(obj + 0x10, a, b, c);
+    func_306630(obj + 0x10, table + 0x30, obj + 0x10);
+    *(int *)(sub + 0x26C) = 0;
+}
+
+
 
 /* Spawns the object's effect after three guards, then runs the timer. */
 void func_L05_003D19F0(char *object)
@@ -460,7 +475,6 @@ void func_L05_003D19F0(char *object)
 
 INCLUDE_ASM("asm/levels", func_L05_003D1AB8);
 
-INCLUDE_ASM("asm/levels", func_L05_003D1E20);
 
 INCLUDE_ASM("asm/levels", func_L05_003D1E60);
 

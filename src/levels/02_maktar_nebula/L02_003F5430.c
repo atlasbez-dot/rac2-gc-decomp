@@ -941,7 +941,7 @@ INCLUDE_ASM("asm/levels", func_L02_003FFDB0);
 
 /* func_L02_004002E0 is matched in L02_004002E0-g8.c (built with -g). */
 
-INCLUDE_ASM("asm/levels", func_L02_004004D0);
+/* func_L02_004004D0 is matched in its own unit, src/levels/shared/L02_004004D0-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */
 
 /* Timer for one of the thirty-nine messages, refused while one is running. */
 s32 func_L02_00400650(char *a0, s32 a1) {

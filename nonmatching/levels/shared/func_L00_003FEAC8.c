@@ -1,3 +1,4 @@
+/* 26 October 2026 (M24): -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier, 212/212 bytes, 9 lines off, registers only: base and index swap s0/s1 (and one mult/move order). Entry through a pointer local, the last callee with its floats before the count, the slot store through a struct view. In the permuter farm. */
 /* from src/levels/shared/L00_003F8E08-g8.c: C that compiles close to the retail's bytes
    but does not match; needs a -G8 unit (the body reads level data through $gp).
 
@@ -14,6 +15,11 @@
    its own, while this cc1 materialises the full address of both globals and puts the
    product in $t0.  The two globals are declared as arrays here; a scalar declaration
    is the next thing to try. */
+typedef int HeroQ __attribute__((mode(TI)));
+typedef union { unsigned char b[0x2600]; signed char c[0x2600]; short h[0x1300]; unsigned short uh[0x1300]; int i[0x980]; unsigned int u[0x980]; float f[0x980]; char *ptr[0x980]; HeroQ q[0x260]; } Hero;
+extern unsigned char D_00189E20[];
+#define H ((Hero *)D_00189E20)
+
 
 /* The body: the object keeps a pointer to a table of 0xE0-byte records at +0x68; the
    record the boot's byte at 0x00139581 picks supplies one float; the new object is
@@ -46,23 +52,27 @@ extern float D_L00_001B0C14 __attribute__((sda));
 extern void ref_L00_003FEAC8_00(void *, void *, void *, int);
 extern float ref_L00_003FEAC8_01(void *);
 extern int ref_L00_003FEAC8_02(int, int);
-extern int ref_L00_003FEAC8_03(void *, void *, void *, int, float, float, float);
+extern int ref_L00_003FEAC8_03(void *, void *, void *, float, float, int, float);
+
+typedef struct { int pad[4]; int spawned[1]; } StateSlots;
 
 void func_L00_003FEAC8(char *self, char *arg1, Quad_3feac8 *arg2, int index)
 {
-    int *base = *(int **)(self + 0x68);
+    StateSlots *base = *(StateSlots **)(self + 0x68);
     Quad_3feac8 vec;
     float f21;
+    Entry_262570_3feac8 *entry;
     float f20;
     int r;
 
     vec = *arg2;
-    f21 = D_L00_00262570[D_00139581[0]].f70;
+    entry = D_L00_00262570 + D_00139581[0];
+    f21 = entry->f70;
     ref_L00_003FEAC8_00(self, arg1, arg2, index);
     f20 = ref_L00_003FEAC8_01(&vec);
     r = ref_L00_003FEAC8_02(1, 30);
-    r = ref_L00_003FEAC8_03(arg1, &vec, self, r, f20, f21, D_L00_001B0C14);
-    *(int *)((char *)base + index * 4 + 0x10) = r;
+    r = ref_L00_003FEAC8_03(arg1, &vec, self, f20, f21, r, D_L00_001B0C14);
+    base->spawned[index] = r;
     if (r != 0) {
         *(int *)(r + 0xB8) = self;
     }

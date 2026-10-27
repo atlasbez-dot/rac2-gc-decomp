@@ -2,6 +2,7 @@
 func_0029B720	boot: instruction at +0x1c differs
 func_0029B758	00_aranos_tutorial: instruction at +0x18 differs
 func_0029B780	00_aranos_tutorial: instruction at +0x18 differs
+func_0029B7C0	boot: instruction at +0x38 differs
 func_0029C1A8	boot: instruction at +0x18 differs
 func_0029C1D8	boot: instruction at +0x18 differs
 func_0029C208	boot: instruction at +0x24 differs
@@ -36,6 +37,7 @@ func_0029C9D0	boot: instruction at +0x18 differs
 func_0029CA00	boot: instruction at +0x24 differs
 func_0029CA40	boot: instruction at +0x18 differs
 func_0029CBE0	boot: instruction at +0x24 differs
+func_002CD250	00_aranos_tutorial: instruction at +0x54 differs
 func_002CD878	boot: instruction at +0x20 differs
 func_002CD950	boot: instruction at +0x90 differs
 func_002CF188	boot: instruction at +0x20 differs
@@ -96,4 +98,5 @@ func_L00_0034C4E0	05_feltzin_system: func_L00_0030DA68 would be at 0x00327c30
 func_L00_0034C668	05_feltzin_system: func_L00_0030D988 would be at 0x00327b50
 func_L00_0034C720	00_aranos_tutorial: instruction at +0x90 differs
 func_L00_0034E6F0	00_aranos_tutorial: instruction at +0x20 differs
+func_L08_00318F90	08_tabora: instruction at +0x38 differs
 func_L20_00446E70	20_yeedil: instruction at +0x64 differs

@@ -1,38 +1,15 @@
-/* func_L00_003BC108 (288 bytes, 27 places) - best attempt, NOT MATCHED.
- *
- * tools/check.py func_L00_003BC108 --diff:
- *   "00_aranos_tutorial: instruction at +0x0 differs" (the size is the retail's 288 bytes;
- *   the same for the other 26 places).
- *
- * What is right: the whole shape of the body.  The two early returns (the parameter equal
- * to 0.0f copies the first point, equal to 1.0f the second one), the `bc1f`/`bc1fl`
- * pair, the 16-byte copies as `lq`/`sq` with a zero displacement, the three components
- * and the fourth one set to zero - and, with the expression form of the result, the
- * OPERATION ORDER of all three components is the retail's, instruction for instruction.
- *
- * What is left is the allocation of the floating-point registers: the retail uses
- * $f8 for the zero, $f6 for a[0], $f4 for b[0], $f3 for c[0], $f2 for t*t*t, $f7 for the
- * difference of the differences, and this cc1 puts the same values in $f7, $f4, $f2,
- * $f3, $f6 and $f0.  The order of the operations is the retail's in all three
- * components, so only the register numbers differ.
- *
- * What was measured to get here (each step is a compile):
- *   - the zero of the fourth component is a float VARIABLE (`float zero = 0.0f;`), not a
- *     literal: the retail materialises it once in $f8 at the top of the body and uses it
- *     both in the first compare and in the last store;
- *   - the 16-byte copies need a `volatile` destination (`*(volatile TI128 *)out =
- *     *(TI128 *)p1;`), otherwise this cc1 sinks the `sq` into the `jr $ra` delay slot and
- *     the retail leaves a nop there (the same spelling as the matched func_002A8C00);
- *   - the three components have to be ONE expression each, not a sequence of named
- *     temporaries: with temporaries the scheduler moves the `b-c` subtraction and the
- *     `t*t*t` multiplication to other places, and the retail's order is only reproduced
- *     by the expression (the common subexpressions are then CSE'd by the compiler);
- *   - the arguments are (float t, void *out, void *p1, void *p2, void *p3, void *p4): the
- *     parameter is the first float (in $f12) and the five pointers take $a0-$a3 and $t0.
- *
- * To retake: a spelling of the three expressions whose floating-point temporaries get
- * the retail's register numbers.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 288/288 bytes; us: 0/27 placements; us2: 0/27 placements; pal: 0/27 placements.
+ * The two complete endpoint copies use qcopy, replacing the historical invented volatile
+ * destination. All three cubic components, early exits and the final zero remain. Operation shape
+ * and size agree, but FP register allocation differs from the initial zero.
+ * Reopen with actual floating live-range or source-expression evidence. Do not restore source
+ * volatile merely to control scheduling.
+ * Original complete variants and allocator diagnostics are preserved privately.
+ * No candidate or linked-build credit is claimed.
  */
+#include "common.h"
 
 #ifndef RAC2_T_TI128_3BC108
 #define RAC2_T_TI128_3BC108
@@ -53,11 +30,11 @@ void func_L00_003BC108(float t, void *out, void *p1, void *p2, void *p3, void *p
     float t2;
 
     if (t == zero) {
-        *(volatile TI128_3BC108 *)out = *(TI128_3BC108 *)p1;
+        qcopy(out, p1);
         return;
     }
     if (t == 1.0f) {
-        *(volatile TI128_3BC108 *)out = *(TI128_3BC108 *)p2;
+        qcopy(out, p2);
         return;
     }
 

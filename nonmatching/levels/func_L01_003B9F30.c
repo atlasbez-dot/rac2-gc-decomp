@@ -1,33 +1,17 @@
 /*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G16 -ffunction-sections -Wa,-G16 -frac2-qcopy.
- * Reported final C / retail: 4208 / 4220 bytes; size equality is not a match.
- * us: 0/1 placements; 4208/4220 bytes.
- * us2: 0/1 placements; 4208/4220 bytes.
- * pal: absent from catalogue (not a match).
- * Residual: See the retained source comment for the measured residual.
- * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ * Retained complete manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G16 -ffunction-sections -Wa,-G16
+ * 4200/4220 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: Full saved position/rotation, outbound-object and query copies are retained with
+ * canonical AA548/AAA00 argument grouping and unsigned colour shifts. Frame0xD0 versus0xB0 and
+ * excess saved FPRs remain. A GCSE diagnostic reaches 4116/4220 and frame 0xB0 but loses the
+ * retail GPR banks; it is not retained.
+ * Reopen: Independent query/constructor scalar/FP lifetimes preserving pointer returns and all
+ * real GPR/FP inputs; no forced spill, fake local or discarded-handle argument.
+ * Trial-only source markers and profiles are restored after checking.
  */
 
-/* Unmatched manual reconstruction. Closest measured profile:
- * -O2 -G16 -ffunction-sections -Wa,-G16 -frac2-qcopy: 4208 versus 4220 bytes,
- * 0/1 placements in US and US2. PAL has no canonical catalogue entry.
- * Without qcopy, 4136/4140 bytes; retail frame is 0xB0, this source uses 0xD0
- * with additional FPR saves. First difference remains at +0, not a 12-byte tail.
- * The real 16-byte zero/vector object is declared at its full observed width.
- * Lookahead passes position+6 in f12; Ghidra omitted that live float argument.
- * Zero-register quadword stores are represented as real aggregate zeroing.
- * Current canonical D6B70 has no arguments and overwrites a0 at entry. This C
- * honors that contract; the retail caller nevertheless loads a discarded handle
- * before its call, contributing a source/interface mismatch.
- * Helper audits preserve AA548/AAA00 f0 results, C9828's float plus five GPR
- * inputs, and C19D8's object-pointer result with two FP and three GPR inputs.
- * Behavior and linked-image equality are unverified. Reopen after an established
- * FPR lifetime/frame remedy and a qualified canonical ignored-handle contract.
- */
+#include "common.h"
 typedef unsigned int Quadword __attribute__((mode(TI)));
 typedef union { Quadword q; float v[4]; } Vector;
 struct Rac2Native_5f824a0e369ccf7b_src_record;
@@ -54,7 +38,7 @@ typedef struct {
 } PoolRecord64;
 extern char D_00189E20[];
 extern unsigned char D_0019B2E8[];
-extern int D_001A79F0[] __attribute__((sda));
+extern int D_001A79F0 __attribute__((sda));
 extern char *D_L01_001FE180[];
 extern char *D_L01_001B255C __attribute__((sda));
 extern float D_L01_001AFE18[4] __attribute__((sda));
@@ -65,7 +49,7 @@ extern struct Rac2Native_5f824a0e369ccf7b_src_record D_L01_00297400;
 extern float func_L01_003BAFB0(void);
 extern int func_001163B0(void);
 extern void func_002A7470(unsigned char *, int, int, int);
-extern void func_002A7750(unsigned char *, unsigned char, int);
+extern void func_002A7750(unsigned char *, int, int);
 extern int func_002A77E0(int);
 extern int func_002A7820(int, int);
 extern float func_002A7878(float, float);
@@ -83,9 +67,14 @@ extern void func_0029FCC0(char *, int, char *);
 extern void *func_002A9640(void *, unsigned int, int);
 extern float func_002AA150(float, float, float);
 extern float func_002AA2E8(float *, float, float);
-extern float func_002AA548(float, float, float, float, void *, void *);
-extern float func_002AAA00(float, float, float, float, void *, void *, int);
-extern float func_002AAC80(float, float, float, float, void *);
+extern float func_002AA548(float *, float *, float, float, float, float);
+extern float func_002AAA00(float *, float *, int, float, float, float, float);
+/* Working effect-only contract used by canonical callers. Retail establishes
+ * the pointer and four FP inputs and mutation through the pointer. The original
+ * source return type remains unqualified; this caller ignores incidental F0,
+ * and no allocation choice depends on the declaration.
+ */
+extern void func_002AAC80(void *, float, float, float, float);
 extern void func_002AC9F8(float *, float), func_002ACB48(float *, float);
 extern void func_002AD6F0(void *, void *, void *, void *);
 extern void func_002AEC48(void *, void *, int, float, float);
@@ -113,8 +102,8 @@ void func_L01_003B9F30(unsigned char *object)
     float surface, yaw, rate, x, y;
     int i, ready, index;
     unsigned char animation;
-    old_position.q = *(Quadword *)(object + 0x10);
-    old_rotation.q = *(Quadword *)(object + 0xF0);
+    qcopy(&old_position, object+0x10);
+    qcopy(&old_rotation, object+0xF0);
     surface = func_L01_003BAFB0();
     if (object[0x20] > 1) F(object, 0x18) = F(context, 0x2A8);
     switch (object[0x20]) {
@@ -123,7 +112,7 @@ void func_L01_003B9F30(unsigned char *object)
             F(context, 0x2B4) = 1.0f / func_00282E48(outbound + 0x10, outbound + 0x20);
             F(context, 0x2B8) = 1.0f / func_00282E48(inbound + 0x10, inbound + 0x20);
             I(context, 0x2F0) = -1;
-            *(Quadword *)(object + 0x10) = *(Quadword *)(outbound + 0x10);
+            qcopy(object+0x10, outbound+0x10);
             F(object, 0xF8) = func_00283248(F(outbound, 0x20) - F(object, 0x10), F(outbound, 0x24) - F(object, 0x14));
             F(context, 0x2D4) = F(object, 0x18);
             I(context, 0x2AC) = 0;
@@ -150,7 +139,7 @@ void func_L01_003B9F30(unsigned char *object)
         ready = 1;
         for (i = 0; i < 5; ++i) {
             index = I(context, 0x2DC + 4*i);
-            if (index != -1 && !(D_0019B2E8[index + D_001A79F0[0]*16] & 0x80)) ready = 0;
+            if (index != -1 && !(D_0019B2E8[index + D_001A79F0*16] & 0x80)) ready = 0;
         }
         if (ready) {
             object[0x31] = 1;
@@ -212,13 +201,13 @@ void func_L01_003B9F30(unsigned char *object)
         }
         func_002AA2E8((float *)(context + 0x2D0), F(context, 0x2CC), 0.33333334f);
         rate = F(context, 0x2B4);
-        func_002AA548((float)(I(outbound, 0)-1), rate*0.005f, rate*0.0016666667f, F(context, 0x2D0)*rate*0.016666668f, context+0x2B0, context+0x2BC);
+        func_002AA548((float *)(context+0x2B0), (float *)(context+0x2BC), (float)(I(outbound, 0)-1), rate*0.005f, rate*0.0016666667f, F(context, 0x2D0)*rate*0.016666668f);
         func_002C9828(F(context, 0x2B0), outbound, 0, object+0x10, &direction, 0);
         F(object, 0xF8) = func_002AA150(F(object, 0xF8), direction.v[2], 0.5f);
-        target.q = 0;
+        qzero(&target);
         if (F(context, 0x2B0)+6.0f < (float)(I(outbound, 0)-1)) {
-            target.q = *(Quadword *)(object+0x10);
-            velocity.q = *(Quadword *)(object+0xF0);
+            qcopy(&target, object+0x10);
+            qcopy(&velocity, object+0xF0);
             func_002C9828(F(context, 0x2B0)+6.0f, outbound, 0, &target, &velocity, 0);
             func_00282CF0(&target, &target, object+0x10);
             yaw = func_00283248(target.v[0], target.v[1]);
@@ -232,12 +221,12 @@ void func_L01_003B9F30(unsigned char *object)
         func_00282CC0(&target, &target, object+0x10);
         target.v[3] = 12345.0f;
         if (!func_002A77E0(4)) {
-            velocity.q = *(Quadword *)(object+0x10);
+            qcopy(&velocity, object+0x10);
             func_002ACB48(velocity.v, 0.05f);
             velocity.v[2] = surface;
             rate = func_002A7878(2.0f, 3.0f);
             i = func_002A77E0(6);
-            child = func_002C19D8(rate, 13000.0f, &velocity, D_L01_001AFE18, ((i+20)<<24)|0x5060);
+            child = func_002C19D8(rate, 13000.0f, &velocity, D_L01_001AFE18, ((u32)(i+20)<<24)|0x5060U);
             if (child) child[9] = func_00283CF0(16.0f)+32;
         }
         if ((float)(I(outbound, 0)-1) <= F(context, 0x2B0)) {
@@ -262,7 +251,7 @@ void func_L01_003B9F30(unsigned char *object)
         }
         if (target.v[3] == 12345.0f) {
             if (!P(context, 0x2AC)) {
-                P(context, 0x2AC) = func_L00_002D70A0(5);
+                P(context, 0x2AC) = (char *)func_L00_002D70A0(5);
                 if (!P(context, 0x2AC)) break;
             }
             child = P(context, 0x2AC);
@@ -275,17 +264,17 @@ void func_L01_003B9F30(unsigned char *object)
     case 7:
         func_0029FCC0(object, 0, (char *)&target);
         if (object[0x20] == 5) {
-            direction.q = *(Quadword *)(inbound+0x10);
+            qcopy(&direction, inbound+0x10);
             direction.v[2] -= 1.5f;
             x = F(inbound, 0x20); y = F(inbound, 0x24);
         } else {
-            direction.q = *(Quadword *)(outbound+0x10);
+            qcopy(&direction, outbound+0x10);
             x = F(outbound, 0x20); y = F(outbound, 0x24);
         }
         yaw = func_00283248(x-direction.v[0], y-direction.v[1]);
         func_00282CF0(&velocity, &direction, object+0x10);
         rate = func_00282DF0(&velocity);
-        func_002AAC80(rate, 0.001666667f, 0.001666667f, 0.10000001f, context+0x2C4);
+        func_002AAC80(context+0x2C4, rate, 0.001666667f, 0.001666667f, 0.10000001f);
         func_002AC9F8(velocity.v, F(context, 0x2C4));
         func_00282CC0(object+0x10, object+0x10, &velocity);
         F(object, 0x18) = F(outbound, 0x18) + (object[0x20] == 5 ? D_L01_002A48B0 : D_L01_002A45D0)[U(object, 0x96)];
@@ -295,21 +284,21 @@ void func_L01_003B9F30(unsigned char *object)
                 func_002ACB48(target.v, 0.01f);
                 target.v[2] = surface;
                 rate = func_002A7878(0.02f, 0.1f); i = func_002A77E0(6);
-                func_002C19D8(rate, 8000.0f, &target, D_L01_001AFE18, ((i+20)<<24)|0x5060);
+                func_002C19D8(rate, 8000.0f, &target, D_L01_001AFE18, ((u32)(i+20)<<24)|0x5060U);
             }
         } else {
             if (object[0x43]) func_002A7470(object, 0, 0, 10);
-            func_002AAA00(yaw, 0.000387851f, 0.0003393696097191423f, 0.02617994323372841f, object+0xF8, context+0x2C8, 0);
+            func_002AAA00((float *)(object+0xF8), (float *)(context+0x2C8), 0, yaw, 0.000387851f, 0.0003393696097191423f, 0.02617994323372841f);
             if (func_00283C80(F(object, 0xF8), yaw) < 0.001f) {
                 object[0xA8] = 0xFF; object[0x20] = object[0x20] == 5 ? 6 : 2;
                 F(context, 0x2B0) = 0.0f;
             }
         }
         if (surface < target.v[2] && !func_002A77E0(6)) {
-            target.q = *(Quadword *)(object+0x10);
+            qcopy(&target, object+0x10);
             func_002ACB48(target.v, 0.5f); target.v[2] = surface;
             rate = func_002A7878(2.0f, 3.0f); i = func_002A77E0(6);
-            child = func_002C19D8(rate, 13000.0f, &target, D_L01_001AFE18, ((i+20)<<24)|0x5060);
+            child = func_002C19D8(rate, 13000.0f, &target, D_L01_001AFE18, ((u32)(i+20)<<24)|0x5060U);
             if (child) child[9] = func_00283CF0(16.0f)+32;
         }
 clear_effect:
@@ -317,7 +306,7 @@ clear_effect:
         break;
     case 6:
         rate = F(context, 0x2B8)*0.0022222223f;
-        func_002AA548((float)(I(inbound, 0)-1), rate, rate, F(context, 0x2B8)*0.16666667f, context+0x2B0, context+0x2BC);
+        func_002AA548((float *)(context+0x2B0), (float *)(context+0x2BC), (float)(I(inbound, 0)-1), rate, rate, F(context, 0x2B8)*0.16666667f);
         func_002C9828(F(context, 0x2B0), inbound, 0, object+0x10, object+0xF0, 0);
         F(object, 0x18) -= 1.5f;
         if ((float)(I(inbound, 0)-1) <= F(context, 0x2B0)) {
@@ -334,7 +323,7 @@ clear_effect:
         for (i = 0; i < 3; ++i) func_002AEC48(object, context+0x90+i*0x80, i, 0.02f, 0.3f);
         if (object[0x20] != 6 && object[0x20] != 0 && !func_002A77E0(49)) {
             rate = func_002A7878(3.0f, 5.0f); i = func_002A77E0(6);
-            child = func_002C19D8(rate, 13000.0f, object+0x10, D_L01_001AFE18, ((i+20)<<24)|0x5060);
+            child = func_002C19D8(rate, 13000.0f, object+0x10, D_L01_001AFE18, ((u32)(i+20)<<24)|0x5060U);
             if (child) child[9] = func_00283CF0(16.0f)+32;
         }
         func_00282CF0(&direction, object+0x10, &old_position);

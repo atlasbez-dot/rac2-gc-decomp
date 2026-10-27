@@ -1,29 +1,23 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 absent from catalogue; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G8 -ffunction-sections
+ * Coverage: US: 0/1; US2: absent from catalogue; PAL: absent from catalogue.
+ * Compiled text: 5692 bytes; retail: 5868 bytes.
+ * The shared cooldown is a 32-bit word: 00282948 uses LW/SW and this caller stores 10
+ * with SW at +0x4E8. The four duration arrays keep their measured +8 start and 16-bit API.
+ * 00277F48 returns a signed 32-bit count in v0; this caller ignores that result.
+ * Remaining difference: Moving the zero initialization of target_distance to the measured post-
+ * selection phase (+0x558) restores frame 0x440 from 0x450. Complete 128-pointer collision
+ * storage, 21 contiguous main entries, four five-vector forks and Impact buffers remain intact.
+ * Explicit vector helpers and separate target-side CF0 calls yield 5692/5868; one extra saved FP
+ * register and phase/scheduling differences remain.
+ * Reopen when: Recover the remaining phase/float lifetimes from exact retail dataflow and
+ * allocator diagnostics. Do not manufacture stack overlays or reduce buffer extents.
  */
 
-/* Retained complete reconstruction, not an integrated match.
-   US only; US2/PAL have no catalogue entry. Three meaningful trials:
-   5704/5868, frame 0x480; truthful shared target descriptor 5712/5868,
-   frame 0x450; final contiguous fork-control view 5688/5868, frame 0x450.
-   Retail frame is 0x440; final first instruction differs. The final body uses
-   all three C2210 calls with seven GPR and three FP arguments, including its
-   real vector-pointer t1 and pointer32 return (ignored). 128 collision objects,
-   twenty main points, four five-vector forks and full Impact objects are real
-   extents. State, player selector and collision structures are prefix views.
-   The decompiler's incoming HI is an artifact: mtlo/madd computes 32-bit fork
-   addresses. No new ABI input or numeric data address was introduced.
-   One source ternary merges two equivalent CF0 call sites (17 against 18 in
-   retail); every other direct call site's count agrees before optimization.
-   Remaining differences include phase/float lifetimes, extra f27/f28 saves,
-   and temporary descriptor/vector stack reuse. Reopen from proven original
-   temporary lifetimes/layouts, rather than flags or forced registers. Some
-   scratch vector w lanes are left unspecified as in retail's xyz producers.
-   Ignored scalar returns remain unqualified where no meaningful consumer was
-   found. This C has not passed byte equality or linked build qualification. */
+#include "common.h"
+
 typedef unsigned int Quadword __attribute__((mode(TI)));
 typedef union { Quadword whole; float f[4]; } Vector;
 typedef struct {
@@ -63,8 +57,9 @@ extern float D_L06_0023A7E0[20];
 extern Vector D_L06_0023A830[4][5];
 /* The cooldown and four fork arrays occupy one contiguous prefix. */
 extern struct {
-    short cooldown;
-    unsigned char unused02[6];
+    int cooldown;
+    /* Unmodeled bytes +4..+7; the first short array is measured at +8. */
+    unsigned char unused04[4];
     short duration[4], alpha[4], reset[4], center[4];
 } D_L06_001B30C0;
 extern float D_L06_001AF014 __attribute__((sda));
@@ -100,11 +95,12 @@ extern void func_00282DD8(void *, void *, void *);
 extern void func_00282D08(void *, void *, void *, float);
 extern void func_002ACEC0(void *, void *, void *, float);
 extern float func_00282DB0(void *, void *), func_00282DF0(void *), func_00282E20(void *), func_00282E48(void *, void *);
-extern int func_00282948(short *), func_00282978(short *);
+extern int func_00282948(int *);
+extern int func_00282978(short *);
 extern float func_002A7878(float, float), func_002A78D8(float, float), func_002ABB18(float);
 extern void func_002A8C00(Impact *, int, int, float, Vector *);
 extern void func_002A8E20(char *, Impact *);
-extern void func_00277F48(void *, int, void *, Impact *, float);
+extern int func_00277F48(void *, int, void *, Impact *, float);
 extern int func_002761F8(void *, void *, int, void *, int);
 extern void func_00300190(void *, void *);
 extern int func_002A7820(int, int), func_002A77E0(int);
@@ -122,10 +118,10 @@ void func_L06_003D64C0(char *object)
     char *candidate, *primary = 0, *secondary = 0, *data;
     char **entry;
     int dual = D_L06_0026C7F0[D_00139568.selected].dual != 0;
-    int count = 0, collided = 0, i, j, side, spin;
+    int count, collided, i, j, side, spin;
     float best = 0, next = 0, distance, angle, view_angle, score;
     float spacing = D_L06_001AF014 * 0.05f;
-    float target_distance = 0, amplitude, wobble, old_height, f, f2, phase, sign;
+    float target_distance, amplitude, wobble, old_height, f, f2, phase, sign;
     D_L06_001AF02C = func_00283B98(D_L06_001AF02C, D_L06_001AF030);
     D_L06_001AF034 = func_00283BE0(D_L06_001AF034, D_L06_001AF038);
     D_L06_001AF048 = func_00283B98(D_L06_001AF048, D_L06_001AF04C);
@@ -200,9 +196,10 @@ void func_L06_003D64C0(char *object)
             beam->secondary = secondary;
         }
     }
+    target_distance = 0;
     if (beam->primary) {
         data = (char *)func_002AB1F0(beam->primary);
-        primary_position.whole = ((Vector *)(beam->primary + 0x10))->whole;
+        qcopy(&primary_position, beam->primary + 0x10);
         func_00282D30(&projection, beam->primary + 0xe0, *(float *)(data + 0x10));
         func_00282CC0(&primary_position, &primary_position, &projection);
         target_distance = func_00282E48(beam, &primary_position);
@@ -210,7 +207,7 @@ void func_L06_003D64C0(char *object)
     }
     if (beam->secondary) {
         data = (char *)func_002AB1F0(beam->secondary);
-        secondary_position.whole = ((Vector *)(beam->secondary + 0x10))->whole;
+        qcopy(&secondary_position, beam->secondary + 0x10);
         func_00282D30(&scratch, beam->secondary + 0xe0, *(float *)(data + 0x10));
         func_00282CC0(&secondary_position, &secondary_position, &scratch);
         spacing = (target_distance + func_00282E48(&primary_position, &secondary_position)) * 0.05f;
@@ -228,8 +225,10 @@ void func_L06_003D64C0(char *object)
         func_002ACEC0(&direction, &direction, &normal, 0.17453294992446899414f);
     }
     func_00282D30(&velocity, &direction, spacing);
-    D_L06_0023A3C0[1].whole = beam->origin.whole;
-    D_L06_0023A510[0].whole = beam->origin.whole;
+    qcopy(&D_L06_0023A3C0[1], &beam->origin);
+    qcopy(&D_L06_0023A510[0], &beam->origin);
+    count = 0;
+    collided = 0;
     for (i = 1; i < 20; i++) {
         Vector *point = &D_L06_0023A3C0[i + 1];
         Vector *render = &D_L06_0023A510[i];
@@ -242,11 +241,11 @@ void func_L06_003D64C0(char *object)
         func_00282D08(&scratch, &normal, &velocity, 0.85f);
         distance = func_00282DF0(&scratch);
         if (distance == 0) {
-            point->whole = D_L06_0023A3C0[i].whole;
+            qcopy(point, &D_L06_0023A3C0[i]);
         } else {
             func_00282D30(&scratch, &scratch, spacing / distance);
             func_00282CC0(point, &D_L06_0023A3C0[i], &scratch);
-            velocity.whole = scratch.whole;
+            qcopy(&velocity, &scratch);
         }
         point->f[2] += wobble;
         func_00282CF0(&normal, point, &D_L06_0023A3C0[i]);
@@ -263,7 +262,8 @@ void func_L06_003D64C0(char *object)
                     func_00282D08(&velocity, &velocity, &pull, f);
                 }
             } else {
-                func_00282CF0(&pull, i < 10 ? &primary_position : &secondary_position, point);
+                if (i < 10) func_00282CF0(&pull, &primary_position, point);
+                else func_00282CF0(&pull, &secondary_position, point);
                 distance = func_00282DF0(&pull);
                 if (distance != 0) {
                     if (i == 9 || i == 19) { f = 0.7f; spacing = distance; }
@@ -278,21 +278,21 @@ void func_L06_003D64C0(char *object)
             phase = func_002ABB18(D_L06_001AF034 + (float)i * D_L06_001AF03C);
             f = func_002ABB18(D_L06_001AF048 + (float)i * D_L06_001AF050);
             amplitude = D_L06_001AF040 * func_00283198(f);
-            render->whole = point->whole;
+            qcopy(render, point);
             wobble = amplitude * func_00283198(phase) + func_002A78D8(0, 0.1f);
             D_L06_0023A7E0[i] = wobble; render->f[2] += wobble;
             f = func_00283B98(func_00283248(normal.f[0], normal.f[1]), 1.5707964897155761719f);
             amplitude = D_L06_001AF044 * func_00283180(phase);
             endpoint.f[0] = func_00283180(f) * amplitude;
             endpoint.f[1] = func_00283198(f) * amplitude;
-            D_L06_0023A6A0[i].whole = endpoint.whole;
+            qcopy(&D_L06_0023A6A0[i], &endpoint);
             endpoint.f[2] = 0;
             func_00282CC0(render, render, &endpoint);
         } else {
-            render->whole = point->whole;
+            qcopy(render, point);
             render->f[2] += D_L06_0023A7E0[21 - i];
             func_00282CC0(render, render, &D_L06_0023A6A0[21 - i]);
-            endpoint.whole = D_L06_0023A6A0[i].whole;
+            qcopy(&endpoint, &D_L06_0023A6A0[i]);
         }
         if (i > 1 && (i == 19 || !(i & 1))) {
             func_00282CF0(&scratch, point, &D_L06_001B9840);
@@ -306,7 +306,7 @@ void func_L06_003D64C0(char *object)
             if (distance == 0) scratch.f[2] = 1.0f;
             else func_00282D30(&scratch, &scratch, 1.0f / distance);
             scratch.f[3] = 5627.9248046875f;
-            hit.direction.whole = scratch.whole;
+            qcopy(&hit.direction, &scratch);
             collided = func_002761F8(&D_L06_0023A3C0[i - 1], point, 0x10, object, 0);
             if (collided) {
                 candidate = D_L06_001BFC80.object;
@@ -318,8 +318,8 @@ void func_L06_003D64C0(char *object)
                     }
                 }
                 if (collided) {
-                    point->whole = D_L06_001BFC80.point.whole;
-                    beam->segments = i; beam->tip.whole = D_L06_001BFC80.point.whole;
+                    qcopy(point, &D_L06_001BFC80.point);
+                    beam->segments = i; qcopy(&beam->tip, &D_L06_001BFC80.point);
                     if (!D_L06_001BFC80.object) { beam->primary = 0; beam->primary_timer = 0; }
                     break;
                 }
@@ -327,7 +327,7 @@ void func_L06_003D64C0(char *object)
         }
     }
     for (i = 0; i < count; i++) *(int *)(disabled[i] + 0x98) = *(int *)(*(char **)(disabled[i] + 0x24) + 0x10);
-    if (!collided) beam->tip.whole = D_L06_0023A3C0[20].whole;
+    if (!collided) qcopy(&beam->tip, &D_L06_0023A3C0[20]);
     if (beam->primary && !beam->primary_timer && !beam->primary_kind) {
         func_00282CF0(&pull, beam->primary + 0x10, &D_L06_001B9840);
         if (!D_L06_001A8FF0) pull.f[2] = 0;
@@ -351,7 +351,7 @@ void func_L06_003D64C0(char *object)
         beam->secondary_kind = data && *(short *)(data + 4) == 1 ? 1 : 5;
     }
     for (side = 0; side < 4; side++) {
-        endpoint.whole = side < 2 ? beam->origin.whole : beam->tip.whole;
+        qcopy(&endpoint, side < 2 ? &beam->origin : &beam->tip);
         if (!func_00282978(&D_L06_001B30C0.duration[side])) {
             for (j = 0; j < 4; j++) {
                 func_00282CF0(&offsets[j], &D_L06_0023A830[side][j + 1], &D_L06_0023A830[side][j]);
@@ -359,7 +359,7 @@ void func_L06_003D64C0(char *object)
                 offsets[j].f[1] += func_002A78D8(0, 0.1f);
                 offsets[j].f[2] += func_002A78D8(0, 0.1f);
             }
-            D_L06_0023A830[side][0].whole = endpoint.whole;
+            qcopy(&D_L06_0023A830[side][0], &endpoint);
             for (j = 0; j < 4; j++) func_00282CC0(&D_L06_0023A830[side][j + 1], &D_L06_0023A830[side][j], &offsets[j]);
             i = D_L06_001B30C0.duration[side] - D_L06_001B30C0.center[side];
             if (i < 0) i = -i;
@@ -371,7 +371,7 @@ void func_L06_003D64C0(char *object)
             func_00282D30(&pull, &direction, side < 2 ? 0.4f : 0.5f);
             func_002ACEC0(&pull, &pull, &D_0018A560, f2);
             func_002ACEC0(&pull, &pull, &D_0018A570, f);
-            D_L06_0023A830[side][0].whole = endpoint.whole;
+            qcopy(&D_L06_0023A830[side][0], &endpoint);
             func_00282CC0(&D_L06_0023A830[side][1], &endpoint, &pull);
             sign = 1.0f;
             for (j = 0; j < 3; j++) {

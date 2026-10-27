@@ -1,10 +1,17 @@
-/* Manual reconstruction, 2026-10-23; retained, not linked.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * us: 16_snivelak: 916 bytes, expected 904; func_L16_004189A0: 0 of 1 places match (src/levels/16_snivelak/L16_004189A0-qcopy.c)
- * us2: 16_snivelak: 916 bytes, expected 904; func_L16_004189A0: 0 of 1 places match (src/levels/16_snivelak/L16_004189A0-qcopy.c)
- * pal: func_L16_004189A0 is in neither catalogue of pal; func_L16_004189A0 is in neither catalogue of pal
- * 916/904 bytes in both USA releases; path-table address calculation, switch/control flow and vector/pointer lifetimes remain different. Tried the direct state switch and corrected unsigned state bytes. Reopen with original path-record layout and source-order evidence.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections.
+ * Compiled 916 bytes; retail 904 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: The frame remains 0x80 against retail 0x70; one extra saved GPR, path-table
+ * addressing and switch/vector lifetimes differ. Shared qcopy preserves the complete
+ * position/angle snapshots but does not close the body. State changes retain their full-width
+ * integer argument.
+ * Reopen: A verified path-record/source lifetime witness reducing saved path pointers while
+ * preserving every vector and field access.
  */
+
 #include "common.h"
 typedef int Vector128 __attribute__((mode(TI)));
 typedef struct { Vector128 position,angles,delta; } MovingPathWorkspace;
@@ -12,7 +19,7 @@ extern char *D_L16_001FE7C0[];
 extern char D_L16_002A4570[];
 extern float D_00189EA0[4];
 extern void func_0026FEB8(const char *,...);
-extern void func_002A7750(unsigned char *,unsigned char,int);
+extern void func_002A7750(unsigned char *,int,int);
 extern void func_00282CF0(void *,void *,void *);
 extern void func_00282F20(void *,void *,float);
 extern void func_00282CC0(void *,void *,void *);
@@ -26,13 +33,13 @@ void func_L16_004189A0(char *object)
     char *state=*(char **)(object+0x68);
     char *path,*point;
     int index,move;
-    *(Vector128 *)&local.position=*(Vector128 *)(object+0x10);
-    *(Vector128 *)&local.angles=*(Vector128 *)(object+0xf0);
+    qcopy(&local.position,(object+0x10));
+    qcopy(&local.angles,(object+0xf0));
     switch(*(unsigned char *)(object+0x20)) {
     case 0:
         index=*(int *)(state+0x60);
         path=D_L16_001FE7C0[index];
-        *(Vector128 *)(object+0x10)=*(Vector128 *)(path+0x10);
+        qcopy((object+0x10),(path+0x10));
         *(int *)(state+0x6c)=0;
         *(float *)(state+0x68)*=0.016666668f;
         if(index==-1) func_0026FEB8(D_L16_002A4570,*(short *)(object+0xaa),*(short *)(object+0xb2));

@@ -47,7 +47,7 @@ INCLUDE_ASM("asm/levels", func_L12_0041EDB8);
 
 INCLUDE_ASM("asm/levels", func_L12_00420660);
 
-INCLUDE_ASM("asm/levels", func_L12_00420838);
+/* func_L12_00420838 is defined in L12_00420838-flags-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L12_00420950);
 

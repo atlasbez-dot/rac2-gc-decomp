@@ -1,24 +1,21 @@
-/* func_L22_003C9D48 (328 bytes, 2 places: 22_dobbo_orbit, 26_jamming_array) -- NEAR MISS.
-   State: exactly 328 bytes and every instruction present; the whole body is a permutation of
-   retail's. It needs a -G8 unit of its own (three $gp words at 0x001AFF58/60/64 and the
-   absolute neighbour 0x001AFF5C) and never the -frac2-qcopy profile: retail's three 16-byte
-   copies are displacement `lq`/`sq`, which qcopy turns into register addresses.
-   What is measured and right: the four-child walk, the `por $v0` register-form zero store into
-   the cleared tail quad, the w[2] product, the two blend calls on the sp+0x00 buffer, the
-   `t < 0.1f` weight (t*10 above, 1.0f - t below) and the 0.08f placement call.
-   Left, all scheduling: retail saves s1/s2 before the `daddu $s1,$a0` copy and saves s0 last,
-   issues func_002820A0 with the controller load in its delay slot (this cc1 hoists the call and
-   loads through $v0 first), and reorg duplicates the `por` into the `bgez` delay slot where this
-   cc1 emits `bgezl` and duplicates the loop's first `lwc1` instead. Eight shapes measured
-   (declaration order, named controller, counter initialiser, pointer formed outside the loop,
-   -g profile): all give the same permutation.
-   Compile with -O2 -G8 -ffunction-sections.
-*/
+/* Retained C reconstruction, not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * 336/328 bytes; 0/2 placements in each of us, us2 and pal.
+ * Corrected the scratch-vector destinations: retail clears local w, writes its Z
+ * product, then copies all four components to local v; it never clears or
+ * overwrites the controller lanes. Load the controller before the setup call,
+ * as in its retail delay slot. The absolute factor is an honest scalar view
+ * with NOT_SDA, rather than an invented three-element array.
+ * Remaining: The absolute factor address is hoisted into an extra saved s3 (0x70 versus
+ * 0x60 frame); initial scheduling and loop delay-slot selection still differ.
+ * Disabling strength reduction did not improve it.
+ * Reopen with: Independent storage/lifetime evidence for the absolute factor or loop
+ * locals; do not restore the false array extent or controller writes.
+ */
 
-typedef unsigned char u8;
-typedef int s32;
+#include "common.h"
+
 typedef int TI128 __attribute__((mode(TI)));
-typedef float f32;
 
 /* the level's two blend words and the scale the placement call takes, all through $gp,
  * and the absolute factor the blend call takes. */
@@ -28,9 +25,9 @@ extern s32 D_L22_001AFF60 __attribute__((sda));
 
 extern f32 D_L22_001AFF64 __attribute__((sda));
 
-extern f32 D_001AFF5C[3] __attribute__((sda));
+extern f32 D_L22_001AFF5C NOT_SDA;
 
-extern void func_002820A0(u8 *);
+extern void func_002820A0(void);
 
 extern s32 func_002820D0(f32 *, s32, s32, f32, f32, f32);
 
@@ -42,8 +39,8 @@ extern f32 func_002AA140(f32, f32, f32);
 
 extern s32 func_00283CF0(f32);
 
-/* Walks the four children of the object: each gets a cleared tail quad, a blend of the two
- * floats around it, and a placement whose weight rises below 0.1 and fades above it. */
+/* Walk the four controller entries, transform a cleared local vector with its Z
+ * component scaled by the two controller lanes, then submit a weighted placement. */
 void func_L22_003C9D48(u8 *a0) {
     u8 *obj = a0;
     s32 i = 3;
@@ -55,16 +52,16 @@ void func_L22_003C9D48(u8 *a0) {
     f32 t;
     s32 n;
 
-    func_002820A0(obj);
     ctl = *(u8 **)(obj + 0x68);
+    func_002820A0();
     p = ctl + 0x20;
     for (; i >= 0; i--) {
-        *(TI128 *)(p + 0x10) = 0;
+        *(TI128 *)w = 0;
         w[2] = *(f32 *)(p) * *(f32 *)(p - 0x10);
-        *(TI128 *)(p) = *(TI128 *)w;
+        *(TI128 *)v = *(TI128 *)w;
         func_00283098(v, v, obj + 0xC0);
         func_00282CC0(v, v, obj + 0x10);
-        f = func_002AA140(D_L22_001AFF58, D_001AFF5C[0], *(f32 *)(p));
+        f = func_002AA140(D_L22_001AFF58, D_L22_001AFF5C, *(f32 *)(p));
         t = *(f32 *)(p);
         if (t < 0.1f)
             n = func_00283CF0((f32)D_L22_001AFF60 * t * 10.0f);

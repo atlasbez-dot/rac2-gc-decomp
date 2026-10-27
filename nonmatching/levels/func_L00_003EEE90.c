@@ -1,14 +1,9 @@
-/* Nonmatching reconstruction of func_L00_003EEE90 (retail 1360 bytes).
- * Measured 2026-10-23: 1344 bytes, 0/27 placements in US and US2.
- * PAL has no catalogue entry. Profile: -O2 -G8 -ffunction-sections
- * -frac2-qcopy -frac2-qcopy-barrier. Two position-pointer forms tied before
- * the final GP scalar qualification.
- * Remaining differences include pointer lifetime/register allocation, the
- * 144-word clearing loop direction, and scalar pointer global access forms.
- * Reopen with original pool declarations/alias evidence. No matching credit.
- * 00300190 takes both identical position pointers; 0032D758 returns int.
- * 00329E90 returns the slot index, 003EEE20 returns aligned address bits.
- * The request is the full aligned 48-byte structure read by 002A8E20.
+/* Nonmatching C: Initialize the effect pools, apply area damage and advance its timed fade states.
+ * Tested profile: -O2 -G8 -ffunction-sections.
+ * Measured US size: 1344 bytes; retail: 1360 bytes.
+ * Placement checks: US and US2: 0/27 each; PAL: absent from the catalogue.
+ * Remaining: Pool clearing direction, pointer lifetimes and scalar-global allocation differ.
+ * Reopen with independent pool-clear and alias-reload evidence; preserve the complete 48-byte damage request and avoid inferring a whole pool extent.
  */
 #include "common.h"
 
@@ -67,7 +62,7 @@ extern int func_00282948(int *);
 extern void func_L00_003EF550(void);
 extern void func_0029F338(void *);
 extern void func_L00_003F00A0(char *);
-extern void func_L00_002E6EF8(void (*)(void *), void *);
+extern void func_L00_002E6EF8(void (*)(char *), char *);
 extern void func_L00_003EFA00(char *);
 
 void func_L00_003EEE90(char *object)
@@ -108,11 +103,11 @@ void func_L00_003EEE90(char *object)
             record -= 0x80;
         } while (i >= 0);
         *(int *)(D_L00_001B2BB4 + 0x30) = 0;
-        initial_position.word = position->word;
+        qcopy(&initial_position, position);
         initial_position.v[2] += 1.0f;
         func_L00_003EFF58(object, 20, position, state, 0.16666667f);
         func_L00_003EF560(object, position);
-        light_position.word = initial_position.word;
+        qcopy(&light_position, &initial_position);
         light_position.v[3] = 2.0f;
         if (func_00283DB8(&light_position, 100.0f) != -1) {
             D_L00_001B8DE0 = 0.44999999f;
@@ -133,12 +128,14 @@ void func_L00_003EEE90(char *object)
                 *hit != D_0018C0B0 && *(short *)(*hit + 0xaa) != 0xa5a) {
                 func_00282CF0(&normal, (Vector *)(*hit + 0x10), position);
                 func_00282F20(&normal, &normal, 1.0f);
-                /* Retail normalizes this scratch before filling the request. */
+
+                /* Retail normalizes this impulse before initialization. Preserve the sequence;
+                 * native C execution is undefined and unverified. */
                 func_00282F20(&request.impulse, &request.impulse, 1.0f);
                 func_002A8C00((char *)&request, (int)object, 0x830000,
                              *(float *)(D_L00_00262570 + D_00139592 * 0xe0 + 0x74),
                              (Quad16 *)&normal);
-                request.impulse.word = normal.word;
+                qcopy(&request.impulse, &normal);
                 request.impulse.v[3] = 5627.9248f;
                 request.enabled = 5;
                 request.kind = 3;
@@ -182,5 +179,5 @@ void func_L00_003EEE90(char *object)
     if (D_L00_001B0830 < -8.0f) D_L00_001B0830 += 8.0f;
     if (D_L00_001B0834 < -8.0f) D_L00_001B0834 += 8.0f;
     func_L00_003F00A0(object);
-    func_L00_002E6EF8((void (*)(void *))func_L00_003EFA00, object);
+    func_L00_002E6EF8(func_L00_003EFA00, object);
 }

@@ -81,11 +81,10 @@ INCLUDE_ASM("asm/game", func_002D6230);
 
 /* func_002D68D8 is in 002D5E98-g8.c. */
 
-INCLUDE_ASM("asm/game", func_002D6970);
 
 typedef struct { char pad[4]; short mode; } Mode2D6E78;
 typedef struct { char pad[0x29C]; int flags[5]; int selected; } Map2D6E78;
-typedef struct { char pad[0xDB]; unsigned char active; } State2D6E78;
+typedef struct { char pad[0xDB]; unsigned char active; char padDC[0x11C - 0xDC]; unsigned int limit; } State2D6E78;
 extern Mode2D6E78 D_001A63A8;
 extern Map2D6E78 D_001C4FA0;
 extern State2D6E78 D_001F2840;
@@ -170,13 +169,51 @@ INCLUDE_ASM("asm/game", func_002D7B18);
 
 INCLUDE_ASM("asm/game", func_002D7DB8);
 
-INCLUDE_ASM("asm/game", func_002D8120);
 
 int func_002D81A8(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002D81B0);
+typedef struct { char pad0[0x36C]; int offset; char pad370[0x16B0 - 0x370]; int start; int length; } Stream2D81B0;
+typedef struct { unsigned int key; unsigned int flags; } Slot2D81B0;
+extern Stream2D81B0 D_0014B540;
+#define MACRO_ADDR __attribute__((section(".sdata")))
+extern Slot2D81B0 D_001B1F50[] MACRO_ADDR;
+extern int D_001F2958;
+
+/* Halves the stream length while it marks the slots whose key is older than the clock and
+   (outside the mode) asks for the next block; the result picks state 1 or 3. */
+int func_002D81B0(char *object)
+{
+    int length;
+    int i;
+    unsigned int *key;
+    unsigned int *flags;
+
+    func_002DE3A0(1);
+    *(int *)(object + 0x54) = 0;
+    *(int *)(object + 0x38) = 0;
+    length = D_0014B540.length;
+    D_0014B540.length = length / 2;
+    flags = &D_001B1F50[0].flags;
+    key = &D_001B1F50[0].key;
+    for (i = 0; i < 5; i++) {
+        if (*key != 0 && *key < D_001F2840.limit)
+            *flags |= 2;
+        flags += 2;
+        key += 2;
+    }
+    *(int *)(object + 0x50) = 0;
+    if (D_001A63A8.mode == 0) {
+        if (func_002B7B18(D_001F2958, D_0014B540.start + D_0014B540.offset, D_0014B540.length) != 0)
+            *(int *)(object + 0x50) = 1;
+        else
+            *(int *)(object + 0x50) = 3;
+    }
+    *(int *)(object + 0x10) |= 4;
+    D_0014B540.length = length;
+    return 0;
+}
 
 extern short D_001A63AC;
 extern void func_002B7AD0(void);
@@ -200,7 +237,6 @@ int func_002D82C8(char *object)
 
 INCLUDE_ASM("asm/game", func_002D8338);
 
-INCLUDE_ASM("asm/game", func_002D84B0);
 
 INCLUDE_ASM("asm/game", func_002D89D8);
 
@@ -254,9 +290,64 @@ int func_002D95D8(char *arg0) {
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002D9600);
+/* Scans the object's 24 effect slots: a slot whose entry flag is clear, whose
+   "used" byte is set, and whose table word is zero is skipped.  Slot 7 also
+   skips a live, in-range material.  The remaining slots dispatch by slot
+   number: most first test the material on the shared record, and every slot
+   that is still live is handed to the effect runner with the "run" flag. */
+typedef struct {
+    char pad00[0x44];
+    char *entries[0x18];
+    unsigned char used[0x18];
+} EffectSlots_2D9600;
 
-INCLUDE_ASM("asm/game", func_002D9730);
+extern int D_00261920[];
+
+extern void func_002DF158(char *, int);
+
+int func_002D9600(EffectSlots_2D9600 *o)
+{
+    int i;
+
+    for (i = 0; i < 0x18; i++) {
+        char *entry;
+        unsigned char id;
+
+        if (o->entries[i] == 0)
+            continue;
+        if (o->used[i] != 0)
+            continue;
+        if (D_00261920[i] == 0)
+            continue;
+        if (i == 7
+            && *(short *)(o->entries[7] + 0xAA) == 0x4A
+            && *(unsigned char *)(o->entries[0] + 0x42)
+                   != *(unsigned char *)(o->entries[0] + 0x43))
+            continue;
+        switch (i - 1) {
+        case 0:
+        case 1:
+        case 2:
+        case 4:
+        case 5:
+        case 9:
+        case 10:
+        case 11:
+            entry = o->entries[0];
+            if ((*(unsigned long long *)(entry + 0x40) & 0xFFFF0000ULL) != 0x99990000ULL)
+                goto call;
+            id = *(unsigned char *)(entry + 0x40);
+            if (id < 0x4D)
+                goto call;
+            if (id < 0x92)
+                continue;
+            break;
+        }
+    call:
+        func_002DF158(o->entries[i], 1);
+    }
+    return 4;
+}
 
 int func_002D9798(int *arg0)
 {
@@ -422,7 +513,6 @@ INCLUDE_ASM("asm/game", func_002DAD18);
 
 INCLUDE_ASM("asm/game", func_002DAF68);
 
-INCLUDE_ASM("asm/game", func_002DB1B0);
 
 INCLUDE_ASM("asm/game", func_002DB3C0);
 
@@ -628,7 +718,7 @@ int func_002DC090(char *s0)
 
 INCLUDE_ASM("asm/game", func_002DC3C8);
 
-INCLUDE_ASM("asm/game", func_002DC720);
+/* func_002DC720 is matched in its own unit, src/game/002DC720.c (its jump table). */
 
 INCLUDE_ASM("asm/game", func_002DC900);
 
@@ -639,11 +729,8 @@ int func_002DCB28(Handles_2DCB28 *object) {
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002DCB58);
 
-INCLUDE_ASM("asm/game", func_002DCFE8);
 
-INCLUDE_ASM("asm/game", func_002DD400);
 
 INCLUDE_ASM("asm/game", func_002DDA10);
 

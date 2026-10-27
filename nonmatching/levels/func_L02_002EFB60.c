@@ -1,13 +1,14 @@
-/* 2026-10-23 bounded readable-C attempt.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * US: 536 versus 540; prologue/loop-counter scheduling and mixed GP/absolute data accesses differ.
- * All carrying placements checked in us, us2 and pal; no candidate.
- * Tried scalar/TI versus union vectors, pointer grouping, expression/control flow
- * spelling, and applicable qualified copy profiles. Reopen with a demonstrated
- * scheduling or symbol declaration remedy; do not infer handwritten assembly.
- */
+/* M21 2026-10-26: 536 of 540 bytes with -O2 -G8 -ffunction-sections -mno-split-addresses
+   (us level 02); same result with -frac2-qcopy -frac2-qcopy-barrier. Two spots off: the
+   loop's down-counter decrement lands in the first jal's slot (retail: a nop there, and the
+   decrement in the slot of the func_002A7878(D_L02_001A8D78, D_L02_001A8D7C) call, after
+   the copy), which also moves the $gp load of D_L02_001A8D78. What closed the rest: the
+   counting-up for loop (loop.c's down-counter is copied from $a3 after the blez, as in
+   retail), -mno-split-addresses for retail's macro loads (`lui $at; lwc1`), the qcopy helper,
+   and func_002A7878 results held in a local before the func_00283D38 calls. Tried: do/while
+   with --count anywhere, `while (--count)`, a separate counter. Permuter queued. */
 
-#include "include_asm.h"
+#include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
 typedef union { TI128 q; float f[4]; } Vec4;
 extern int D_L02_001A8D68 __attribute__((sda));
@@ -31,25 +32,26 @@ void func_L02_002EFB60(void *owner, void *from, void *to, int count, int *colour
     Vec4 position;
     Vec4 velocity;
     float gravity = speed * 0.00027777778f;
-    float brightness;
-    int r, g, b, first, second;
+    float brightness, t;
+    int r, g, b, first, second, i;
     int *rgb = &D_L02_001A8D68;
     if (colour) rgb = colour;
-    if (count > 0) do {
+    for (i = 0; i < count; i++) {
         brightness = func_002A7878(0.7f, 1.3f);
         r = func_00283CF0((float)rgb[0] * brightness);
         g = func_00283CF0((float)rgb[1] * brightness);
         b = func_00283CF0((float)rgb[2] * brightness);
         func_00282D08(&direction, from, to, func_002A7878(0.0f, 1.0f));
-        position.q = direction.q;
+        qcopy(&position, &direction);
         position.f[3] = func_002A7878(D_L02_001A8D78, D_L02_001A8D7C);
-        --count;
         func_00282C88(&velocity);
         velocity.f[2] = -gravity * (float)(r + g + b);
         func_00282CC0(&velocity, &velocity, &direction);
         velocity.f[3] = position.f[3];
-        first = func_00283D38(D_L02_001A8D58, D_L02_001A8D5C, func_002A7878(0.0f, 1.0f));
-        second = func_00283D38(D_L02_001A8D60, D_L02_001A8D64, func_002A7878(0.0f, 1.0f));
+        t = func_002A7878(0.0f, 1.0f);
+        first = func_00283D38(D_L02_001A8D58, D_L02_001A8D5C, t);
+        t = func_002A7878(0.0f, 1.0f);
+        second = func_00283D38(D_L02_001A8D60, D_L02_001A8D64, t);
         func_002BAA28(owner, &position, &velocity, first, second, r, g, b, D_L02_001A8D50);
-    } while (count != 0);
+    }
 }

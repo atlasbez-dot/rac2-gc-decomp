@@ -81,7 +81,6 @@ s32 func_L17_003CC798(u8 *a0, TI128 *a1, f32 f1, f32 f2) {
 
 INCLUDE_ASM("asm/levels", func_L17_003CC850);
 
-INCLUDE_ASM("asm/levels", func_L17_003D0620);
 
 extern u16 *D_L17_001FB720[];
 
@@ -138,7 +137,7 @@ void func_L17_003E47E8(s32 a0) {
 }
 
 /* func_L17_003E4860 is a near miss: nonmatching/levels/func_L17_003E4860.c */
-INCLUDE_ASM("asm/levels", func_L17_003E4860);
+/* func_L17_003E4860 is defined in L02_003CE9A8-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L17_003E48E0);
 
@@ -189,7 +188,6 @@ INCLUDE_ASM("asm/levels", func_L17_00417DB0);
 
 INCLUDE_ASM("asm/levels", func_L17_00418A68);
 
-INCLUDE_ASM("asm/levels", func_L17_0041A4C0);
 
 INCLUDE_ASM("asm/levels", func_L17_0041E208);
 

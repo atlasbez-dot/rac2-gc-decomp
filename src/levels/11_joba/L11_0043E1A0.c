@@ -1,16 +1,11 @@
 #include "include_asm.h"
+#include "common.h"
 
-typedef float f32;
 
-typedef unsigned char u8;
 
-typedef int s32;
 
-typedef short s16;
 
-typedef unsigned short u16;
 
-typedef unsigned int u32;
 
 /* Dispatches an indexed polygon query through the already integrated helper. */
 typedef struct { s32 field00; u8 remainder[12]; } JobaPolygonHeaderView;
@@ -25,7 +20,6 @@ typedef struct {
     s32 fielde0, fielde4, fielde8, fieldec, fieldf0, fieldf4;
 } JobaClassCounterView;
 
-INCLUDE_ASM("asm/levels", func_L11_0043E1A0);
 
 /* bumps the 0xFFFF-saturated counter, then starts the state's timer and reports the object */
 extern u8 D_L11_004465F8[];
@@ -83,7 +77,66 @@ INCLUDE_ASM("asm/levels", func_L11_00440868);
 
 /* func_L11_00440970 lives in the sibling small-data unit (L11_0043E1A0-g8.c). */
 
-INCLUDE_ASM("asm/levels", func_L11_00440B28);
+/* Hands a target point to the first free class-0xD37 moby (state 1) in this moby's
+   group: records the caller as its owner, places it at the target facing -pi/2, sets
+   its heading toward the target from the caller and starts it; 0 when the group is
+   empty or has no free member. */
+typedef struct {
+    u8 pad0[0x10];
+    float pos[4];
+    u8 state;
+    u8 pad21[0x89];
+    short oclass;
+    u8 padAC[0xC];
+    void *owner;
+    u8 padBC[4];
+    float rot[12];
+    float fF0;
+    float fF4;
+    float fF8;
+} GroupMoby440B28;
+typedef struct {
+    u8 pad0[0xC0];
+    int group;
+} GroupVars440B28;
+extern char *D_001B359C __attribute__((sda));
+extern unsigned short *D_001FC420[];
+extern float func_00283248(float, float);
+extern void func_002833F0(void *, void *);
+extern void func_L11_00436910(void *, int, int);
+
+int func_L11_00440B28(u8 *object, float *target)
+{
+    GroupMoby440B28 *member;
+    unsigned short *list;
+    unsigned short *p;
+    int group;
+    float dx;
+
+    group = ((GroupVars440B28 *)*(u8 **)(object + 0x68))->group;
+    if (group == 0xFF)
+        return 0;
+    list = D_001FC420[group];
+    if (list == 0)
+        return 0;
+    p = list;
+    do {
+        member = (GroupMoby440B28 *)(D_001B359C + (*p & 0x7FFF) * 0x100);
+        if (member != 0 && member->state != 0xFE && member->state != 0xFD &&
+            member->oclass == 0xD37 && member->state == 1) {
+            member->owner = object;
+            qcopy(member->pos, target);
+            member->fF0 = 0.0f;
+            member->fF4 = -1.5707965f;
+            dx = target[0] - ((float *)func_L11_004417E8(object))[0];
+            member->fF8 = func_00283248(dx, target[1] - ((float *)func_L11_004417E8(object))[1]);
+            func_002833F0(member->rot, &member->fF0);
+            func_L11_00436910(member, 0, 1);
+            return 1;
+        }
+    } while ((short)*p++ >= 0);
+    return 0;
+}
 
 /* Returns the state's 0x200 halfword. */
 s16 func_L11_00440C80(u8 *obj) {
@@ -552,9 +605,7 @@ INCLUDE_ASM("asm/levels", func_L11_004423F8);
 
 INCLUDE_ASM("asm/levels", func_L11_004425C8);
 
-INCLUDE_ASM("asm/levels", func_L11_004427B8);
-
-INCLUDE_ASM("asm/levels", func_L11_00442B60);
+/* func_L11_00442B60 is defined in its dedicated source unit. */
 
 extern void func_L02_003A6F78(u8 *);
 
@@ -655,9 +706,9 @@ INCLUDE_ASM("asm/levels", func_L11_00444400);
 
 INCLUDE_ASM("asm/levels", func_L11_004456A0);
 
-INCLUDE_ASM("asm/levels", func_L11_00445990);
+/* func_L11_00445990 is defined in L11_00445990-g8.c ($gp accesses). */
 
-INCLUDE_ASM("asm/levels", func_L11_00445B30);
+/* func_L11_00445B30 is defined in L11_00445B30-g-g8.c. */
 
 /* Claims the shared call slot for the state entry the identifier names. */
 typedef struct {
@@ -707,7 +758,7 @@ s32 func_L11_00445D28(u8 *obj, s32 idx) {
 fail:
     return 0;
 }
-INCLUDE_ASM("asm/levels", func_L11_00445DF8);
+/* func_L11_00445DF8 is defined in L11_00445DF8-g8.c ($gp accesses). */
 
 INCLUDE_ASM("asm/levels", func_L11_00446020);
 

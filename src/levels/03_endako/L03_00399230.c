@@ -39,7 +39,6 @@ typedef int TI128 __attribute__((mode(TI)));
 
 INCLUDE_ASM("asm/levels", func_L03_00399230);
 
-INCLUDE_ASM("asm/levels", func_L03_003C5FE8);
 
 INCLUDE_ASM("asm/levels", func_L03_003C6208);
 
@@ -70,8 +69,7 @@ void func_L03_003C7A88(char *a0)
     *(s32 *)(a0 + 0x9C) = 1;
 }
 
-/* func_L03_003C7AA0 is a near miss: nonmatching/levels/func_L03_003C7AA0.c */
-INCLUDE_ASM("asm/levels", func_L03_003C7AA0);
+/* func_L03_003C7AA0 is matched in its own unit, src/levels/03_endako/L03_003C7AA0-qcopy.c (-frac2-qcopy). */
 
 INCLUDE_ASM("asm/levels", func_L03_003C7AC0);
 
@@ -92,7 +90,7 @@ void func_L03_003C85F8(char *a0, s32 a1)
     func_31B920(a0, 2, -1);
 }
 
-INCLUDE_ASM("asm/levels", func_L03_003C8660);
+/* func_L03_003C8660 is matched in its own unit, src/levels/03_endako/L03_003C8660-qcopy.c (-frac2-qcopy). */
 
 INCLUDE_ASM("asm/levels", func_L03_003C8698);
 
@@ -219,7 +217,6 @@ INCLUDE_ASM("asm/levels", func_L03_003D22C8);
 
 INCLUDE_ASM("asm/levels", func_L03_003D2518);
 
-INCLUDE_ASM("asm/levels", func_L03_003D5788);
 
 INCLUDE_ASM("asm/levels", func_L03_003E18D8);
 

@@ -33,7 +33,6 @@ void func_00338A60(char *a0)
     func_L00_0042E138_1(a0);
 }
 
-INCLUDE_ASM("asm/game", func_00338AD8);
 
 void func_00338F50(char *object)
 {

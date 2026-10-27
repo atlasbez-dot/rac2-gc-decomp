@@ -164,7 +164,7 @@ void func_L00_003BC080(char *p)
 
 INCLUDE_ASM("asm/levels", func_L00_003BC108);
 
-INCLUDE_ASM("asm/levels", func_L00_003BC228);
+/* func_L00_003BC228 is defined in x-qcopy.c. */
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L00_003BC400(Vec16_Fc936841d *object, int index)
@@ -264,7 +264,6 @@ void func_L00_003BC998(char *owner, char *arg1)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003BCC10);
 
 extern void func_L00_003BCE28(char *a0, char *a1);
 
@@ -311,7 +310,7 @@ unsigned int func_L00_003BFF58(unsigned int param_1)
     return result;
 }
 
-extern float func_002B04E0(char *a0, void *out, int a2, int a3);
+extern float func_002B04E0(char *a0, float *src, char *third);
 
 /* The four floats are declared before the two other arguments, which sets the order this caller
    evaluates them in (the registers are the same either way). */
@@ -323,19 +322,19 @@ extern void func_00283738(char *a0, char *a1, void *a2);
 
 extern float func_00282C48(float f);
 
-/* Copies the caller's 16-byte block into a stack scratch area, runs the four-argument starter on
+/* Copies the caller's 16-byte block into a stack scratch area, runs the three-argument starter on
    it, then fills the scratch area's upper half from the state block's 0xB4 float and the pair
    helper before folding the starter's result against the state's own reading of that float. One
    `char scratch[0x50]` gives retail's frame. The 16-byte clear is retail's `sq $zero,0($sp)`:
    with the scheduling barrier of zero_ti_store_barrier.py it takes retail's place, and so does
    the prologue's save order. */
-float func_L00_003BFF68(char *a0, char *a1, char *a2, int a3)
+float func_L00_003BFF68(char *a0, char *a1, char *a2, char *a3)
 {
     char scratch[0x50];
     float f;
 
     *(Rac2TI128 *)scratch = *(Rac2TI128 *)a2;
-    f = func_002B04E0(a0, scratch, a3, a3);
+    f = func_002B04E0(a0, (float *)scratch, a3);
     *(int *)(scratch + 0x40) = 0;
     func_002AAA00(scratch + 0x40, f, *(float *)(a1 + 0x14), *(float *)(a1 + 0x18), 3.14159274f, a1 + 0xB4, 0);
     *(Rac2TI128 *)scratch = 0;
@@ -438,7 +437,6 @@ void func_L00_003C2F10(unsigned char *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003C2FC8);
 
 /* When the context flag at offset 0x24 is nonzero, pass scale 1.0, the context, its vector at offset 0x10 and mode zero to the bound helper; original game role is unknown. */
 void func_L00_003C33E0(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
@@ -449,7 +447,6 @@ void func_L00_003C33E0(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003C3418);
 
 /* The 0x68 context block starts with two words and a halfword that this body clears. */
 void func_L00_003C37A0(char *p)

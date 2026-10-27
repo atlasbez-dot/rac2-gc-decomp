@@ -119,7 +119,6 @@ void func_L00_002B91C0(void)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002B9380);
 
 /* reads a scalar through DATA0 and, when it exceeds 0.001f, re-normalises the vector at DATA0 (and DATA0-112) from the elapsed float, clamping the amount at zero; otherwise it runs the plain refresh entry point. */
 void func_L00_002B94D8(float a0)
@@ -174,7 +173,6 @@ int func_L00_002B9B88(int index, int flags)
     return func_002E5CF8(index, flags, (char *)D_0018C0B0);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002B9BB0);
 
 /* Claims the first free slot of the eight 8-byte entries at resident +0x23EC: a slot whose
    leading short is clear takes the three arguments, a pending marker and its two extra

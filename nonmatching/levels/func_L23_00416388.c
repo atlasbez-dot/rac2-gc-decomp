@@ -1,34 +1,21 @@
-/* Retained 23 October 2026 reconstruction of the complete 21-state update.
-   Game -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
-   -frac2-zero-ti-barrier: 5172/5228 bytes, 0/1 USA v1.01 placements;
-   absent from the USA v2.00 and PAL catalogues. Canonical direct-call identity counts
-   agree (161 sites in each body), but this is not byte-match or runtime proof.
-   Remaining differences span address formation, GPR/FPR allocation, stores,
-   scheduling and state-branch sharing; equal stack size (0x1a0) is insufficient.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 5172 bytes; retail 5228 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: canonical name absent; no match credit.
+ * pal: canonical name absent; no match credit.
+ * Remaining: All 21 state arms, shared cleanup and 161 static call sites are preserved, with the
+ * correct 0x1A0 frame. Actual helper captures retain full player/position vectors and aligned
+ * 64-byte transforms/joint outputs. The current int-return forwarding wrapper is preserved; the
+ * historical void note is superseded. GPR/FPR allocation, store/address scheduling and branch
+ * sharing still differ.
+ * Reopen: Independent original state/local lifetime evidence or a qualified compiler
+ * explanation; do not repeat the earlier ten CFG/cleanup/flag trials.
+ */
 
-   Ten bounded trials covered actual pointer/value lifetimes, the partial resident
-   view below, shared versus per-state cleanup stores, countdown pointer loops,
-   -g, -fno-gcse and the qualified block-order/unsplit-edge profiles. Sizes ranged
-   from 5120 to 5348 bytes. The 5244-byte form duplicated six static call sites
-   (167 versus 161), so the more faithful shared-cleanup form is retained.
-
-   The jump table was read from retail and cross-checked against a freshly recovered
-   reference switch. Matrix outputs are full 64-byte objects, with explicit column
-   views. The particle helper has all eight GPR, two FP and four stack arguments;
-   its final stack slot and pointer return are preserved. The wrapper
-   func_L02_00332630 forwards func_L02_00332668's int result, which this caller
-   consumes, despite its historical void C definition. Action helpers whose result
-   is discarded retain provisional result declarations where retail supplies no
-   deliberate return-bank evidence; these contracts are not claimed recovered.
-
-   Reopen with independent original state/control/layout or return-contract evidence,
-   or a qualified compiler explanation for the measured differences. Do not repeat
-   the same lifetime/cleanup/flag trials or classify the ordinary MMI copies as
-   handwritten. No linked builds or integrated match are claimed. */
-#include "include_asm.h"
+#include "common.h"
 
 typedef int Quad __attribute__((mode(TI)));
-typedef unsigned char u8;
 typedef struct {
     char prefix[0x18]; u8 enabled, count, kind;
     char reserved[0x65]; u8 payload[1];
@@ -45,22 +32,22 @@ typedef struct {
 } ResidentHeroView;
 extern void *D_L23_002AB4C0[];
 extern u8 *D_L23_00259560[];
-extern float D_L23_001B36A0 __attribute__((nosda));
-extern float D_L23_001B36A4 __attribute__((nosda));
-extern int D_L23_001B36AC __attribute__((nosda));
-extern int D_L23_001B3710 __attribute__((nosda));
-extern int D_L23_001B3714 __attribute__((nosda));
-extern int D_L23_001B3718 __attribute__((nosda));
-extern float D_L23_001B36C0[4] __attribute__((nosda));
-extern float D_L23_001B36D0[4] __attribute__((nosda));
-extern float D_L23_001B3760[4] __attribute__((nosda));
-extern float D_L23_001B3770[4] __attribute__((nosda));
-extern float D_L23_001B3860[4] __attribute__((nosda));
-extern float D_L23_001B3880[4] __attribute__((nosda));
-extern float D_L23_001BA640[4] __attribute__((nosda));
-extern Quad D_L23_001BA870[] __attribute__((nosda));
-extern Quad D_L23_001C87C0 __attribute__((nosda));
-extern Quad D_L23_001C87D0 __attribute__((nosda));
+extern float D_L23_001B36A0 NOT_SDA;
+extern float D_L23_001B36A4 NOT_SDA;
+extern int D_L23_001B36AC NOT_SDA;
+extern int D_L23_001B3710 NOT_SDA;
+extern int D_L23_001B3714 NOT_SDA;
+extern int D_L23_001B3718 NOT_SDA;
+extern float D_L23_001B36C0[4] NOT_SDA;
+extern float D_L23_001B36D0[4] NOT_SDA;
+extern float D_L23_001B3760[4] NOT_SDA;
+extern float D_L23_001B3770[4] NOT_SDA;
+extern float D_L23_001B3860[4] NOT_SDA;
+extern float D_L23_001B3880[4] NOT_SDA;
+extern float D_L23_001BA640[4] NOT_SDA;
+extern Quad D_L23_001BA870[] NOT_SDA;
+extern Quad D_L23_001C87C0 NOT_SDA;
+extern Quad D_L23_001C87D0 NOT_SDA;
 extern float D_L23_001B13D8 __attribute__((sda));
 extern float D_L23_001B13DC __attribute__((sda));
 extern float D_L23_001B13E0 __attribute__((sda));
@@ -114,7 +101,7 @@ extern float func_002B0360(char *);
 extern void func_0029FCC0(char *, int, char *);
 extern void func_0029FC20(char *, int, char *);
 extern void func_0029F978(u8 *, unsigned int, u8 *);
-extern void func_002A7750(u8 *, u8, int);
+extern void func_002A7750(u8 *, int, int);
 extern float func_002A7878(float, float);
 extern int func_002B3868(u8 *);
 extern void func_002AB6D8(float *, float *);
@@ -185,16 +172,16 @@ void func_L23_00416388(u8 *object)
         &&state5, &&state6, &&state7, &&state8, &&state9, &&state10, &&state11,
         &&state12, &&state13, &&state14, &&state15, &&state16, &&state_default,
         &&state_default, &&state19, &&state20};
-    char direction[16];
-    float jointMatrix[16];
-    char jointOffset[16];
-    char blendedPosition[16];
-    char localPosition[16];
-    char transform[64];
-    char angles[16];
-    char secondPosition[16];
-    char thirdPosition[16];
-    char extraPosition[16];
+    char direction[16] __attribute__((aligned(16)));
+    float jointMatrix[16] __attribute__((aligned(16)));
+    char jointOffset[16] __attribute__((aligned(16)));
+    char blendedPosition[16] __attribute__((aligned(16)));
+    char localPosition[16] __attribute__((aligned(16)));
+    char transform[64] __attribute__((aligned(16)));
+    char angles[16] __attribute__((aligned(16)));
+    char secondPosition[16] __attribute__((aligned(16)));
+    char thirdPosition[16] __attribute__((aligned(16)));
+    char extraPosition[16] __attribute__((aligned(16)));
     char *state = *(char **)(object + 0x68);
     char *position;
     char *jointPosition;
@@ -223,10 +210,10 @@ void func_L23_00416388(u8 *object)
     func_00282CC0((char *)D_L23_001B36C0, (char *)D_L23_001B36C0, PLAYER_POS);
     func_00282D30((char *)D_L23_001B36D0, PLAYER + 0xe0, D_L23_001B148C);
     func_00282CC0((char *)D_L23_001B36D0, (char *)D_L23_001B36D0, PLAYER_POS);
-    SQ(0x3f0) = *(Quad *)PLAYER_POS;
+    qcopy(state+(0x3f0),PLAYER_POS);
     position = (char *)object + 0x10;
     func_L23_00418650(state + 0x3f0, 0.0f);
-    SQ(0x3e0) = *(Quad *)position;
+    qcopy(state+(0x3e0),position);
     func_L23_00418650(state + 0x3e0, 0.0f);
     {
         float playerHeight = func_002B0360(PLAYER_POS) - D_L23_001B36A4;
@@ -279,18 +266,18 @@ state4:
         func_L23_0041D398((char *)object);
     } else if (AGE == D_L23_001B13E4 / 2 - 4) {
         func_0027D330(1);
-        *(Quad *)(transform + 0x00) = D_L23_001BA870[0];
-        *(Quad *)(transform + 0x10) = D_L23_001BA870[1];
-        *(Quad *)(transform + 0x20) = D_L23_001BA870[2];
-        *(Quad *)(transform + 0x30) = 0;
+        qcopy(transform+0x00,&D_L23_001BA870[0]);
+        qcopy(transform+0x10,&D_L23_001BA870[1]);
+        qcopy(transform+0x20,&D_L23_001BA870[2]);
+        qzero(transform + 0x30);
         func_002AB6D8((float *)transform, (float *)localPosition);
         func_00335438((char *)D_L23_001BA640, localPosition, 1, 0, 0);
     } else if (D_L23_001B13E4 / 2 - 4 < AGE) {
         func_0027D330(1);
-        *(Quad *)(transform + 0x00) = *(Quad *)(object + 0xc0);
-        *(Quad *)(transform + 0x10) = *(Quad *)(object + 0xd0);
-        *(Quad *)(transform + 0x20) = *(Quad *)(object + 0xe0);
-        *(Quad *)(transform + 0x30) = 0;
+        qcopy((transform + 0x00) ,(object + 0xc0));
+        qcopy((transform + 0x10) ,(object + 0xd0));
+        qcopy((transform + 0x20) ,(object + 0xe0));
+        qzero(transform + 0x30);
         func_002AB6D8((float *)transform, (float *)localPosition);
         func_00282D30(secondPosition, (char *)object + 0xc0, -D_L23_001B13E0);
         func_00282CC0(secondPosition, secondPosition, position);
@@ -319,7 +306,7 @@ state2:
     }
     goto state_default;
 state3:
-    SQ(0x3d0) = *(Quad *)D_L23_001B3760;
+    qcopy(state+(0x3d0),D_L23_001B3760);
     SP(0x400) = state + 0x3d0;
     func_L23_004186D0((char *)object, SF(0x588));
     func_L23_0041A648((char *)object);
@@ -394,17 +381,17 @@ state9:
                     func_0029FCC0((char *)object, i + 30, transform);
                     func_0029FC20((char *)object, i + 30, (char *)jointMatrix);
                     func_00282D30(localPosition, (char *)jointMatrix + 0x20, -16.0f);
-                    *(Quad *)extraPosition = *(Quad *)transform;
+                    qcopy(extraPosition ,transform);
                     func_L23_00418650(extraPosition, 0.0f);
                     func_00282CF0(thirdPosition, extraPosition, position);
                     func_00282D30(thirdPosition, thirdPosition, D_L23_001B1420);
                     func_00282CC0(localPosition, localPosition, thirdPosition);
                     func_00282CC0(transform, position, localPosition);
                     func_L23_00418650(transform, 0.0f);
-                    *(Quad *)(enemy + 0xc0) = *(Quad *)(object + 0xc0);
-                    *(Quad *)(enemy + 0xd0) = *(Quad *)(object + 0xd0);
-                    *(Quad *)(enemy + 0xe0) = *(Quad *)(object + 0xe0);
-                    *(Quad *)(enemy + 0x10) = *(Quad *)transform;
+                    qcopy((enemy + 0xc0) ,(object + 0xc0));
+                    qcopy((enemy + 0xd0) ,(object + 0xd0));
+                    qcopy((enemy + 0xe0) ,(object + 0xe0));
+                    qcopy((enemy + 0x10) ,transform);
                 }
             }
             func_00282948(state + 0x598);
@@ -426,10 +413,10 @@ state10:
             char *child = SP(0x36c + i * 4);
             if (child) {
                 char *source = SP(0x358 + i * 4);
-                *(Quad *)(child + 0xc0) = *(Quad *)(source + 0xc0);
-                *(Quad *)(child + 0xd0) = *(Quad *)(source + 0xd0);
-                *(Quad *)(child + 0xe0) = *(Quad *)(source + 0xe0);
-                *(Quad *)(child + 0x10) = *(Quad *)(source + 0x10);
+                qcopy((child + 0xc0) ,(source + 0xc0));
+                qcopy((child + 0xd0) ,(source + 0xd0));
+                qcopy((child + 0xe0) ,(source + 0xe0));
+                qcopy((child + 0x10) ,(source + 0x10));
                 FLAGS(child) &= 0xbff9;
                 *(int *)(child + 0x98) = *(int *)(*(char **)(child + 0x24) + 0x10);
                 if (enable)
@@ -597,7 +584,7 @@ state_default:
         FLAGS(SP(0x614)) |= 0x100;
     }
     func_L23_00419D60((char *)object);
-    *(Quad *)localPosition = *(Quad *)D_L23_001B36C0;
+    qcopy(localPosition ,D_L23_001B36C0);
     func_L23_0041A038((char *)object, localPosition);
     func_L23_0041A3B8((char *)object, localPosition);
     func_L23_0041C0E8((char *)object);

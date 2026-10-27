@@ -53,9 +53,9 @@ void func_002C7888(char *self)
 
 /* The three handler slots and the string table are read through $gp, so this
  * function needs the -G8 profile of the sibling file. */
-extern int D_001AA420 __attribute__((sda));
-extern int D_001AA428 __attribute__((sda));
-extern int D_001AA42C __attribute__((sda));
+extern void (*D_001AA420)(int) __attribute__((sda));
+extern void (*D_001AA428)(int) __attribute__((sda));
+extern void (*D_001AA42C)(int) __attribute__((sda));
 extern char D_0025BA90[];
 extern int func_002D5B38(int, char *);
 
@@ -85,3 +85,34 @@ extern int D_001AA730 __attribute__((sda));
 extern int D_001AA748 __attribute__((sda));
 
 extern int func_002D5E70(char *object, int *result);
+
+/* Mode dispatcher: two handler slots are called, one mode names a string. */
+int func_002CB820(int mode)
+{
+    int result = 0;
+
+    switch (mode) {
+    case 0:
+        result = 1;
+        break;
+    case 1:
+        if (D_001AA420)
+            D_001AA420(0);
+        result = 1;
+        break;
+    case 2:
+        if (D_001AA428)
+            D_001AA428(0);
+        result = 1;
+        break;
+    case 3:
+        result = func_002D5B38(3, D_0025BA90);
+        break;
+    case 4:
+        if (D_001AA42C)
+            D_001AA42C(0);
+        result = 1;
+        break;
+    }
+    return result;
+}

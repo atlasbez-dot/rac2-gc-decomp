@@ -1,3 +1,9 @@
+/* M22, 2026-10-26: with the current compiler the C below is 368/368 and the
+ * screen-field addressing matches; about 13 words differ, all scheduling: the
+ * order of func_0027DE50's argument setup and of the 0.1f / end load in both
+ * interpolations.  Tried an unsigned long colour and the factor as a local.
+ * On the permuter.
+ */
 /* Bounded manual reconstruction, 2026-10-23; not linked.
  * Profile: -O2 -G0 -ffunction-sections.
  * us: func_L16_0041F950: 0 of 2 places match (src/levels/shared/L16_0041F950-draw.c); us2: func_L16_0041F950: 0 of 2 places match (src/levels/shared/L16_0041F950-draw.c); pal: func_L16_0041F950: 0 of 2 places match (src/levels/shared/L16_0041F950-draw.c)

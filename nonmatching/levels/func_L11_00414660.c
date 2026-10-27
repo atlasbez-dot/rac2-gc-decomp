@@ -1,3 +1,13 @@
+/* Retained readable reconstruction; NOT MATCHING and no exact-C credit.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g
+ * Fresh local measure: 288/288 bytes; 0/4 USA v1.01 placements; first mismatch +0x40.
+ * Evidence: Approved endpoint qcopy transfers tie the prior TI form. Scalar component scopes and an inline component helper remain 288 bytes but worsen initial FP allocation; a dependency-safe endpoint nc form also ties.
+ * Reopen: Obtain a measured scalar FP interference/coalescing model while preserving the arithmetic tree, all four anchors and the zero W store.
+ * Older notes below are historical. Equal size and allocator diagnostics do
+ * not establish relocation/binding qualification or linked equality.
+ */
+#include "common.h"
+
 /* 2026-10-23 readable reconstruction. Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g.
  * 288/288 bytes, 0/4 placements in each of us, us2 and pal. First remaining mismatch +0x40: scalar FP allocation. Seven source/profile trials; plain TI endpoint copies work, qcopy/barrier fixes their return scheduling. Reopen with evidence for scalar temporary allocation.
  * Earlier screening-only commentary is preserved below as historical context.
@@ -20,11 +30,11 @@ void func_L11_00414660(float *out, float *start, float *end, float *before, floa
 {
     float t2, t3, a, b, result;
     if (t == 0.0f) {
-        *(Vec128_00414660 *)out = *(Vec128_00414660 *)start;
+        qcopy(out, start);
         return;
     }
     if (t == 1.0f) {
-        *(Vec128_00414660 *)out = *(Vec128_00414660 *)end;
+        qcopy(out, end);
         return;
     }
     t2 = t * t;

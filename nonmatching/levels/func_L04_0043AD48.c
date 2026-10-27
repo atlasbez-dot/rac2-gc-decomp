@@ -1,3 +1,10 @@
+/* M25 2026-10-26: 1648/1648 bytes (was 1640). The forward segment search is a
+ * do/while whose top test exits without the subtraction (goto found), which gives
+ * retail's loop shape and size. Left (119 lines): count/path in $a2/$a0 where retail
+ * has $a0/$v1 (beq path,*currentPath operand order), progress in $f1 where retail
+ * computes it straight into $f12, and the forward loop is strength-reduced (pointer
+ * IVs) where retail indexes with sll/addu each pass.
+ */
 /* Signature/interface follow-up, 23 October 2026.
  * Profile: -O2 -G0 -ffunction-sections.
  * USA v1.01: 1640/1648 bytes, 0/1 carrying placements.
@@ -176,11 +183,12 @@ void func_L04_0043AD48(int *outX, int *outY, int animation, int frame, int *curr
             } else {
                 do {
                     segment++;
-                    if (progress < start)
-                        break;
+                    if (!(start <= progress))
+                        goto found;
                     start += lengths[segment];
-                } while (start <= progress);
+                } while (!(progress < start));
                 start -= lengths[segment];
+            found:;
             }
         }
         *currentSegment = segment;

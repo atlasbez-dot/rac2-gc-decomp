@@ -12,7 +12,6 @@ INCLUDE_ASM("asm/levels", func_L07_003E5198);
 
 INCLUDE_ASM("asm/levels", func_L07_003E56B8);
 
-INCLUDE_ASM("asm/levels", func_L07_003E5910);
 
 extern void func_00282978(char *);
 
@@ -82,7 +81,7 @@ unsigned char *func_L07_003E5B70(int group, int *count)
     return result;
 }
 
-INCLUDE_ASM("asm/levels", func_L07_003E5C78);
+/* func_L07_003E5C78 is defined in L07_003E5C78-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L07_003E5D80);
 

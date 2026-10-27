@@ -42,7 +42,43 @@ void func_00288D88(void)
 {
 }
 
-INCLUDE_ASM("asm/game", func_00288D90);
+typedef struct {
+    int active;
+    int timer;
+    char pad08[0x18];
+    int entryIndex;
+    int unk24;
+} SubtitleState;
+
+extern SubtitleState D_00254E78;
+
+void func_00288D90(void)
+{
+    switch (D_00254E78.active) {
+    case 0:
+        D_00254E78.unk24 = -1;
+        return;
+    case 1:
+    case 2:
+        D_00254E78.active = 7;
+        D_00254E78.timer = 0;
+        return;
+    case 3:
+        D_00254E78.active = 7;
+        D_00254E78.timer = 0;
+        return;
+    case 4:
+        D_00254E78.active = 6;
+        D_00254E78.timer = 4 - D_00254E78.timer;
+        return;
+    case 5:
+        D_00254E78.active = 6;
+        D_00254E78.timer = 0;
+        return;
+    case 7:
+        return;
+    }
+}
 
 typedef struct { int active; char reserved04[0x20]; int key; int selection; char reserved2C[0x14]; int value40; int value44; } SelectorState;
 typedef struct { char reserved00[0x24]; int key; char reserved28[0x40]; int active;
@@ -66,19 +102,10 @@ int func_00288E18(int key, int selection)
 }
 
 
-typedef struct {
-    int active;
-    int timer;
-    char pad08[0x18];
-    int entryIndex;
-    int unk24;
-} SubtitleState;
-
 typedef struct { int unk00; int unk04; int id; int unk0C; } TextEntry;
 
 typedef struct { char pad00[0x2A20]; int unk2A20[1]; } DiscToc;
 
-extern SubtitleState D_00254E78;
 extern TextEntry *D_001B1840 __attribute__((sda));
 extern DiscToc D_0014B540;
 
@@ -102,11 +129,9 @@ void func_00288EA0(void)
     D_00254E78.timer = 0;
 }
 
-INCLUDE_ASM("asm/game", func_00288F48);
 
 
 
-INCLUDE_ASM("asm/game", func_00289020);
 
 INCLUDE_ASM("asm/game", func_00289178);
 
@@ -132,7 +157,28 @@ int func_00289FC8(short key, int field, unsigned short *out)
     return -1;
 }
 
-INCLUDE_ASM("asm/game", func_0028A030);
+extern unsigned char D_0018D0E8[];
+extern int D_001A7C04_sda __attribute__((sda));
+extern int D_001A7C04[] __attribute__((sda));
+
+void func_0028A030(short id)
+{
+    int val = func_00289FC8(id, 1, 0);
+    int i;
+
+    if (val == -1)
+        return;
+    for (i = 0; D_0018D0E8[i] != val && i < D_001A7C04_sda; i++) {
+    }
+    if (i < D_001A7C04_sda) {
+        for (; i < D_001A7C04_sda - 1; i++)
+            D_0018D0E8[i] = D_0018D0E8[i + 1];
+        D_0018D0E8[i] = 0;
+        D_001A7C04[0]--;
+    }
+    D_0018D0E8[D_001A7C04[0]] = val;
+    D_001A7C04[0]++;
+}
 
 void
 func_0028A130(int param_1)
@@ -154,15 +200,13 @@ INCLUDE_ASM("asm/game", func_0028A2F8);
 INCLUDE_ASM("asm/game", func_0028A670);
 
 
-INCLUDE_ASM("asm/game", func_0028AB20);
 
 INCLUDE_ASM("asm/game", func_0028AB70);
 
+
 INCLUDE_ASM("asm/game", func_0028ACB0);
 
-INCLUDE_ASM("asm/game", func_0028AE88);
 
-INCLUDE_ASM("asm/game", func_0028AFE8);
 
 INCLUDE_ASM("asm/game", func_0028B160);
 
@@ -365,4 +409,3 @@ void func_0028BCA0(int arg) {
 }
 
 
-INCLUDE_ASM("asm/game", func_0028BCE8);

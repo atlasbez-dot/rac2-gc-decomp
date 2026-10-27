@@ -1,3 +1,4 @@
+/* 26 October 2026 (M24): -O2 -G0 -ffunction-sections, 524/524 bytes, 5 lines off: a separate local for the first sound slot fixes its address register, and D_L05_001B251C is a plain pointer; left only the order of the table-pointer load against the state+0x260 reload, as in func_L05_00415B38. */
 /* 0 of 1 places match - last line: 05_feltzin_system: instruction at +0xe4 differs
    Same size (524 bytes) and the same structure; the whole main body differs only in the
    block that builds the entry pointer at +0x120: retail loads the absolute table pointer
@@ -21,7 +22,7 @@ typedef int TI128 __attribute__((mode(TI)));
 
 extern char D_00188660[];
 
-extern char D_L05_001B251C[];
+extern char *D_L05_001B251C;
 
 extern int func_379860(char *object);
 extern char *func_379CA0(char *object);
@@ -44,7 +45,7 @@ void func_L05_004155A0(char *object)
 {
     char *state = *(char **)(object + 0x68);
     char *r;
-    char *rec;
+    char *rec, *rec2, *rec3;
     char buf[0x10];
     int st;
 
@@ -70,12 +71,12 @@ void func_L05_004155A0(char *object)
     if (st == one) {
         if (*(int *)(state + 0x260) != -1) {
             *(int *)(r + 0x11C) = st;
-            rec = *(char **)D_L05_001B251C + *(int *)(state + 0x260) * 256;
+            rec = D_L05_001B251C + *(int *)(state + 0x260) * 256;
             *(int *)(r + 0x120) = (int)rec;
             if (func_3067D8(rec + 0x10, object + 0x10) < 10.0f) {
-                rec = D_00188660 + *(int *)(state + 0x270) * 0x70;
-                if (*(char **)(rec + 0x88) != object ||
-                    *(unsigned char *)(rec + 0x74) == 0) {
+                rec2 = D_00188660 + *(int *)(state + 0x270) * 0x70;
+                if (*(char **)(rec2 + 0x88) != object ||
+                    *(unsigned char *)(rec2 + 0x74) == 0) {
                     if (func_332AB8(0x190) == 0)
                         *(int *)(state + 0x270) =
                             func_3719A8(0xE, 0, object, 0xFBF);

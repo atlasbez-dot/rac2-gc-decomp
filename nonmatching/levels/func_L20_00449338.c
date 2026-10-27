@@ -1,3 +1,4 @@
+/* M33 2026-10-26: 13 -> 10 lines with the history table as a real 2D array (u8 D_0019B2E8[][16], D_0019B2E8[D_001A79F0][kind]): retail's (kind + row*16) + base order and the lbu register now match. Left, twice: the sum takes the row term's register ($v0) here, kind's ($v1) in retail; kind is a cross-block pseudo, so local-alloc ties the sum to the row term. Tried int/u8 kind, u32 index, kind re-read. In the permuter. */
 /* Retained manual C near miss; no linked or exact-C credit.
  * Profile: -O2 -G8 -ffunction-sections. US: 624/624 bytes, 0/1, exit 1.
  * Full state transitions, signed checkpoint index and ordered float tests are preserved.
@@ -10,7 +11,7 @@ typedef int TI128 __attribute__((mode(TI)));
 
 extern s32 D_001A79F0 __attribute__((sda));
 
-extern u8 D_0019B2E8[] __attribute__((nosda));
+extern u8 D_0019B2E8[][16] __attribute__((nosda));
 
 extern u32 D_00189EA0[] __attribute__((nosda));
 
@@ -40,8 +41,7 @@ void func_L20_00449338(char *arg0) {
         kind = *(u8 *)(arg0 + 0xB0);
         if (kind != 0xFF) {
             if (*(u32 *)(state + 0x8C) != 0) {
-                historyPage = D_0019B2E8 + D_001A79F0 * 16;
-                if (historyPage[kind] & 0x80) {
+                if (D_0019B2E8[D_001A79F0][kind] & 0x80) {
                     goto l2c;
                 }
             }
@@ -70,8 +70,7 @@ void func_L20_00449338(char *arg0) {
         kind = *(u8 *)(arg0 + 0xB0);
         if (kind != 0xFF) {
             if (*(u32 *)(state + 0x8C) != 0) {
-                historyPage = D_0019B2E8 + D_001A79F0 * 16;
-                if (historyPage[kind] & 0x80) {
+                if (D_0019B2E8[D_001A79F0][kind] & 0x80) {
                     func_002A7750(arg0, 2, -1);
                     break;
                 }

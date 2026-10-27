@@ -1,4 +1,5 @@
 #include "include_asm.h"
+#include "common.h"
 
 /* Qwen draft (branch qwen/autonomy, c8b09022), checked by tools/check.py */
 void func_002B9180(void *);
@@ -53,7 +54,6 @@ extern void F15a8b7f0_FUN_00282CC0(char *first, char *second, char *third);
 
 extern void F15a8b7f0_FUN_002B9180(char *object);
 
-typedef unsigned char u8;
 
 extern void func_00282CC0_19(void *out, void *in, void *src);
 
@@ -75,7 +75,6 @@ extern void Fa03721e9_FUN_00282CC0(char *a, char *b, char *c);
 
 extern void Fa03721e9_FUN_002B9180(char *p);
 
-typedef int s32;
 
 #ifndef RAC2_T_S16_F570CFB4B
 #define RAC2_T_S16_F570CFB4B
@@ -84,7 +83,6 @@ typedef short s16_F570cfb4b;
 
 extern void func_002B9180_7(u8 *);
 
-typedef float f32;
 
 extern int F7cacd225_FUN_00282978(short *p);
 
@@ -149,7 +147,7 @@ void func_002BF6F0(void *param_1)
   return;
 }
 
-INCLUDE_ASM("asm/game", func_002BF728);
+/* func_002BF728 uses the quadword-copy profile in 002BF728-qcopy.c. */
 
 extern int func_002A77E0(int);
 extern void func_00282CC0(char *, char *, char *);
@@ -230,30 +228,115 @@ void func_002BF8F0(char *self)
     func_00282CC0(self + 0x10, self + 0x10, (char *)vec);
 }
 
-INCLUDE_ASM("asm/game", func_002BFB38);
 
-INCLUDE_ASM("asm/game", func_002BFC50);
+extern int func_002761F8(void *, void *, int, void *, void *);
+extern int func_00278E78(void);
+extern void *func_002C19D8(void *, float, void *, float, int);
+extern void func_002C3D80(void *, int, float, float);
+typedef union { unsigned char b[0x2600]; int i[0x980]; float f[0x980]; } L_BFC50Hero;
+extern char D_00189E20[];
+extern void *D_001A9E74 __attribute__((section(".sdata")));
+extern float D_001BAF80[];
+extern char D_001BAFA0[];
 
-INCLUDE_ASM("asm/game", func_002BFE80);
+void func_002BFC50(char *self)
+{
+    char *s1 = self + 0x20;
+    float vec[4] __attribute__((aligned(16)));
+    int state = *(int *)(s1 + 0x10);
 
-INCLUDE_ASM("asm/game", func_002BFFE8);
+    if (state == 0) {
+        func_00282CC0(self + 0x10, self + 0x10, s1);
+    } else if (state == 1) {
+        func_00282CC0((char *)vec, self + 0x10, s1);
+        if (func_002761F8(self + 0x10, vec, 2, 0, 0) == 0) {
+            goto copy;
+        }
+        if (func_00278E78() == 0) {
+            func_002C19D8(D_001BAFA0, 0.2f, D_001A9E74, 5250.0f, -1);
+        }
+        func_002B9180(self);
+        return;
+    } else if (state == 3) {
+        func_00282CC0(self + 0x10, self + 0x10, s1);
+        if (*(float *)(self + 0x18) < ((L_BFC50Hero *)D_00189E20)->f[0x330 / 4]) {
+            void *t = D_001A9E74;
 
-INCLUDE_ASM("asm/game", func_002C00F0);
+            *(float *)(self + 0x18) = ((L_BFC50Hero *)D_00189E20)->f[0x330 / 4];
+            func_002C19D8(self + 0x10, 0.2f, t, 5250.0f, -1);
+            func_002B9180(self);
+            return;
+        }
+    } else {
+        func_00282CC0((char *)vec, self + 0x10, s1);
+        if (func_002761F8(self + 0x10, vec, 2, 0, 0) == 0) {
+            goto copy;
+        }
+        if (func_00278E78() != 0) {
+            D_001BAF80[10] = D_001BAF80[10] + 0.05f;
+            func_002C3D80(&D_001BAF80[8], -1, 0.25f, 3150.0f);
+        }
+        func_002B9180(self);
+        return;
+copy:
+        qcopy(self + 0x10, vec);
+    }
+    *(float *)(s1 + 8) = *(float *)(s1 + 8) - *(float *)(s1 + 0x1C);
+    self[8] = self[8] + 2;
+    if (--*(int *)(s1 + 0x14) <= 0 || *(float *)(self + 0x18) < *(float *)(s1 + 0x18)) {
+        *(int *)(self + 4) = *(int *)(self + 4) - 0x10000000;
+        if (*(int *)(self + 4) < 0) {
+            func_002B9180(self);
+        }
+    }
+}
+
+/* func_002BFE80 is defined in 002BFE80-dbg.c. */
+
+extern void func_00282CF0(void *, void *, void *);
+extern float func_00282DF0(void *);
+extern void func_00282D30(void *, void *, float);
+extern void func_00282F20(void *, void *, float);
+extern int func_L00_0031C998(int, int, float);
+extern float D_001B5340[];
+extern int abs(int);
+
+void func_002BFFE8(char *self)
+{
+    char *s1 = self + 0x20;
+    float vec[4];
+    int d;
+    float f;
+
+    if (func_00282978((short *)(self + 0xA)) != 0) {
+        func_002B9180(self);
+        return;
+    }
+    func_00282CF0(vec, D_001B5340, s1);
+    if (func_00282DF0(vec) > 5.0f) {
+        func_00282F20(vec, vec, 1.25f);
+    } else {
+        func_00282D30((char *)vec, (char *)vec, 0.25f);
+    }
+    func_00282CC0((char *)(self + 0x10), s1, (char *)vec);
+    d = abs(*(short *)(self + 0xA) - *(int *)(s1 + 0x14));
+    f = (float)(*(int *)(s1 + 0x14) - d) / (float)*(int *)(s1 + 0x14);
+    *(int *)(self + 4) = func_L00_0031C998(0, *(int *)(s1 + 0x10), f);
+}
+
 
 INCLUDE_ASM("asm/game", func_002C01F8);
 
-INCLUDE_ASM("asm/game", func_002C02F0);
+/* func_002C02F0 uses the quadword-copy profile in 002C02F0-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002C04C0);
 
 
-INCLUDE_ASM("asm/game", func_002C0CC0);
+/* func_002C0CC0 uses the quadword-copy profile in 002C0CC0-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002C0E50);
 
-INCLUDE_ASM("asm/game", func_002C14D8);
 
-INCLUDE_ASM("asm/game", func_002C16C0);
 
 /* Updates one byte-addressed object by packing a converted short-ratio value with three bytes, applying the bound helper sequence to three stored floats, and accumulating one byte and one float. */
 void func_002C1840(char *self)
@@ -300,7 +383,67 @@ void func_002C1840(char *self)
     *(float *)(self + 12) = *(float *)(self + 12) + *(float *)(s1 + 20);
 }
 
-INCLUDE_ASM("asm/game", func_002C19D8);
+typedef struct {
+    float vx;
+    float vy;
+    int f8;
+    int fC;
+    float spin;
+    void *owner;
+} L_C19D8Payload;
+typedef struct {
+    unsigned char b0, b1, b2, b3;
+    int color;
+    unsigned char seed, alpha;
+    unsigned short size;
+    float life;
+    float position[4];
+    L_C19D8Payload payload;
+} L_C19D8Particle;
+extern void *func_002B9030(int);
+extern int func_00283CF0(float);
+extern int func_002A77E0(int);
+extern int func_001163B0(void);
+extern float func_002A7940(void);
+extern float func_002A7878(float, float);
+extern float func_00283180(float);
+extern float func_00283198(float);
+extern unsigned char *D_001F25F4;
+
+void *func_002C19D8(void *position, float size, void *owner, float spin, int color)
+{
+    L_C19D8Particle *p = (L_C19D8Particle *)func_002B9030(0x2D);
+    L_C19D8Payload *out;
+    float angle;
+    float speed;
+    int c;
+
+    if (p) {
+        qcopy(p->position, position);
+        if (color == -1) {
+            c = ((func_002A77E0(6) + 0x14) << 24) | 0x808080;
+        } else {
+            c = color;
+        }
+        out = &p->payload;
+        p->color = c;
+        p->alpha = func_00283CF0(1.0f) + 32;
+        p->b3 = 0x48;
+        p->b1 = 1;
+        p->b2 = *D_001F25F4;
+        p->seed = func_001163B0();
+        p->size = 4;
+        p->life = size * 210000.0f;
+        angle = func_002A7940();
+        speed = func_002A7878(0.0015f, 0.0025f);
+        p->payload.vx = func_00283180(angle) * speed;
+        out->vy = func_00283198(angle) * speed;
+        out->owner = owner;
+        out->spin = spin;
+        out->f8 = 0;
+    }
+    return p;
+}
 
 /* func_002C1B38 is in the -G8 sibling. */
 
@@ -326,9 +469,40 @@ void func_002C1C88(char *self)
         func_002B9180(self);
 }
 
-INCLUDE_ASM("asm/game", func_002C1DB0);
+extern void func_00282D30_fa(void *, void *, float);
 
-INCLUDE_ASM("asm/game", func_002C1E50);
+void func_002C1DB0(char *a0)
+{
+    char *p = a0;
+    char *q = p + 32;
+    int v;
+
+    func_00282D30_fa(q, q, 0.975f);
+    func_00282CC0(p + 16, p + 16, q);
+    *(float *)(p + 12) = *(float *)(p + 12) + 14700.0f;
+    *(u8 *)(p + 8) = *(u8 *)(p + 8) + *(u8 *)(q + 16);
+    v = *(int *)(p + 4) + 0xFE000000;
+    *(int *)(p + 4) = v;
+    if (v < 0) {
+        func_002B9180(p);
+    }
+}
+
+extern void func_00282CC0(char *, char *, char *);
+extern float func_00283CE0(int);
+extern float func_00282C48(float);
+extern int func_00283D38(int, int, float);
+
+void func_002C1E50(char *obj) {
+    char *tail = obj + 0x20;
+    obj[8] += tail[0x1C];
+    func_00282CC0(obj + 0x10, obj + 0x10, tail);
+    *(int *)(obj + 4) = func_00283D38(*(int *)(tail + 0x18), *(int *)(tail + 0x14),
+        func_00282C48(func_00283CE0(*(short *)(obj + 0x0A)) * *(float *)(tail + 0x10) - 1.0f));
+    if (func_00282978((short *)(obj + 0x0A)) != 0) {
+        func_002B9180(obj);
+    }
+}
 
 
 /* func_002C1FC0 is defined in 002BF6F0-g8.c. */
@@ -375,13 +549,11 @@ void func_002C2170(char *p)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002C2210);
-
 INCLUDE_ASM("asm/game", func_002C23B8);
 
 extern void func_002C96F8(float, float, void *, int *, float *, void *);
 
-extern int func_00277F48(void *, int, int, int, float);
+extern int func_00277F48(float, void *, int, int, int);
 
 extern float func_00283CE0(int);
 
@@ -437,13 +609,12 @@ void func_002C2658(char *obj)
                                              func_00283CE0(index) * 0.0106666666f);
     }
 
-    count = func_00277F48(vec, 16, *(int *)(motion + 0x14), 0, 0.15f);
+    count = func_00277F48(0.15f, vec, 16, *(int *)(motion + 0x14), 0);
     local[1] = *(V4_Fc3cb9262 *)(obj + 0x10);
     func_002A9850((void *)*(int *)(motion + 0x14), (Vec16_F5621621c *)&local[1],
                    D_001BF000, count, 0, 0x810001, 2, 1, 2.0f, 1.0f, 1.0f);
 }
 
-INCLUDE_ASM("asm/game", func_002C27B0);
 
 void func_002C28F8(char *object)
 {
@@ -464,9 +635,28 @@ void func_002C28F8(char *object)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002C29A0);
+extern int func_00283CF0(float);
 
-INCLUDE_ASM("asm/game", func_002C2A88);
+/* A drifting spark: moves by its velocity, spins, slows its fall and fades over its last
+   64 frames; it frees itself when the count runs out. */
+void func_002C29A0(char *p)
+{
+    char *vel = p + 0x20;
+
+    func_00282CC0(p + 0x10, p + 0x10, vel);
+    *(float *)(p + 0xC) += 5880.0f;
+    *(float *)(vel + 0x14) *= 0.98f;
+    *(float *)(vel + 0x10) += *(float *)(vel + 0x14);
+    p[8] = func_00283CF0(*(float *)(vel + 0x10));
+    if (--*(short *)(p + 0xA) <= 0)
+        func_002B9180(p);
+    if (*(short *)(p + 0xA) > 0x40)
+        *(int *)(p + 4) = ((0x80 - *(short *)(p + 0xA)) << 24) | 0x808080;
+    else
+        *(int *)(p + 4) = (*(short *)(p + 0xA) << 24) | 0x808080;
+}
+
+/* func_002C2A88 uses the quadword-copy profile in 002C2A88-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002C2C80);
 
@@ -484,7 +674,7 @@ void func_002C30F8(char *self)
         func_002B9180(self);
 }
 
-INCLUDE_ASM("asm/game", func_002C3150);
+/* func_002C3150 uses the quadword-copy profile in 002C3150-qcopy.c. */
 
 /* advances three floats of a sub-object by a resident offset triple, calls a three-pointer update, subtracts the offsets back out, rejects the result when any coordinate leaves the 2.0..1021.0 band, and otherwise rescales a 24-bit handle by the ratio of two helper lookups over a signed halfword index */
 void func_002C3280(u8 *self)
@@ -492,7 +682,6 @@ void func_002C3280(u8 *self)
     char *s2 = (char *)self + 32;
     int n;
     float a;
-    float b;
 
     if (*(int *)(s2 + 28) == 1) {
         char *base = D_00189E20_18;
@@ -521,13 +710,12 @@ void func_002C3280(u8 *self)
 
     n = *(int *)(self + 4) & 0xFFFFFF;
     a = func_00283CE0_4(*(short *)(self + 10) - 1);
-    b = func_00283CE0_4(*(short *)(self + 10));
-    *(int *)(self + 4) = func_00283D38_3(n, *(int *)(self + 4), a / b);
+    /* One statement: retail has no line label between the second call and the
+       division, so no division padding (docs/COMPILER-NOTES.md). */
+    *(int *)(self + 4) = func_00283D38_3(n, *(int *)(self + 4), a / func_00283CE0_4(*(short *)(self + 10)));
 }
 
 INCLUDE_ASM("asm/game", func_002C3430);
-
-INCLUDE_ASM("asm/game", func_002C36D0);
 
 void func_002C37E0(char *obj)
 {
@@ -564,7 +752,7 @@ tail:
 
 INCLUDE_ASM("asm/game", func_002C3B08);
 
-INCLUDE_ASM("asm/game", func_002C3D80);
+/* func_002C3D80 uses the quadword-copy profile in 002C3D80-qcopy.c. */
 
 void func_002C3EE8(char *p)
 {
@@ -581,11 +769,10 @@ void func_002C3EE8(char *p)
         Fa03721e9_FUN_002B9180(p);
 }
 
-INCLUDE_ASM("asm/game", func_002C3F88);
+/* func_002C3F88 uses the quadword-copy profile in 002C3F88-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002C4100);
 
-INCLUDE_ASM("asm/game", func_002C43C8);
 
 INCLUDE_ASM("asm/game", func_002C4500);
 
@@ -649,11 +836,39 @@ void func_002C4F08(char *self)
 
 
 
-INCLUDE_ASM("asm/game", func_002C5068);
+extern float func_00283CE0_2(int v);
+extern int func_00283CF0_6(float f);
+extern void func_00282CC0_17(char *dst, char *src, char *vec);
+extern int func_00282978_9(char *p);
+extern void func_002B9180_13(char *self);
+
+
+/* The particle update: the quad at 0x20 is copied to the stack, the value of
+   the helper at 0xA is divided by the copy's fourth float, the two scaled
+   results are packed into the word at 4 and the byte at 8. */
+void func_002C5068(char *self)
+{
+    V4_Fc3cb9262 vec;
+    float f3;
+    float f21;
+    int v;
+
+    vec = *(V4_Fc3cb9262 *)(self + 0x20);
+    f3 = ((float *)&vec)[3];
+    ((float *)&vec)[3] = 0.0f;
+    f21 = func_00283CE0_2(*(short *)(self + 0xA)) / f3;
+    v = func_00283CF0_6(f21 * 38.0f);
+    *(int *)(self + 4) = (v << 24) | 0x808080;
+    v = func_00283CF0_6(f21 * 33.0f);
+    *(char *)(self + 8) = (char)v;
+    func_00282CC0_17(self + 0x10, self + 0x10, (char *)&vec);
+    if (func_00282978_9(self + 0xA) != 0) {
+        func_002B9180_13(self);
+    }
+}
 
 INCLUDE_ASM("asm/game", func_002C5120);
 
-INCLUDE_ASM("asm/game", func_002C5400);
 
 void func_002C5550(Obj_F7cacd225 *o)
 {
@@ -676,17 +891,37 @@ void func_002C5550(Obj_F7cacd225 *o)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002C56B0);
+/* func_002C56B0 uses the quadword-copy profile in 002C56B0-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002C58A8);
 
-INCLUDE_ASM("asm/game", func_002C5B70);
+/* func_002C5B70 uses the quadword-copy profile in 002C5B70-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002C5D00);
 
 /* func_002C6360 is in the -G8 sibling (its two globals are read through $gp). */
 
-INCLUDE_ASM("asm/game", func_002C64D8);
+extern float func_00283198(float);
+extern int func_00283CF0(float);
+
+void func_002C64D8(char *s1)
+{
+    float f20;
+    float t;
+    char *s0;
+
+    if (s1 == 0)
+        return;
+    s0 = s1 + 0x20;
+    if (func_00282978((short *)(s1 + 0x24)) != 0) {
+        func_002B9180(s1);
+        return;
+    }
+    f20 = func_00283CE0(*(short *)(s0 + 4)) / func_00283CE0(*(short *)(s0 + 6));
+    t = func_00283198(f20 * 6.283186f);
+    *(int *)(s1 + 4) = (*(int *)(s1 + 4) & 0x00FFFFFF)
+                       + (func_00283CF0(func_00282C48(func_00283CE0(*(int *)(s0 + 0xC)) * t)) << 24);
+}
 
 INCLUDE_ASM("asm/game", func_002C65A0);
 
@@ -767,13 +1002,89 @@ void func_002C6868(char *self)
         func_002B9180(self);
 }
 
-INCLUDE_ASM("asm/game", func_002C6A08);
+/* Follows a sound emitter's moby: fades its volume byte (the top byte of +4) up by 4
+   toward the target while the moby is visible and active, else down by 4 to zero,
+   then places the emitter at the moby (or at its joint, pulled 0.4 of the way toward
+   the camera). A dead or dying moby (state 0xFE/0xFD) or none lets the emitter finish
+   and frees it. */
+typedef int TI128_2C6A08 __attribute__((mode(TI)));
+typedef struct {
+    unsigned char pad0[0x10];
+    float pos[4];
+    unsigned char state;
+    unsigned char pad21[0x10];
+    unsigned char visible;
+    unsigned char pad32[2];
+    unsigned short flags;
+} EmitterMoby2C6A08;
+typedef struct {
+    EmitterMoby2C6A08 *moby;
+    unsigned char pad4[2];
+    short joint;
+    unsigned char pad8[3];
+    signed char target;
+} EmitterRef2C6A08;
+typedef struct {
+    unsigned char pad0[4];
+    int packed;
+    unsigned char ticks;
+    unsigned char pad9[7];
+    float pos[4];
+    EmitterRef2C6A08 ref;
+} Emitter2C6A08;
+extern float D_001B5340[];
+extern int func_002A8860(void *, int);
+extern void func_0029FCC0(void *, int, void *);
+extern void func_00282CF0(void *, void *, void *);
+extern void func_00282F20(void *, void *, float);
+
+void func_002C6A08(Emitter2C6A08 *emitter)
+{
+    float joint[4];
+    float toward[4];
+    EmitterMoby2C6A08 *moby;
+    int level;
+    int target;
+    EmitterRef2C6A08 *ref;
+
+    if (emitter == 0)
+        return;
+    emitter->ticks++;
+    ref = &emitter->ref;
+    moby = ref->moby;
+    if (moby == 0 || moby->state == 0xFE || moby->state == 0xFD) {
+        if (func_002A8860(&emitter->packed, 4) != 0)
+            func_002B9180(emitter);
+        return;
+    }
+    level = emitter->packed >> 24;
+    target = ref->target;
+    if (moby->visible != 0 && !(moby->flags & 2)) {
+        if (level < target) {
+            level += 4;
+            if (target < level)
+                level = target;
+        }
+    } else {
+        level -= 4;
+        if (level < 0)
+            level = 0;
+    }
+    emitter->packed = (emitter->packed & 0xFFFFFF) | (level << 24);
+    if (ref->joint == -1) {
+        qcopy(emitter->pos, ref->moby->pos);
+        return;
+    }
+    func_0029FCC0(ref->moby, ref->joint, joint);
+    func_00282CF0(toward, D_001B5340, joint);
+    func_00282F20(toward, toward, 0.4f);
+    func_00282CC0((char *)emitter->pos, (char *)joint, (char *)toward);
+}
 
 INCLUDE_ASM("asm/game", func_002C6B68);
 
 INCLUDE_ASM("asm/game", func_002C6DD8);
 
-INCLUDE_ASM("asm/game", func_002C6EF0);
 
 INCLUDE_ASM("asm/game", func_002C7050);
 
@@ -800,5 +1111,3 @@ void func_002C7538(char *a0)
     if (Fc3cb9262_FUN_00282978(a0 + 10) != 0)
         Fc3cb9262_FUN_002B9180(a0);
 }
-
-INCLUDE_ASM("asm/game", func_002C7620);

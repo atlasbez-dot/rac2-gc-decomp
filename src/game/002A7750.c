@@ -204,7 +204,41 @@ float func_002A7AA8(float a, float b, float c, float d, float t) {
     return p * t3 + q * t2 + (c - a) * t + b;
 }
 
-INCLUDE_ASM("asm/game", func_002A7AE0);
+static __inline__ void qcopy(void *dst, const void *src) {
+    __asm__ __volatile__("lq $2,0x0(%1)\n\tsq $2,0x0(%0)"
+                         : : "r"(dst), "r"(src) : "$2", "memory");
+}
+
+void func_002A7AE0(f32 *out, f32 *a, f32 *b, f32 *c, f32 *d, float t)
+{
+    f32 t2;
+    f32 t3;
+    f32 k1, k2, k3;
+
+    if (t == 0.0f) {
+        qcopy(out, a);
+        return;
+    }
+    if (t == 1.0f) {
+        qcopy(out, b);
+        return;
+    }
+    t2 = t * t;
+    t3 = t2 * t;
+    k3 = (d[0] - b[0]) - (c[0] - a[0]);
+    k2 = (c[0] - a[0]) - k3;
+    k1 = b[0] - c[0];
+    out[0] = k3 * t3 + k2 * t2 + k1 * t + a[0];
+    k3 = (d[1] - b[1]) - (c[1] - a[1]);
+    k2 = (c[1] - a[1]) - k3;
+    k1 = b[1] - c[1];
+    out[1] = k3 * t3 + k2 * t2 + k1 * t + a[1];
+    k3 = (d[2] - b[2]) - (c[2] - a[2]);
+    k2 = (c[2] - a[2]) - k3;
+    k1 = b[2] - c[2];
+    out[2] = k3 * t3 + k2 * t2 + k1 * t + a[2];
+    out[3] = 0.0f;
+}
 
 /* Eased scalar interpolation between a and b: returns a for t==0.0, b for t==1.0, otherwise a + (b-a)*((1-cos(t*pi))*0.5). */
 f32 func_002A7C00 (f32 a, f32 b, f32 t)
@@ -341,7 +375,6 @@ int func_002A8860(int *p, int b) {
 
 
 
-INCLUDE_ASM("asm/game", func_002A89A8);
 
 extern float func_002A89A8(void *, int, float);
 
@@ -387,7 +420,6 @@ void func_002A8C00(char *a, int b, int c, float d, Quad16 *q) {
     *(volatile TI128 *)a = *(TI128 *)q;
 }
 
-INCLUDE_ASM("asm/game", func_002A8C28);
 
 extern void func_0029FCC0(void *, int, float *);
 extern int func_002A8C28(void *, float, float *, int, float, float, int, int, int);
@@ -400,7 +432,70 @@ int func_002A8D70(float x, float y, float z, void *object, int bone, int mode, i
 }
 
 
-INCLUDE_ASM("asm/game", func_002A8E20);
+typedef struct {
+    u8 pad0[0x10];
+    f32 pos[4];
+    s32 i20;
+    s32 flags;
+    u8 b28;
+    u8 b29;
+    unsigned short h2A;
+    f32 f2C;
+    s32 i30;
+    f32 f34;
+    u8 *owner;
+    s32 i3C;
+} L_A8E20Entry;
+
+typedef struct {
+    f32 pos[4];
+    s32 i10;
+    s32 flags;
+    u8 b18;
+    u8 b19;
+    unsigned short h1A;
+    f32 f1C;
+    s32 i20;
+    f32 f24;
+} L_A8E20Req;
+
+extern void func_00282C88(void *);
+extern s32 D_001BAF80[];
+extern L_A8E20Entry D_001BF200[];
+
+void func_002A8E20(u8 *m, L_A8E20Req *r)
+{
+    s32 idx = D_001BAF80[5];
+    s32 flags = 0;
+    L_A8E20Entry *e;
+
+    if (m[0xA8] != 0xFF) {
+        L_A8E20Entry *p = &D_001BF200[m[0xA8]];
+
+        if (p->owner == m) {
+            if (p->f2C > r->f1C) {
+                p->flags = p->flags | r->flags;
+                return;
+            }
+            flags = p->flags;
+        }
+    }
+    e = &D_001BF200[idx];
+    func_00282C88(e);
+    qcopy(D_001BF200[idx].pos, r->pos);
+    e->flags = r->flags | flags;
+    e->i20 = r->i10;
+    e->b28 = r->b18;
+    e->b29 = r->b19;
+    e->h2A = r->h1A;
+    e->f2C = r->f1C;
+    e->f34 = r->f24;
+    e->i30 = r->i20;
+    e->owner = m;
+    e->i3C = 0;
+    m[0xA8] = idx;
+    D_001BAF80[5] = (idx + 1) & 0x3F;
+}
 
 INCLUDE_ASM("asm/game", func_002A8F70);
 
@@ -448,7 +543,7 @@ void func_002A91F0(void *a0, float *a1) {
     func_002837D0(a0, a0, v2);
 }
 
-INCLUDE_ASM("asm/game", func_002A9288);
+/* func_002A9288 uses the quadword-copy profile in 002A9288-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002A93B0);
 
@@ -468,7 +563,84 @@ int func_002A9568(int first, int second, float amount) {
 
 
 
-INCLUDE_ASM("asm/game", func_002A96A0);
+typedef struct Rec_002A96A0 {
+    char pad0[4];
+    short s4;
+    char pad6[0x11];
+    u8 b17;
+    u8 *p18;
+    short s1C;
+} Rec_002A96A0;
+
+typedef struct Src_002A96A0 {
+    char pad0[0x20];
+    u8 *p20;
+    int f24;
+    u8 b28;
+    float f2C;
+} Src_002A96A0;
+
+extern Rec_002A96A0 *func_002AB1F0(s32);
+extern u8 *func_002AB220(s32);
+extern u8 func_002AD980(u8 *);
+
+f32 func_002A96A0(s32 a0, Src_002A96A0 *a1) {
+    Rec_002A96A0 *p = func_002AB1F0(a0);
+    f32 f = 0.0f;
+    if (p != 0) {
+        u8 *q = p->p18;
+        if (q != 0) {
+            u8 c = q[0x20];
+            if (c != 0xFE) {
+                if (c == 0xFD) {
+                    p->s1C = 0;
+                    p->p18 = 0;
+                }
+            } else {
+                p->s1C = 0;
+                p->p18 = 0;
+            }
+        }
+        {
+            short t = p->s1C;
+            if (t != 0) {
+                p->s1C = (unsigned short)p->s1C + 1;
+                if (t >= 0x79) {
+                    p->p18 = 0;
+                    p->s1C = 0;
+                }
+            }
+        }
+        if (a1 != 0) {
+            u8 *x = a1->p20;
+            f = a1->f2C;
+            if (x != 0) {
+                if (p->p18 != x) {
+                    p->p18 = x;
+                    p->b17 = func_002AD980(a1->p20);
+                    p->s1C = 1;
+                } else {
+                    if (a1->b28 == 9) {
+                        if (p->s1C < 0x3C) f = 0.0f;
+                        else p->s1C = 1;
+                    } else {
+                        if (p->s1C < 10) f = 0.0f;
+                        p->s1C = 1;
+                    }
+                }
+            }
+            if ((f32)p->s4 <= 1.0f && f > 0.0f && f < 1.0f) f = 1.0f;
+            if (a1->f24 & 0x100000) {
+                u8 *o = func_002AB220(a0);
+                if (o != 0) o[0x18] = 1;
+            } else {
+                u8 *o = func_002AB220(a0);
+                if (o != 0) o[0x18] = 0;
+            }
+        }
+    }
+    return f;
+}
 
 void func_002A9850(void *a0, Vec16_F5621621c *src, int *p, int n,
                                         int t0, int t1, int t2, int t3,

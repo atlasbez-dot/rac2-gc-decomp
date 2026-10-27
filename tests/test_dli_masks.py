@@ -118,7 +118,8 @@ class FixtureTests(unittest.TestCase):
                      "width31_shift2", "width32_shift1", "width32_shift16",
                      "width16_shift17", "existing_width20_shift36", "internal_hole",
                      "target_minus1", "target_plus1", "unshifted_width33",
-                     "touch_sign_width59", "touch_sign_width33"):
+                     "touch_sign_width59", "touch_sign_width33",
+                     "leading_ones_pure_shift_unchanged"):
             with self.subTest(control=name):
                 self.assertFalse(cases[name]["changed_by_fix"])
                 self.assertEqual(cases[name]["words_r2"], cases[name]["baseline_words_r2"])
@@ -129,6 +130,10 @@ class FixtureTests(unittest.TestCase):
             self.assertEqual(len(cases[name]["words_r2"]), length)
         self.assertEqual(cases["sign_bit"]["words_r2"], ["2402ffff", "000217fc"])
         self.assertEqual(cases["sign_bit"]["words_r2"], cases["sign_bit_signed"]["words_r2"])
+        # Retail lockB mask (func_0030A348 and its level copies): sign-extending lui first.
+        self.assertTrue(cases["leading_ones_top16_lui"]["changed_by_fix"])
+        self.assertEqual(cases["leading_ones_top16_lui"]["words_r2"],
+                         ["3c028000", "00021078", "3442ffff", "00021438"])
 
 
     def test_exhaustive_shifted_family_specification(self):

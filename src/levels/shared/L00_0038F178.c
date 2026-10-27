@@ -176,7 +176,6 @@ char *func_L00_00390938(char *p)
 
 INCLUDE_ASM("asm/levels", func_L00_00390E10);
 
-INCLUDE_ASM("asm/levels", func_L00_00390F28);
 
 INCLUDE_ASM("asm/levels", func_L00_00390FF8);
 
@@ -204,11 +203,8 @@ void func_L00_00391310(char *arg0, char *arg1)
 }
 
 
-INCLUDE_ASM("asm/levels", func_L00_003914E0);
 
-INCLUDE_ASM("asm/levels", func_L00_003918C8);
 
-INCLUDE_ASM("asm/levels", func_L00_00392530);
 
 /* Gates on the sub-object's tag byte, mirrors one status bit from that object into its own
  * halfword, clamps the wrapped value at +4 against a signed window and finishes with the
@@ -305,7 +301,6 @@ INCLUDE_ASM("asm/levels", func_L00_00395A88);
 
 /* func_L00_00396078 is defined in L00_00396078-g64.c. */
 
-INCLUDE_ASM("asm/levels", func_L00_00396288);
 
 INCLUDE_ASM("asm/levels", func_L00_003973E8);
 
@@ -320,12 +315,11 @@ void func_L00_00398118(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00398150);
 
 INCLUDE_ASM("asm/levels", func_L00_00398810);
 
 
-INCLUDE_ASM("asm/levels", func_L00_0039B288);
+/* func_L00_0039B288 is defined in L00_0039B288-g8.c. */
 
 
 INCLUDE_ASM("asm/levels", func_L00_0039D110);
@@ -367,10 +361,7 @@ void func_L00_0039E5B0(NativeUpdate775View *object)
 INCLUDE_ASM("asm/levels", func_L00_0039E7A8);
 
 
-INCLUDE_ASM("asm/levels", func_L00_0039F300);
-
 INCLUDE_ASM("asm/levels", func_L00_003A09F8);
 
-INCLUDE_ASM("asm/levels", func_L00_003A0C00);
+/* func_L00_003A0C00 is in L00_003A0C00.c. */
 
-INCLUDE_ASM("asm/levels", func_L00_003A0DA0);

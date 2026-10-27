@@ -10,7 +10,6 @@ typedef signed int s32;
 
 INCLUDE_ASM("asm/levels", func_L18_00427BE0);
 
-INCLUDE_ASM("asm/levels", func_L18_00428048);
 
 /* Reports zero after handing the level's measured list to the shared test. */
 extern void func_L00_003B9310(void *);
@@ -76,8 +75,6 @@ INCLUDE_ASM("asm/levels", func_L18_00428F08);
 
 INCLUDE_ASM("asm/levels", func_L18_0042B008);
 
-INCLUDE_ASM("asm/levels", func_L18_0043E760);
-
 /* func_L18_0043E938 lives in the sibling small-data unit (L18_00427BE0-g8.c): its controls are read through $gp. */
 
 /* func_L18_0043E9B0 lives in the sibling small-data unit (L18_00427BE0-g8.c): its
@@ -85,7 +82,8 @@ INCLUDE_ASM("asm/levels", func_L18_0043E760);
 
 INCLUDE_ASM("asm/levels", func_L18_0043EA90);
 
-INCLUDE_ASM("asm/levels", func_L18_0043EDE8);
+/* func_L18_0043EDE8 lives in the sibling small-data unit (L18_00427BE0-g8.c): its spin limits are read through $gp. */
+
 
 /* func_L18_0043EF40 is written with its sibling func_L18_0043F040 above. */
 
@@ -128,7 +126,7 @@ void func_L18_0043F040(u8 *obj) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L18_0043EF40);
+/* func_L18_0043EF40 is matched in its own unit, L18_0043EF40-g8.c. */
 INCLUDE_ASM("asm/levels", func_L18_0043F428);
 
 INCLUDE_ASM("asm/levels", func_L18_0043FFF8);

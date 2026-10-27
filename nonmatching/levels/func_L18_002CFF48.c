@@ -1,16 +1,10 @@
-/* Retained manual C reconstruction, 25 October 2026; not matching.
- * Profile: -O2 -G0 -ffunction-sections.
- * 504/504 bytes, first mismatch +0x198. Separating attached, restored and current object
- * pointers recovers the retail callback setup and copy/handler paths; corrected clear ordering
- * matches the earlier stores. The final global-mode conditional still uses another scratch
- * register and a plain branch instead of the retail likely branch. Duplicating calls grew to 520
- * bytes; switch/goto forms tied. Reopen with a new conditional/lifetime witness.
- * Checks: us: func_L18_002CFF48: 0 of 2 places match; us2: func_L18_002CFF48 is in neither
- * catalogue of us2; pal: func_L18_002CFF48 is in neither catalogue of pal.
- * No linked build or runtime validation. This header was added after candidate checks; the
- * copied standalone file was not recompiled after retention.
+/* Retained manual C reconstruction; not matching.
+ * Profile: -O2 -G0 -ffunction-sections. 504/504 bytes, US 0/2 (PAL, US2 absent).
+ * M8, 26 October 2026: callees renamed to their catalogue names; still 6 instructions off,
+ * all in the final 0x61/global-mode test: retail keeps the mode in $v1 (its %hi in the same
+ * register) and the case constants in $v0, so reorg uses bnel; this source puts the mode in
+ * $a0 and 2 in $v1. Or-chains, nested switch and an explicit local tie. Queued for the permuter.
  */
-
 #include "common.h"
 extern u8 D_00189E20[];
 extern u8 D_L18_001B4E00[], D_L18_001B5400[];
@@ -27,7 +21,7 @@ extern s32 func_L00_002F6B90(u32);
 extern void func_L00_002A6708(void);
 extern void func_L00_002D24B8(void);
 extern s32 func_L00_002A4DB0(char *, s32, s32, s32);
-extern s32 func_L18_002E0070(s32, s32);
+extern void func_L18_002E0070(s32, s32);
 extern void func_L00_002D9D98(void);
 void func_L18_002CFF48(s32 keep)
 {
@@ -77,8 +71,7 @@ void func_L18_002CFF48(s32 keep)
     value = func_L00_002A4DB0((char *)current, current[0x43], current[0x41], (s32)D_L18_001B5400);
     *(s32 *)(*(u8 **)(D_00189E20 + 0x2290) + 0x5C) = value;
     if (*(s32 *)(D_00189E20 + 0x2294) != 0x61) goto reset;
-    mode = D_L18_001A8F00;
-    switch (mode) {
+    switch (D_L18_001A8F00) {
     case 2:
     case 6:
         goto done;

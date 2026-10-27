@@ -220,7 +220,6 @@ INCLUDE_ASM("asm/levels", func_L08_003F6E18);
 
 INCLUDE_ASM("asm/levels", func_L08_003F76C0);
 
-INCLUDE_ASM("asm/levels", func_L08_003F77C0);
 
 extern u32 D_L08_001B9E04;
 
@@ -229,13 +228,13 @@ typedef int TQ_003F79E0 __attribute__((mode(TI)));
 
 /* func_L08_003F79E0: 124 bytes against retail's 104; the four bound constants take
    different FPRs and the frame grows. Deposited in nonmatching/levels/. */
-INCLUDE_ASM("asm/levels", func_L08_003F79E0);
+/* func_L08_003F79E0 is defined in L08_003F79E0-qcopy-barrier.c. */
 
 INCLUDE_ASM("asm/levels", func_L08_003F7A48);
 
 INCLUDE_ASM("asm/levels", func_L08_0040E9B8);
 
-INCLUDE_ASM("asm/levels", func_L08_0040F9D0);
+/* func_L08_0040F9D0 is matched in its own unit, src/levels/shared/L08_0040F9D0-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L08_0040FAE8);
 
@@ -273,11 +272,8 @@ void func_L08_00422428(Ent *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L08_00422578);
 
-INCLUDE_ASM("asm/levels", func_L08_00422850);
 
-INCLUDE_ASM("asm/levels", func_L08_00422900);
 
 /* the entry's own two handles and its sound handle are released */
 void func_L08_00422AD8(Ent *a0)
@@ -340,7 +336,7 @@ INCLUDE_ASM("asm/levels", func_L08_00423010);
 
 INCLUDE_ASM("asm/levels", func_L08_004233E0);
 
-INCLUDE_ASM("asm/levels", func_L08_004237F0);
+/* func_L08_004237F0 is matched in its own unit, src/levels/08_tabora/L08_004237F0.c (default flags). */
 
 /* the driver is primed, the entry follows its mount and then its own update runs */
 void func_L08_004238A0(Ent *a0)

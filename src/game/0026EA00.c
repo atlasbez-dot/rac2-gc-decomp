@@ -505,7 +505,6 @@ void func_00270A00(char *object) {
         callback(object);
 }
 
-INCLUDE_ASM("asm/game", func_00270A48);
 
 extern void func_00282CF0(float *dst, float *a, float *b);
 extern float func_00282DB0(float *a, float *b);
@@ -577,8 +576,6 @@ void func_00270B58(float *out, float *p0, float *p1, float *dir0, float *dir1, f
 
 INCLUDE_ASM("asm/game", func_00270EE0);
 
-INCLUDE_ASM("asm/game", func_00271130);
-
 INCLUDE_ASM("asm/game", func_002712D8);
 
 /* func_002718B8 uses the quadword-copy profile in 0026EA00-qcopy.c. */
@@ -587,14 +584,59 @@ INCLUDE_ASM("asm/game", func_00271958);
 
 INCLUDE_ASM("asm/game", func_00271B90);
 
-INCLUDE_ASM("asm/game", func_00271E88);
-
 INCLUDE_ASM("asm/game", func_00271FD8);
 
 
-INCLUDE_ASM("asm/game", func_002721C8);
+/* Advances the shared scalar towards the stored target and updates its timer. */
+typedef struct {
+    char prefix[0x268];
+    float step;
+    float target;
+    int timer;
+    float step2;
+    float rate2;
+    float target2;
+    int timer2;
+} ScalarTransitionView;
+extern ScalarTransitionView D_L00_001B8C80;
+extern float D_L00_001B18E0 __attribute__((sda));
+extern float func_002AA2E8(float *, float, float);
+extern int func_00282948(void *);
 
-INCLUDE_ASM("asm/game", func_00272280);
+void func_002721C8(void)
+{
+    ScalarTransitionView *state = &D_L00_001B8C80;
+
+    if (state->step != 0.0f) {
+        func_002AA2E8(&D_L00_001B18E0,
+                     state->target, state->step);
+        if (D_L00_001B18E0 == state->target) {
+            if (func_00282948(&state->timer) == 1)
+                state->target = 0.0f;
+        }
+        if (D_L00_001B8C80.target <= 0.0f && D_L00_001B18E0 <= 0.0f)
+            D_L00_001B8C80.step = 0.0f;
+    }
+}
+
+/* Advances the second shared scalar towards its stored target and updates its timer. */
+extern float D_L00_001B18E4 __attribute__((sda));
+
+void func_00272280(void)
+{
+    if (D_L00_001B8C80.step2 != 0.0f) {
+        if (D_L00_001B8C80.target2 != 0.0f)
+            func_002AA2E8(&D_L00_001B18E4, D_L00_001B8C80.target2, D_L00_001B8C80.step2);
+        else
+            func_002AA2E8(&D_L00_001B18E4, D_L00_001B8C80.target2, D_L00_001B8C80.rate2);
+        if (D_L00_001B18E4 == D_L00_001B8C80.target2) {
+            if (func_00282948(&D_L00_001B8C80.timer2) == 1)
+                D_L00_001B8C80.target2 = 0.0f;
+        }
+        if (D_L00_001B8C80.target2 <= 0.0f && D_L00_001B18E4 <= 0.0f)
+            D_L00_001B8C80.step2 = 0.0f;
+    }
+}
 
 INCLUDE_ASM("asm/game", func_00272368);
 
@@ -626,12 +668,78 @@ INCLUDE_ASM("asm/game", func_002725E0);
 INCLUDE_ASM("asm/game", func_00272CB0);
 
 
-INCLUDE_ASM("asm/game", func_00273318);
 
 INCLUDE_ASM("asm/game", func_00273418);
 
 
-INCLUDE_ASM("asm/game", func_002735A0);
+/* Blends the fog preset between the two colours and depth ranges of the camera environment
+   region the position falls in (rac1's camera_switch_and_update twin). */
+typedef struct {
+    u8 pad0[0x50];
+    int flags;
+    int negative_color;
+    int positive_color;
+    float negative_depth_start;
+    float negative_value_start;
+    float negative_depth_end;
+    float negative_value_end;
+    float positive_depth_start;
+    float positive_value_start;
+    float positive_depth_end;
+    float positive_value_end;
+    u8 pad7C[4];
+} CameraEnvironmentRegion;
+typedef struct {
+    u8 r, g, b, pad3;
+    float f[4];
+} FogPresetView;
+extern CameraEnvironmentRegion D_001C1740[];
+#ifndef MACRO_ADDR
+#define MACRO_ADDR __attribute__((section(".sdata")))
+#endif
+extern FogPresetView D_001B1640 MACRO_ADDR;
+extern int func_002A6640(void *, float *, int *);
+extern int func_00283CF0(float);
+
+void func_002735A0(void *position)
+{
+    float blend;
+    int region_index;
+    CameraEnvironmentRegion *region;
+    unsigned int positive_weight;
+    unsigned int negative_weight;
+    int negative_color;
+    int positive_color;
+    float inverse_blend;
+    unsigned int red, green;
+    unsigned int positive_red, negative_red, positive_green, negative_green, positive_blue, negative_blue;
+
+    if (func_002A6640(position, &blend, &region_index) == 0)
+        return;
+    region = &D_001C1740[region_index];
+    if (!(region->flags & 2))
+        return;
+    positive_weight = func_00283CF0(blend * 255.0f);
+    negative_weight = 255 - positive_weight;
+    inverse_blend = 1.0f - blend;
+    positive_color = region->positive_color;
+    negative_color = region->negative_color;
+    positive_red = (positive_color & 0xFF) * positive_weight;
+    positive_green = ((positive_color >> 8) & 0xFF) * positive_weight;
+    positive_blue = (positive_color >> 16) & 0xFF;
+    negative_red = (negative_color & 0xFF) * negative_weight;
+    negative_green = ((negative_color >> 8) & 0xFF) * negative_weight;
+    negative_blue = (negative_color >> 16) & 0xFF;
+    red = (int)(positive_red + negative_red) >> 8;
+    green = (int)(positive_green + negative_green) >> 8;
+    D_001B1640.b = (int)(positive_blue * positive_weight + negative_blue * negative_weight) >> 8;
+    D_001B1640.r = red;
+    D_001B1640.g = green;
+    D_001B1640.f[0] = (region->positive_depth_start * blend + region->negative_depth_start * inverse_blend) * 1024.0f;
+    D_001B1640.f[1] = (region->positive_depth_end * blend + region->negative_depth_end * inverse_blend) * 1024.0f;
+    D_001B1640.f[2] = 255.0f - (region->positive_value_start * blend + region->negative_value_start * inverse_blend) * 255.0f;
+    D_001B1640.f[3] = 255.0f - (region->positive_value_end * blend + region->negative_value_end * inverse_blend) * 255.0f;
+}
 
 INCLUDE_ASM("asm/game", func_00273730);
 

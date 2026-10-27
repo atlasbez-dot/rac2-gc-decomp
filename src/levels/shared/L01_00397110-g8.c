@@ -55,7 +55,6 @@ extern int func_003104E8(int);
 
 extern void func_L01_00397A28(char *);
 
-INCLUDE_ASM("asm/levels", func_L01_00397EB0);
 
 extern void func_002E3470(void *, void *, void *);
 
@@ -124,6 +123,43 @@ void func_L01_00417090(char *a0)
         func_00282CC0(&v1, &v1, &v2);
         b = D_L01_001B1AAC;
         func_002C3150(&m, &v1, D_L01_001B1AB4, b, func_002A77E0(255), 0, D_L01_001B1ABC);
+    } while (i >= 0);
+}
+
+/* Same body as func_L01_00417090, with this function's own callees. */
+extern float D_00189F08 __attribute__((nosda));
+
+extern float ref_L01_00397EB0_00 __attribute__((sda));
+extern float ref_L01_00397EB0_01 __attribute__((sda));
+extern unsigned char ref_L01_00397EB0_02 __attribute__((sda));
+extern int ref_L01_00397EB0_03 __attribute__((sda));
+extern float ref_L01_00397EB0_04 __attribute__((sda));
+extern float ref_L01_00397EB0_05 __attribute__((sda));
+extern float ref_L01_00397EB0_06 __attribute__((sda));
+extern int ref_L01_00397EB0_07 __attribute__((sda));
+extern float ref_L01_00397EB0_08 __attribute__((sda));
+void func_L01_00397EB0(char *a0)
+{
+    TI128 m, v1, v2;
+    int i;
+    int b;
+
+    if (*(unsigned char *)(a0 + 0x20) == 1) {
+        func_00282D30(&m, a0, 0.0009765625f);
+    } else {
+        func_0029FCC0(a0, 0, &m);
+        if (((float *)&m)[2] < D_00189F08) return;
+    }
+    i = 2;
+    func_002A7A00(&v1, ref_L01_00397EB0_00 * 0.016666668f, ref_L01_00397EB0_01 * 0.016666668f);
+    b = ref_L01_00397EB0_02;
+    func_002C3150(&m, &v1, ref_L01_00397EB0_03, b, func_002A77E0(255), 0, ref_L01_00397EB0_04);
+    do {
+        i--;
+        func_002A7A00(&v2, ref_L01_00397EB0_05 * 0.016666668f, ref_L01_00397EB0_06 * 0.016666668f);
+        func_00282CC0(&v1, &v1, &v2);
+        b = ref_L01_00397EB0_02;
+        func_002C3150(&m, &v1, ref_L01_00397EB0_07, b, func_002A77E0(255), 0, ref_L01_00397EB0_08);
     } while (i >= 0);
 }
 

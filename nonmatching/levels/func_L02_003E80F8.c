@@ -1,17 +1,24 @@
-/* Nonmatching: USA v1.01: 0/1 carrying places; USA v2.00: 0/1 carrying places; PAL: absent. Final C 1732/1756 retail bytes. Game -O2 -G8 -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-barrier. Full table-actor renderer, transform visibility, rotating packets, mirrored glow and particles reconstructed. First trial 1732/1756 bytes; final explicit nextPass loop lifetime trial. Remaining frame/loop/register scheduling; no linked builds. Reopen with renderer packet typing and loop lifetime hypothesis.  */
+/* Nonmatching: 1772/1756 bytes.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Placement checks: US: 0/1; US2: 0/1; PAL absent from catalogue.
+ * 1772/1756 bytes, frame0xb70. All32 transforms, visibility words, both144-byte packets and complete vector/matrix buffers are retained. Helper transfers preserve full vectors. Historical char[4] declarations for32/64-byte UV/geometry reads are replaced by incomplete typed views; their complete global ownership is still unqualified. Allocation, address materialization and loop scheduling differ throughout.
+ * Reopen with independently established UV/geometry owners and real transform/packet cursor lifetimes. Do not restore small false extern extents merely to obtain GP addressing.
+ */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
-typedef struct { float vertex[4][4]; unsigned int color[4]; float uv[4][2]; unsigned long long state[4]; } Packet;
+typedef struct { float vertex[4][4]; unsigned int color[4]; float uv[4][2]; unsigned long long state[4]; } Packet __attribute__((aligned(16)));
 extern int D_L02_001B30C8;
 extern char *D_L02_001B359C;
 extern unsigned short *D_L02_001FC060[];
 extern int D_L02_001B0A68 __attribute__((sda)), D_L02_001B0A98 __attribute__((sda));
 extern int D_L02_001B0A6C, D_L02_001B0A9C, D_L02_001B0AA0, D_L02_001B0AA4;
-extern char D_L02_001B0A78[4] __attribute__((sda)), D_L02_001B0AB0[4] __attribute__((sda)), D_L02_001B0AF0[4] __attribute__((sda));
+extern float D_L02_001B0A78[][2] __attribute__((sda));
+extern float D_L02_001B0AB0[][4] __attribute__((sda));
+extern float D_L02_001B0AF0[][4] __attribute__((sda));
 extern int D_L02_001B0B30 __attribute__((sda));
-extern unsigned int D_L02_001B0B38[2] __attribute__((sda));
+extern unsigned int D_L02_001B0B38[] __attribute__((sda));
 extern float D_L02_001B0B40 __attribute__((sda));
-extern char D_L02_001B0B48[4] __attribute__((sda));
+extern float D_L02_001B0B48[][2] __attribute__((sda));
 extern char D_L02_001BA500[];
 extern float func_00283CE0(int);
 extern void func_00283410(void *, void *), func_0029FC20(void *, int, void *), func_002830C0(void *, void *, void *);
@@ -26,14 +33,17 @@ extern void func_00282F20(void *, void *, float), func_00282CC0(void *, void *, 
 extern float func_002A7878(float, float), func_002A7940(void);
 extern unsigned int func_00283D38(unsigned int, unsigned int, float);
 extern void func_00281EB8(void *, int, unsigned int, int, float, float, float);
-/* Renders the visible table actors, their rotating rings, mirrored glow and particles. */
+
 void func_L02_003E80F8(char *actor) {
-    float matrices[32][16], rotation[16];
+    float matrices[32][16] __attribute__((aligned(16)));
+    float rotation[16] __attribute__((aligned(16)));
     unsigned int visible[32];
-    float tilt[12];
-    float probe[4];
+    float tilt[12] __attribute__((aligned(16)));
+    float probe[4] __attribute__((aligned(16)));
     Packet packet[2];
-    float angles[4], point[4], doubled[12], identity[16], normal[4], offset[4];
+    float angles[4] __attribute__((aligned(16))), point[4] __attribute__((aligned(16)));
+    float doubled[12] __attribute__((aligned(16))), identity[16] __attribute__((aligned(16)));
+    float normal[4] __attribute__((aligned(16))), offset[4] __attribute__((aligned(16)));
     unsigned short *entry = D_L02_001FC060[*(unsigned char *)(actor + 0x21)];
     unsigned short id;
     float frame;
@@ -47,7 +57,7 @@ void func_L02_003E80F8(char *actor) {
     *(Quad *)point = 0;
     frame = func_00283CE0(D_L02_001B30C8 % 600);
     point[0] = (frame * 0.0016666667f + frame * 0.0016666667f) * 3.1415927f - 3.1415927f;
-    *(Quad *)angles = *(Quad *)point;
+    qcopy(angles, point);
     func_00283410(rotation, angles);
     do {
         char *object;
@@ -97,7 +107,7 @@ void func_L02_003E80F8(char *actor) {
         func_00282CF0(point, D_L02_001BA500, matrices[i] + 12);
         func_00282DD8(normal, matrices[i], point);
         normal[3] = 1.0f;
-        *(Quad *)(identity + 12) = *(Quad *)(matrices[i] + 12);
+        qcopy(identity + 12, matrices[i] + 12);
         for (vertex = 0; vertex < 4; vertex++) {
             float extent = vertex < 2 ? geometry[vertex * 4 + 2] + D_L02_001B0B40 : geometry[vertex * 4 + 2] - D_L02_001B0B40;
             func_00282F20(packet[0].vertex[vertex], normal, extent);

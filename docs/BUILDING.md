@@ -32,6 +32,9 @@ Each program prints `OK` with its C functions, or stops at the first byte that d
 Ordinary C switches may bring compiler-owned branch tables. The linker retains a
 complete read-only input section only when its derived address, alignment and
 every case relocation agree with the retail data and independently placed C text.
+Two switches of one function share one section; the zero words of the compiler's
+`.align 4` between their tables are accepted when retail has the same zeros there
+(`func_L13_00406F18`, `func_L13_0040A720`).
 Complete relocation-free `.rodata`/`.rdata` constant pools can also be placed when
 their entire contents, including padding, equal one initialized retail data span.
 Their address comes from that object's accepted text relocations, never a search

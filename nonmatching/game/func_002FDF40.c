@@ -1,50 +1,30 @@
-/* 25 October 2026 approved-helper experiment; original C below is preserved.
- * Trial profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses -g
- * Trial checks: us: 0/28; us2: 0/27; pal: 0/27.
- * 1624/1628 bytes with the correct 0x210 frame. Approved qcopy reproduces the four source-object copy pairs, but initial FPR/GPR scheduling and resident-object base lifetime still differ. A truthful typed prefix was 1612 bytes and did not close the body.
- * Reopen: Independent evidence for resident-base lifetime or source-parameter/FPR scheduling; the centrally audited scoped callee and its real two integer arguments must remain.
- * No exact, linked or native-runtime credit is claimed.
+/* Manual reconstruction; not linked. Profile: -O2 -G8 -ffunction-sections -frac2-qcopy
+ * -frac2-qcopy-barrier -g (split addresses; the earlier -mno-split-addresses trial was wrong).
+ * 1628/1628 bytes, us 0/28. 26 October 2026 (M10): hero fields through the Hero union view
+ * (retail's lui/addiu base + offset), D_00138320 outside small data, D_001B5340/D_001B5570 one
+ * object (retail derives 0x1B5340 as the 0x1B5570 register - 0x230), and both if/else chains with
+ * the complex arm first. 26 October 2026 (integrate/holds): with the division label floor after
+ * a call (rule D, pad_div_erratum_nops.py) and the duration's call and division as two statements,
+ * the size is retail's and the pair before that div.s is in place; the jal at +0x1A8 is
+ * func_0026F748. Left: (1) the prologue move order of sourceObject () against acceleration ();
+ * (2) the camera-basis block's call/argument order near +0x1F4; (3) the reach clamp's branches
+ * target the div.s, where retail's label sits on the first of its two pad nops (the old and the
+ * new assembler give the same bytes there, so that is the branch-group padding rule, not rule D);
+ * (4) the gravity/reciprocal block's operand order near +0x58C.
  */
-
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -mno-split-addresses -g.
- * Prior worker coverage: US 0/28; final scoped-ref source unmeasured in US2/PAL.
- * These are the recorded worker checks; no fresh compilation was run for retention.
- */
-
-/* Manual reconstruction with qualified per-placement call identity.
-   Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
-   -mno-split-addresses -g.
-   Final source is 1628 bytes, frame0x210, but US matches0/28; the first
-   real difference is the argument/FPR move at+0x24. Nine bounded trials
-   preceded the independently qualified scoped-ref test, which also failed.
-   ref_002FDF40_00 preserves the two actual integer arguments29,1 at+0x1A8.
-   Its bootstub/levelcallee identity variation and unsigned32 zero/one
-   result were audited centrally across82 US/US2/PAL carrying placements;
-   caller ignores that result. No extra FP or stack arguments are required.
-   Before the scoped-ref correction, final US2/PAL checks were0/27 each;
-   the final scoped-ref source was checked only for US after that test failed.
-   Source position is16bytes; every basis/rotation here is a genuine48-byte
-   three-row matrix. Allocation and resident-base lifetime differences remain.
-   Reopen only with a new measured lifetime/declaration mechanism, not another
-   flag sweep. No exact-match or native-behavior credit is claimed.
-*/
-/* Screened, not matched in wave 13 (worker g3): 50 call(s), 1 $gp-relative small-data access(es), MMI words [10 pairs] (the lq/sq family, which mode(TI) reaches), float constants [none]. The body is straight-line code
-   whose register allocation and the materialisation of its constant addresses have to be
-   reproduced word for word; no C was written in this wave. */
-
 typedef unsigned char u8;
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
 extern char D_00189E20[];
+typedef union { u8 b[0x2600]; short h[0x1300]; int i[0x980]; unsigned int u[0x980]; float f[0x980]; char *ptr[0x980]; Quad q[0x260]; } Hero;
+#define H ((Hero *)D_00189E20)
 extern int D_001A8CA0 __attribute__((sda)), D_001A8CA4;
-extern unsigned int D_00138320;
-extern float D_001B5570[12], D_001B5340[4];
+extern unsigned int D_00138320 __attribute__((section(".data")));
+extern float D_001B5340[];
+#define CAMERA_BASIS (&D_001B5340[0x230 / 4])
 extern void func_00282D30(void *,void *,float);
 extern void func_002AFFD8(char *,char *,int);
-extern unsigned int ref_002FDF40_00(int,int);
+extern unsigned int func_0026F748(int,int);
 extern void func_00282F20(void *,void *,float);
 extern float func_00282DB0(void *,void *);
 extern void func_00282CF0(void *,void *,void *);
@@ -77,23 +57,21 @@ void func_002FDF40(Vector *output, Vector *origin, char *targetObject,
         *(Quad *)(sourceBasis+4)=*(Quad *)(sourceObject+0xd0);
         *(Quad *)(sourceBasis+8)=*(Quad *)(sourceObject+0xe0);
     } else {
-        char *heroObject=*(char **)(D_00189E20+0x2290);
+        char *heroObject=H->ptr[0x2290/4];
         sourcePosition.q=*(Quad *)(heroObject+0x10);
-        *(Quad *)(sourceBasis+0)=*(Quad *)(D_00189E20+0x730);
-        *(Quad *)(sourceBasis+4)=*(Quad *)(D_00189E20+0x740);
-        *(Quad *)(sourceBasis+8)=*(Quad *)(D_00189E20+0x750);
+        *(Quad *)(sourceBasis+0)=H->q[0x730/16];
+        *(Quad *)(sourceBasis+4)=H->q[0x740/16];
+        *(Quad *)(sourceBasis+8)=H->q[0x750/16];
     }
     output->f[0]=1.0f; output->f[1]=0.0f; output->f[2]=0.0f; output->f[3]=0.0f;
-    if(*(short *)(D_00189E20+0x348)!=0 && D_001A8CA4==0)
-        func_00282D30(&normal,*(char **)(D_00189E20+0x2290)+0xe0,-1.0f);
+    if(H->h[0x348/2]!=0 && D_001A8CA4==0)
+        func_00282D30(&normal,H->ptr[0x2290/4]+0xe0,-1.0f);
     else func_002AFFD8((char *)&sourcePosition,(char *)&normal,0);
     reach=maximum;
     if(!targetObject) {
-        if(*(int *)(D_00189E20+0x2294)==1) ref_002FDF40_00(29,1);
-        if((D_00138320&4)==0 || D_00189E20[0x22bc]!=0) {
-            func_00283098(output,output,sourceBasis);
-        } else {
-            func_00282F20(&forward,D_001B5570,1.0f);
+        if(H->i[0x2294/4]==1) func_0026F748(29,1);
+        if((D_00138320&4)!=0 && H->b[0x22bc]==0) {
+            func_00282F20(&forward,CAMERA_BASIS,1.0f);
             func_00282D30(&temporary,&normal,func_00282DB0(&forward,&normal));
             func_00282CF0(&projected,&forward,&temporary);
             func_00282F20(&projected,&projected,1.0f);
@@ -102,9 +80,9 @@ void func_002FDF40(Vector *output, Vector *origin, char *targetObject,
             func_00282D30(&quaternion,&axis,func_00283198(angle));
             quaternion.f[3]=func_00283180(angle);
             func_00283958(&quaternion,rotation);
-            func_00283738(orientedBasis,rotation,D_001B5570);
+            func_00283738(orientedBasis,rotation,CAMERA_BASIS);
             planeOffset=-func_00282DB0(&sourcePosition,&normal);
-            func_00282F20(&testVector,D_001B5570,1.0f);
+            func_00282F20(&testVector,CAMERA_BASIS,1.0f);
             projection=func_00282DB0(&normal,&testVector);
             if(projection>0.0f) {
                 factor=(func_00282DB0(&normal,D_001B5340)+planeOffset)/projection;
@@ -119,26 +97,31 @@ void func_002FDF40(Vector *output, Vector *origin, char *targetObject,
             }
             reach=maximum*func_002A7798(reach/maximum);
             func_00283098(output,output,orientedBasis);
+        } else {
+            func_00283098(output,output,sourceBasis);
         }
         func_00282F20(output,output,reach);
         func_00282CC0(&target,output,&sourcePosition);
     } else {
-        if((unsigned)(*(unsigned short *)(targetObject+0xaa)-0xa8d)>1 ||
-            (targetData=(float *)func_002AB1F0((u8 *)targetObject))==0 || !(targetData[0]>0.0f)) {
-            target.q=*(Quad *)(targetObject+0x10);
-        } else if(D_001A8CA0==0 && *(short *)(D_00189E20+0x348)==0) {
-            target.q=*(Quad *)(targetObject+0x10);
-            target.f[2]+=targetData[4];
+        if((unsigned)(*(unsigned short *)(targetObject+0xaa)-0xa8d)<=1 &&
+            (targetData=(float *)func_002AB1F0((u8 *)targetObject))!=0 && targetData[0]>0.0f) {
+            if(D_001A8CA0!=0 || H->h[0x348/2]!=0) {
+                func_00282D30(&quaternion,targetObject+0xe0,targetData[4]);
+                func_00282CC0(&target,targetObject+0x10,&quaternion);
+            } else {
+                target.q=*(Quad *)(targetObject+0x10);
+                target.f[2]+=targetData[4];
+            }
         } else {
-            func_00282D30(&quaternion,targetObject+0xe0,targetData[4]);
-            func_00282CC0(&target,targetObject+0x10,&quaternion);
+            target.q=*(Quad *)(targetObject+0x10);
         }
     }
     func_00282CF0(&displacement,&target,origin);
     func_00282D30(&temporary,&normal,func_00282DB0(&displacement,&normal));
     func_00282CF0(&projected,&displacement,&temporary);
     func_00282F20(output,&projected,speed);
-    duration=func_00282DF0(&projected)/speed;
+    duration=func_00282DF0(&projected);
+    duration=duration/speed;
     reciprocal=1.0f/duration;
     func_00282D30(&originProjection,&normal,func_00282DB0(origin,&normal));
     func_00282D30(&targetProjection,&normal,func_00282DB0(&target,&normal));

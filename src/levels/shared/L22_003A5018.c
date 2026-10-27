@@ -19,7 +19,7 @@ INCLUDE_ASM("asm/levels", func_L22_003A5018);
 
 INCLUDE_ASM("asm/levels", func_L22_003A5BD8);
 
-INCLUDE_ASM("asm/levels", func_L22_003A5F90);
+/* func_L22_003A5F90 is matched in L22_003A5F90.c. */
 
 extern int func_L22_003A48F8(int);
 
@@ -161,7 +161,6 @@ void func_L22_003AD090(u8 *a0) {
 }
 
 
-INCLUDE_ASM("asm/levels", func_L22_003B9128);
 
 
 INCLUDE_ASM("asm/levels", func_L22_003C9880);
@@ -233,9 +232,9 @@ INCLUDE_ASM("asm/levels", func_L22_003F5688);
 
 /* func_L22_003F58F8 is defined in L22_003A5018-g8.c (it reads $gp data outside a delay slot). */
 
-INCLUDE_ASM("asm/levels", func_L22_003F85A0);
+/* func_L22_003F85A0 is defined in L22_003F85A0-flags-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L22_003F8658);
+/* func_L22_003F8658 is defined in L22_003F8658-helper-g8.c. */
 
 
 INCLUDE_ASM("asm/levels", func_L22_003FB1F8);
@@ -247,27 +246,26 @@ INCLUDE_ASM("asm/levels", func_L22_003FB9B8);
 INCLUDE_ASM("asm/levels", func_L22_003FBBF0);
 
 
-INCLUDE_ASM("asm/levels", func_L22_003FBFD0);
 
 INCLUDE_ASM("asm/levels", func_L22_003FC048);
 
 INCLUDE_ASM("asm/levels", func_L22_003FC338);
 
 
-INCLUDE_ASM("asm/levels", func_L22_003FC780);
+/* func_L22_003FC780 is defined in L22_003FC780-helper-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L22_003FC870);
 
 INCLUDE_ASM("asm/levels", func_L22_003FCF08);
 
-INCLUDE_ASM("asm/levels", func_L22_003FD1E8);
+/* func_L22_003FD1E8 is defined in L22_003FD1E8-helper-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L22_003FD2D8);
 
 INCLUDE_ASM("asm/levels", func_L22_003FD958);
 
 
-INCLUDE_ASM("asm/levels", func_L22_0040DD40);
+/* func_L22_0040DD40 is defined in L22_0040DD40-helper-g8.c. */
 
 extern f32 func_002A7878(f32 low, f32 high);
 

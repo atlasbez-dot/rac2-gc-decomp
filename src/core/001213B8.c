@@ -26,7 +26,6 @@ double func_001213B8(long value) {
 
 /* func_00121450 is in 00121450.c, its own public libgcc module. */
 
-INCLUDE_ASM("asm/core", func_00121AB8);
 
 extern void func_00121B18(void);
 extern void r1_func_0011D4A0_00121B18(void);

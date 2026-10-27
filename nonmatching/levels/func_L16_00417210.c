@@ -1,24 +1,30 @@
-/* Manual reconstruction, 2026-10-23; retained, not linked.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses.
- * us: 16_snivelak: 1432 bytes, expected 1396; func_L16_00417210: 0 of 1 places match (src/levels/16_snivelak/L16_00417210-g8-qcopy.c)
- * us2: 16_snivelak: 1432 bytes, expected 1396; func_L16_00417210: 0 of 1 places match (src/levels/16_snivelak/L16_00417210-g8-qcopy.c)
- * pal: func_L16_00417210 is in neither catalogue of pal; func_L16_00417210 is in neither catalogue of pal
- * 1432/1396 bytes in both USA releases. Rate-selection, clamp-temporary and global/FP scheduling remain different. The yaw helper receives both the heading and state+0x80 (the latter is omitted in Ghidra). Reopen with original settings and lifetime evidence.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections -mno-split-addresses.
+ * Compiled 1432 bytes; retail 1396 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: The 0x90 frame agrees, but rate/clamp temporaries, saved-register count and mixed
+ * absolute/GP schedules differ. Shared qcopy retains complete initial vectors; audio-bank reads
+ * now use the actual D_00188660 base, 0x70 stride, owner +0x88 and active +0x74. The two-float
+ * heading helper remains explicit.
+ * Reopen: An original steering-settings and clamp-lifetime witness; preserve the two-float
+ * helper contract and actual audio-bank offsets.
  */
+
 #include "common.h"
 typedef int Vector128 __attribute__((mode(TI)));
 typedef struct { Vector128 position,angles; union { float bounds[2]; Vector128 delta; } work; float limits[2]; } SteeringWorkspace;
-typedef struct { unsigned char active; char reserved[19]; char *owner; char tail[88]; } SoundRecord;
-extern SoundRecord D_001886D4[];
-extern float D_0018BDD0 __attribute__((nosda)),D_0018BDD4 __attribute__((nosda));
-extern float D_L16_001B1B50 __attribute__((sda)),D_L16_001B1B54 __attribute__((nosda));
-extern float D_L16_001B1B10 __attribute__((sda)),D_L16_001B1B14 __attribute__((nosda));
-extern float D_L16_001B1B18 __attribute__((sda)),D_L16_001B1B1C __attribute__((nosda));
+extern char D_00188660[];
+extern float D_0018BDD0 NOT_SDA,D_0018BDD4 NOT_SDA;
+extern float D_L16_001B1B50 __attribute__((sda)),D_L16_001B1B54 NOT_SDA;
+extern float D_L16_001B1B10 __attribute__((sda)),D_L16_001B1B14 NOT_SDA;
+extern float D_L16_001B1B18 __attribute__((sda)),D_L16_001B1B1C NOT_SDA;
 extern float D_L16_001B1B20 __attribute__((sda));
-extern float D_L16_001B1B28 __attribute__((sda)),D_L16_001B1B2C __attribute__((nosda));
-extern float D_L16_001B1B30 __attribute__((sda)),D_L16_001B1B34 __attribute__((nosda));
+extern float D_L16_001B1B28 __attribute__((sda)),D_L16_001B1B2C NOT_SDA;
+extern float D_L16_001B1B30 __attribute__((sda)),D_L16_001B1B34 NOT_SDA;
 extern float D_L16_001B1B38 __attribute__((sda));
-extern float D_L16_001B1B40 __attribute__((sda)),D_L16_001B1B44 __attribute__((nosda));
+extern float D_L16_001B1B40 __attribute__((sda)),D_L16_001B1B44 NOT_SDA;
 extern float func_00282C48(float);
 extern float func_002AA2E8(float *,float,float);
 extern float func_00283B98(float,float);
@@ -33,9 +39,9 @@ void func_L16_00417210(char *object)
     char *state=*(char **)(object+0x68);
     float acceleration,target,deceleration,oldMagnitude,newMagnitude;
     int handle;
-    SoundRecord *sound;
-    *(Vector128 *)&local.position=*(Vector128 *)(object+0x10);
-    *(Vector128 *)&local.angles=*(Vector128 *)(object+0xf0);
+    char *sound;
+    qcopy(&local.position,(object+0x10));
+    qcopy(&local.angles,(object+0xf0));
     if(func_00282C48(D_0018BDD0)<D_L16_001B1B50) D_L16_001B1B50=func_00282C48(D_0018BDD0);
     else if(D_L16_001B1B50 < -func_00282C48(D_0018BDD0)) D_L16_001B1B50=-func_00282C48(D_0018BDD0);
     if(func_00282C48(D_0018BDD4)<D_L16_001B1B54) D_L16_001B1B54=func_00282C48(D_0018BDD4);
@@ -84,10 +90,10 @@ void func_L16_00417210(char *object)
     }
     handle=*(int *)(state+0xa4);
     if(func_00282C48(*(float *)(state+0x80))>0.0f || func_00282C48(*(float *)(state+0x84))>0.0f) {
-        sound=D_001886D4+handle;
-        if(sound->owner!=object || sound->active==0) *(int *)(state+0xa4)=func_002E5CF8(4,4,object);
+        sound=D_00188660+0x70*handle;
+        if((*(char **)(sound+0x88))!=object || (*(unsigned char *)(sound+0x74))==0) *(int *)(state+0xa4)=func_002E5CF8(4,4,object);
     } else {
-        if(handle!=-1 && D_001886D4[handle].owner==object && D_001886D4[handle].active!=0) func_002E59F8(handle);
+        if(handle!=-1 && (*(char **)(D_00188660+handle*0x70+0x88))==object && (*(unsigned char *)(D_00188660+handle*0x70+0x74))!=0) func_002E59F8(handle);
         *(int *)(state+0xa4)=-1;
     }
     func_00282CF0(&local.work.delta,object+0x10,&local.position);

@@ -11,21 +11,58 @@
    the three separate sections of a normal object, and the only source-level
    way to hand tools/build.py a single 728-byte symbol. */
 
-typedef signed long long s64;
+/* 26 October 2026 (xcarry): this version, carried from rac3-decomp's
+   src/boot_elf/core/libgcc/_eh.c (func_001269B0, the same instructions
+   there), is exact under tools/check.py in us, pal and us2 when built
+   `sdk -O2 -G2 -ffunction-sections -fexceptions` (libgcc builds _eh.o with
+   -fexceptions; __terminate is not noreturn), and with the section
+   attributes on the two later bodies tools/build.py boot --strict links it
+   (OK, 1942 C functions). Left here for a maintainer to rule on the
+   section attributes; without them it waits for the catalogue split. */
 
-#define FIRST_PSEUDO_REGISTER 79
+/* libgcc _eh.o: __sjthrow, __sjpopnthrow and __eh_rtime_match, which follow each other
+   in retail (the catalogue sees the three as one function), from the L_eh section of
+   GCC's libgcc2.c, carried from rac3-decomp's src/boot_elf/core/libgcc/_eh.c
+   (func_001269B0), the same instructions there. Built with -fexceptions, as libgcc
+   builds _eh.o, and with inhibit_libc (no fprintf). __terminate is func_00120368,
+   __get_eh_info func_00120448 and get_eh_context the pointer D_00135D38 (00120390.c).
+   GPL-2.0-or-later with the libgcc linking exception below. No proprietary SDK source
+   is used. */
+/* More subroutines needed by GCC output code on some machines.  */
+/* Compile this one with gcc.  */
+/* Copyright (C) 1989, 92-98, 1999 Free Software Foundation, Inc.
 
-typedef struct frame_state
-{
-  void *cfa;
-  void *eh_ptr;
-  long cfa_offset;
-  long args_size;
-  long reg_or_offset[FIRST_PSEUDO_REGISTER+1];
-  unsigned short cfa_reg;
-  unsigned short retaddr_column;
-  char saved[FIRST_PSEUDO_REGISTER+1];
-} frame_state;
+This file is part of GNU CC.
+
+GNU CC is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+GNU CC is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU CC; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+/* As a special exception, if you link this library with other files,
+   some of which are compiled with GCC, to produce an executable,
+   this library does not by itself cause the resulting executable
+   to be covered by the GNU General Public License.
+   This exception does not however invalidate any other reasons why
+   the executable file might be covered by the GNU General Public License.  */
+
+#define NULL ((void *) 0)
+#define inhibit_libc
+
+#define __terminate func_00120368
+#define __get_eh_info func_00120448
+#define __sjthrow func_00120528
+#define get_eh_context D_00135D38
 
 struct eh_context
 {
@@ -35,33 +72,33 @@ struct eh_context
   void *table_index;
 };
 
-typedef struct exception_descriptor
-{
-  void *runtime_id_field;
-} exception_descriptor;
+typedef void * (*__eh_matcher) (void *, void *, void *);
 
-typedef void *(*__eh_matcher)(void *, void *, void *);
-
-typedef struct
+typedef struct __eh_info
 {
   __eh_matcher match_function;
   short language;
   short version;
 } __eh_info;
 
-#define NEW_EH_RUNTIME ((void *) -2)
+extern void __terminate (void);
+extern void **__get_eh_info (void);
+extern struct eh_context *(*get_eh_context) (void);
 
-#ifndef NULL
-#define NULL ((void *) 0)
-#endif
+/* This is used to throw an exception when the setjmp/longjmp codegen
+   method is used for exception handling.
 
-/* Support routines for setjmp/longjmp exception handling.  */
+   We call __terminate if there are no handlers left.  Otherwise we run the
+   cleanup actions off the dynamic cleanup stack, and pop the top of the
+   dynamic handler chain, and use longjmp to transfer back to the associated
+   handler.  */
 
-extern void func_00120528(void) __attribute__ ((__noreturn__));
+extern void __sjthrow (void) __attribute__ ((__noreturn__));
 
-void func_00120528(void)
+void
+func_00120528 ()
 {
-  struct eh_context *eh = (struct eh_context *) D_00135D38 ();
+  struct eh_context *eh = (*get_eh_context) ();
   void ***dhc = &eh->dynamic_handler_chain;
   void *jmpbuf;
   void (*func)(void *, int);
@@ -81,7 +118,11 @@ void func_00120528(void)
       buf[0] = (*dhc);
 
       /* try { */
+#ifdef DONT_USE_BUILTIN_SETJMP
+      if (! setjmp (&buf[2]))
+#else
       if (! __builtin_setjmp (&buf[2]))
+#endif
 	{
 	  *dhc = buf;
 	  while (cleanup[0])
@@ -99,16 +140,16 @@ void func_00120528(void)
       /* catch (...) */
       else
 	{
-	  func_00120368 ();
+	  __terminate ();
 	}
     }
-
+  
   /* We must call terminate if we try and rethrow an exception, when
      there is no exception currently active and when there are no
      handlers left.  */
   if (! eh->info || (*dhc)[0] == 0)
-    func_00120368 ();
-
+    __terminate ();
+    
   /* Find the jmpbuf associated with the top element of the dynamic
      handler chain.  The jumpbuf starts two words into the buffer.  */
   jmpbuf = &(*dhc)[2];
@@ -117,7 +158,12 @@ void func_00120528(void)
   *dhc = (void**)(*dhc)[0];
 
   /* And then we jump to the handler.  */
+
+#ifdef DONT_USE_BUILTIN_SETJMP
+  longjmp (jmpbuf, 1);
+#else
   __builtin_longjmp (jmpbuf, 1);
+#endif
 }
 
 /* Run cleanups on the dynamic cleanup stack for the current dynamic
@@ -125,19 +171,22 @@ void func_00120528(void)
    then throw.  This is used to skip the first handler, and transfer
    control to the next handler in the dynamic handler stack.  */
 
-void func_001206A0(void)
-     __attribute__ ((section (".text.func_00120528")));
+extern void __sjpopnthrow (void) __attribute__ ((__noreturn__));
 
-void func_001206A0(void)
+__attribute__ ((section (".text.func_00120528"))) void
+__sjpopnthrow ()
 {
-  struct eh_context *eh = (struct eh_context *) D_00135D38 ();
+  struct eh_context *eh = (*get_eh_context) ();
   void ***dhc = &eh->dynamic_handler_chain;
   void (*func)(void *, int);
   void *arg;
   void ***cleanup;
 
+  /* The cleanup chain is one word into the buffer.  Get the cleanup
+     chain.  */
   cleanup = (void***)&(*dhc)[1];
 
+  /* If there are any cleanups in the chain, run them now.  */
   if (cleanup[0])
     {
       double store[200];
@@ -145,7 +194,12 @@ void func_001206A0(void)
       buf[1] = 0;
       buf[0] = (*dhc);
 
+      /* try { */
+#ifdef DONT_USE_BUILTIN_SETJMP
+      if (! setjmp (&buf[2]))
+#else
       if (! __builtin_setjmp (&buf[2]))
+#endif
 	{
 	  *dhc = buf;
 	  while (cleanup[0])
@@ -153,64 +207,44 @@ void func_001206A0(void)
 	      func = (void(*)(void*, int))cleanup[0][1];
 	      arg = (void*)cleanup[0][2];
 
+	      /* Update this before running the cleanup.  */
 	      cleanup[0] = (void **)cleanup[0][0];
 
 	      (*func)(arg, 2);
 	    }
 	  *dhc = buf[0];
 	}
+      /* catch (...) */
       else
 	{
-	  func_00120368 ();
+	  __terminate ();
 	}
     }
 
   /* Then we pop the top element off the dynamic handler chain.  */
   *dhc = (void**)(*dhc)[0];
 
-  func_00120528 ();
+  __sjthrow ();
 }
-
+
 /* Support code for all exception region-based exception handling.  */
 
-int func_001207B8(void *rtime)
-     __attribute__ ((section (".text.func_00120528")));
-
-int func_001207B8(void *rtime)
+__attribute__ ((section (".text.func_00120528"))) int
+__eh_rtime_match (void *rtime)
 {
   void *info;
   __eh_matcher matcher;
   void *ret;
 
-  info = *(void **)func_00120448 ();
+  info = *(__get_eh_info ());
   matcher = ((__eh_info *)info)->match_function;
   if (! matcher)
     {
+#ifndef inhibit_libc
+      fprintf (stderr, "Internal Compiler Bug: No runtime type matcher.");
+#endif
       return 0;
     }
   ret = (*matcher) (info, rtime, (void *)0);
   return (ret != NULL);
 }
-
-/* Near miss: 720 bytes against retail's 728, and the body is not exactly
-   retail's. Three independent differences, all of them the allocator and the
-   block placer rather than the source:
-
-   1. The `cleanup` local is built in $a1 by retail and in $a0 here (both are
-      spilled and reloaded, so only the register byte differs at +0x20 and
-      +0xC0).
-   2. __builtin_setjmp's "returns 1" block is inline in retail (a `b` over an
-      `addiu $v0,$zero,1` at +0xB0) and sunk to the end of the function here.
-   3. __builtin_longjmp is an indirect jump through the buffer in retail
-      (`lw $v0,0x4($v1) ; jr $v0`) and a direct branch here, which is two
-      instructions shorter - the 8 bytes of the size difference.
-
-   What is right and reusable: the three bodies, the 0x750 frame, the whole
-   __sjpopnthrow needing the noreturn declaration of __sjthrow to drop its
-   epilogue, and __eh_rtime_match. The boot catalogue carries one 728-byte
-   extent for this object (`config/boot/functions.tsv`, 00120528 728) while
-   the retail bytes hold three functions at 0x00120528, 0x001206A0 and
-   0x001207B8; the section attributes below are what makes one 728-byte
-   symbol out of them, and they stay the right shape once the extent is
-   split. Verified with tools/check.py func_00120528: `720 bytes, expected
-   728`. */

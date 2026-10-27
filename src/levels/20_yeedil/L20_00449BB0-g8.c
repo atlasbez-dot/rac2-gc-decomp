@@ -8,7 +8,7 @@ extern int D_L20_001B2AC8 __attribute__((sda));
 extern float D_L20_001B23F0 __attribute__((sda));
 extern char *D_L20_001C4480[] __attribute__((nosda));
 
-extern int func_00277F48(char *a, int b, char *c, int d, float f);
+extern int func_00277F48(float f, char *a, int b, char *c, int d);
 extern void func_L20_00449AE8(char *);
 extern void func_L20_00444C18(char *, char *);
 extern void func_00282CF0(void *, void *, void *);
@@ -24,7 +24,7 @@ void func_L20_00449BB0(char *arg0) {
 
     if (*(int *)(state + 0xAC) != 0) {
         if ((D_L20_001B2AC8 & 7) == (((int)arg0 >> 8) & 7)) {
-            count = func_00277F48(arg0 + 0x10, 0, arg0, 0, 1.5f);
+            count = func_00277F48(1.5f, arg0 + 0x10, 0, arg0, 0);
             for (i = 0; i < count; i++) {
                 if (*(short *)(D_L20_001C4480[i] + 0xAA) == 0x11E0) {
                     func_L20_00449AE8(arg0);

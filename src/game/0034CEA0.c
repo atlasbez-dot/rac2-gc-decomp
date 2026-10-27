@@ -109,7 +109,6 @@ void func_0034E220(char *a0, int a1, int a2, int a3, int t0)
     (*(void (**)(char *))(vt + 12))(base + *(short *)(vt + 8));
 }
 
-INCLUDE_ASM("asm/game", func_0034E2E0);
 
 
 
@@ -131,8 +130,6 @@ void *func_0034E5B8(void *object) {
 }
 
 INCLUDE_ASM("asm/game", func_0034E5C0);
-
-INCLUDE_ASM("asm/game", func_0034EB20);
 
 void func_0034EBE0(void)
 {
@@ -245,7 +242,6 @@ void func_0034EDB0(void *unused, char *object)
 }
 
 
-INCLUDE_ASM("asm/game", func_0034EE78);
 
 
 INCLUDE_ASM("asm/game", func_0034F048);
@@ -385,7 +381,6 @@ INCLUDE_ASM("asm/game", func_00350240);
 
 INCLUDE_ASM("asm/game", func_00350378);
 
-INCLUDE_ASM("asm/game", func_00350460);
 
 void func_00350590(u8 *a0) {
  a0+=0x50000;

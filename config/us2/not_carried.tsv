@@ -1,7 +1,9 @@
 # v1.01 function	what tools/build.py said (the first program) -- tools/carry.py --demote
+func_00298F00	00_aranos_tutorial: instruction at +0x4f0 differs
 func_0029B720	boot: instruction at +0x1c differs
 func_0029B758	00_aranos_tutorial: instruction at +0x18 differs
 func_0029B780	00_aranos_tutorial: instruction at +0x18 differs
+func_0029B7C0	boot: instruction at +0x38 differs
 func_0029C248	00_aranos_tutorial: instruction at +0x2c differs
 func_0029C290	boot: instruction at +0x24 differs
 func_0029C3A0	boot: instruction at +0x24 differs
@@ -21,6 +23,7 @@ func_0029CA70	boot: instruction at +0x24 differs
 func_0029CAB0	boot: instruction at +0x18 differs
 func_0029CAE0	boot: instruction at +0x24 differs
 func_0029CBE0	boot: instruction at +0x24 differs
+func_002CD250	00_aranos_tutorial: instruction at +0x54 differs
 func_002CD878	boot: instruction at +0x20 differs
 func_002CF188	boot: instruction at +0x20 differs
 func_002D32C0	boot: instruction at +0x90 differs
@@ -55,4 +58,5 @@ func_L00_00346CD8	00_aranos_tutorial: instruction at +0x20 differs
 func_L00_003485E8	00_aranos_tutorial: instruction at +0x20 differs
 func_L00_0034C720	00_aranos_tutorial: instruction at +0x90 differs
 func_L00_0034E6F0	00_aranos_tutorial: instruction at +0x20 differs
+func_L08_00318F90	08_tabora: instruction at +0x38 differs
 func_L20_00446E70	20_yeedil: instruction at +0x64 differs

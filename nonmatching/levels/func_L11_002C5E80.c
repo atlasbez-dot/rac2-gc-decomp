@@ -1,3 +1,13 @@
+/* Retained readable reconstruction; NOT MATCHING and no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measure: 488/512 bytes; 0/2 USA v1.01 placements; frame 0x70 versus 0x80.
+ * Evidence: Restored the missing measured 0x20 record view: point/radius prefix, owner +0x10, kind +0x14, unknown tail. Initial-bound snapshot gave 492 bytes and real absolute/GP aliases 472; neither qualified. Eight GPR inputs and all three FP helper slots are retained.
+ * Reopen: Reopen with an independently measured record/counter induction and output-pointer lifetime model; do not fabricate parallel arrays or extents.
+ * Older notes below are historical. Equal size and allocator diagnostics do
+ * not establish relocation/binding qualification or linked equality.
+ */
+#include "common.h"
+
 /* 2026-10-23 readable reconstruction. Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
  * 488/512 bytes, 0/2 placements in each of us, us2 and pal. Local frame/register allocation differs; retail also mixes absolute and GP access to the same globals. One C reconstruction measured. Reopen with evidence for the original record/counter access representation.
  * Earlier screening-only commentary is preserved below as historical context.
@@ -14,6 +24,16 @@
  *   0x002c5e94  daddu       $s1, $zero, $zero
  * Kept as data for the maintainers. */
 
+/* Retail records have a measured 0x20 stride, with a point/radius prefix.
+ * The last eight bytes exist but their fields are not used by this routine. */
+typedef struct {
+    float position[3];
+    float radius;
+    int *owner;
+    int kind;
+    unsigned char unknown18[8];
+} Nearby_L11;
+
 typedef int Vec128_L11 __attribute__((mode(TI)));
 extern Nearby_L11 *D_L11_001B2DC0;
 extern int D_L11_001B2DC4;
@@ -28,7 +48,7 @@ int func_L11_002C5E80(void *position, int **owner, float *target, int *contact, 
     int hit;
     float distance;
     int i;
-    *(Vec128_L11 *)local = *(Vec128_L11 *)position;
+    qcopy(local, position);
     for (i = 0; i < D_L11_001B2DC4; i++) {
         if (excluded && D_L11_001B2DC0[i].owner == excluded) continue;
         if (required && D_L11_001B2DC0[i].owner != required) continue;

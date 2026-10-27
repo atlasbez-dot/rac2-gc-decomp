@@ -1,16 +1,20 @@
-/* Complete manual reconstruction; NOT MATCHING and never linked.
-   Tested profile: -O2 -G0 -ffunction-sections
-   Actual final-source coverage: us: 0/28 placements, 804 compiled bytes; us2: absent from both catalogues; pal: absent from both catalogues.
-   804/808 bytes. Palette addressing and repeated control-character loads differ; the palette full extent remains unknown. No shortened SDA object was introduced. Mixed f12-f14/GPR inputs and 64-bit texture/color are retained.
-   Reopen only with: Establish the complete palette object and its legitimate storage profile, then recover the genuine control-character alias/lifetime model.
+/* Near miss, NOT MATCHING and never linked (M36, 26 October 2026).
+   Profile: -O2 -G32 -Wa,-G32 -ffunction-sections. us 0/28 (boot + 27 levels); us2/pal absent.
+   The globals now take retail's forms: the palette is a 32-byte sda table (D_001A89B0[8], so
+   `sw -0x6640($gp)` and `addiu a1, $gp, -0x6640` as retail), D_001B166C an incomplete array read
+   [0] (retail lui/lw), D_001B1668 sda. 792/808 bytes at that point (the earlier -G0 draft was 804).
+   Left: retail reloads the control character (lbu 0($s1)) at the loop top, in the palette arm,
+   in the glyph arm and at the loop test; this C loads it once and keeps it in $a0. text[i]
+   indexing instead of a walking pointer is neutral. Reopen with a source form whose character
+   reads are distinct expressions to gcse.
 */
 
 typedef unsigned char u8;
 typedef unsigned long u64;
 /* Font metrics are four bytes per glyph: atlas u/v, vertical offset, advance. */
-extern int D_001B166C __attribute__((sda));
+extern int D_001B166C[];
 extern int D_001B1668 __attribute__((sda));
-extern int D_001A89B0[] __attribute__((sda));
+extern int D_001A89B0[8] __attribute__((sda));
 extern float func_00283CE0(int);
 extern void func_0027E1A0(int u, int v, int width, int height,
                          unsigned int *colors, u64 texture,
@@ -23,7 +27,7 @@ void func_0027F640(u64 color, u8 *text, int length, u64 texture, u8 *metrics,
     float height, offset;
     int i;
     u8 *p;
-    if (D_001B166C == 0)
+    if (D_001B166C[0] == 0)
         D_001A89B0[0] = (int)color;
     i = 0;
     height = scale * 16.0f;

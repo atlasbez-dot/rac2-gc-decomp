@@ -30,7 +30,51 @@ extern short *D_L09_001FB560[];
 
 INCLUDE_ASM("asm/levels", func_L09_002F8BA0);
 
-INCLUDE_ASM("asm/levels", func_L09_002F8FD8);
+typedef struct {
+    unsigned char pad00[0x34];
+    unsigned short flags;
+    unsigned char pad36[0x68 - 0x36];
+    unsigned int p68;
+    unsigned char pad6C[0xAA - 0x6C];
+    short type;
+} Mob_L09_002F8FD8;
+
+typedef struct {
+    unsigned char pad00[0x30];
+    int mode;
+    unsigned char pad34[0x44 - 0x34];
+    short count;
+    unsigned char pad46[0x18C - 0x46];
+    Mob_L09_002F8FD8 *mobs[1];
+} MobList_L09_002F8FD8;
+
+extern MobList_L09_002F8FD8 ref_L09_002F8FD8_00;
+extern int D_001A79F0 __attribute__((sda));
+extern void func_L00_002FC980(void);
+extern void func_002E64A0(void *);
+extern void func_L00_00326048(void *, void *, int, int, float);
+extern void func_L00_002E6CF0(void *, void *);
+extern void func_L09_002F8BA0(void *);
+
+/* Walks the level's list of mobs like func_L02_00300CE8; when the game state is 9 and the
+   list's word at +0x30 is 1 it queues a callback. */
+void func_L09_002F8FD8(void) {
+    int i;
+
+    func_L00_002FC980();
+    for (i = 0; i < ref_L09_002F8FD8_00.count; i++) {
+        Mob_L09_002F8FD8 *mob = ref_L09_002F8FD8_00.mobs[i];
+
+        if (mob != 0 && mob->type == 0xE29)
+            mob->flags |= 0x800;
+        if (mob->type == 0xD54)
+            func_002E64A0(mob);
+        if (mob != 0 && mob->type == 0xFA0 && mob->p68 != 0)
+            func_L00_00326048(mob, (unsigned char *)mob->p68 + 0xC, 0x80AAAAD2, 0x80396464, 0.0610865355f);
+    }
+    if (D_001A79F0 == 9 && ref_L09_002F8FD8_00.mode == 1)
+        func_L00_002E6CF0(func_L09_002F8BA0, *(void **)((char *)&ref_L09_002F8FD8_00 + 0x194));
+}
 
 
 
@@ -77,7 +121,6 @@ void func_L09_003C8CD8(unsigned char *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003CBB18);
 
 /* Two-state step of a scripted record: while the state byte is clear a random
    duration in 150..200 is drawn and the record is marked active; in the active
@@ -199,7 +242,6 @@ INCLUDE_ASM("asm/levels", func_L09_003FB788);
 /* Same release at its own place in the level, on the id byte of a slot rather
    than a live id: both halves and the slot's live word are cleared and the two
    handles are given back. */
-INCLUDE_ASM("asm/levels", func_L09_003FB860);
 
 
 INCLUDE_ASM("asm/levels", func_L09_003FB908);
@@ -220,7 +262,6 @@ INCLUDE_ASM("asm/levels", func_L09_003FD460);
 
 INCLUDE_ASM("asm/levels", func_L09_003FD7D0);
 
-INCLUDE_ASM("asm/levels", func_L09_003FDA38);
 
 /* Samples the sub-object through the shared record starter and ramps the
    three floats it wrote into the object's 0x390/0x394/0x398 channels at 0.02
@@ -254,7 +295,6 @@ void func_L09_003FDC58(unsigned char *a0) {
    the object's 0x38C and 0x3B0, and hands it to the shared record starter
    together with a zero pair it fills in; the three floats it wrote then ramp
    the object's 0x10/0x14/0x18 channels at 0.02 per frame. */
-INCLUDE_ASM("asm/levels", func_L09_003FDD80);
 
 
 /* Feeds the sub-object two measured channel ramps, then, only in state 1 and
@@ -280,7 +320,7 @@ void func_L09_003FDED8(unsigned char *a0) {
                   0.02f);
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003FDFF0);
+/* func_L09_003FDFF0 is defined in L09_003FDFF0-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L09_003FE0C0);
 

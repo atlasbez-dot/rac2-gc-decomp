@@ -127,7 +127,7 @@ extern int func_002EF250(float);
 
 extern int func_002ABB78(char *);
 
-extern void func_002AF000(void *);
+extern void func_002AF000(float *, float, float, float);
 
 extern void func_00282CC0(void *, void *, void *);
 
@@ -272,7 +272,6 @@ int func_L00_0031C998(int from, int to, float fraction)
 }
 
 
-INCLUDE_ASM("asm/levels", func_L00_0031CDD0);
 
 
 int func_L00_0031D620(int a0, int a1, float x) {
@@ -441,9 +440,9 @@ void func_L00_00323E48(GornRecordWrite64 *record, u32 selector,
     }
 }
 
-void func_L00_00323F28(void *a0, void *a1) {
-    int buf[4];
-    func_002AF000(buf);
+void func_L00_00323F28(void *a0, void *a1, float a, float b, float c) {
+    float buf[4];
+    func_002AF000(buf, a, b, c);
     func_00282CC0(a0, buf, a1);
 }
 
@@ -533,7 +532,6 @@ void func_L00_00326048(char *a0, f32 *a1, s32 a2, s32 a3, f32 f) {
 
 
 
-INCLUDE_ASM("asm/levels", func_L00_00326110);
 
 void func_L00_00326200(void)
 {
@@ -566,7 +564,7 @@ void func_L00_003294F0(unsigned char *entity, int enabled) {
         entity[0xBE] &= 0xFB;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00329520);
+/* func_L00_00329520 is in L00_00329520.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_003296C0);
 
@@ -574,9 +572,7 @@ INCLUDE_ASM("asm/levels", func_L00_00329E90);
 
 /* func_L00_00329FF0 is defined in L00_00329FF0-g.c. */
 
-INCLUDE_ASM("asm/levels", func_L00_0032A088);
 
-INCLUDE_ASM("asm/levels", func_L00_0032A0B8);
 
 void func_L00_0032A0E8(void) {
     u8 *current = &D_L00_00268E20;

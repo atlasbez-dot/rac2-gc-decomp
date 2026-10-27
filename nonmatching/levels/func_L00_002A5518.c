@@ -1,22 +1,11 @@
-/* Current reconstruction, checked 2026-10-23.
-   Game profile: -O2 -G64 -Wa,-G64 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-schedule-insns -fno-gcse.
-   USA v1.01 and USA v2.00: 0/27 carrying placements each; absent from PAL.
-   768/808 bytes, frame 0x70. Float reload/branch schedules and vector-loop spills differ. Independent destination-column iterators recovered the retail frame. The GP index and fade arrays retain honest seven-int and twelve-float extents; the standard G64 compiler/assembler profile is an experiment, not an integrated qualification. Reopen with the original clamp reloads and copy-loop spill layout.
-   The historical screening comment below is superseded by these C measurements.
-   No linked build was run for this draft.
-*/
-
-/* func_L00_002A5518 - 808 bytes, 27 places, level 00_aranos_tutorial at 0x002A5518.
-   Wave 13 s4: not attempted, screened.  The body is a float comparison chain
-   over two resident records (0x8A4 and 0x8A8 of the record at 0x2290) with
-   four branch-likely `bc1tl` blocks, a call to func_L00_002A5480, a counter
-   at 0x1180 and a loop over eight entries; it has no 128-bit copy, so the
-   quad wall of func_L00_002A6008 does not apply, but the float result
-   registers, the likely-branch placement and the eleven saved registers
-   ($s0..$s7, $fp, $ra, $f20, $f21) have to be reproduced word by word.  The
-   frame is 0x70 and the constants are 0x3E80, 0x3E17, 0x3E97, 0xBE32,
-   0x3D0E, 0xBD0E, 0x3DFA and 0xBDFA.  Unblocker: the float register plan
-   and the branch-likely slots. */
+/* Nonmatching C: Clamp the control rotations and initialize or retire the seven resident effect records.
+ * Tested profile: -O2 -G64 -Wa,-G64 -ffunction-sections.
+ * Measured US size: 752 bytes; retail: 808 bytes.
+ * Placement checks: US and US2: 0/27 each; PAL: absent from the catalogue.
+ * Remaining: Floating-point clamp reloads, branch scheduling and vector-loop spills differ.
+ * Reopen with independent clamp and copy-loop lifetime evidence; retain the seven-entry index/vector tables and twelve-entry fade table.
+ */
+#include "common.h"
 
 typedef int Vector __attribute__((mode(TI)));
 extern unsigned char D_00189E20[];
@@ -89,9 +78,9 @@ void func_L00_002A5518(void) {
         if (!scan[0xEC1]) {
             func_0029F978(*(unsigned char **)(hero + 0x2290), *indices, record);
             scan[0xEC3] = 1;
-            *out_a = *a;
-            *out_b = *b;
-            *out_c = *c;
+            qcopy(out_a, a);
+            qcopy(out_b, b);
+            qcopy(out_c, c);
         }
     }
     record = D_00189E20 + 0xECC;

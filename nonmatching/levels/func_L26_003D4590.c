@@ -1,22 +1,17 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -frac2-zero-ti-por.
- * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh checks on the qualified current compiler, 2026-10-25.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-zero-ti-por
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 908 bytes; retail text: 928 bytes.
+ * Remaining difference: Frame 0xC0 matches, but the body is 908 bytes versus 928. State dispatch,
+ * object-register ownership and instruction scheduling still differ. The rotation basis remains
+ * the independently measured complete 48 bytes.
+ * Reopen when: A measured source-level state or workspace lifetime distinction, rather than
+ * enlarging the 48-byte basis or adding flag permutations.
  */
 
-/*
- * Manual C reconstruction retained after bounded retail comparison.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por
- * Measured text: 912 bytes; retail: 928 bytes. Stack frame 0xC0; retail 0xC0.
- * Final coverage: US 0/1, US2 0/1, PAL absent. Absences are not matches.
- * 1 measured source/profile forms. Six-vector table initialization, basis pointer allocation,
- * scalar scheduling and copies differ. Rotation matrices are 48 bytes and separate rotation
- * seed/output vectors preserve the observed copies. Reopen on initialization/local lifetimes
- * or basis pointer walks.
- * All carrying checks are nonmatches (exit 1); no linked-build credit.
- */
+#include "common.h"
 
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
@@ -39,7 +34,7 @@ extern void func_00282DD8(void *, void *, void *);
 extern float func_002A78D8(float, float);
 extern float func_002A7878(float, float);
 extern float func_002A7940(void);
-extern void func_002A7750(unsigned char *, unsigned char, int);
+extern void func_002A7750(unsigned char *, int, int);
 extern float func_00283B98(float, float);
 extern float func_00283180(float);
 extern float func_00283198(float);
@@ -68,7 +63,8 @@ void func_L26_003D4590(unsigned char *object) {
     object[0x31] = 1;
     *(unsigned short *)(object + 0x34) &= 0xFFFE;
     private = *(char **)(object + 0x68);
-    if (object[0x20] == 0) {
+    switch (object[0x20]) {
+    case 0:
         if (D_L26_002967A0[0].f[3] == 0.0f) {
             position.q = 0;
             position.f[2] = 2.0943954f;
@@ -94,7 +90,8 @@ void func_L26_003D4590(unsigned char *object) {
         *(float *)(private + 0x180) = func_002A7878(D_L26_001B0458, D_L26_001B045C) * 0.00029088825f;
         *(float *)(private + 0x184) = func_002A7940();
         func_002A7750(object, 1, -1);
-    } else if (object[0x20] == 1) {
+        break;
+    case 1:
         *(float *)(private + 0x184) = func_00283B98(*(float *)(private + 0x184), *(float *)(private + 0x180));
         position.f[0] = func_00283180(*(float *)(private + 0x184));
         position.f[1] = func_00283198(*(float *)(private + 0x184));
@@ -120,5 +117,6 @@ void func_L26_003D4590(unsigned char *object) {
             *(int *)(private + 0x18C) = D_L26_001B0470[selection];
         }
         func_L26_003D4930(object);
+        break;
     }
 }

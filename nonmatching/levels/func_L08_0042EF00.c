@@ -1,12 +1,9 @@
-/* Retained manual C reconstruction; not linked or counted.
- * Retail: 1340 bytes. Checked trial: src/levels/shared/L08_0042EF00-g8.c
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * us: 0/3 placements (exit 1), 1324 compiled bytes
- * us2: 0/3 placements (exit 1), 1324 compiled bytes
- * pal: explicit catalogue absence (exit 1); no credit
- * Residual: The 0x50-byte frame and true 64-bit texture result agree. Packet test-word allocation, mixed GP/absolute frame-data accesses, packet store ordering and common-tail scheduling still differ.
- * Reopen: Reopen with measured packet field/lifetime declarations or dual-address scalar qualification; preserve the 0x90-byte packet stride and 64-bit register values.
- * The ASM marker and trial-only file profile were restored after checks.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections
+ * 1320/1340 bytes; 0/3 placements in us and us2; pal has no catalogue entry.
+ * Residual: The complete 0x90-byte packets, 64-bit texture/GS registers and four-float door state are preserved. Test-word allocation, mixed GP/absolute loads, packet stores and common-tail scheduling differ.
+ * Reopen: Independent packet-field lifetime or dual-address frame-data evidence, preserving 64-bit values and the full aligned position vector.
+ * Trial-only source markers and profiles are restored after checking.
  */
 
 #include "common.h"
@@ -59,16 +56,19 @@ extern int func_00283DB8(void *position, float radius);
 extern void func_L08_0042E678(void *object);
 extern void func_L00_002E6CF0(void (*callback)(void *), void *object);
 
+/* The four measured state floats occupy one 16-byte parameter block. */
+typedef struct { float upper, lower, phase, rate; } DoorState;
+
 void func_L08_0042EF00(u8 *object)
 {
-    u8 *data = *(u8 **)(object + 0x68);
+    DoorState *data = *(DoorState **)(object + 0x68);
     float rate;
     float half;
     float phase;
     float uv;
     float corner;
     unsigned long texture;
-    float position[4];
+    float position[4] __attribute__((aligned(16)));
     int id;
     if (data == 0)
         return;
@@ -78,8 +78,8 @@ void func_L08_0042EF00(u8 *object)
             func_00282A60(D_L08_002B2540, 0, 128);
             D_L08_001B1ECC = 0;
         }
-        *(float *)(data + 0xc) *= 0.0002908882452175021f;
-        *(float *)(data + 8) = 0;
+        data->rate *= 0.0002908882452175021f;
+        data->phase = 0;
         texture = func_0027C878(D_L08_001B1EBC);
         D_L08_00264F20.test = (unsigned long)D_L08_001B1E58 | ((unsigned long)D_L08_001B1E5C << 2) | ((unsigned long)D_L08_001B1E60 << 4) | ((unsigned long)D_L08_001B1E64 << 6) | ((unsigned long)D_L08_001B1E68 << 32);
         D_L08_00264F20.colour[0] = D_L08_001B1E6C;
@@ -109,7 +109,7 @@ void func_L08_0042EF00(u8 *object)
         object[0x31] = 0;
         *(unsigned short *)(object + 0x34) |= 1;
         if (D_0019B2E8[object[0xb0] + D_001A79F0 * 16] & 0x80) {
-            *(float *)(data + 8) = 3.1415927410125732f;
+            data->phase = 3.1415927410125732f;
             object[0x95] = 3;
         } else {
             object[0x95] = 1;
@@ -123,25 +123,25 @@ void func_L08_0042EF00(u8 *object)
         }
         break;
     case 2:
-        phase = *(float *)(data + 8);
+        phase = data->phase;
         if (phase >= 3.1415927410125732f || phase < -3.0f) {
-            *(float *)(data + 8) = 3.1415927410125732f;
+            data->phase = 3.1415927410125732f;
             object[0x95] = 3;
         }
         break;
     }
-    rate = *(float *)(data + 0xc);
-    if (object[0x95] != 2 || *(float *)(data + 8) >= 3.1415927410125732f || *(float *)(data + 8) < -3.0f)
-        *(float *)(data + 0xc) = 0;
-    half = (*(float *)data - *(float *)(data + 4)) * 0.5f;
-    phase = func_00283180(func_00283BE0(*(float *)(data + 8), 3.1415927410125732f));
-    *(float *)(object + 0x18) = *(float *)(data + 4) + (phase * half + half);
+    rate = data->rate;
+    if (object[0x95] != 2 || data->phase >= 3.1415927410125732f || data->phase < -3.0f)
+        data->rate = 0;
+    half = (data->upper - data->lower) * 0.5f;
+    phase = func_00283180(func_00283BE0(data->phase, 3.1415927410125732f));
+    *(float *)(object + 0x18) = data->lower + (phase * half + half);
     if (D_00189E20[0x22b4] == 4 ||
         (*(int *)(D_00189E20 + 0x229c) != 20 && *(int *)(D_00189E20 + 0x229c) != 25 &&
          *(int *)(D_00189E20 + 0x2294) != 0x39 && *(int *)(D_00189E20 + 0x2294) != 0x78 &&
          *(int *)(D_00189E20 + 0x2294) != 0x79))
-        *(float *)(data + 8) = func_00283B98(*(float *)(data + 8), *(float *)(data + 0xc));
-    *(float *)(data + 0xc) = rate;
+        data->phase = func_00283B98(data->phase, data->rate);
+    data->rate = rate;
     if (D_L08_001B2508 != D_L08_001B1EC0) {
         phase = func_00283198(func_002ABB18(func_00283CE0(D_L08_001B2508) * D_L08_001B1EA4));
         D_L08_001B1EC4 = D_L08_001B1EA8 * phase;
@@ -159,7 +159,7 @@ void func_L08_0042EF00(u8 *object)
         D_L08_002B2540[0] = 0;
         D_L08_001B1ECC = 0;
     }
-    *(DoorQuad *)position = *(DoorQuad *)(object + 0x10);
+    qcopy(position, object + 0x10);
     position[3] = (*(float *)(object + 0x2c) * 11.319999694824219f) / *(float *)(*(u8 **)(object + 0x24) + 0x24);
     if (func_00283DB8(position, (float)*(short *)(object + 0x32)) != -1) {
         func_L00_002E6CF0(func_L08_0042E678, object);

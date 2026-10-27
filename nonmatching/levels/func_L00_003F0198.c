@@ -1,12 +1,16 @@
-/* Bounded manual reconstruction; not linked.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
  * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g.
- * 1248/1252 bytes; us: 0/27 places; us2: 0/27 places; pal: absent from catalogue.
- * Truthful128-byte pool records preserve limits, rollback stores and all three initialization
- * variants. RGB expansion and exact constants improve 1212 to 1248 bytes. -g gives no further
- * change. Scalar zero-store lowering removes retail floating-zero liveness, reducing the
- * frame 0x80 to 0x70 and changing allocation. Reopen with an independently established
- * zero/store/lifetime witness.
+ * 1248/1252 bytes; us: 0/27 placements; us2: 0/27 placements; pal: absent from catalogue.
+ * Truthful 128-byte pool records retain all three initialization variants, bounds and rollback
+ * stores. Scalar zero stores lose the retail floating zero lifetime; frame0x70 differs from retail
+ * 0x80.
+ * Reopen with concrete scalar zero-store and allocator lifetime evidence. Do not manufacture a
+ * floating dependency, volatile store or extra vector.
+ * Prior complete variants and diagnostic dumps are preserved privately.
+ * No candidate or linked-build credit is claimed.
  */
+#include "common.h"
+
 typedef int PoolWord128 __attribute__((mode(TI)));
 typedef union { PoolWord128 word; float values[4]; } PoolVector;
 typedef struct {
@@ -96,7 +100,7 @@ PoolRecord *func_L00_003F0198(char *owner, int kind, PoolVector *position, float
             random = func_002A7820(100, 120);
             slot->b = random;
             slot->a = random;
-            slot->position.word = position->word;
+            qcopy(&slot->position, position);
             slot->mode = 2;
             slot->angularSpeed = zero;
         } else if (kind == 2) {

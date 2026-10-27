@@ -20,7 +20,6 @@ INCLUDE_ASM("asm/game", func_0028BE00);
 
 INCLUDE_ASM("asm/game", func_0028C6D0);
 
-INCLUDE_ASM("asm/game", func_0028CC98);
 
 INCLUDE_ASM("asm/game", func_0028CCE0);
 
@@ -35,7 +34,6 @@ int func_0028DF68(void) {
 }
 
 
-INCLUDE_ASM("asm/game", func_0028DF80);
 
 /* The map's thirteen records, 0x90 bytes each: +0x04 flags, +0x14 handler,
    +0x68 busy, +0x6C position, +0x7C timer. */

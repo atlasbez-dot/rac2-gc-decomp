@@ -1,73 +1,63 @@
-/* func_L09_003364E0, 280 bytes, 5 places (09_dobbo, 12_todano, 18_damosel, 19_grelbin,
- * 20_yeedil).
- * NEAR MISS - the candidate is 272 bytes against retail's 280.  The body is right: the
- * level's slot from func_002B9030, the two words the caller passes, the three byte
- * flags, the level's flag byte, the run's own copy of the object's position, the two
- * angles and the object's id - but the register assignment is one out.  Retail keeps the
- * object in $s3, the first int in $s4, the second in $s2, the third in $s0 and the slot
- * pointer in $s1; this cc1 keeps them in $s1, $s3, $s4, $s2 and $s0.  That one register
- * out costs two words: retail computes the base of the last three stores once
- * (`addiu $v0,$s1,0x30`) and the second quadword copy's address once
- * (`addiu $v1,$s1,0x20`), and it fills the branch's delay slot with a copy of the
- * else's first word, where this cc1 duplicates the store of the second angle instead.
- *
- * The two 16-byte copies need the grouped lq/sq pattern, so this unit must be built
- * with -frac2-qcopy; the copy from the object to the slot and the copy from the slot to
- * the slot's second half are both plain `mode(TI)` assignments.
- *
- * What is needed: the source shape that makes this compiler hand out the callee-saved
- * registers the way retail does.  The store order, the parameter types (int or pointer),
- * the pointer variable for the last three stores and the position of the two word stores
- * around the 0.4f call were all measured; the register assignment did not move.
+/* Nonmatching: 276/280 bytes.
+ * Profile: -O2 -G0 -ffunction-sections.
+ * Placement checks: US: 0/5; US2: 0/5; PAL: 0/5.
+ * 276/280 bytes. Saved-register allocation and branch/copy address setup differ. The typed slot is independently qualified: func_002B9038 returns a pointer/null, uses a 64-byte allocation stride and clears four complete quadwords. Header16, position16, previous-position16 and context16 therefore describe the real storage without padding. The conversion result plus32 supplies byte9, and the second copy is common to both index branches. The earlier complete280-byte variant is archived privately.
+ * Reopen with actual slot/position/context lifetimes and allocator conflicts. One complete typed64-byte form was measured; do not add references or change parameter order to manipulate priorities.
  */
+#include "common.h"
 
-#include "include_asm.h"
+typedef union {
+    u32 words[4];
+    u8 bytes[16];
+} ParticleHeader;
 
-typedef unsigned int u32;
+typedef struct {
+    char *object;
+    int index;
+    int class_id;
+    float scale;
+} ParticleContext;
 
-typedef unsigned char u8;
+/* B9038 allocates at a 64-byte stride and clears all four quadwords. */
+typedef struct {
+    ParticleHeader header;
+    float position[4];
+    float previous_position[4];
+    ParticleContext context;
+} __attribute__((aligned(16))) ParticleSlot;
 
-typedef int TI128 __attribute__((mode(TI)));
+extern u8 *D_L09_001FF65C;
+extern void *func_002B9030(int);
+extern int func_00283CF0(float);
+extern void func_0029FCC0(char *, int, char *);
 
-/* the level's pointer to the object's table entry */
-extern u32 D_L09_001FF65C;
-
-extern char *func_002B9030(int kind);
-
-extern void func_00283CF0(float f);
-
-extern void func_0029FCC0(char *object, int a, void *b);
-
-/* Builds the object's table entry: the run's own copy of the object's position,
-   the level's slot flags and the two angles the caller passed. */
-char *func_L09_003364E0(char *object, int a1, char *a2, char *a3, float f12, float f13)
+char *func_L09_003364E0(char *object, int index, u32 value, int parameter,
+                      float first_scale, float second_scale)
 {
-    char *s1 = func_002B9030(0x37);
+    ParticleSlot *slot = func_002B9030(0x37);
+    float *position;
 
-    if (s1 != 0) {
-        *(u32 *)(s1 + 0xC) = (u32)a3;
-        *(u32 *)(s1 + 4) = (u32)a2;
-        func_00283CF0(0.4f);
-        *(u8 *)(s1 + 9) = (u8)(s1 + 0x20);
-        *(u8 *)(s1 + 3) = 0x48;
-        *(u8 *)(s1 + 1) = 3;
-        *(u8 *)(s1 + 2) = *(u8 *)(D_L09_001FF65C);
-        if (a1 > 0) {
-            func_0029FCC0(object, a1, s1 + 0x10);
+    if (slot != 0) {
+        slot->header.words[1] = value;
+        slot->header.words[3] = parameter;
+        slot->header.bytes[9] = (u8)(func_00283CF0(0.4f) + 0x20);
+        slot->header.bytes[3] = 0x48;
+        slot->header.bytes[1] = 3;
+        slot->header.bytes[2] = D_L09_001FF65C[0];
+        if (index > 0) {
+            position = slot->position;
+            func_0029FCC0(object, index, (char *)position);
         } else {
-            *(TI128 *)(s1 + 0x10) = *(TI128 *)(object + 0x10);
-            *(TI128 *)(s1 + 0x20) = *(TI128 *)(s1 + 0x10);
+            position = slot->position;
+            qcopy(position, object + 0x10);
         }
-        *(float *)(s1 + 0x2C) = f13;
-        *(float *)(s1 + 0x1C) = f12;
-        *(u32 *)(s1 + 0x30) = (u32)object;
-        {
-            char *q = s1 + 0x30;
-
-            *(float *)(q + 0xC) = f12;
-            *(int *)(q + 0x8) = *(short *)(object + 0xAA);
-            *(u32 *)(q + 0x4) = a1;
-        }
+        qcopy(slot->previous_position, position);
+        slot->previous_position[3] = second_scale;
+        slot->position[3] = first_scale;
+        slot->context.object = object;
+        slot->context.scale = first_scale;
+        slot->context.class_id = *(short *)(object + 0xAA);
+        slot->context.index = index;
     }
-    return s1;
+    return (char *)slot;
 }

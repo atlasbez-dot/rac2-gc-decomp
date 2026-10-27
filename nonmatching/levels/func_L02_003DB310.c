@@ -1,7 +1,23 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured unit: src/levels/02_maktar_nebula/L02_003DB310-reinit-g8.c
+ * Profile: -O2 -G8 -ffunction-sections
+ * Actual release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL absent (exit1).
+ * Current residual: 972/968 bytes. The full 16-byte position copy now uses an incomplete
+ * source storage view instead of a fabricated char scalar. Its LUI+ADDI replaces retail GP
+ * addressing and shifts the otherwise matching setup. The pre-existing sibling G8 unit and
+ * its flags were restored untouched.
+ * Reopen only for: Independent evidence of the source global complete extent/storage, then
+ * a qualified profile; a copy width alone is insufficient to declare a complete 16-byte
+ * global.
+ * Older notes below are historical. Marker and trial-only profiles were restored.
+ */
+
 /* Nonmatching: USA v1.01: 0/1 carrying places; USA v2.00: 0/1 carrying places; PAL: absent. Final C 968/968 retail bytes. Game -O2 -G8 -frac2-qcopy -frac2-qcopy-barrier. USA v1.01/v2.00 0/1, 968/968 bytes, first difference +0x8; PAL absent. Eight trials: field typing fixes alias reloads/frame; builtin memcpy and struct copy 988 bytes; no barrier, -g and disabled first scheduling do not match. Remaining initial quad-copy source/destination allocation and prologue; later body otherwise follows retail. Reopen with natural copy source shape or measured compiler hypothesis. No linked builds.  */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
-extern char D_L02_001B03F0 __attribute__((sda));
+/* Position window; complete surrounding storage extent is unknown. */
+extern char D_L02_001B03F0[] __attribute__((sda));
 extern char *D_L02_001B359C;
 typedef struct { char pad[0x80]; float x, y; } HeroPosition;
 extern HeroPosition D_00189E20;
@@ -35,7 +51,7 @@ void func_L02_003DB310(char *actor, int alternate) {
     *(int *)(actor + 0x9C) = 0;
     *(unsigned char *)(actor + 0x7F) = 0;
     *(unsigned char *)(state + 0x2E) = 1;
-    *(Quad *)(actor + 0x10) = *(Quad *)&D_L02_001B03F0;
+    qcopy(actor + 0x10, D_L02_001B03F0);
     *(char **)(PRIVATE + 0x260) = func_0029EFD0(0xA4C);
     if (ATTACHMENT != 0) {
         *(unsigned char *)(ATTACHMENT + 0x30) = *(unsigned char *)(actor + 0x30);
@@ -49,7 +65,7 @@ void func_L02_003DB310(char *actor, int alternate) {
         *(unsigned char *)(ATTACHMENT + 0x31) = 1;
     }
     func_0029FC20(actor, 0, transform);
-    *(Quad *)(CHILD + 0x10) = transform[3];
+    qcopy(CHILD + 0x10, &transform[3]);
     *(float *)(actor + 0xF8) = func_00283248(D_00189E20.x - *(float *)(actor + 0x10), D_00189E20.y - *(float *)(actor + 0x14));
     ((ActorFlags *)CHILD)->heading = func_00283248(D_00189E20.x - *(float *)(actor + 0x10), D_00189E20.y - *(float *)(actor + 0x14));
     func_002A05A8(CHILD);

@@ -1,3 +1,4 @@
+/* M33 2026-10-26: plain C, no aliases or do-while, profile -O2 -G8 -ffunction-sections -mno-split-addresses, D_L23_001B3850 MACRO_ADDR (gives retail's per-use lui/addiu without the alias names). 652/652 B, one instruction pair off: in the kind-0xF arm retail sets $a0 (la D_L23_001B3850) before the 1.5f constant and the two frame addresses; here it comes after them (sched1 tie, see the older note below). Tried: block-local tmp, void func_L00_0035F5A0. Only the rejected do { } while (0) moves it. */
 /* func_L23_0041A3B8 (652 bytes, 1 place: 23:0041A3B8) -- EXACT, but only with a `do { ... } while (0)`
    around the kind-0xF effect, which the task rules ("no construct whose only purpose is to steer the
    compiler") keep out of src/. Installed temporarily as src/levels/23_damosel_orbit/L23_0041A3B8-g8.c
@@ -22,6 +23,8 @@
    For the lead: if non-empty `do { ... } while (0)` wrappers are accepted (src/ already has two used as
    this lever: func_L23_0041C8C0 in L23_00416388.c and the one in src/core/00124568.c), moving this body
    to the unit above is the whole job. */
+#include "common.h"
+
 
 extern float D_L23_001B3728 __attribute__((sda));
 
@@ -29,11 +32,7 @@ extern float D_L23_001B1454 __attribute__((sda));
 
 extern int D_L23_001B3784;
 
-extern char D_L23_001B3850[];
-
-extern char D_L23_001B3850_b[] __asm__("D_L23_001B3850");
-
-extern char D_L23_001B3850_c[] __asm__("D_L23_001B3850");
+extern char D_L23_001B3850[] MACRO_ADDR;
 
 extern char D_L23_001B3870[];
 
@@ -45,7 +44,7 @@ extern void func_L23_00422540(char *, char *, float *);
 
 extern void func_L23_004280D8(char *, char *, char *, int, float);
 
-extern int func_L00_0035F5A0(int, int, int);
+extern void func_L00_0035F5A0(int, int, int);
 
 extern void func_0032C700(char *, int, int, int, int, int, int, int, float, float, int, int, int, int);
 
@@ -66,11 +65,9 @@ int func_L23_0041A3B8(char *arg0, char *arg1) {
     } else {
         if ((*(unsigned short *)(arg0 + 0x96) & 3) != 2)
             return 1;
-        do {
-            func_00282F20((char *)vec, D_L23_001B3870, *(short *)(state + 0x33A) * 0.016666668f);
-            tmp = *(float *)(state + 0x300) * 1.5f;
-            func_L23_00422540(D_L23_001B3850, (char *)vec, &tmp);
-        } while (0);
+        func_00282F20((char *)vec, D_L23_001B3870, *(short *)(state + 0x33A) * 0.016666668f);
+        tmp = *(float *)(state + 0x300) * 1.5f;
+        func_L23_00422540(D_L23_001B3850, (char *)vec, &tmp);
         func_L00_0035F5A0(0x21, 0, 0);
         return 1;
     }
@@ -83,8 +80,8 @@ int func_L23_0041A3B8(char *arg0, char *arg1) {
             return 1;
         func_00282CF0((char *)vec, arg1, D_L23_001B3850);
         func_00282F20((char *)vec, (char *)vec, *(short *)(state + 0x33C) * 0.016666668f);
-        func_L23_004280D8(arg0, (char *)vec, D_L23_001B3850_b, 0, *(float *)(state + 0x304));
-        func_0032C700(D_L23_001B3850_c, 0, 2, 3, 2, 2, 0xA, 0, 0.5f, 20.0f, 1, 1, 0, 0);
+        func_L23_004280D8(arg0, (char *)vec, D_L23_001B3850, 0, *(float *)(state + 0x304));
+        func_0032C700(D_L23_001B3850, 0, 2, 3, 2, 2, 0xA, 0, 0.5f, 20.0f, 1, 1, 0, 0);
         func_L00_0035F5A0(0x1A, 0, 0);
     } else {
         int m = *(short *)(state + 0x334);

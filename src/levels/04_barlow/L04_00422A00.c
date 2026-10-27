@@ -66,7 +66,6 @@ void func_L04_0042BF58(u8 *a0) {
     }
 }
 INCLUDE_ASM("asm/levels", func_L04_00434BB0);
-INCLUDE_ASM("asm/levels", func_L04_004389C0);
 struct BarlowEntry { u8 bytes[256]; };
 extern u8 D_00189EA0[];
 extern u16 *D_L04_001FB1E0[];
@@ -128,7 +127,6 @@ void func_L04_00438B50(u8 *object) {
 
 /* func_L04_00439870 is defined in L04_00422A00-g8.c (this unit's -G8 profile gives the
    retail's address forms). */
-INCLUDE_ASM("asm/levels", func_L04_00439950);
 extern void func_40A090(int a0, u8 *a1, u8 *a2, u8 *a3, u8 *a4, u8 *a5);
 
 extern u8 D_L04_001B12B0[] __attribute__((sda));
@@ -257,7 +255,6 @@ int func_L04_0044DAC8(char *a0) {
     }
     return 0;
 }
-INCLUDE_ASM("asm/levels", func_L04_0044DB18);
 
 void func_L04_00450268(char *a0) {
     char *s0 = *(char **)(a0 + 0x68);

@@ -52,7 +52,6 @@ void func_L08_0030A8F8(s32 x) {
     func_002934B8(D_L08_001DAC40[D_L08_001DB5E7], D_L08_001BFEF4);
 }
 
-INCLUDE_ASM("asm/levels", func_L08_00318F90);
 f32 func_L08_003277C0(s32 n, f32 x) {
     f32 r;
     if (n < 2)
@@ -200,11 +199,7 @@ INCLUDE_ASM("asm/levels", func_L08_0034A078);
 
 INCLUDE_ASM("asm/levels", func_L08_00363320);
 
-INCLUDE_ASM("asm/levels", func_L08_0036EFC8);
 
-INCLUDE_ASM("asm/levels", func_L08_0036F030);
-
-INCLUDE_ASM("asm/levels", func_L08_0037E6D8);
 
 INCLUDE_ASM("asm/levels", func_L08_00389B68);
 
@@ -237,15 +232,12 @@ INCLUDE_ASM("asm/levels", func_L08_003CC4B8);
 extern u8 *D_0018C0B0;
 extern void func_002A0F48();
 
-INCLUDE_ASM("asm/levels", func_L08_003CD600);
+/* func_L08_003CD600 and func_L08_003CD6C8 are matched in L08_003CD600-qcopy.c. */
 
 /* Defined in L08_003CD648.c. */
 
-INCLUDE_ASM("asm/levels", func_L08_003CD6C8);
 
 INCLUDE_ASM("asm/levels", func_L08_003CD708);
-
-INCLUDE_ASM("asm/levels", func_L08_003CDB38);
 
 INCLUDE_ASM("asm/levels", func_L08_003CDB78);
 

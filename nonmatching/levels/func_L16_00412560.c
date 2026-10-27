@@ -1,35 +1,32 @@
 /*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G32 -ffunction-sections -Wa,-G32 -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
- * Reported final C / retail: 1448 / 1420 bytes; size equality is not a match.
- * us: 0/1 placements; 1448/1420 bytes.
- * us2: 0/1 placements; 1448/1420 bytes.
- * pal: absent from catalogue (not a match).
- * Residual: Frame 0x2C0 versus retail 0x2B0; batch pointers/loop allocation differ. Honest 32-byte UV table and 64-bit descriptor result retained.
- * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G32 -Wa,-G32 -ffunction-sections
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 1384 bytes; retail: 1420 bytes.
+ * Remaining difference: The full64-byte bone output,two144-byte batches,48-byte request and32-byte
+ * UV table remain. The observed UV fields are floats and explicit color/U/V source and destination
+ * streams restore frame0x2B0 without shrinking any buffer. The body is1384/1420; cursor/register
+ * scheduling and mixed GP/absolute source forms still differ. Texture results remain64-bit and
+ * C16C0/C6DD8 are pointer/null factories with ignored results.
+ * Reopen when: An independently measured batch/cursor lifetime or original global-field layout
+ * explaining the mixed UV address forms; no duplicated data aliases or narrowed texture
+ * descriptor.
  */
 
-/* Manual reconstruction, 2026-10-23: NOT MATCHED. US 1448/1420 bytes,
- * 0/1 placements; profile: -O2 -ffunction-sections G32 asG32 qcopy/qcopy-barrier/zero-ti-por.
- * Frame 0x2C0 versus retail 0x2B0; batch pointers/loop allocation differ. Honest 32-byte UV table and 64-bit descriptor result retained.
- * Historical screening notes below are preserved; the current measured
- * residual replaces any earlier claim that lq/sq/por cannot be emitted. */
 #include "common.h"
 typedef int BeamQuadword __attribute__((mode(TI)));
 typedef struct { int word[4]; } BeamDamageData __attribute__((aligned(16)));
 typedef struct {
     float position[4][4];
     u32 color[4];
-    u32 uv[4][2];
+    float uv[4][2];
     unsigned long packet[4];
 } BeamBatch __attribute__((aligned(16)));
 extern float D_L16_001B16D0[4] __attribute__((sda));
 extern float D_L16_001B17F8[2] __attribute__((sda));
 extern int D_L16_001B17E8[2] __attribute__((sda));
-extern u32 D_L16_001B1800[4][2] __attribute__((sda));
+extern float D_L16_001B1800[4][2] __attribute__((sda));
 extern u32 D_L16_001B1820[2] __attribute__((sda));
 extern int D_L16_001B1828 __attribute__((sda));
 extern u32 D_L16_001B182C __attribute__((sda));
@@ -49,16 +46,16 @@ extern void func_00282F70(void *, void *, float), func_00282F20(void *, void *, 
 extern void func_00282DD8(void *, void *, void *), func_00282D30(void *, void *, float);
 extern void func_002A8C00(char *, int, int, float, BeamDamageData *);
 extern int func_002761F8(void *, void *, int, void *, void *);
-extern u32 func_00283D38(float, u32, u32);
+extern u32 func_00283D38(u32, u32, float);
 extern unsigned long func_0027C878(int);
 extern void func_00280B90(void *, int, int);
 extern int func_002A7820(int, int), func_00283CF0(float);
 extern float func_002A78D8(float, float), func_002A7878(float, float);
 extern void func_00282D08(void *, void *, void *, float);
 /* Particle calls consume six/three GPR inputs and five/one FP inputs.
- * Their unused returns remain unqualified. */
-extern void func_002C16C0(void *, void *, int, int, int, int, float, float, float, float, float);
-extern void func_002C6DD8(void *, void *, int, float);
+ * Both return their allocated pointer or null; this caller ignores those results. */
+extern void *func_002C16C0(void *, void *, int, int, int, int, float, float, float, float, float);
+extern void *func_002C6DD8(void *, void *, int, float);
 extern void func_002A7A00(void *, float, float);
 
 void func_L16_00412560(u8 *moby)
@@ -83,32 +80,39 @@ void func_L16_00412560(u8 *moby)
     func_002830C0(start, D_L16_001B16D0, bone);
     object = *(u8 **)(state + 0x24c);
     if (object) {
-        *(BeamQuadword *)target = *(BeamQuadword *)(object + 0x10);
+        qcopy(target, (object + 0x10));
         target[2] = func_L16_00416EB8((char *)object);
-    } else *(BeamQuadword *)target = *(BeamQuadword *)(state + 0x210);
+    } else qcopy(target, (state + 0x210));
     func_00282CF0(end, moby + 0x10, target);
     end[2] = -0.1f;
     func_00282F70(end, end, *(float *)(state + 0x250));
     func_00282CC0(end, end, target);
     func_002A8C00(effect, (int)moby, 0x90001, (float)state[0x36], &D_L16_001A8F20);
     if (func_002761F8(start, end, 0, moby, effect))
-        *(BeamQuadword *)end = *(BeamQuadword *)D_L16_001BFF60;
+        qcopy(end, D_L16_001BFF60);
     func_00282CF0(camera, D_L16_001B9B00, start);
     func_00282CF0(ray, end, start);
     func_00282DD8(side, ray, camera);
     func_00282F20(side, side, 1.0f);
     for (i = 0; i < 2; i++) {
+        float *u = &batch[i].uv[0][0];
+        float *v = &batch[i].uv[0][1];
+        float *source_u = &D_L16_001B1800[0][0];
+        float *source_v = &D_L16_001B1800[0][1];
+        u32 *color = batch[i].color;
+        float (*vertex)[4] = batch[i].position;
         for (j = 0; j < 4; j++) {
-            batch[i].color[j] = func_00283D38(*(float *)(state + 0x254),
-                D_L16_001B1820[i] & 0xff000000, D_L16_001B1820[i]);
-            batch[i].uv[j][0] = D_L16_001B1800[j][0];
-            batch[i].uv[j][1] = D_L16_001B1800[j][1];
+            *color = func_00283D38(D_L16_001B1820[i] & 0xff000000,
+                D_L16_001B1820[i], *(float *)(state + 0x254));
+            *u = *source_u;
+            *v = *source_v;
             if ((j & 1) == 0)
-                func_00282D30(batch[i].position[j], side, -D_L16_001B17F8[i]);
-            else func_00282D30(batch[i].position[j], side, D_L16_001B17F8[i]);
-            if (j < 2) func_00282CC0(batch[i].position[j], batch[i].position[j], start);
-            else func_00282CC0(batch[i].position[j], batch[i].position[j], end);
-            batch[i].position[j][3] = 1.0f;
+                func_00282D30(*vertex, side, -D_L16_001B17F8[i]);
+            else func_00282D30(*vertex, side, D_L16_001B17F8[i]);
+            if (j < 2) func_00282CC0(*vertex, *vertex, start);
+            else func_00282CC0(*vertex, *vertex, end);
+            (*vertex)[3] = 1.0f;
+            ++vertex; ++color; u += 2; v += 2; source_u += 2; source_v += 2;
         }
         batch[i].packet[1] = func_0027C878(D_L16_001B17E8[i]);
         batch[i].packet[3] = 0x8000000048UL;
