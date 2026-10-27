@@ -279,7 +279,6 @@ void func_002B8518(void) {
 
 INCLUDE_ASM("asm/game", func_002B8530);
 
-INCLUDE_ASM("asm/game", func_002B8548);
 
 INCLUDE_ASM("asm/game", func_002B85F8);
 
@@ -321,7 +320,6 @@ INCLUDE_ASM("asm/game", func_002BA0E0);
 
 INCLUDE_ASM("asm/game", func_002BA6A0);
 
-INCLUDE_ASM("asm/game", func_002BA8A0);
 
 extern unsigned char *D_001F2544;
 
@@ -336,7 +334,6 @@ void func_002BA978(char *self)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002BAA28);
 
 /* func_002BABE8 is in 002B7E28-g8.c (its global read uses the retail's one-register
    `lui`/`lw` pair, which only a -G8 unit emits). */
@@ -344,7 +341,7 @@ INCLUDE_ASM("asm/game", func_002BAA28);
 void func_002BAE48(void) {
 }
 
-INCLUDE_ASM("asm/game", func_002BAE50);
+/* func_002BAE50 is matched in its own unit, src/game/002BAE50.c (default flags). */
 
 void func_002BAF68(char *a0)
 {
@@ -370,7 +367,29 @@ void func_002BAF68(char *a0)
         Fe617c30b_FUN_002B9180(a0);
 }
 
-INCLUDE_ASM("asm/game", func_002BB050);
+extern void func_002B9180(char *);
+extern void func_00300190(char *, char *);
+
+void func_002BB050(u8 *a0)
+{
+    u8 *s0 = a0;
+    u8 *s1 = a0 + 0x20;
+
+    if (func_00282948((char *)s1) != 0) {
+        func_002B9180((char *)s0);
+        return;
+    }
+    {
+        u8 *p = s0 + 0x10;
+
+        func_00300190((char *)p, (char *)p);
+    }
+    *(f32 *)(s0 + 0xC) = *(f32 *)(s0 + 0xC) + *(f32 *)(s1 + 4);
+    if (*(s32 *)(s1) < 6) {
+        *(unsigned int *)(s0 + 4) = (*(unsigned int *)(s0 + 4) & 0xFFFFFF)
+            | ((unsigned int)(*(s32 *)(s1) * 127 / 6) << 24);
+    }
+}
 
 INCLUDE_ASM("asm/game", func_002BB100);
 
@@ -486,13 +505,11 @@ void func_002BC8E8(char *p)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002BCA08);
 
-INCLUDE_ASM("asm/game", func_002BCB00);
+/* func_002BCB00 is defined in 002BCB00-zero-ti-barrier.c. */
 
 INCLUDE_ASM("asm/game", func_002BCC58);
 
-INCLUDE_ASM("asm/game", func_002BCF18);
 
 INCLUDE_ASM("asm/game", func_002BD0D0);
 
@@ -528,26 +545,42 @@ void func_002BD398(OBJ_F3c007b59 *o)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002BD500);
+extern void func_00282CC0(char *, char *, char *);
+extern int func_00283CF0(float);
+
+void func_002BD500(char *a)
+{
+    char *p1 = a + 16;
+    char *p2 = a + 32;
+    char *p3 = a + 48;
+    int v;
+
+    func_00282CC0(p1, p1, p3);
+    func_00282CC0(p2, p2, p3);
+    func_00300190(p1, p1);
+    func_00300190(p2, p2);
+    v = *(int *)(a + 4) - (func_00283CF0(*(float *)(p3 + 12)) << 24);
+    *(int *)(a + 4) = v;
+    *(int *)(a + 12) = v;
+    if (v < 0)
+        func_002B9180(a);
+}
 
 
-INCLUDE_ASM("asm/game", func_002BD8B0);
 
 INCLUDE_ASM("asm/game", func_002BD9B0);
 
-INCLUDE_ASM("asm/game", func_002BDBC0);
 
 INCLUDE_ASM("asm/game", func_002BDCE8);
 
 INCLUDE_ASM("asm/game", func_002BDEB0);
 
-INCLUDE_ASM("asm/game", func_002BE150);
 
-INCLUDE_ASM("asm/game", func_002BE278);
+/* func_002BE278 uses the quadword-copy profile in 002BE278-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_002BE400);
 
-INCLUDE_ASM("asm/game", func_002BE7E8);
+/* func_002BE7E8 uses the quadword-copy profile in 002BE7E8-qcopy.c. */
 
 /* calls a three-argument helper on the sub-objects at +16 and +32, then packs ((v[6]*v[4])/v[5])<<24 into the low 24 bits of the word at +4 and conditionally calls a second helper on +48 before a final call. */
 void func_002BE928(s32 *self) {

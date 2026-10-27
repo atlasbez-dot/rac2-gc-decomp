@@ -1,17 +1,13 @@
-/* Nonmatching reconstruction of func_L00_003F4210 (retail 2392 bytes).
- * Measured 2026-10-23: 2352 bytes, 0/27 placements in US and US2.
- * PAL has no catalogue entry. Profile: -O2 -G8 -ffunction-sections
- * -frac2-qcopy -frac2-qcopy-barrier. The 0x100 frame matches; allocation,
- * branch shape and scheduling remain. Reopen with original local lifetime
- * evidence. No candidate or linked-build credit is claimed.
- * 003252A8 forwards output/mode in a1/a2 to 002AFFD8. This three-argument
- * interface is reconciled with the lead repair of the former one-argument
- * definition, preserving all retail inputs. 00282F70 takes f12 at both calls: the second
- * value is minimum/60, built at US 00:003F46B0 before the branch.
- * 002BDCE8 returns the allocated pointer, with a 64-bit signed color word.
- * 002ABBB8 preserves seven FP, eight GPR and four stack inputs (0,8,16,24).
- * The scratch union overlays disjoint movement, color and explosion phases;
- * its motion arm and the damage request are each 48 bytes, the RGB is 12.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 2368/2392 bytes; us: 0/27 placements; us2: 0/27 placements; pal: absent from catalogue.
+ * Out-of-range globals use absolute addressing. The request, 12-byte color scratch and full vectors
+ * retain their real extents. The scalar damping subtraction/addition sequence is preserved.
+ * Allocation, address sharing and branch scheduling differ.
+ * Reopen with original local lifetime or qualified helper ABI evidence; retain truthful absolute
+ * addressing even when the body grows.
+ * Prior complete variants and diagnostic dumps are preserved privately.
+ * No candidate or linked-build credit is claimed.
  */
 #include "common.h"
 
@@ -36,12 +32,13 @@ typedef struct {
     short particle_timer, bounces;
     float fade_scale;
 } ProjectileState;
-extern char *D_L00_001BF218;
+/* The hit pointer is outside the GP-relative displacement range. */
+extern char *D_L00_001BF218 NOT_SDA;
 extern Vector D_L00_001BF220, D_L00_001BF240;
 extern int D_L00_001A8FF0;
 extern Vector D_L00_001A8F20;
 extern char *D_L00_001C3280[];
-extern unsigned char D_00139587;
+extern unsigned char D_00139587 NOT_SDA;
 extern unsigned char D_L00_00262570[];
 extern Color D_L00_001B0920;
 extern float D_L00_001B0900 __attribute__((sda));
@@ -119,7 +116,7 @@ void func_L00_003F4210(char *object)
         func_00282978(&state->particle_timer);
         if (state->particle_timer != 0) {
             for (i = 0; i < 3; ++i) {
-                temporary.word = position->word;
+                qcopy(&temporary, position);
                 func_L00_0031D670(&point, &temporary, &scratch.motion.end, (float)i * 0.3333f);
                 spin = func_002A77E0(6);
                 if (func_002A77E0(2) != 0) spin = -spin;
@@ -137,9 +134,9 @@ void func_L00_003F4210(char *object)
         }
         if (func_002761F8(position, &scratch.motion.end, 0, object, 0) != 0 &&
             (D_L00_001BF218 == 0 || D_L00_001BF218 != state->owner))
-            position->word = D_L00_001BF220.word;
+            qcopy(position, &D_L00_001BF220);
         else
-            position->word = scratch.motion.end.word;
+            qcopy(position, &scratch.motion.end);
         if (D_L00_001A8FF0 == 0) {
             crossed = position->v[2] - D_L00_001BF220.v[2] < 0.0f;
         } else {
@@ -185,7 +182,7 @@ void func_L00_003F4210(char *object)
                     }
                     func_003001E0(velocity, velocity, position);
                 } else {
-                    velocity->word = temporary.word;
+                    qcopy(velocity, &temporary);
                 }
             }
         }

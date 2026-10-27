@@ -1,26 +1,11 @@
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -mno-split-addresses.
- * Prior worker coverage: US 0/2; US2 0/2; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+/* Manual reconstruction, wave8 (2026-10-25). Nonmatching; no linked or runtime credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses
+ * Final checks: US 0/2; US2 0/2; PAL absent from catalogue.
+ * Real qcopy transfers preserve the position history and both sixteen-byte D0 captures.
+ * The shared transform retains its actual three-float interface. Resident addresses are scoped by use.
+ * Address construction, branch scheduling and saved-register allocation still differ; text 1904/2016 bytes.
+ * Reopen with evidence for the resident data views and timer/history control flow, not arbitrary padding.
  */
-
-/* Historical analysis (summary).
- * Historical screening catalogued calls, vector operations and data addressing without a
- * complete manual reconstruction. Its generated call/address lists and decoded instruction
- * header remain private. The dated manual reconstruction and recorded worker profile below
- * supersede that screening; no unsupported impossibility or handwritten classification is
- * carried forward.
- */
-
-/* Wave4 manual reconstruction, 2026-10-23. Nonmatching; historical screening above
-   is summarized; generated listings and unsupported classifications remain private.
-   Trial source: src/levels/shared/L18_002DEFF8-g8-qcopy.c
-   Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses
-   Family vector uses actual current three-float12B definition. Two level-only handler calls retain normal scoped reference. Timers and history stores reconstructed; exact source tree/register allocation unresolved.
-   us: func_L18_002DEFF8: 0 of 2 places match (src/levels/shared/L18_002DEFF8-g8-qcopy.c), exit 1; us2: func_L18_002DEFF8: 0 of 2 places match (src/levels/shared/L18_002DEFF8-g8-qcopy.c), exit 1; pal: absent_from_catalogue, exit 1
-*/
 #include "common.h"
 typedef int Vector128 __attribute__((mode(TI)));
 typedef struct { float x,y,z; } FamilyC94396F4Vector_Fc94396f4;
@@ -58,11 +43,12 @@ extern void func_L00_002B30E8(void);
 void func_L18_002DEFF8(void)
 {
     Vector128 sum[1],delta[1];
-    char *player=D_00189E20;
     char **entry;
     char *object;
     unsigned int frame;
     int i,index,previous;
+    {
+    char *player=D_00189E20;
     if(*(unsigned char *)(player+0x22bd)==0) func_L00_002B9380();
     (*(int *)(player+0x1b8))++; (*(int *)(player+0x1bc))++; (*(int *)(player+0x1c0))++; (*(int *)(player+0x1c4))++;
     func_00282978((short *)(player+0x1e0));
@@ -105,7 +91,7 @@ void func_L18_002DEFF8(void)
     else (*(int *)(player+0x1d8))++;
     if(D_00138354==0) { *(int *)(player+0x1cc)=0; (*(int *)(player+0x1c8))++; }
     else { *(int *)(player+0x1c8)=0; (*(int *)(player+0x1cc))++; }
-    if(*(unsigned char *)(player+0x22c3)!=0 && *(int *)(player+0x229c)==0 && *(int *)(player+0x340)!=0 && *(float *)(player+0x170)<0.001666666824f && *(float *)(player+0x184)<0.001666666824f) *(Vector128 *)(player+0x80)=*(Vector128 *)(player+0x2030);
+    if(*(unsigned char *)(player+0x22c3)!=0 && *(int *)(player+0x229c)==0 && *(int *)(player+0x340)!=0 && *(float *)(player+0x170)<0.001666666824f && *(float *)(player+0x184)<0.001666666824f) qcopy(player+0x80,player+0x2030);
     if(*(short *)(player+0x1454)==0) (*(int *)(player+0x1e8))++; else *(int *)(player+0x1e8)=0;
     if(*(int *)(player+0x24cc)==0 || D_L18_001A8F00==0) {
         if(*(int *)(player+0x24cc)!=0 && *(unsigned char *)(player+0x22b4)==4 && *(int *)(player+0x2294)!=0x6f && (D_00138324&0x10)!=0) {
@@ -118,6 +104,9 @@ void func_L18_002DEFF8(void)
             if(*(short *)(player+0x228)>120) { *(short *)(player+0x228)=0; D_L18_001B2264=0.0f; }
         }
     }
+    }
+    {
+    char *player=D_00189E20;
     if(*(short *)(player+0x224)!=0) {
         for(entry=D_L18_001FB6E0;(object=*entry)!=0;entry++) {
             if((func_002ABB78(object)!=0 || (*(void **)(object+0x24)!=0 && *(short *)(*(char **)(object+0x24)+0x46)==0x16)) && ((D_L18_001B2348&7)==((unsigned int)object>>8&7) || func_002A77E0(4)==0)) {
@@ -155,13 +144,14 @@ void func_L18_002DEFF8(void)
         else { *(float *)(player+0x24a8)=4.5f; *(float *)(player+0x24a4)=14.0f; }
     }
     if(*(float *)(player+0x31c)<4.0f) {
-        *(Vector128 *)(player+0xd0)=*(Vector128 *)(player+0x2d0);
+        qcopy(player+0xd0,player+0x2d0);
         func_L00_002D3778((FamilyC94396F4Vector_Fc94396f4 *)(player+0xd0),(FamilyC94396F4Vector_Fc94396f4 *)(player+0xd0),0.5f);
-    } else *(Vector128 *)(player+0xd0)=*(Vector128 *)(player+0xe0);
+    } else qcopy(player+0xd0,player+0xe0);
     object=*(char **)(player+0x5c0);
     if(object!=0) {
         if((*(unsigned short *)(object+0x34)&0x1000)==0 || object==*(char **)(player+0x33c)) *(void **)(player+0x5c0)=0;
         if(*(void **)(player+0x5c0)!=0 && *(int *)(player+0x1248)!=0x2e) *(void **)(player+0x5c0)=0;
     }
     if(*(float *)(player+0x88)<1.0f) func_L00_002B30E8();
+    }
 }

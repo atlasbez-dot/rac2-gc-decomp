@@ -34,7 +34,8 @@ extern float func_00282E80(void *, u8 *);
    Spelling: the walk is the matched id-list walk (a `for` loop with the redundant `p != 0 &&`
    in its test, which keeps jump.c from duplicating the test), and `p` is looked up from the raw
    group word before `g` takes it; that order gives retail's registers for the entry block. */
-void func_L02_003CAE68(char *self) {
+/* The update caller also supplies an output pointer; this body derives it from self. */
+void func_L02_003CAE68(char *self, char *unused_output) {
     char *state = *(char **)(self + 0x68);
     char *rec;
     Vec4 *path;

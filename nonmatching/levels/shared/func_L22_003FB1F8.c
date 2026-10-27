@@ -1,25 +1,18 @@
-/* from src/levels/shared/L22_003A5018.c: C that compiles but does not link at its places yet */
-/* Spawns the object of kind 0xE3A, arms it with the slot number and the scale factor, and
- * copies the position into it.  The slot number is a 16 bit quantity: the counter of the
- * spawned objects only advances for a slot that is not zero.
- *
- * The candidate is 268 bytes against the retail's 276, and it differs in two places:
- *   - the counter's address is materialised once, in $a2, and used by both the load and the
- *     store, where the retail rematerialises it: the load takes its base from the
- *     destination register ($v0) and the store's address is a fresh `lui $at`, and
- *   - the store of the 0x34 mask and the store of the 0x32 halfword are in another order
- *     than the retail's (retail: 0x32, 0x34, 0x30, 0x31, 0x20; this cc1: 0x32, 0x34, 0x30,
- *     0x31, 0x20 with the 0x34 store after the 0x32 one).
- * The statement orders tried here (counter first, remainder first, remainder in a local, the
- * counter through a pointer, the counter volatile) do not change the address.
- *
- * The 16 bit slot test is `(short)arg3` and the copy is a TImode assignment, so the unit
- * needs the -frac2-qcopy profile of src/levels/shared/L22_003A5018-g8.c.
+/* Retained C reconstruction, not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * 276/276 bytes; 0/2 placements in each of us, us2 and pal.
+ * The approved qcopy closes the copy addressing, counter rematerialization
+ * and controller allocation walls. All code outside the initial object-flag
+ * stores agrees.
+ * Remaining: The 0x50/0xFF constant allocations and stores at +0x32/+0x30 are exchanged
+ * around the +0x34 mask store, first difference +0x84. A named mask load and
+ * an evidence-based partial object-field layout give the same schedule.
+ * Reopen with: Independent object-field/lifetime or store-order evidence; three
+ * meaningful forms now give identical bytes.
  */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef float f32;
+
+#include "common.h"
+
 typedef int TI128 __attribute__((mode(TI)));
 
 extern int func_0029EFD0(int);
@@ -46,7 +39,7 @@ char *func_L22_003FB1F8(char *obj, TI128 *pos, int arg3, f32 f) {
         *(f32 *)(o + 0x2C) = *(f32 *)(*(u32 *)(o + 0x24) + 0x24) * f;
         *(u32 *)(ctl + 0x20) = (u32)obj;
         *(f32 *)(ctl + 0x4C) = func_002A7940();
-        *(TI128 *)(o + 0x10) = *pos;
+        qcopy(o + 0x10, pos);
         *(u16 *)(o + 0x34) |= 0x41;
         func_00283360(o + 0xC0);
         func_L22_003FBBF0(o);

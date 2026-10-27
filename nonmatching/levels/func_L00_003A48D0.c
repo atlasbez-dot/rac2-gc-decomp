@@ -1,230 +1,338 @@
-/* Retained nonmatching C; measured 25 October 2026.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses.
- * Final check.py coverage: us 0/27, us2 0/27, pal catalogue absent.
- * 2616/2708 bytes. Branch-local availability initialization changes allocation but the first save/register assignment still differs at +0x4; target/controller and light scheduling remain open.
- * Reopen: Use an independently measured resident-state/target lifetime and complete light-index/call-contract witness; do not invent global extents or prototypes.
- * Shared EE transfer helpers are approved; their use is not matching evidence.
- * Earlier complete drafts and all trial sources/logs are preserved privately.
+/* Retained nonmatching C (Opus big40), measured 26 October 2026; replaces the earlier draft.
+ * Profile: -O2 -G0 -ffunction-sections -g (the -g statement nops before both div.s).
+ * us 0/27, pal catalogue absent. 2712/2708 bytes, about 40 instruction lines differ.
+ * Agrees: hero fields through one D_00189E20 view (retail's la+offset everywhere), the
+ * MACRO_ADDR reads of D_L00_001B2864/D_L00_001A8F00, qcopy for the three quad copies, the
+ * locked/candidate arms in retail order, the light stores (last source store first),
+ * block-local `scale` in each flash arm, the weapon row as a pointer statement, the target
+ * reusing the candidate variable (retail $s1), func_L00_00324D18 with its int last
+ * (a2 in the call slot), func_L00_002D6B70 taking the handle.
+ * Left: (1) retail cross-jumps the 0.75 func_00282D30 call of the two aim arms; here the
+ * else arm ends in a call followed by flow's (use 0), so the arms keep separate calls
+ * (+2 insns) and the $s0/$s1 roles of the hero base and &origin swap. (2) light block:
+ * retail keeps &muzzle in $s0 across func_0029FCC0 and copies it to $s3 after the call,
+ * &offset in $s1; here &offset is $s0 and the muzzle copy is made before the call.
+ * (3) first hero test $v0/$v1. Sister func_L00_0040F6A0 is exact with the same idioms.
+ * Reopen: an arm ending that survives flow's (use 0), or the permuter (queued).
  */
 
 #include "common.h"
-typedef int VectorBits __attribute__((mode(TI)));
-struct Rac2Native_5f824a0e369ccf7b_src_record { u8 b0,b1,b2,b3; u16 s4,s6,s8,s10,s12; u8 e,f; };
-extern struct Rac2Native_5f824a0e369ccf7b_src_record D_L00_00294880[];
-extern int D_0018C0B4 NOT_SDA,D_0018C0BC NOT_SDA,D_0018C354 NOT_SDA,D_0018B270 NOT_SDA,D_0018B060 NOT_SDA;
-extern char *D_0018C0B0 NOT_SDA,*D_0018AA18 NOT_SDA;
-extern u8 D_0018C0DC NOT_SDA,D_0018C0D8 NOT_SDA,D_00139583 NOT_SDA;
-extern short D_0018C30C NOT_SDA;
-extern float D_0018C2D8 NOT_SDA;
-extern unsigned int D_00138320 NOT_SDA,D_00138324 NOT_SDA,D_0018B050 NOT_SDA;
-extern int D_L00_001A8F00 NOT_SDA;
-extern int D_L00_001B2864 __attribute__((sda));
-extern char *D_L00_001BF218 NOT_SDA,*D_L00_001C3280[];
-extern float D_00189EA0[4],D_0018A580[4],D_L00_001B8DC0[4];
-typedef struct { char prefix[0x54]; float rate; char tail[0x88]; } WeaponEntry;
-extern WeaponEntry D_L00_00262570[];
-typedef struct { float radius,spread,power,reserved; float position[4]; } MuzzleLight;
+
+typedef int Quad __attribute__((mode(TI)));
+typedef union { Quad quad; float f[4]; } Vector;
+typedef union { u8 b[0x2600]; s16 h[0x1300]; s32 i[0x980]; u32 u[0x980]; f32 f[0x980]; char *ptr[0x980]; Quad q[0x260]; } Hero;
+
+typedef struct Moby Moby;
+struct Moby {
+    u8 pad00[0x10];
+    Vector position;
+    u8 state;
+    u8 pad21[3];
+    struct { u8 pad00[0x46]; s16 kind; } *model;
+    u8 pad28[9];
+    u8 alive;
+    s16 health;
+    u8 pad34[0xE];
+    u8 animation;
+    u8 nextAnimation;
+    u8 pad44[0x1C];
+    u8 flags;
+    u8 pad61[7];
+    void *vars;
+    u8 pad6C[0x3E];
+    s16 objectClass;
+    u8 padAC[0x14];
+    Vector right;
+    Vector forward;
+    Vector up;
+};
+
+typedef struct {
+    float cooldown;
+    u8 pad04[0xC];
+    Moby *target;
+    int lockTimer;
+    float lockHeight;
+    s16 light;
+    s16 flash;
+    Moby *candidate;
+    int candidateTimer;
+    int aiming;
+    int sound;
+} TurretVars;
+
+typedef struct { float radius, spread, power, reserved; Vector position; } MuzzleLight;
+typedef struct { u8 pad00[0x54]; float rate; u8 pad58[0x88]; } WeaponEntry;
+typedef struct { int unknown00[6]; Moby *hit; } CollisionResult;
+
+extern u8 D_00189E20[], D_00139568[];
+extern Vector D_00189EA0;
+extern u32 D_00138180[];
+extern int D_L00_001A8F00 MACRO_ADDR;
+extern int D_L00_001B2864 MACRO_ADDR;
+extern float D_L00_001B8DC0[];
+extern Moby *D_L00_001C3280[];
+extern CollisionResult D_L00_001BF200;
 extern MuzzleLight D_L00_001C6F40[];
-extern void func_L00_003A41F0(void *);
-extern int func_002829D8(void *),func_00282948(void *),func_00282978(void *);
-extern void func_L00_002C42E0(int,int);
-extern void func_002A75E0(void *,int,int,int,int),func_002A7470(void *,int,int,int);
-extern int func_L00_002D4040(int),func_L00_002D3F30(int,int);
-extern void func_00273318(void *,unsigned int,void *,int,int,int,float,float,float);
-extern void func_00282D30(void *,void *,float),func_00282CC0(void *,void *,void *);
-extern char *func_L00_00324D18(void *,void *,int,float,float,float,float,float);
-extern int func_002AB1F0(u8 *),func_002ABB78(char *);
-extern float func_00282E48(void *,void *),func_00282C48(float),func_00283CE0(int);
-extern int func_002E5CF8(int,int,char *);
-extern int func_00277F48(void *,int,void *,int,float);
-extern void func_L00_003A4480(void *),func_L00_003A5370(int);
-extern void func_L00_002D2168(int,int,float),func_L00_002AF568(void),func_L00_002D6B70(void);
-extern int func_L00_002D6998(struct Rac2Native_5f824a0e369ccf7b_src_record *);
-extern void func_0029FCC0(char *,int,char *);
-extern int func_L00_002FCF18(void *,float,float,float,float,float);
+extern WeaponEntry D_00262570[];
+extern u8 D_00294880[];
+
+extern void func_L00_003A41F0(Moby *);
+extern void func_002829D8(void *);
+extern void func_L00_002C42E0(int, int);
+extern void func_002A75E0(void *, int, int, int, int);
+extern void func_002A7470(void *, int, int, int);
+extern int func_L00_002D4040(int);
+extern int func_L00_002D3F30(int, int);
+extern void func_00273318(void *, float, unsigned int, void *, int, float, int, float, int);
+extern void func_00282D30(void *, void *, float);
+extern void func_00282CC0(void *, void *, void *);
+extern Moby *func_L00_00324D18(void *, void *, float, float, float, float, float, int);
+extern float *func_002AB1F0(Moby *);
+extern int func_002ABB78(Moby *);
+extern float func_00282E48(void *, void *);
+extern float func_00282C48(float);
+extern float func_00283CE0(int);
+extern int func_00282948(int *);
+extern int func_00282978(short *);
+extern int func_002E5CF8(int, int, void *);
+extern int func_00277F48(float, void *, int, void *, void *);
+extern void func_L00_003A4480(Moby *);
+extern void func_L00_003A5370(Moby *);
+extern void func_L00_002D2168(int, int, float);
+extern void func_L00_002AF568(void);
+extern void func_L00_002D6B70(int);
+extern int func_L00_002D6998(void *);
+extern void func_0029FCC0(void *, int, void *);
+extern int func_L00_002FCF18(void *, float, float, float, float, float);
 extern void func_00291450(int);
 
-/* Acquire a stable target, fire the weapon and update its short muzzle light. */
-void func_L00_003A48D0(char *moby)
+
+#define HERO ((Hero *)D_00189E20)
+
+/* Acquires a stable target, fires and drives the short muzzle light. */
+void func_L00_003A48D0(Moby *moby)
 {
-    char *state = *(char **)(moby + 0x68);
-    float direction[4], playerPoint[4], targetPoint[4], muzzle[4], offset[4], lift[4];
-    char *candidate, *locked;
-    float horizontal,vertical;
+    TurretVars *vars = moby->vars;
+    Vector direction, origin, aim, muzzle, offset, lift;
+    float horizontal, vertical;
+    Moby *candidate;
     int ready;
-    if (*(u8 *)(moby + 0x20) == 0) {
-        *(u8 *)(moby + 0x20) = 1;
-        *(short *)(state + 0x1C) = -1;
-        *(int *)(state + 0x24) = 5;
-        *(int *)(state + 0x2C) = -1;
-        *(short *)(state + 0x1E) = 0;
-        *(int *)(state + 0x10) = 0;
-        *(int *)(state + 0x20) = 0;
-        *(int *)(state + 0x28) = 0;
+    Vector *point;
+
+    if (moby->state == 0) {
+        moby->state = 1;
+        vars->light = -1;
+        vars->candidateTimer = 5;
+        vars->sound = -1;
+        vars->flash = 0;
+        vars->target = 0;
+        vars->candidate = 0;
+        vars->aiming = 0;
     }
     func_L00_003A41F0(moby);
-    func_002829D8(state);
-    if (D_0018C0B4 == 1)
-        func_L00_002C42E0(29,1);
-    if (*(u8 *)(moby + 0x42) == *(u8 *)(moby + 0x43) && (*(u8 *)(moby + 0x60) & 2))
-        func_002A75E0(moby,1,0,2,0);
-    if (D_0018B270)
-        D_0018AA18 = (char *)D_0018B270;
-    if (D_0018C0B4 == 29 && (*(u16 *)(D_0018C0B0 + 0x34) & 1)) {
-        unsigned int color = 0x600FFF0F;
-        if (!*(int *)(state + 0x28)) {
-            *(int *)(state + 0x10) = 0;
-            *(int *)(state + 0x24) = 5;
+    func_002829D8(vars);
+    if (HERO->i[0x2294 / 4] == 1)
+        func_L00_002C42E0(0x1D, 1);
+    if (moby->animation == moby->nextAnimation && (moby->flags & 2))
+        func_002A75E0(moby, 1, 0, 2, 0);
+    if (HERO->i[0x1450 / 4] != 0)
+        HERO->i[0xBF8 / 4] = HERO->i[0x1450 / 4];
+
+    if (HERO->i[0x2294 / 4] == 0x1D && (*(u16 *)(HERO->ptr[0x2290 / 4] + 0x34) & 1)) {
+        unsigned int color;
+        if (vars->aiming == 0) {
+            vars->target = 0;
+            vars->candidateTimer = 5;
         }
-        *(int *)(state + 0x28) = 1;
+        vars->aiming = 1;
         horizontal = vertical = 0.06981317699f;
-        if (*(float *)state > 0.0f && func_L00_002D4040(-1))
+        if (vars->cooldown > 0.0f && func_L00_002D4040(-1))
             color = 0x600000FF;
-        func_00273318(moby,color,0,0x27,-1,4,1.25f,0.0f,90.0f);
-        qcopy(direction, D_0018A580);
+        else
+            color = 0x600FFF0F;
+        func_00273318(moby, 1.25f, color, 0, 0x27, 0.0f, -1, 90.0f, 4);
+        qcopy(&direction, &HERO->q[0x760 / 16]);
+        point = &origin;
+        func_00282D30(point, HERO->ptr[0x2290 / 4] + 0xE0, 0.75f);
     } else {
-        *(int *)(state + 0x28) = 0;
+        vars->aiming = 0;
         horizontal = 0.3141593039f;
         vertical = 0.2967059910f;
-        if (D_0018C30C == 0)
-            qcopy(direction, D_0018A580);
+        if (HERO->h[0x24EC / 2] != 0)
+            func_00282D30(&direction, &moby->forward, -1.0f);
         else
-            func_00282D30(direction,moby + 0xD0,-1.0f);
+            qcopy(&direction, &HERO->q[0x760 / 16]);
+        point = &origin;
+        func_00282D30(point, HERO->ptr[0x2290 / 4] + 0xE0, 0.75f);
     }
-    func_00282D30(playerPoint,D_0018C0B0 + 0xE0,0.75f);
-    func_00282CC0(playerPoint,D_00189EA0,playerPoint);
-    candidate = func_L00_00324D18(playerPoint,direction,1,horizontal,vertical,75.0f,horizontal,horizontal);
-    locked = *(char **)(state + 0x10);
-    if (!locked) {
-        if (candidate == *(char **)(state + 0x20) && func_00282948(state + 0x24)) {
-            float *component;
-            *(char **)(state + 0x10) = candidate;
-            *(int *)(state + 0x14) = 5;
-            component = (float *)func_002AB1F0((u8 *)candidate);
-            *(float *)(state + 0x18) = component ? *(float *)((char *)component + 0x10) : 0.1f;
-        } else if (candidate != *(char **)(state + 0x20)) {
-            *(int *)(state + 0x24) = 5;
+    func_00282CC0(point, &D_00189EA0, point);
+    candidate = func_L00_00324D18(point, &direction, horizontal, vertical, 75.0f, horizontal, horizontal, 1);
+
+    if (vars->target != 0) {
+        float *hp = func_002AB1F0(vars->target);
+        if (vars->target == 0 || vars->target->state == 0xFE || vars->target->state == 0xFD ||
+            (hp != 0 && *hp <= 0.0f) || vars->target->alive == 0 || HERO->h[0x24EC / 2] != 0) {
+            vars->target = 0;
+            vars->candidateTimer = 5;
+        } else if (candidate != vars->target) {
+            if (func_00282948(&vars->lockTimer)) {
+                vars->target = 0;
+                vars->candidateTimer = 5;
+            }
+        } else {
+            float distance;
+            float *health;
+            vars->lockTimer = 5;
+            distance = func_00282E48(D_L00_001B8DC0, &candidate->position) * 0.006666667f;
+            health = func_002AB1F0(candidate);
+            vars->lockHeight = health ? health[4] : 0.1f;
+            func_00282D30(&aim, &candidate->up, vars->lockHeight);
+            func_00282CC0(&aim, &candidate->position, &aim);
+            func_00273318(moby, func_00282C48(0.9f - distance * 0.65f), 0xFF0FFF0F, &aim, 0x26, 0.0f, -1, 90.0f, 4);
+            HERO->ptr[0xBF8 / 4] = (char *)candidate;
+        }
+    } else if (candidate == vars->candidate) {
+        if (func_00282948(&vars->candidateTimer)) {
+            float *health;
+            vars->target = candidate;
+            vars->lockTimer = 5;
+            health = func_002AB1F0(candidate);
+            if (health == 0)
+                vars->lockHeight = 0.1f;
+            else
+                vars->lockHeight = health[4];
         }
     } else {
-        float *component = (float *)func_002AB1F0((u8 *)locked);
-        if (*(u8 *)(locked + 0x20) == 0xFE || *(u8 *)(locked + 0x20) == 0xFD ||
-            (component && *component <= 0.0f) || !*(u8 *)(locked + 0x31) || D_0018C30C) {
-            *(int *)(state + 0x10) = 0;
-            *(int *)(state + 0x24) = 5;
-        } else if (candidate == locked) {
-            float distance = func_00282E48(D_L00_001B8DC0,locked + 0x10);
-            *(int *)(state + 0x14) = 5;
-            component = (float *)func_002AB1F0((u8 *)candidate);
-            *(float *)(state + 0x18) = component ? *(float *)((char *)component + 0x10) : 0.1f;
-            func_00282D30(targetPoint,candidate + 0xE0,*(float *)(state + 0x18));
-            func_00282CC0(targetPoint,candidate + 0x10,targetPoint);
-            func_00273318(moby,0xFF0FFF0F,targetPoint,0x26,-1,4,
-                          func_00282C48(0.9f - distance * 0.006666667f * 0.65f),0.0f,90.0f);
-            D_0018AA18 = candidate;
-        } else if (func_00282948(state + 0x14)) {
-            *(int *)(state + 0x10) = 0;
-            *(int *)(state + 0x24) = 5;
-        }
+        vars->candidateTimer = 5;
     }
-    *(char **)(state + 0x20) = candidate;
-    locked = *(char **)(state + 0x10);
-    if (D_0018C0B4 == 29)
-        ready = func_00282948(&D_0018C354) != 0;
-    else {
-        D_0018C354 = 40;
-        ready = 1;
+    vars->candidate = candidate;
+    candidate = vars->target;
+
+    ready = 1;
+    if (HERO->i[0x2294 / 4] == 0x1D) {
+        if (!func_00282948(&HERO->i[0x2534 / 4]))
+            ready = 0;
     }
-    if (D_L00_001A8F00 != 2 && *(float *)state == 0.0f && !D_0018C0DC &&
-        *(u8 *)(moby + 0x42) <= 1 && (D_00138320 & D_0018B050) && D_0018B060 >= 23 && ready) {
-        if (*(u8 *)(moby + 0x43) == 0)
-            func_002A7470(moby,1,0,4);
-        if (func_L00_002D3F30(-1,1)) {
+    else
+        HERO->i[0x2534 / 4] = 0x28;
+
+    if (D_L00_001A8F00 != 2 && vars->cooldown == 0.0f && HERO->b[0x22BC] == 0 && moby->animation < 2 &&
+        (D_00138180[0x1A0 / 4] & HERO->u[0x1230 / 4]) && HERO->i[0x1240 / 4] >= 23 && ready) {
+        if (moby->nextAnimation == 0)
+            func_002A7470(moby, 1, 0, 4);
+        if (func_L00_002D3F30(-1, 1)) {
             D_L00_001B2864 = 1;
-            if (!locked) {
-                int count,i;
-                func_00282D30(muzzle,moby + 0xD0,-1.0f);
-                func_00282CC0(muzzle,muzzle,moby + 0x10);
-                func_00282D30(offset,moby + 0xC0,0.275f);
-                func_00282CC0(muzzle,muzzle,offset);
-                count = func_00277F48(muzzle,1,D_0018C0B0,0,1.0f);
-                for (i = 0; i < count; i++) {
-                    char *hit = D_L00_001C3280[i];
-                    float *component = (float *)func_002AB1F0((u8 *)hit);
-                    char *model;
-                    if (!*(u8 *)(hit + 0x31) || *(short *)(hit + 0x32) <= 0 ||
-                        *(u8 *)(hit + 0x20) == 0xFE || *(u8 *)(hit + 0x20) == 0xFD ||
-                        *(short *)(hit + 0xAA) == 0xC87 || *(short *)(hit + 0xAA) == 0xECC || !component)
-                        continue;
-                    if (*component <= 0.0f && !func_002ABB78(hit))
-                        continue;
-                    model = *(char **)(hit + 0x24);
-                    if (!model || *(short *)(model + 0x46) != 5) {
-                        *(char **)(state + 0x10) = D_L00_001BF218;
-                        break;
+            if (candidate == 0) {
+                int count, i;
+                func_00282D30(&muzzle, &moby->forward, -1.0f);
+                func_00282CC0(&muzzle, &muzzle, &moby->position);
+                func_00282D30(&offset, &moby->right, 0.275f);
+                func_00282CC0(&muzzle, &muzzle, &offset);
+                count = func_00277F48(1.0f, &muzzle, 1, HERO->ptr[0x2290 / 4], 0);
+                if (count != 0) {
+                    for (i = 0; i < count; i++) {
+                        Moby *hit = D_L00_001C3280[i];
+                        float *hp = func_002AB1F0(hit);
+                        if (hit->alive == 0)
+                            continue;
+                        if (hit->health <= 0)
+                            continue;
+                        if (hit == 0)
+                            continue;
+                        if (hit->state == 0xFE)
+                            continue;
+                        if (hit->state == 0xFD)
+                            continue;
+                        if (hit->objectClass == 0xC87)
+                            continue;
+                        if (hit->objectClass == 0xECC)
+                            continue;
+                        if (hp == 0)
+                            continue;
+                        if (!(*hp > 0.0f) && !func_002ABB78(hit))
+                            continue;
+                        if (hit->model == 0 || hit->model->kind != 5) {
+                            candidate = D_L00_001BF200.hit;
+                            vars->target = candidate;
+                            break;
+                        }
                     }
                 }
             }
-            func_002E5CF8(0,0,moby);
-            *(short *)(state + 0x1E) = 15;
+            func_002E5CF8(0, 0, moby);
+            vars->flash = 15;
             func_L00_003A4480(moby);
-            func_L00_003A5370((int)moby);
-            if (!D_0018C0BC || (D_0018C0B4 == 2 && D_0018C2D8 < 0.7f))
-                func_L00_002D2168(0x36,1,10.0f);
+            func_L00_003A5370(moby);
+            if (HERO->i[0x229C / 4] == 0 || (HERO->i[0x2294 / 4] == 2 && HERO->f[0x24B8 / 4] < 0.7f))
+                func_L00_002D2168(0x36, 1, 10.0f);
             else
                 func_L00_002AF568();
-            func_002A7470(moby,2,0,0);
-            *(int *)(state + 0x2C) = func_L00_002D6998(D_L00_00294880);
-            *(float *)state = 1.0f / D_L00_00262570[D_00139583].rate;
-        } else if ((D_00138324 & D_0018B050) || D_L00_001B2864 == 1) {
-            func_002E5CF8(1,0,moby);
+            func_002A7470(moby, 2, 0, 0);
+            vars->sound = func_L00_002D6998(D_00294880);
+            {
+                WeaponEntry *weapon = D_00262570 + D_00139568[0x1B];
+                vars->cooldown = 1.0f / weapon->rate;
+            }
+        } else if ((D_00138180[0x1A4 / 4] & HERO->u[0x1230 / 4]) || D_L00_001B2864 == 1) {
+            func_002E5CF8(1, 0, moby);
             D_L00_001B2864 = 0;
         }
-        if (!((D_00138320 & D_0018B050) && func_L00_002D4040(-1) && D_0018C0D8) && *(int *)(state + 0x2C) >= 0) {
-            func_L00_002D6B70();
-            *(int *)(state + 0x2C) = -1;
+        if (!((D_00138180[0x1A0 / 4] & HERO->u[0x1230 / 4]) && func_L00_002D4040(-1) && HERO->b[0x22B8]) &&
+            vars->sound >= 0) {
+            func_L00_002D6B70(vars->sound);
+            vars->sound = -1;
         }
     }
-    if (*(u8 *)(moby + 0x42) != 2 && *(short *)(state + 0x1E) > 0) {
-        float reciprocal,alpha,width,power;
-        int frames;
-        if (*(short *)(state + 0x1E) < 13) {
-            reciprocal = 1.0f / func_00283CE0(12);
-            frames = *(short *)(state + 0x1E);
+
+    if (moby->animation != 2 && vars->flash > 0) {
+        float alpha, width, power;
+        Vector *off;
+        Vector *pos;
+        if (vars->flash >= 13) {
+            float scale = 1.0f / func_00283CE0(3);
+            alpha = func_00283CE0(15 - vars->flash) * scale;
+            width = func_00283CE0(15 - vars->flash) * (scale * 0.8f);
+            power = func_00283CE0(15 - vars->flash) * (scale * 0.5f);
         } else {
-            reciprocal = 1.0f / func_00283CE0(3);
-            frames = 15 - *(short *)(state + 0x1E);
+            float scale = 1.0f / func_00283CE0(12);
+            alpha = func_00283CE0(vars->flash) * scale;
+            width = func_00283CE0(vars->flash) * (scale * 0.8f);
+            power = func_00283CE0(vars->flash) * (scale * 0.5f);
         }
-        alpha = func_00283CE0(frames) * reciprocal;
-        width = func_00283CE0(frames) * reciprocal * 0.8f;
-        power = func_00283CE0(frames) * reciprocal * 0.5f;
-        if (D_0018C30C == 0)
-            qcopy(offset, D_0018A580);
-        else
-            func_00282D30(offset,moby + 0xD0,-1.0f);
-        func_0029FCC0(moby,0,(char *)muzzle);
-        func_00282CC0(muzzle,muzzle,offset);
-        func_00282D30(lift,D_0018C0B0 + 0xE0,0.3f);
-        func_00282CC0(muzzle,muzzle,lift);
-        if (*(short *)(state + 0x1C) == -1) {
-            *(short *)(state + 0x1C) = func_L00_002FCF18(muzzle,8.0f,0.0f,alpha,width,power);
+        if (HERO->h[0x24EC / 2] != 0) {
+            off = &offset;
+            func_00282D30(off, &moby->forward, -1.0f);
         } else {
-            MuzzleLight *light = &D_L00_001C6F40[*(short *)(state + 0x1C)];
-            qcopy(light->position, muzzle);
-            light->power = power;
-            light->position[3] = 8.0f;
+            off = &offset;
+            qcopy(off, &HERO->q[0x760 / 16]);
+        }
+        func_0029FCC0(moby, 0, &muzzle);
+        pos = &muzzle;
+        func_00282CC0(pos, pos, off);
+        func_00282D30(&lift, HERO->ptr[0x2290 / 4] + 0xE0, 0.3f);
+        func_00282CC0(pos, pos, &lift);
+        if (vars->light == -1) {
+            vars->light = func_L00_002FCF18(pos, 8.0f, 0.0f, alpha, width, power);
+        } else {
+            MuzzleLight *light = &D_L00_001C6F40[vars->light];
+            qcopy(&light->position, pos);
+            light->position.f[3] = 8.0f;
             light->radius = alpha;
             light->spread = width;
+            light->power = power;
         }
-        func_00282978(state + 0x1E);
-    } else if (*(short *)(state + 0x1C) != -1) {
-        func_00291450(*(short *)(state + 0x1C));
-        *(short *)(state + 0x1C) = -1;
-        *(short *)(state + 0x1E) = 0;
+        func_00282978(&vars->flash);
+    } else if (vars->light != -1) {
+        func_00291450(vars->light);
+        vars->light = -1;
+        vars->flash = 0;
     }
-    if (*(u8 *)(moby + 0x43) == 2) {
-        if (*(short *)(state + 0x1C) != -1)
-            func_00291450(*(short *)(state + 0x1C));
-        *(short *)(state + 0x1C) = -1;
-        *(short *)(state + 0x1E) = 0;
+
+    if (moby->nextAnimation == 2) {
+        if (vars->light != -1)
+            func_00291450(vars->light);
+        vars->light = -1;
+        vars->flash = 0;
     }
 }

@@ -22,7 +22,6 @@ INCLUDE_ASM("asm/levels", func_L00_003F8E08);
 
 INCLUDE_ASM("asm/levels", func_L00_003F9040);
 
-INCLUDE_ASM("asm/levels", func_L00_003F9368);
 
 extern void func_31D8A0(void *, float, float);
 extern void func_2E6CF0(void *, void *);
@@ -55,11 +54,8 @@ void func_L00_003FC100(void)
 {
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003FC108);
 
-INCLUDE_ASM("asm/levels", func_L00_003FC228);
 
-INCLUDE_ASM("asm/levels", func_L00_003FC468);
 
 extern char D_L00_001B8DC0[];
 
@@ -111,9 +107,7 @@ void func_L00_003FC820(float *pos)
 
 INCLUDE_ASM("asm/levels", func_L00_003FCA40);
 
-INCLUDE_ASM("asm/levels", func_L00_003FCB70);
 
-INCLUDE_ASM("asm/levels", func_L00_003FCDB0);
 
 INCLUDE_ASM("asm/levels", func_L00_003FD178);
 
@@ -131,7 +125,6 @@ void func_L00_003FD6B0(char *self)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003FD700);
 
 extern void func_0029F338(void *);
 extern int func_002ACBC8(void *, int);
@@ -207,7 +200,6 @@ void func_L00_003FDB20(unsigned char *self)
     *(unsigned short *)(self + 0x96) += 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003FDE48);
 
 extern int func_L00_003FED60(int, int, int);
 
@@ -278,7 +270,6 @@ void func_L00_003FE490(Rac2Native_9cdc323a4d0c2fbd_AnalysisOwner *owner)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003FE4C8);
 
 
 INCLUDE_ASM("asm/levels", func_L00_003FE920);
@@ -287,11 +278,9 @@ INCLUDE_ASM("asm/levels", func_L00_003FEAC8);
 
 INCLUDE_ASM("asm/levels", func_L00_003FEBA0);
 
-INCLUDE_ASM("asm/levels", func_L00_003FED60);
 
 INCLUDE_ASM("asm/levels", func_L00_003FEEA0);
 
-INCLUDE_ASM("asm/levels", func_L00_003FF530);
 
 /* takes the float array at +104 and writes four values returned by a call with argument 255, then four float constants (-1.0, -2.25, 1.25, 2.5) at +16..+28, a descending count 255/191/127/63 into the ints at +44..+32 and 2.5/3.0 pairs at +48..+60 */
 void func_L00_003FF7B8(char *self)
@@ -330,4 +319,3 @@ void func_L00_003FF7B8(char *self)
     p[14] = 3.0000000000000000000000e+00f;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003FF890);

@@ -1,14 +1,18 @@
-/* Retained manual C reconstruction; not linked and not matching.
- * Profile: -O2 -G8 -ffunction-sections
- * Local tools/check.py measurements: us: 1040 compiled bytes, 0/1 placements, exit 1; us2: 1040 compiled bytes, 0/1 placements, exit 1; pal: catalogue absent (exit 1).
- * Retail extent: 1040 bytes. No exact-C credit and no full build performed.
- * Residual: Equal 1040-byte extent, 0x50 frame; first difference +0x8 in saved registers. State pointer allocation, copied-header count-down loop, repeated object-base loads and phase-loop scheduling differ. Qcopy/pointer-local trial grew to 1076 bytes.
- * Reopen: Reopen after a measured non-countdown copy-loop or state-pointer allocation hypothesis; preserve the 16-byte vectors and all state transitions.
- * Arrays with unknown total extent remain incomplete. Pointer-offset views do
- * not establish the full sizes or ownership of game records.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 1048 bytes; retail 1040 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: Shared qcopy and an increasing source/destination cursor preserve complete 16-byte
+ * header rows and all animation transitions. Both indexed and cursor helper forms give 1048
+ * bytes against 1040. State-pointer allocation, row-copy loop setup and repeated object-
+ * base/phase scheduling still differ.
+ * Reopen: A genuine source lifetime or independently measured copy-loop witness; do not repeat
+ * the tied indexed/cursor helper forms.
  */
-/* Animates the selected polygon and its two cycling texture phases. */
-typedef unsigned char u8;
+
+#include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 #define S16(p,o) (*(short *)((p)+(o)))
 #define U16(p,o) (*(unsigned short *)((p)+(o)))
@@ -40,7 +44,8 @@ void func_L11_004461E8(u8 *object)
         dst=D_L11_001FF580[I32(state,0x1c8)];
         src=D_L11_001FF580[I32(state,0x1cc)];
         count=I32(dst,0);
-        for(i=0;i<count;i++) ((Quad *)(dst+16))[i]=((Quad *)(src+16))[i];
+        dst+=16; src+=16;
+        for(i=0;i<count;i++,dst+=16,src+=16) qcopy(dst,src);
         U16(D_L11_001B359C+(I32(state,0x1b8)<<8),0x34)&=0xfffe;
         D_L11_001B359C[(I32(state,0x1b8)<<8)+0x31]=1;
         U16(D_L11_001B359C+(I32(state,0x1b8)<<8),0x32)=255;

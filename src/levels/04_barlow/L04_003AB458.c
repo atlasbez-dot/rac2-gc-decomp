@@ -22,7 +22,7 @@ typedef struct L04_003E5318_BUF {
     int z;
 } L04_003E5318_BUF;
 
-INCLUDE_ASM("asm/levels", func_L04_003E5298);
+/* func_L04_003E5298 is defined in L02_003CE9A8-g8.c. */
 
 void func_L04_003E5318(char *a0)
 {
@@ -75,7 +75,53 @@ void func_L04_003E7FE8(void)
     func_L04_003A21F8(D_L04_002AF6C0, 10);
 }
 
-INCLUDE_ASM("asm/levels", func_L04_003AB458);
+typedef unsigned char u8;
+typedef int s32;
+typedef float f32;
+extern u8 D_00188660[];
+extern char D_00189EA0[];
+extern s32 func_00342228(void *, s32);
+extern s32 func_00382FF0(s32, s32, void *);
+extern s32 func_0033D168(s32, s32);
+extern void func_00382AF8(s32);
+extern void func_003317E8(void *);
+extern f32 func_0030EFA8(void *, void *);
+
+void func_L04_003AB458(u8 *a0)
+{
+    u8 *s0 = *(u8 **)(a0 + 0x68);
+
+    if (func_00342228(D_00189EA0, *(s32 *)s0) != 0) {
+        u8 *p = D_00188660 + *(s32 *)(s0 + 8) * 0x70;
+        if (*(u8 **)(p + 0x88) != a0 || *(u8 *)(p + 0x74) == 0) {
+            *(s32 *)(s0 + 8) = func_00382FF0(0x17, 4, a0);
+        }
+    }
+    if (func_0033D168(*(s32 *)(s0 + 4), -1) < 7) {
+        s32 id = *(s32 *)(s0 + 8);
+        if (id != -1) {
+            u8 *p = D_00188660 + id * 0x70;
+            if (*(u8 **)(p + 0x88) == a0 && *(u8 *)(p + 0x74) != 0)
+                func_00382AF8(id);
+        }
+        *(s32 *)(s0 + 8) = -1;
+        func_003317E8(a0);
+    } else {
+        u8 *p = D_00188660 + *(s32 *)(s0 + 8) * 0x70;
+        if (*(u8 **)(p + 0x88) == a0 && *(u8 *)(p + 0x74) != 0) {
+            if (func_0030EFA8(a0 + 0x10, D_00189EA0) > 50.0f) {
+                s32 id = *(s32 *)(s0 + 8);
+                if (id != -1) {
+                    u8 *q = D_00188660 + id * 0x70;
+                    if (*(u8 **)(q + 0x88) == a0 && *(u8 *)(q + 0x74) != 0)
+                        func_00382AF8(id);
+                }
+                *(s32 *)(s0 + 8) = -1;
+            }
+        }
+    }
+}
+
 
 INCLUDE_ASM("asm/levels", func_L04_003B8B60);
 
@@ -93,13 +139,8 @@ void func_L04_003E22B0(char *a0, int a1, int a2, int a3, int a4)
 
 INCLUDE_ASM("asm/levels", func_L04_003E2338);
 
-INCLUDE_ASM("asm/levels", func_L04_003E2438);
 
 INCLUDE_ASM("asm/levels", func_L04_003E4C00);
-
-INCLUDE_ASM("asm/levels", func_L04_003E53D0);
-
-INCLUDE_ASM("asm/levels", func_L04_003E55E0);
 
 INCLUDE_ASM("asm/levels", func_L04_003E5B10);
 

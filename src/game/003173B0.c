@@ -1,4 +1,5 @@
 #include "include_asm.h"
+#include "common.h"
 
 extern char F669d6320_D_001BAFC0[];
 
@@ -109,6 +110,8 @@ typedef struct {
 
 extern State_001b5200 D_001B5200;
 
+extern void func_002A91F0(void *, float *);
+
 INCLUDE_ASM("asm/game", func_003173B0);
 
 INCLUDE_ASM("asm/game", func_00317D78);
@@ -174,7 +177,6 @@ void func_00319FB8(char *object)
 
 INCLUDE_ASM("asm/game", func_0031A098);
 
-INCLUDE_ASM("asm/game", func_0031A158);
 
 extern void func_0031A098(void *record);
 extern long long func_0027C878_1(int id);
@@ -236,9 +238,37 @@ int func_0031A708(unsigned char *object) {
     return object[0x21] != 255;
 }
 
-INCLUDE_ASM("asm/game", func_0031A718);
+typedef union { u8 b[0x2600]; float v[0x980][1]; } Hero_0031A718;
 
-INCLUDE_ASM("asm/game", func_0031A848);
+extern u8 D_00189E20[];
+extern short *D_001EE5A0[];
+extern u8 *D_001B1B5C MACRO_ADDR;
+extern float func_00282E48(void *, void *);
+
+/* Picks the nearest live moby on the object's list (skipping 0x9B4 ones) that is closer than
+   the hero, and records it as the object's target. */
+void func_0031A718(u8 *self)
+{
+    u8 *vars = *(u8 **)(self + 0x68);
+    short *list;
+    u8 *moby;
+    float best;
+
+    best = func_00282E48(self + 0x10, &((Hero_0031A718 *)D_00189E20)->b[0x80]);
+    if (self[0x21] == 0xFF && D_001EE5A0[self[0x21]] == 0 && *(int *)(vars + 0x350) == 0)
+        return;
+    list = D_001EE5A0[self[0x21]];
+    do {
+        moby = D_001B1B5C + ((*list & 0x7FFF) << 8);
+        if (*(s8 *)(moby + 0x20) >= 0 && *(s16 *)(moby + 0xAA) != 0x9B4) {
+            if (func_00282E48(self + 0x10, moby + 0x10) < best) {
+                *(u8 **)(vars + 0x30) = moby;
+                best = func_00282E48(self + 0x10, moby + 0x10);
+            }
+        }
+    } while (*list++ >= 0);
+}
+
 
 void func_0031A998(char *self, char *p1, int p2)
 {
@@ -276,9 +306,8 @@ unsigned int func_0031AB08(unsigned int param_1)
     return result;
 }
 
-INCLUDE_ASM("asm/game", func_0031AB18);
+/* func_0031AB18 is defined in 0031AB18-zero-ti.c. */
 
-INCLUDE_ASM("asm/game", func_0031ABE0);
 
 INCLUDE_ASM("asm/game", func_0031BCC8);
 
@@ -337,7 +366,6 @@ void func_0031C8E0(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/game", func_0031C970);
 
 INCLUDE_ASM("asm/game", func_0031CB78);
 
@@ -345,7 +373,18 @@ INCLUDE_ASM("asm/game", func_0031CDF8);
 
 INCLUDE_ASM("asm/game", func_0031D070);
 
-INCLUDE_ASM("asm/game", func_0031D268);
+void func_0031D268(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    *(int *)(state + 0x288) = 0;
+    *(int *)(state + 0x284) = (*(int *)(state + 0x284) + 1) % 4;
+    if (*(int *)(state + 0x280) < 4)
+        (*(int *)(state + 0x280))++;
+    func_002A91F0(state + (*(int *)(state + 0x284) * 16 + 0x4A0), (float *)(arg0 + 0xF0));
+    qcopy(state + *(int *)(state + 0x284) * 16 + 0x3A0,
+          (char *)(*(int *)(state + 0x278) + 0x10));
+}
+
 
 /* func_0031D308 is in the -G8 sibling. */
 
@@ -363,7 +402,7 @@ INCLUDE_ASM("asm/game", func_0031DEE8);
 INCLUDE_ASM("asm/game", func_0031E3A8);
 
 
-INCLUDE_ASM("asm/game", func_0031E560);
+/* func_0031E560 is defined in 0031E560-dbg.c (-g). */
 
 INCLUDE_ASM("asm/game", func_0031E6D8);
 
@@ -499,9 +538,8 @@ void func_0031EB00(char *position, int color, float scale, char *resource, float
     func_00280B90(work, work + 0x90, 0);
 }
 
-INCLUDE_ASM("asm/game", func_0031EC68);
 
-INCLUDE_ASM("asm/game", func_0031EFC8);
+/* func_0031EFC8 uses the profile in 003173B0-qcopy.c. */
 
 void func_0031F1A8(Vec16_Fc936841d *object, int index)
 {

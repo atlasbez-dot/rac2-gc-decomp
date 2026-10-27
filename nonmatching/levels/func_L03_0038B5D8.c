@@ -1,10 +1,9 @@
-/* Reconstructed 2026-10-23; -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * us: 0/2, us2: 0/2, pal: 0/2.
- * 1664/1768 bytes, expected 0x100 frame.
- * Strand-pool copies, inner-loop address accumulation and FP allocation differ.
- * Single-pool and independently referenced input/output pool views gave 1668 and 1664 bytes.
- * Exact phase2 constant corrected to 0xBFC25C21.
- * Reopen with measured pool/strand lifetime structure.
+/* Nonmatching C: Update four strands, apply attraction and procedural motion, then write the output strand pool.
+ * Tested profile: -O2 -G0 -ffunction-sections.
+ * Measured US size: 1664 bytes; retail: 1768 bytes.
+ * Placement checks: US, US2 and PAL: 0/2 each.
+ * Remaining: Pool and strand address lifetimes, loop accumulation and floating-point allocation still differ.
+ * Reopen with independent pool-lifetime evidence across the strand loops; retain complete 16-byte vectors and the measured 256-byte row stride.
  */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -13,7 +12,7 @@ extern RopeVector D_L03_00238040[][16];
 extern RopeVector D_L03_00238440[][16];
 extern RopeVector *D_L03_001FE700[];
 extern RopeVector D_L03_00237F40[];
-extern float D_00189EA0[4];
+extern float D_00189EA0[];
 extern float func_00283B98(float, float);
 extern void func_00282CF0(void *, void *, void *);
 extern float func_00282DF0(void *);
@@ -25,7 +24,7 @@ extern float func_00283198(float);
 extern float func_00283180(float);
 extern float func_00283248(float, float);
 
-/* Builds four vertex strands and applies shared displacement and phase offsets. */
+
 void func_L03_0038B5D8(u8 *object)
 {
     RopeVector toward, relative, blended, tangent, radial, jitter;
@@ -45,7 +44,7 @@ void func_L03_0038B5D8(u8 *object)
             RopeVector *source = D_L03_001FE700[group] + 1;
             RopeVector *destination = D_L03_00238040[*(int *)(state + 0xDC) + row];
             for (column = 0; column < *(int *)(state + 0x38); column++)
-                destination[column].quad = source[column].quad;
+                qcopy(&destination[column], &source[column]);
             if (flags & 8) {
                 float distance, strength;
                 func_00282CF0(&toward, D_00189EA0, state + 0xE0);
@@ -56,7 +55,7 @@ void func_L03_0038B5D8(u8 *object)
                     for (column = 0; column < *(int *)(state + 0x38); column++) {
                         RopeVector *vertex = &D_L03_00238040[*(int *)(state + 0xDC) + row][column];
                         float length, amount;
-                        relative.quad = vertex->quad;
+                        qcopy(&relative, vertex);
                         func_00282CF0(&relative, &relative, state + 0xE0);
                         length = func_00282DF0(&relative);
                         if (length > 1.1f)
@@ -96,7 +95,7 @@ void func_L03_0038B5D8(u8 *object)
                 RopeVector *vertex;
                 func_00282F20(&radial, &tangent, (float)column / ((float)*(int *)(state + 0x38) - 0.5f));
                 vertex = &D_L03_00238040[*(int *)(state + 0xDC) + row][column];
-                vertex->quad = radial.quad;
+                qcopy(vertex, &radial);
                 func_00282CC0(vertex, vertex, state + 0xE0);
             }
         }
@@ -126,7 +125,7 @@ void func_L03_0038B5D8(u8 *object)
             int base = *(int *)(state + 0xDC) + row;
             RopeVector *original = &D_L03_00238040[base][column];
             RopeVector *output = &D_L03_00238440[base][column];
-            output->quad = original->quad;
+            qcopy(output, original);
             if (column != 0 && column != *(int *)(state + 0x38) - 1) {
                 if (!(*(int *)(state + 0x3C) & 0x40)) {
                     func_00282CC0(output, output, &jitter);

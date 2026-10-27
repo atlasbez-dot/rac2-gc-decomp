@@ -1,50 +1,27 @@
-/* US, US2 and PAL, game -O2/-G8: 516 bytes versus 508; 0/27 placements
-   in each release. Reconstructed from verified retail assembly. The initial
-   shared-base form was 492 bytes; direct canonical resident references at the
-   tail produced this 516-byte form. -mno-split-addresses did not change its size.
-   Remaining differences include saved-register allocation, the repeated table
-   count load, and mixed GP/absolute accesses to the same mode word. This attempt
-   preserves one data identity; the historical suggestion below to introduce an
-   absolute alias is not an allowed remedy. Reopen with a measured single-symbol
-   mixed-addressing and lifetime idiom. No linked build or functional test run. */
-
-/* Historical screening, superseded by the measured C attempt above. */
-/* Not attempted - body read in full, no C written: a loop over seven slots, 508 bytes,
-   27 places.
-
-   The body: the state block's first object gets its halfword flag 0x34 set; the call
-   to func_L00_002D6418 runs only on the first turn of the loop; the word at
-   $gp-0x60F0 (0x001A8F00, the same word the `lui`/`addiu` pair loads a few words
-   later) decides the branch; the two guards on the shorts at 0x001BCAC0+0x44 and at
-   0x00152C00+0x20 pick the path; a walk over the table at 0x001BCAC0+0x18C keeps the
-   last entry's flag with a `movz`; and the three pointers at the base of the state
-   (+0x1220, +0x1224, +0x1228) each get their halfword flag 0x34 set when they are
-   not null.
-
-   The word at +0xF8 was rechecked during integration: it has rs=$s0, rt=$v0 and
-   rd=$v1. R5900 mult supports a GPR destination, also described by the qualified
-   GNU opcode table's `d,s,t` form with WR_d. Thus the following use of $v1 does not
-   require mfhi/mflo and does not prove an unmatchable high-half multiply. The
-   earlier two-operand disassembly omitted rd. No C candidate has been tested
-   here, and this record does not establish a compiler limitation.
-   The loop's other shapes (the `bnel`/`bnez`
-   chain, the `sltiu` range test on the count, the `movz` of the walk) are ordinary
-   C, and the word at $gp-0x60F0 needs the two-name pattern (an `sda` name for the
-   $gp form and an absolute alias for the macro form) in a `-g8` unit. */
-
+/* Complete reconstruction; not linked. Profile: -O2 -G8 -ffunction-sections.
+ * 26 October 2026 (M10): 496/508 bytes. D_L00_001A8F00 is a plain sized scalar (retail:  in
+ * the delay slot, lui/lw elsewhere); the hero tail goes through the Hero union view (retail's
+ * la + offset forms); the idle scan is a counted for loop (retail's blez entry test with found = 0
+ * in the slot). Left: retail reads the 0x44 count twice, from two callee-saved copies of the table
+ * address ( test,  loop: likely two hoisted invariants), keeps only 2 in , and the
+ * prologue order follows from that. The earlier do/while form was 504 bytes.
+ */
 #include "common.h"
+typedef unsigned int TI128 __attribute__((mode(TI)));
+typedef union { u8 b[0x2600]; s16 h[0x1300]; s32 i[0x980]; u32 u[0x980]; f32 f[0x980]; u8 *ptr[0x980]; TI128 q[0x260]; } Hero;
+#define H ((Hero *)D_00189E20)
 
 extern u8 D_00189E20[];
 extern u8 D_00152C00[];
 extern u8 D_L00_001BCAC0[];
-extern s32 D_L00_001A8F00 __attribute__((sda));
+extern s32 D_L00_001A8F00;
 extern s32 func_L00_002D6418(void);
 
 void func_L00_002D2E68(void)
 {
     u8 *base;
-    u8 *table;
     u8 *guard;
+    u8 *table;
     u8 *slot;
     u8 *obj;
     u8 **entries;
@@ -62,15 +39,12 @@ void func_L00_002D2E68(void)
         if (i == 0 && func_L00_002D6418())
             continue;
         mode = D_L00_001A8F00;
-        if (mode == 2 && *(s16 *)(table + 0x44) > 0) {
+        if (mode == 2) {
             found = 0;
-            count = *(s16 *)(table + 0x44);
-            entries = (u8 **)(table + 0x18C);
-            do {
-                if (*(s16 *)(*entries + 0xAA) == 0)
+            for (count = 0; count < *(s16 *)(table + 0x44); count++) {
+                if (*(s16 *)(((u8 **)(table + 0x18C))[count] + 0xAA) == 0)
                     found = 1;
-                entries++;
-            } while (--count != 0);
+            }
             if (found)
                 continue;
         }
@@ -85,14 +59,14 @@ void func_L00_002D2E68(void)
         obj = *(u8 **)(slot + 0x1228);
         if (obj) *(u16 *)(obj + 0x34) |= 1;
     }
-    obj = *(u8 **)(D_00189E20 + 0x131C);
+    obj = H->ptr[0x131C / 4];
     if (obj) *(u16 *)(obj + 0x34) |= 1;
-    if (D_00189E20[0x22B4] == 1) {
-        obj = *(u8 **)(D_00189E20 + 0x1864);
+    if (H->b[0x22B4] == 1) {
+        obj = H->ptr[0x1864 / 4];
         if (obj) *(u16 *)(obj + 0x34) |= 1;
     }
-    if (*(s32 *)(D_00189E20 + 0x1248) == 10) {
-        obj = *(u8 **)(D_00189E20 + 0x1220);
+    if (H->i[0x1248 / 4] == 10) {
+        obj = H->ptr[0x1220 / 4];
         if (obj && D_L00_001A8F00 == 0 && obj[0x20])
             *(u16 *)(obj + 0x34) &= ~0x41;
     }

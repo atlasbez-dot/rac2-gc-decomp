@@ -60,7 +60,7 @@ void func_0033C468(u8_Ff4eb83c9 *self, void *arg) {
     *(s32_Ff4eb83c9 *)(self + 680) = 0;
     func_0033C590(self, 0);
 }
-
+/* Near miss: nonmatching/game/func_0033C590.c - one redundant addiu of the
+   modulo constant 3 at the mode==2 case. */
 INCLUDE_ASM("asm/game", func_0033C590);
-
 INCLUDE_ASM("asm/game", func_0033C738);

@@ -1,40 +1,19 @@
-/* func_L23_0041B9F0 (level 23, 1148 bytes) -- NEAR MISS, not integrated.
-   state: 1140 bytes against retail's 1148 (285 instructions against 287); tools/check.py: 0 of 1
-   places match ("1140 bytes, expected 1148"); 22 of 287 words differ once the bodies are aligned.
-   built as the last function of L23_00416388-g8.c (-G8: D_L23_001B1484, the two reach constants
-   and D_L23_001B1694 are $gp loads); it uses that unit's own declarations of D_L23_001B1484,
-   D_L23_001B1694, D_L23_001B36E0 (a plain small extern: its address comes out as retail's bare
-   lui/addiu pair), func_00282CC0, func_00282D30, func_002A7878 and func_0029F338, repeated below.
-   matches: the 0xE0 frame (the vector at sp+0, the particle velocity at sp+0x10, the joint matrix
-   at sp+0x20), the prologue, both arms of the shield test, the hit filter (its two halfword loads
-   and the f604 load hoisted by PRE come out as retail's lh/lhu/lw), the four-particle loop
-   (retail's invariants, the bnel store of the callback, func_00273730 takes its two floats before
-   the last int), the damage and death sequence, the generator loop with D_L23_001B13CC through
-   $at (sda, sized past the $gp limit), and the held-object tail. Measured: the moby and the
-   state as unsigned char (a char 0xFF store is CSE'd into the register that holds the -1 of the
-   0x60C test), block-scoped temporaries in the generator loop (one variable for both float reads
-   lands the threshold in $f0), the damage subtraction before the timer store, and 0.017453294f
-   (0x3C8EFA36, one ulp above pi/180).
-   what still differs:
-   - the three 16-byte copies to D_L23_001B36E0: retail emits `lui $v1; addiu $v1; lq $v0,0($sp);
-     sq $v0,0($v1)` back to back; this cc1 schedules the lq first (latency 2) and sinks the sq
-     past the next call's arguments (in the generator arm past the loop set-up, so the loop
-     pointer and counter take $a0/$a1 instead of retail's $v1/$a0). The address form itself is
-     right; the order is the known wall of these copies (they behave as one unit in retail).
-   - the PRE placement of st+0x140: retail computes it in the first block (after func_002A9640)
-     and fills the `beqz $s3` slot with the tail's `daddu $a1,$s4,$zero`; this cc1 splits the
-     critical edge into the tail (the tail is reached only by jumps) and inserts the computation
-     there, so reorg moves it into that slot. Retail is one instruction longer here, and the
-     particle loop then needs retail's alignment nop: that is the 8 bytes. Hypothesis: retail's
-     GCSE does not split critical edges (gcse.c's compute_preds_succs(..., 1) does here); no
-     source shape found that gives the tail a fall-through predecessor with retail's layout.
-   - knock-on: the copy of moby+0x10 for the loop lands right after the first call instead of in
-     the func_002A9640 delay slot.
-   tried: st+0x140 in a variable (spilled, 0xF0 frame), the two hit tests as sibling ifs (same
-   code), a variable for the loop's position argument (77 words off), five orders/spellings of
-   the damage subtraction, func_00273730 with its floats last (the $f12 move then takes the
-   call's delay slot instead of retail's `addiu $t3,$zero,0xFF`). */
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 1140 bytes; retail 1148 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: Shared qcopy preserves all three complete vector snapshots, but the critical-edge
+ * placement of state+0x140, loop alignment and position lifetime remain eight bytes short. The
+ * destination is now a full 16-byte vector, and the scalar threshold uses NOT_SDA rather than a
+ * fabricated three-element array to avoid GP addressing. The callback symbol is declared as an
+ * actual function.
+ * Reopen: Independent tail fall-through or state-field lifetime evidence; preserve the scalar
+ * threshold and complete vector destination.
+ */
 
+#include "common.h"
 typedef int TI16 __attribute__((mode(TI)));
 
 /* from the unit */
@@ -42,7 +21,7 @@ extern char *D_L23_001B1484 __attribute__((sda));
 
 extern int D_L23_001B1694 __attribute__((sda));
 
-extern int D_L23_001B36E0;
+extern TI16 D_L23_001B36E0;
 
 extern void func_00282CC0(char *, char *, char *);
 
@@ -58,10 +37,10 @@ extern float D_L23_001B16BC __attribute__((sda));
 
 extern float D_L23_001B16C0 __attribute__((sda));
 
-/* read as a bare symbol through $at: sized past the $gp limit */
-extern float D_L23_001B13CC[3] __attribute__((sda));
+/* Retail reads this scalar through an absolute address. */
+extern float D_L23_001B13CC NOT_SDA;
 
-extern int D_0018C0B0 __attribute__((nosda));
+extern int D_0018C0B0 NOT_SDA;
 
 /* the hit-delay timer */
 extern int D_L23_001B3714;
@@ -108,7 +87,7 @@ extern float func_00283198(float);
 
 extern char *func_00273730(void *, int, int, int, void *, void *, void *, float, float, int);
 
-extern void func_00310C88();
+extern void func_00310C88(unsigned char *);
 
 extern void func_L23_0041C578(char *);
 
@@ -142,7 +121,7 @@ void func_L23_0041B9F0(unsigned char *moby) {
     if (*(int *)(st + 0x60C) == -1 && *(char **)(st + 0x610) == 0) {
         func_00282D30(tmp, moby + 0xE0, D_L23_001B16BC);
         func_00282CC0(tmp, tmp, moby + 0x10);
-        *(TI16 *)&D_L23_001B36E0 = *(TI16 *)tmp;
+        qcopy(&D_L23_001B36E0 ,tmp);
         hit = func_002A9640(moby, 0x30000, 0);
         moby[0xA8] = 0xFF;
         func_00282978(st + 0x26);
@@ -202,21 +181,21 @@ void func_L23_0041B9F0(unsigned char *moby) {
             func_0029FC20(moby, *(int *)(st + 0x60C) + 1, mtx);
             func_00282D30(tmp, (char *)(mtx + 4), D_L23_001B16C0);
             func_00282CC0(tmp, tmp, moby + 0x10);
-            *(TI16 *)&D_L23_001B36E0 = *(TI16 *)tmp;
+            qcopy(&D_L23_001B36E0 ,tmp);
             for (k = 0; k < 5; k++) {
                 char *gen = ((char **)(st + 0x358))[k];
 
                 if (gen != 0) {
                     float v = *(float *)(*(char **)(gen + 0x68) + 0x20);
 
-                    if (D_L23_001B13CC[0] < v)
+                    if (D_L23_001B13CC < v)
                         total += v;
                 }
             }
         } else {
             func_00282D30(tmp, moby + 0xE0, D_L23_001B16BC);
             func_00282CC0(tmp, tmp, moby + 0x10);
-            *(TI16 *)&D_L23_001B36E0 = *(TI16 *)tmp;
+            qcopy(&D_L23_001B36E0 ,tmp);
         }
         held = *(char **)(st + 0x610);
         if (held != 0) {

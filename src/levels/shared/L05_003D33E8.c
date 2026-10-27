@@ -35,7 +35,6 @@ extern void ref_L05_00424C88_01(void *, void *);
 
 INCLUDE_ASM("asm/levels", func_L05_003D33E8);
 
-INCLUDE_ASM("asm/levels", func_L05_003FE430);
 
 /* shared native body of family 5a97ab89858c */
 void func_L05_00416630(char *p)
@@ -88,7 +87,6 @@ void func_L05_00417448(char *object)
     *(float *)(object + 0x2C) = 0.02f;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_00417550);
 
 INCLUDE_ASM("asm/levels", func_L05_00417D48);
 
@@ -225,11 +223,9 @@ void func_L05_0041C410(char *object)
     *(float *)(state + 0x38) = 3.7f;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0041C4E8);
 
 INCLUDE_ASM("asm/levels", func_L05_0041C708);
 
-INCLUDE_ASM("asm/levels", func_L05_0041C7E8);
 
 /* func_L05_0041D498 is defined in L05_003D33E8-g8.c (this unit has no $gp access for it). */
 
@@ -264,7 +260,6 @@ void func_L05_0041D728(char *object)
     *(float *)(state + 0x38) = 3.5f;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0041D800);
 
 INCLUDE_ASM("asm/levels", func_L05_0041ED18);
 
@@ -311,7 +306,6 @@ void func_L05_00424C88(char *object)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L05_00424CF0);
 
 INCLUDE_ASM("asm/levels", func_L05_00425058);
 
@@ -418,7 +412,6 @@ void func_L05_00426D98(char *object)
     *(float *)(state + 0x38) = 3.2f;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_00426E70);
 
 INCLUDE_ASM("asm/levels", func_L05_00427090);
 

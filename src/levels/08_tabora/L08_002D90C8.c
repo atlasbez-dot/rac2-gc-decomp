@@ -34,8 +34,6 @@ extern void func_L04_003A02A0(void *, int);
 
 extern void func_0029FCC0(void *, int, void *);
 
-INCLUDE_ASM("asm/levels", func_L08_002D90C8);
-
 INCLUDE_ASM("asm/levels", func_L08_00308888);
 
 void func_L08_00329EC0(float value, float *object) {
@@ -150,13 +148,11 @@ void func_L08_003D0040(void *object) {
 
 INCLUDE_ASM("asm/levels", func_L08_003D00C8);
 
-INCLUDE_ASM("asm/levels", func_L08_003D0508);
+/* func_L08_003D0508 is defined in L08_003D0508-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L08_003D2F50);
 
-INCLUDE_ASM("asm/levels", func_L08_003D3D80);
 
-INCLUDE_ASM("asm/levels", func_L08_003D3E00);
 
 INCLUDE_ASM("asm/levels", func_L08_003D3EF8);
 
@@ -202,8 +198,6 @@ void func_L08_003D7E68(void *arg0) {
     } while (i >= 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L08_003D7FB8);
 
-INCLUDE_ASM("asm/levels", func_L08_003D8290);
+/* func_L08_003D8290 is defined in L08_003D8290-qcopy.c. */
 
-INCLUDE_ASM("asm/levels", func_L08_003D82F0);

@@ -21,7 +21,6 @@ typedef struct {
     s32 extra;
 } PackedHeaderCountView;
 
-INCLUDE_ASM("asm/levels", func_L04_002CC748);
 
 typedef struct {
     u8 pad00[0x7A8];
@@ -195,9 +194,6 @@ INCLUDE_ASM("asm/levels", func_L04_0032F62C);
 
 INCLUDE_ASM("asm/levels", func_L04_0032F994);
 
-INCLUDE_ASM("asm/levels", func_L04_0033C420);
-
-INCLUDE_ASM("asm/levels", func_L04_0033CB08);
 
 /* sched1 hoists the last statement of */
 void func_L04_0033CB88(char *p)
@@ -253,8 +249,8 @@ extern void func_00282DD8(void *dst, void *a, void *b);
 extern void func_00283430(void *dst, void *src);
 extern void func_00283788(void *a, void *b, void *c);
 extern void func_002830C0(void *a, void *b, void *c);
-extern f32 func_002AA898(f32 *position, f32 *velocity, s32 direction, f32 target,
-                         f32 acceleration, f32 damping, f32 limit);
+extern f32 func_002AA898(f32 *position, f32 target, f32 *velocity,
+                         f32 acceleration, f32 damping, f32 limit, s32 direction);
 extern void func_002AB6D8(f32 *src, f32 *out);
 
 /* Copies the caller's matrix into a local one, takes the two aim angles off
@@ -298,7 +294,7 @@ void func_L04_00347AB8(void *a0, void *a1, void *a2, void *a3, f32 f1, f32 f2, f
         ang = 0.0f;
         d = 0.0f;
     }
-    func_002AA898(&pos, (f32 *)a2, 0, base, f1, f2, f3);
+    func_002AA898(&pos, base, (f32 *)a2, f1, f2, f3, 0);
     vec[0] = 0.0f;
     vec[1] = 0.0f;
     vec[2] = pos;
@@ -320,7 +316,6 @@ INCLUDE_ASM("asm/levels", func_L04_003524D0);
 
 INCLUDE_ASM("asm/levels", func_L04_00358868);
 
-INCLUDE_ASM("asm/levels", func_L04_00358AE8);
 
 INCLUDE_ASM("asm/levels", func_L04_0035F3E0);
 
@@ -375,7 +370,44 @@ void *func_L04_00362940(void *a0, void *a1, u32 a2, f32 f3) {
     return (u32)p;
 }
 
-INCLUDE_ASM("asm/levels", func_L04_00362A50);
+typedef int TI128 __attribute__((mode(TI)));
+typedef union { TI128 word; float values[4]; } Vec4;
+extern int func_00282978_2a50(void *);
+extern void func_002B9180(void *);
+extern void func_00282CC0(void *, void *, void *);
+extern float func_00282DF0(void *);
+extern void func_00282F20_2a50(void *, void *, float);
+extern void func_00282CF0_2a50(void *, void *, void *);
+extern float func_00283CE0(int);
+extern int func_00283CF0_2a50(float);
+
+/* Same body as func_002C7620, with this function's own callees. */
+void func_L04_00362A50(char *self) {
+    Vec4 buf, offset;
+    char *s0;
+    char *s2 = self + 0x30;
+    float t;
+    int color;
+
+    if (func_00282978_2a50(self + 0xA) != 0) {
+        func_002B9180(self);
+        return;
+    }
+    s0 = self + 0x10;
+    buf.word = *(TI128 *)s0;
+    func_00282CC0(s0, s0, s2);
+    *(float *)(s2 + 8) = *(float *)(s2 + 8) - *(float *)(s2 + 0xC);
+    t = func_00282DF0(s2);
+    func_00282F20_2a50(&offset, s2, t * 0.4f);
+    func_00282CF0_2a50(self + 0x20, s0, &offset);
+    *(float *)(self + 0x2C) = 1.0f;
+    if (*(short *)(self + 0xA) < *(unsigned char *)(self + 8)) {
+        t = func_00283CE0(*(short *)(self + 0xA)) / func_00283CE0(*(unsigned char *)(self + 8));
+        color = (func_00283CF0_2a50(t * 127.0f) << 24) | 0x00FFFFFF;
+        *(int *)(self + 0xC) = color;
+        *(int *)(self + 4) = color;
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L04_00363690);
 
@@ -537,8 +569,6 @@ s32 func_L04_003A1540(const PackedHeaderCountView *header) {
     return ((total + 15) / 16) * 4;
 }
 
-INCLUDE_ASM("asm/levels", func_L04_003A1578);
-
 INCLUDE_ASM("asm/levels", func_L04_003A15C0);
 
 INCLUDE_ASM("asm/levels", func_L04_003A1868);
@@ -554,8 +584,6 @@ void func_L04_003A1A48(u8 *dst, u16 *src, s32 count) {
         count--;
     } while (count != 0);
 }
-
-INCLUDE_ASM("asm/levels", func_L04_003A1A78);
 
 INCLUDE_ASM("asm/levels", func_L04_003A1C98);
 
@@ -593,15 +621,65 @@ INCLUDE_ASM("asm/levels", func_L04_003C3BA0);
 
 INCLUDE_ASM("asm/levels", func_L04_003C4050);
 
-INCLUDE_ASM("asm/levels", func_L04_003C4858);
-
-/* A sixteen-byte record per spawn slot: three floats the level fills in. */
+/* Initialises particle i of this emitter: a random unit-cube direction, a random
+   speed, size and lifetime from the emitter's three ranges, a zero age, the current
+   colour, cleared flags and a start delay staggered by the particle's index. */
+typedef struct {
+    short first;
+    u8 pad2[6];
+    float life_min;
+    float life_max;
+    float speed_min;
+    float speed_max;
+    float size_min;
+    float size_max;
+} ParticleRanges3C4858;
 typedef struct {
     f32 x;
     f32 y;
     f32 z;
     f32 w;
 } L04SpawnRecord;
+
+extern L04SpawnRecord D_L04_0023BDD0[];
+extern f32 D_L04_0023CA50[];
+extern f32 D_L04_0023CD70[];
+extern f32 D_L04_0023D220[];
+extern f32 D_L04_0023D540[];
+extern u8 D_L04_0023D158[];
+extern u16 D_L04_0023D860[];
+extern u16 D_L04_0023D9F0[];
+extern u16 D_L04_0023DB80[];
+#ifndef MACRO_ADDR
+#define MACRO_ADDR __attribute__((section(".sdata")))
+#endif
+extern s32 D_L04_001B2E70 MACRO_ADDR;
+extern u16 D_L04_001B2E74 MACRO_ADDR;
+extern f32 func_002A78D8(f32 a0, f32 a1);
+extern f32 func_002A7878(f32 a0, f32 a1);
+
+void func_L04_003C4858(void *emitter, s32 i)
+{
+    ParticleRanges3C4858 *ranges = *(ParticleRanges3C4858 **)((u8 *)emitter + 0x68);
+    L04SpawnRecord *rec;
+    f32 v;
+
+    v = func_002A78D8(0.0f, 1.0f);
+    rec = &D_L04_0023BDD0[i];
+    rec->x = v;
+    rec->y = func_002A78D8(0.0f, 1.0f);
+    rec->z = func_002A78D8(0.0f, 1.0f);
+    D_L04_0023CA50[i] = func_002A7878(ranges->speed_min, ranges->speed_max);
+    D_L04_0023CD70[i] = func_002A7878(ranges->size_min, ranges->size_max);
+    D_L04_0023D220[i] = 0.0f;
+    D_L04_0023D540[i] = func_002A7878(ranges->life_min, ranges->life_max);
+    D_L04_0023D860[i] = D_L04_001B2E74;
+    D_L04_0023D9F0[i] = 0;
+    D_L04_0023DB80[i] = (i - ranges->first + 1) * D_L04_001B2E70;
+    D_L04_0023D158[i] = 0;
+}
+
+/* A sixteen-byte record per spawn slot (L04SpawnRecord, above). */
 
 extern L04SpawnRecord D_L04_0023BDD0[];
 extern f32 D_L04_0023CA50[];

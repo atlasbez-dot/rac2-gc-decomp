@@ -1,8 +1,11 @@
-/* Measured with -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses.
-   US: 01_oozla: 588 bytes, expected 596; 0/1 placements. US2: 0/1 placements. PAL: canonical function
-   absent. Particle loops reconstruct the retail behavior. Four source/profile trials; an early scale
-   conversion and grouped vector copies recover most scheduling. Remaining float register lifetime and
-   loop setup differences. Reopen with a matching witness for float live ranges crossing two loops.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * 588/596 bytes; 0/1 USA v1.01 and USA v2.00 places.
+ * The canonical function is absent from the PAL catalogue.
+ * Remaining: Float temporaries spanning the two particle loops are allocated differently; the
+ * retail move into the second-loop scale and loop setup are not reproduced.
+ * Reopen with: Independent float lifetime/loop evidence. Disabling the second loop
+ * optimization worsened this to 584 bytes and a smaller frame.
  */
 
 #include "common.h"
@@ -25,7 +28,7 @@ void func_L01_003A6028(char *object)
     int i, j, type, lifetime;
     int scale = 2;
     float multiplier;
-    *(OozlaQuad *)center = *(OozlaQuad *)(object + 0x10);
+    qcopy(center, (object + 0x10));
     multiplier = scale;
     center[2] = D_L01_001B2F48 = func_002A89A8(object + 0x10, 0, 0.5f);
     func_00312D58(center, 4.5f);

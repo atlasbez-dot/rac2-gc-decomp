@@ -1,11 +1,19 @@
-/* USA v1.01/v2.00: 0/1; PAL absent from catalogue; 888/868 bytes. G8 with -frac2-qcopy,
- * -frac2-qcopy-barrier -frac2-zero-ti-barrier -fno-gcse; default
- * qcopy also gives 888 bytes. Frame keeps an extra s2/f20; constant
- * stores, zero and TI copies schedule differently. Reopen with typed
- * object/data layouts and evidence for constant lifetimes.
+/*
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G8 -ffunction-sections
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 888 bytes; retail: 868 bytes.
+ * Remaining difference: The observed orientation SQ-zero and both full position snapshots use the
+ * reviewed helpers. The body remains 888/868, with an extra s2/f20 and frame 0x30 versus 0x20. The
+ * early 0.5 argument is retained across calls and reused for the later 0.5 field store, while
+ * retail reloads it.
+ * Reopen when: Qualify the actual field/constant lifetime model; historical default and no-GCSE
+ * attempts already tied, so another flag permutation is insufficient.
  */
-typedef unsigned char u8;
-typedef unsigned short u16;
+
+#include "common.h"
+
 typedef int TI128 __attribute__((mode(TI)));
 extern u8 *D_L04_001B24DC __attribute__((sda));
 extern float D_L04_001B1870 __attribute__((sda));
@@ -32,7 +40,7 @@ void func_L04_0044D0C0(u8 *object) {
     object[0x23] = 0x80;
     if (object[0x20] == 0) {
         *(float *)(object + 0x18) = func_002A89A8(object + 0x10, 0, 0.5f);
-        *(TI128 *)(object + 0xF0) = 0;
+        qzero((object + 0xF0));
         if (*(int *)(data + 0x328) != -1) {
             float height = *(float *)(D_L04_001B24DC + *(int *)(data + 0x328) * 256 + 0x18);
             *(unsigned int *)(object + 0x98) = 0;
@@ -71,10 +79,10 @@ void func_L04_0044D0C0(u8 *object) {
         *(float *)(data + 0x144) = D_L04_001B1870;
         *(float *)(data + 0x164) = *(float *)(data + 0x30C) * 0.01666666753590107f;
         if (*(float *)(data + 0x2EC) != 12439.400390625f) {
-            *(TI128 *)(data + 0x2E0) = *(TI128 *)(object + 0x10);
+            qcopy((data + 0x2E0), (object + 0x10));
             *(float *)(data + 0x2EC) = 12439.400390625f;
         }
-        *(TI128 *)(data + 0x110) = *(TI128 *)(data + 0x2E0);
+        qcopy((data + 0x110), (data + 0x2E0));
         *(float *)(data + 0x120) = 0.5f;
         *(u16 *)(data + 0x300) = func_002A7820(120, 700);
         *(int *)(data + 0x31C) = 0;

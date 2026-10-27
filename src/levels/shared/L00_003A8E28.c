@@ -28,13 +28,11 @@ typedef struct {
 } Vec16_Fc936841d;
 #endif
 
-INCLUDE_ASM("asm/levels", func_L00_003A8E28);
 
 INCLUDE_ASM("asm/levels", func_L00_003A9000);
 
 INCLUDE_ASM("asm/levels", func_L00_003A91A0);
 
-INCLUDE_ASM("asm/levels", func_L00_003A9798);
 
 INCLUDE_ASM("asm/levels", func_L00_003A98E8);
 
@@ -79,7 +77,6 @@ INCLUDE_ASM("asm/levels", func_L00_003AB9C0);
 
 INCLUDE_ASM("asm/levels", func_L00_003ABEC0);
 
-INCLUDE_ASM("asm/levels", func_L00_003AC8E8);
 
 INCLUDE_ASM("asm/levels", func_L00_003ACA60);
 
@@ -100,11 +97,9 @@ INCLUDE_ASM("asm/levels", func_L00_003AE900);
 
 INCLUDE_ASM("asm/levels", func_L00_003B0A28);
 
-INCLUDE_ASM("asm/levels", func_L00_003B0AB0);
 
 INCLUDE_ASM("asm/levels", func_L00_003B0B20);
 
-INCLUDE_ASM("asm/levels", func_L00_003B0CE8);
 
 INCLUDE_ASM("asm/levels", func_L00_003B0DA0);
 
@@ -159,4 +154,4 @@ void func_L00_003B2B60(Vec16_Fc936841d *object, int index)
     func_00282CC0_15((char *)&object[index - 1], (char *)&object[index - 2], local);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_003B3090);
+/* func_L00_003B3090 is matched in its own unit, src/levels/shared/L00_003B3090-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */

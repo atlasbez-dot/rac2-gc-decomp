@@ -49,13 +49,13 @@ extern int D_0018C0B0;
 
 extern int func_002B6120(char *object, unsigned int entry);
 
-extern int func_002B6228(char *object, unsigned int entry);
+extern int func_002B6228(void *object, void *entry, int count, int value);
 
-extern int func_L06_00382850(char *object, unsigned int entry);
+extern int func_L06_00382850(char *object, char *entry, float base);
 
 extern float func_L01_003377C8(void *entry);
 
-extern int func_L01_00337888(char *object, unsigned int entry);
+extern int func_L01_00337888(char *object, unsigned int entry, void *out, int current, int direction, float step);
 
 extern void func_00282CC0(char *first, char *second, char *third);
 
@@ -193,7 +193,7 @@ int func_L09_00329028(char *object, int index)
     return func_002B6120(object, entry);
 }
 
-int func_L09_00329178(char *object, int index)
+int func_L09_00329178(char *object, int index, int count, int value)
 {
     unsigned int entry;
 
@@ -202,7 +202,7 @@ int func_L09_00329178(char *object, int index)
     entry = D_L09_001FE6C0[index];
     if (entry == 0)
         return 0;
-    return func_002B6228(object, entry);
+    return func_002B6228(object, (void *)entry, count, value);
 }
 
 INCLUDE_ASM("asm/levels", func_L09_003364E0);
@@ -210,7 +210,7 @@ INCLUDE_ASM("asm/levels", func_L09_003364E0);
 /* func_L09_0033E658 is matched in L09_0033E658-rc2.c. */
 
 
-int func_L09_0033E690(char *object, int index)
+int func_L09_0033E690(char *object, int index, float base)
 {
     unsigned int entry;
 
@@ -219,7 +219,7 @@ int func_L09_0033E690(char *object, int index)
     entry = D_L09_001FE6C0[index];
     if (entry == 0)
         return -1;
-    return func_L06_00382850(object, entry);
+    return func_L06_00382850(object, (char *)entry, base);
 }
 
 float func_L09_0033E7A0(int index)
@@ -234,7 +234,7 @@ float func_L09_0033E7A0(int index)
     return func_L01_003377C8((void *)entry);
 }
 
-int func_L09_0033E8B0(char *object, int index)
+int func_L09_0033E8B0(char *object, int index, void *out, int current, int direction, float step)
 {
     unsigned int entry;
 
@@ -243,7 +243,7 @@ int func_L09_0033E8B0(char *object, int index)
     entry = D_L09_001FE6C0[index];
     if (entry == 0)
         return -1;
-    return func_L01_00337888(object, entry);
+    return func_L01_00337888(object, entry, out, current, direction, step);
 }
 
 INCLUDE_ASM("asm/levels", func_L09_0037FCE8);
@@ -252,7 +252,7 @@ INCLUDE_ASM("asm/levels", func_L09_003806A0);
 
 INCLUDE_ASM("asm/levels", func_L09_003A01D8);
 
-INCLUDE_ASM("asm/levels", func_L09_003A06B0);
+/* func_L09_003A06B0 is defined in L09_003A06B0-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L09_003AE8C8);
 
@@ -381,12 +381,11 @@ void func_L09_003AF6B0(char *object)
     func_L09_003AF9E8(object, pos);
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003AF9E8);
 
 INCLUDE_ASM("asm/levels", func_L09_003B6550);
 
 /* snapshots the object's frame and re-seeds its four steering angles from the new one */
-INCLUDE_ASM("asm/levels", func_L09_003E99E0);
+/* func_L09_003E99E0 is matched in its own unit, src/levels/shared/L09_003E99E0-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L09_003E9AA0);
 
@@ -470,7 +469,7 @@ void func_L09_003F7158(char *object)
 /* func_L09_003F72A8 is defined in L09_002B7238-g8.c (it reads the group count through $gp). */
 
 /* spawns one measured stage with the object's placement lifted by DY */
-INCLUDE_ASM("asm/levels", func_L09_003F7370);
+/* func_L09_003F7370 is matched in its own unit, src/levels/shared/L09_003F7370.c (default flags). */
 
 void func_L09_003F73E8(char *object)
 {
@@ -581,7 +580,6 @@ void func_L09_003F77D0(char *object)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003F7840);
 
 /* reports whether the index still names a reachable entry, or whether the frame moved close enough */
 int func_L09_003F7A88(char *object, int index) {
@@ -598,7 +596,6 @@ int func_L09_003F7A88(char *object, int index) {
     return entry;
 }
 
-INCLUDE_ASM("asm/levels", func_L09_003F7B28);
 
 
 INCLUDE_ASM("asm/levels", func_L09_003F7CE0);
@@ -633,8 +630,6 @@ void func_L09_003F8858(char *object)
 }
 
 /* func_L09_003F8898 lives in the L09_002B7238-g8.c sibling: its four counters are small data. */
-
-INCLUDE_ASM("asm/levels", func_L09_003F8960);
 
 INCLUDE_ASM("asm/levels", func_L09_003F8AE0);
 

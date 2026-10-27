@@ -1,35 +1,18 @@
-/* 0 of 27 places match - last line: 00_aranos_tutorial: instruction at +0x28 differs
-   Size EXACT (152) and every instruction is present: the two 16-byte operand copies are
-   retail's lq/sq pair (`lq $v0,0x0($a1)` / `sq $v0,0x0($sp)`, `lq $v1,0x0($a2)` /
-   `sq $v1,0x10($sp)`), and each of the four 0x002AA140 blends is `lwc1 $f12,<left>` +
-   `lwc1 $f13,<right>` + `mov.s $f14,$f20` + `jal`.
-   The lq/sq needs `__attribute__((mode(TI)))` on the copies: a plain 16-byte struct
-   assignment (the form this file used to hold) emits ldl/ldr + sdl/sdr pairs and comes out
-   188 bytes; the f32-array spell of the same copy comes out 140 (this cc1 then reads both
-   operands straight off $sp and keeps no second callee-saved register).
-   The remaining gap is that callee-saved pair, not the body: retail copies the destination
-   pointer into `$s0` in the prologue (`daddu $s0,$a0,$zero` at +0x28) and materialises the
-   right operand's address later, in the first call's delay slot (`addiu $s1,$sp,0x10` at
-   +0x3C), so its first store lands at +0x40; here the right operand's address takes `$s0`
-   early (+0x28) and `$s1` receives the destination in that delay slot, which shifts every
-   store one call later. Measured with ~15 spellings (named f32* locals for both / one /
-   none, cast-at-each-use - which ICEs cc1 in convert_move -, a union with a mode(TI)
-   member, f32[4] arrays, one f32[8] buffer, a V4 struct, a named destination local, and
-   both pointer declaration orders): the body never moves.
+/*
+ * Retained manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections
+ * Retail: 152 bytes; compiled: 152 bytes.
+ * Final coverage: us: 0/27; us2: 0/27; pal: 0/27.
+ * Residual: 152/152 bytes. The original useful complete TI-snapshot form remains the
+ * final control; destination/right-local saved-register roles and first-store scheduling
+ * differ at+0x28. The new first-snapshot helper gave 140 bytes; a streamed destination
+ * gave 152 with the wrong 0x40 frame, so neither replaces this control.
+ * Reopen: A real destination/right-snapshot lifetime witness. The prior dozens of
+ * equivalent pointer/union/declaration forms remain stopping evidence; helper grouping
+ * cannot by itself recover the separated initial loads.
+ */
+#include "common.h"
 
-   Wave 8 (agent w8-08) confirms the 152-byte size and the same single difference with
-   ~10 more spellings: the retail's `daddu $s0,$a0,$zero` (the destination) sits in the
-   prologue and `addiu $s1,$sp,0x10` (the right operand's address) in the first call's
-   delay slot, while every candidate gives the right operand $s0 (defined early, right
-   after the copies) and the destination $s1 (defined in that delay slot). Nothing moves
-   it: a named `float *o = (float *)out;` is folded back into the parameter, and the
-   destination pointer is used once per component (four references) while the local
-   pointer has four plus its definition, so the allocator prefers it. What is needed is
-   a source where the destination pointer's pseudo is created BEFORE the local's, with
-   the local still forced into a register - the `float *o = (float *)out;` form has to
-   survive the folding. */
-
-typedef float f32;
 typedef unsigned int u128 __attribute__((mode(TI)));
 
 extern float func_002AA140(float, float, float);

@@ -1,25 +1,11 @@
-/* Current reconstruction, checked 2026-10-23.
-   Game profile: -O2 -G64 -Wa,-G64 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-schedule-insns.
-   USA v1.01 and USA v2.00: 0/27 carrying placements each; absent from PAL.
-   1096/1136 bytes, frame 0x70. Resident-base and scalar lifetimes, float scheduling and loop spills differ. Separate interpolation-call branches and addition of the negative pi constant recovered the retail entry shape. GP vectors retain four-by-sixteen-byte extents, with a four-int index array; the standard G64 profile is experimental. Independent output columns recovered the frame; disabling GCSE was neutral. Reopen with the original resident-field grouping and spill layout.
-   The historical screening comment below is superseded by these C measurements.
-   No linked build was run for this draft.
-*/
-
-/* func_L00_002A5840 - 1136 bytes, 27 places, level 00_aranos_tutorial at 0x002A5840.
-   Wave 13 s4: not attempted, screened.  The body is a long straight-line
-   float computation with nine saved registers ($s0..$s7, $fp, $ra), a
-   `div`/`break` guard, a `mtc1 $s3,$f12` (a general register into an FPR)
-   and $gp-relative small data (`addiu $a0,$gp,-0x72F8`), which needs a
-   -G8 unit for this file.  It also carries the retail quad-copy shape:
-     sq $v0,0($s7) ; sq $v0,0($s5) ; lq $v0,0($v1) ; sq $v0,0($fp) ;
-     lq $v0,0($s2) ; sq $v0,0($s0)
-   (words 0x7AE20000, 0x7EA20000, 0x78620000, 0x7FC20000, 0x7A420000,
-   0x7E020000) - the same wall as func_L00_002A6008, where this cc1 folds
-   the constant offset into the lq/sq.  The 0x700014A9 word is the MMI0
-   `pcpyld` that plain C cannot spell either.  Unblocker: the quad-copy wall
-   of func_L00_002A6008 and the MMI0 zero have to fall first, and the file
-   would need its own -G8 build. */
+/* Nonmatching C: Update the object color and initialize or retire four resident effect records.
+ * Tested profile: -O2 -G64 -Wa,-G64 -ffunction-sections.
+ * Measured US size: 1096 bytes; retail: 1136 bytes.
+ * Placement checks: US and US2: 0/27 each; PAL: absent from the catalogue.
+ * Remaining: Resident-base and scalar lifetimes, floating-point scheduling and vector-loop spills differ.
+ * Reopen with independent resident-field grouping and loop-spill evidence; retain all four entries of each vector and index table.
+ */
+#include "common.h"
 
 typedef int Vector __attribute__((mode(TI)));
 extern unsigned char D_00189E20[];
@@ -136,9 +122,9 @@ void func_L00_002A5840(void) {
         if (!scan[0x1081]) {
             func_0029F978((unsigned char *)object, *indices, record);
             scan[0x1083] = 1;
-            *out_a = *a;
-            *out_b = *b;
-            *out_c = *c;
+            qcopy(out_a, a);
+            qcopy(out_b, b);
+            qcopy(out_c, c);
             func_00282D30(out_c, out_c, *(float *)(object + 0x2C));
         }
     }

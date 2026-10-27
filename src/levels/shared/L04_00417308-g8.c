@@ -36,4 +36,3 @@ void func_L04_0046CE28(char *a0)
     D_L04_001B1CBC = -1;
     D_L04_001B1CCC = -1;
 }
-

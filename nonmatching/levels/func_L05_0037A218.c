@@ -1,18 +1,11 @@
-/* 2026-10-23 reconstruction. Measured with -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-
-   barrier. us: 0/4 placements; 05_feltzin_system: 988 bytes, expected 992; us2: 0/4 placements;
-   05_feltzin_system: 988 bytes, expected 992; pal: canonical name absent. Three meaningful
-   source/profile trials. The historical MMI impossibility below is superseded: plain C emits the exact
-   retail mtlo+madd at +0x200. Remaining callback-loop scheduling and register lifetimes are4bytes
-   short; no-GCSE emits1000bytes. Reopen with a matching two-loop callback/projectile witness.
-   Historical screening is preserved below. */
-
-/* MMI (SPECIAL2) instruction: no C spelling. 992 bytes, level
-   05_feltzin_system. Retail at 0x0037A218 carries the SPECIAL2 word
-   0x70431000 (+0x0200) - opcode 0x1C, which rabbitizer prints as `INVALID`;
-   it is the MMI family (pcpyld and its relatives) the sixth wave recorded
-   and that no C spelling reaches. This cc1 emits `lq`/`sq` for a `mode(TI)`
-   local and `ldl`/`ldr`/`sdl`/`sdr` for a struct assignment, never the
-   packed copy. ASM_FUNC candidate, as for the rest of the family. */
+/* M21 2026-10-26: 992 of 992 bytes with -O2 -G8 -ffunction-sections -frac2-qcopy
+   -frac2-qcopy-barrier, us 05_feltzin_system. Four words off, register/order only: at the
+   projectile-loop top retail builds the table base (lui $v0; addiu $v1,$v0,lo) before
+   `sll $v0,j,7`; here sll comes first and the high part lands in $a0. What closed the rest:
+   the hit state as one struct (flag at -8 from the position), qcopy from a `pos` copy set
+   after the empty-slot continue (retail's daddu $s4,$s1 in the jal slot), D_L05_001A8F20
+   MACRO_ADDR, store order slow/frames/flags. Spellings of the index (&D[j], D+j, int-first,
+   <<7, unsigned j, do/while) all give the same code. Permuter queued. */
 
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
@@ -34,9 +27,9 @@ extern int D_001A79F0 __attribute__((sda));
 extern u8 D_00188660[];
 typedef struct { u8 pad[0x160]; float slow; int pad164,frames,flags; } L05ImpactState;
 extern L05ImpactState D_L05_001B9580;
-extern int D_L05_001BFB18;
-extern float D_L05_001BFB20[4];
-extern u8 D_L05_001A8F20[];
+typedef struct { int on; int pad; float pos[4]; } L05Hit;
+extern L05Hit D_L05_001BFB18;
+extern u8 D_L05_001A8F20[] MACRO_ADDR;
 extern int func_L00_004272A0(void);
 extern s32 func_002ED688(u8 *);
 extern float func_002A7878(float,float);
@@ -58,7 +51,7 @@ void func_L05_0037A218(void *unused)
     float step[4],check[4];
     float scale,speed,angle;
     u8 *state,*target,*sound;
-    L05Projectile *record;
+    L05Projectile *record; float *pos;
     int i,j;
     (void)unused;
     if (D_L05_001A8F00 == 2) return;
@@ -66,8 +59,9 @@ void func_L05_0037A218(void *unused)
         if (D_L05_00225ED0[i]) D_L05_00225ED0[i](D_L05_00225DD0[i]);
     }
     for (j=0;j<128;j++) {
-        record = &D_L05_00221DD0[j];
+        record = (L05Projectile *)(j * sizeof(L05Projectile) + (unsigned int)D_L05_00221DD0);
         if (!record->object) continue;
+        pos = record->position;
         state = (u8 *)func_002ED688(record->object);
         if (D_L05_00221D10[0x2C/4] == 1 || *(int *)(state+0x110) == 0 || record->distance >= 350.0f) {
             record->object = 0;
@@ -81,8 +75,8 @@ void func_L05_0037A218(void *unused)
         record->distance += scale*speed;
         if (record->flags == 0 && record->mode && func_00282E48(record->position,*(u8 **)(state+0x120)+0x10) < record->rate) {
             D_L05_001B9580.frames = 30;
-            D_L05_001B9580.flags = 0;
             D_L05_001B9580.slow = 0.05f;
+            D_L05_001B9580.flags = 0;
             if (func_002A77E0(6) && (target=*(u8 **)(state+0x120)) && *(s16 *)(target+0xAA) == 0xFBF) {
                 sound = D_00188660+D_L05_001AC4D4*0x70;
                 if ((*(u8 **)(sound+0x88) != target || !sound[0x74]) && D_001A79F0 != 10)
@@ -93,12 +87,12 @@ void func_L05_0037A218(void *unused)
             record->object = 0;
         }
         if (record->effect && *(u8 **)(state+0x120) && func_00282E48(record->position,*(u8 **)(state+0x120)+0x10) < 32.0f) {
-            *(Quad *)check = *(Quad *)record->position;
+            qcopy(check, pos);
             check[3] = 1.0f;
             if (func_00283DB8(check,256.0f) != -1 && func_002761F8(record->previous,record->position,0,0,0)) {
-                func_L05_0037DA58(D_L05_001BFB20,20,record->color,60);
-                if (D_L05_001BFB18)
-                    func_002A8F70(*(u8 **)(state+0x120),record->object,0x10000,D_L05_001BFB20,D_L05_001A8F20,0.25f);
+                func_L05_0037DA58(D_L05_001BFB18.pos,20,record->color,60);
+                if (D_L05_001BFB18.on)
+                    func_002A8F70(*(u8 **)(state+0x120),record->object,0x10000,D_L05_001BFB18.pos,D_L05_001A8F20,0.25f);
                 record->object = 0;
             }
         }

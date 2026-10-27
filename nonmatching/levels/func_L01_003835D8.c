@@ -1,9 +1,14 @@
-/* Measured with -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por. US:
-   01_oozla: instruction at +0x18 differs; 0/1 placements. US2: 0/1 placements. PAL: canonical function
-   absent. Four source/profile trials. Equal retail size; the first mismatch is initial zero-store
-   scheduling at +0x18. Typed hit/collision records and particle loop reconstructed. No-GCSE shortened
-   to 1032 bytes; grouped-copy/default GCSE retained. Reopen with a witness for clear placement and
-   shared collision branches.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-zero-ti-por.
+ * 1040/1044 bytes; 0/1 USA v1.01 and USA v2.00 places.
+ * The canonical function is absent from the PAL catalogue.
+ * Remaining: The full vector transfers and initial clears now agree. The hit owner is set
+ * before its direction copy as in retail, keeping all four copied components.
+ * Damage table addressing, hit scalar-store allocation and collision branch
+ * sharing remain different. The resident pointer is NOT_SDA because its actual
+ * address is outside signed GP reach.
+ * Reopen with: Independent hit-record/store scheduling and shared collision-tail
+ * evidence; real helpers alone do not close this body.
  */
 
 #include "common.h"
@@ -22,7 +27,7 @@ typedef struct { u8 pad[0x70]; float damage; u8 tail[0x6C]; } OozlaDamage;
 extern OozlaDamage D_L01_002637A0[];
 typedef struct { u8 pad[0x18]; u8 *other; int count; OozlaQuad position; u8 pad2[0x10]; float normal[4]; } OozlaCollision;
 extern OozlaCollision D_L01_001BF900;
-extern char *D_0018C0B0;
+extern char *D_0018C0B0 NOT_SDA;
 extern void *D_L01_001AC810;
 extern void func_00282CC0(void *, void *, void *);
 extern void func_002AFFD8(void *, void *, int);
@@ -40,7 +45,7 @@ extern int D_L01_001B2CF0 __attribute__((sda));
 extern int D_L01_001B2CF8 __attribute__((sda));
 extern void func_002FEE70(int,void *,int);
 extern void func_00300190(void *,void *);
-extern void func_00300248(void *,void *);
+extern void func_00300248(int,int);
 extern void func_002FE880(void *,void *,float);
 extern void func_L00_0038F178(void *);
 extern int func_00278E78(void);
@@ -69,19 +74,19 @@ void func_L01_003835D8(u8 *object)
     *(OozlaQuad *)rotation = 0;
     movement[2] = 0.033333335f;
     rotation[2] = 1.0f;
-    *(OozlaQuad *)previous = *(OozlaQuad *)(object+0x10);
+    qcopy(previous, (object+0x10));
     func_00282CC0(object+0x10,state,object+0x10);
     func_002FEE70(*(int *)(state+0x1C),state,0);
     func_00300190(object+0x10,object+0x10);
-    func_00300248(state,state);
+    func_00300248((int)state,(int)state);
     func_002FE880(object+0x10,state,0.0030555557f);
     func_L00_0038F178(object);
+    hit.owner = object;
     hit.flags = 0x830000;
     if (*(int *)(state+0x18) < 290) hit.flags = 0x830001;
     hit.enabled = 1;
     hit.damage = D_L01_002637A0[D_00139574].damage;
-    *(OozlaQuad *)hit.direction = *(OozlaQuad *)state;
-    hit.owner = object;
+    qcopy(hit.direction, state);
     func_00282F70(hit.direction,hit.direction,1.0f);
     hit.oclass = *(u16 *)(object+0xAA);
     hit.direction[2] = 1.0f;
@@ -117,7 +122,7 @@ void func_L01_003835D8(u8 *object)
             if (*(void **)(other+0x64) == D_L01_001AC810 && *(short *)(other+0xAA) != 0x336) goto finished;
         } else if (D_L01_001BF900.count <= 0) goto finished;
         object[0xBC] = 1;
-        *(OozlaQuad *)(object+0x10) = D_L01_001BF900.position;
+        qcopy(object + 0x10, &D_L01_001BF900.position);
         func_00283028(movement,state,D_L01_001BF900.normal);
         func_00282F20(movement,movement,0.033333335f);
         func_00282F20(rotation,D_L01_001BF900.normal,1.0f);

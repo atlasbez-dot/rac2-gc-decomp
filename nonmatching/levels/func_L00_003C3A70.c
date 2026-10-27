@@ -1,19 +1,24 @@
-/* Complete manual reconstruction; NOT MATCHING and never linked.
-   Tested profile: -O2 -mno-split-addresses -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
-   Actual final-source coverage: us: 0/27 placements, 800 compiled bytes; us2: 0/27 placements, 800 compiled bytes; pal: absent from both catalogues.
-   800/800 bytes but 0/27 placements. First non-relocation difference at +0x30. The complete creation/fallback CFG, 16-byte vectors, history/reset loops, state setup and returned owner are retained. Address formation, entry block scheduling and forward/up/side allocation differ. Equal size earns no match credit.
-   Reopen only with: A measured real object/table address model and pointer lifetimes; the -mno-split-addresses profile repairs constant-addend lowering but changes indexed table formation.
-*/
+/* M12, 2026-10-26: not linked. Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * (split addresses: retail schedules the lui/lbu pairs apart, which -mno-split-addresses cannot).
+ * 800/800 bytes; us: 0/27. Changes: D_L00_001D9F00 and the three cleared tables are MACRO_ADDR
+ * (retail lui/addiu of D+offset in one register), the body runs under if (owner) with one return,
+ * forward/side are written at each use (retail copies them from the argument register), position stays
+ * a local (spilled to 0($sp) as in retail), state words stored -1 then 30.
+ * Residual: the three clear loops swap counter/pointer registers (v0/v1), the D_L00_001DB2BC lui uses
+ * v0 where retail uses a0, and the owner+0x34 |= 0x41 read-modify-write is scheduled after the
+ * forward address. With only D_L00_001B2940 MACRO_ADDR its loop allocates as retail.
+ */
+#include "common.h"
 
-#include "include_asm.h"
+
 typedef int UiQuadword __attribute__((mode(TI)));
 extern char *D_L00_001AFF98 __attribute__((sda));
 extern unsigned char D_L00_001DB2BC;
-extern char *D_L00_001D9F00[];
+extern char *D_L00_001D9F00[] MACRO_ADDR;
 extern UiQuadword D_00189EA0[];
-extern int D_L00_001B2940[];
-extern int D_L00_001B2950[];
-extern short D_L00_001B2990[];
+extern int D_L00_001B2940[] MACRO_ADDR;
+extern int D_L00_001B2950[] MACRO_ADDR;
+extern short D_L00_001B2990[] MACRO_ADDR;
 extern UiQuadword D_L00_001B2900, D_L00_001B2910, D_L00_001B2920, D_L00_001B2930;
 extern float D_L00_001AFF4C __attribute__((sda));
 extern float D_L00_001B29D4 __attribute__((sda));
@@ -49,31 +54,28 @@ unsigned char *func_L00_003C3A70(int mode)
         return 0;
     }
     owner = func_0029EFD0(mode ? 0x1192 : 0xA5C);
-    if (owner == 0)
-        return 0;
+    if (owner != 0) {
     state = *(char **)(owner + 0x68);
     D_L00_001AFF98 = owner;
     *(unsigned short *)(owner + 0x34) |= 0x41;
     owner[0x30] = 0xFF;
     owner[0x20] = 1;
-    forward = owner + 0xC0;
-    func_002833F0(forward, owner + 0xF0);
+    func_002833F0((owner + 0xC0), owner + 0xF0);
     up = owner + 0xE0;
-    side = owner + 0xD0;
     position = (UiQuadword *)(owner + 0x10);
     for (i = 3; i >= 0; i--)
         D_L00_001B2940[i] = 0;
-    func_00282F20(D_L00_0023FB80, forward, D_L00_001AFF4C);
-    D_L00_001B2900 = *(UiQuadword *)(up);
-    func_00282F20(D_L00_0023FB80 + 0x140, side, D_L00_001AFF4C);
-    D_L00_001B2910 = *(UiQuadword *)(forward);
+    func_00282F20(D_L00_0023FB80, (owner + 0xC0), D_L00_001AFF4C);
+    qcopy(&D_L00_001B2900, up);
+    func_00282F20(D_L00_0023FB80 + 0x140, (owner + 0xD0), D_L00_001AFF4C);
+    qcopy(&D_L00_001B2910, (owner + 0xC0));
     func_00282F20(D_L00_0023FB80 + 0x280, up, D_L00_001AFF4C);
-    D_L00_001B2920 = *(UiQuadword *)(side);
-    func_00282CC0(D_L00_0023FB80 + 0x3C0, forward, up);
+    qcopy(&D_L00_001B2920, (owner + 0xD0));
+    func_00282CC0(D_L00_0023FB80 + 0x3C0, (owner + 0xC0), up);
     entries = (short *)(state + 0x18);
     func_00282F20(D_L00_0023FB80 + 0x3C0, D_L00_0023FB80 + 0x3C0, D_L00_001AFF4C);
     words = (int *)(state + 0x20);
-    func_00282DD8(&D_L00_001B2930, D_L00_0023FB80 + 0x3C0, side);
+    func_00282DD8(&D_L00_001B2930, D_L00_0023FB80 + 0x3C0, (owner + 0xD0));
     for (i = 7; i >= 0; i--)
         D_L00_001B2950[i] = 0;
     for (i = 4; i >= 0; i--)
@@ -81,14 +83,15 @@ unsigned char *func_L00_003C3A70(int mode)
     D_L00_001B29D4 = 1.0f;
     func_L00_0037E670(mode);
     *(float *)state = func_L00_0037E668();
-    *position = D_00189EA0[0];
-    *(int *)(state + 0x14) = 30;
+    qcopy(position, D_00189EA0);
     *(int *)(state + 0xC) = -1;
+    *(int *)(state + 0x14) = 30;
     *(int *)(state + 0x10) = 0;
     for (i = 3; i >= 0; i--)
         entries[i] = 0;
     for (i = 3; i >= 0; i--)
         words[i] = 0;
     func_002E5CF8(1, 0, (char *)owner);
+    }
     return owner;
 }

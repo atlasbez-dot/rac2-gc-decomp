@@ -1,3 +1,11 @@
+/* Opus big44, 26 October 2026: under -O2 -G0 -ffunction-sections -frac2-qcopy
+ * -frac2-qcopy-barrier (split addresses, i.e. without -mno-split-addresses) this source is
+ * 369/372 instructions with 21 register-blind lines off, against 30 under the profile below.
+ * Retail's lui/addiu pairs land in different registers (lui v0; addiu s0, v0), which is
+ * split addressing. Left: D_L19_001B2728 stores want the lui $at macro form (MACRO_ADDR),
+ * the hero base reached as (D_00189E20+0x80)-0x80, and 0.3f is kept in $f20 across the
+ * first func_002AEC48 call where retail rematerialises it.
+ */
 /*
  * Retained handwritten near miss; historical evidence only.
  * No linked-image equality or complete retail semantics is established.

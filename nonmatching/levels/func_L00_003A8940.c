@@ -1,30 +1,18 @@
-/* Retained reconstruction, 23 October 2026.
+/* Complete nonmatching reconstruction: 1256/1256 bytes.
  * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * USA v1.01/v2.00 and PAL: 0/27 each, 1272/1256 bytes. Two source trials and a corrected
- * absolute-data declaration measured. The complete nested rendering loops are reconstructed,
- * including both submissions to the second batch. Register/spill allocation and madd-result
- * consumption differ; the compiler emits madd naturally but follows it with mflo here. Reopen
- * with record/loop lifetime and aliasing evidence. The historical MMI-only note below is
- * superseded: por/madd are compiler-emitted operations, not handwritten-assembly evidence.
+ * Placement checks: US: 0/27; US2: 0/27; PAL: 0/27.
+ * Both complete144-byte batches, all80 records and both submissions for each of four sides remain. Shape and UV cursors are captured separately before math calls; this reaches1256/1256 bytes with the retail0x270 frame, without a match. Each112-byte record position and the real zero-vector source use clobbering16-byte transfers. Color alpha is converted to unsigned32 before shifting. The radius sum is captured before the vector calls. The first mismatch is+0x10: the candidate saves f26 where retail saves f27; the remaining FP constant live ranges, pointer spills and nested-loop scheduling differ.
+ * Reopen with independently justified FP zero/one/radius lifetimes and actual record/packet cursor allocation. Keep both full batches and all submissions; equal size does not establish matching.
  */
-
-/* MMI (SPECIAL2) instruction: no C spelling. 1256 bytes, level
-   00_aranos_tutorial. Retail at 0x003A8940 carries the SPECIAL2 words
-   0x700014A9, 0x70629000 (+0x000C, +0x00E0) - opcode 0x1C, which rabbitizer
-   prints as `INVALID`; it is the MMI family (pcpyld and its relatives) the
-   sixth wave recorded and that no C spelling reaches. This cc1 emits
-   `lq`/`sq` for a `mode(TI)` local and `ldl`/`ldr`/`sdl`/`sdr` for a struct
-   assignment, never the packed copy. ASM_FUNC candidate, as for the rest of
-   the family. */
-
-#include "include_asm.h"
+#include "common.h"
 typedef int Quadword __attribute__((mode(TI)));
+typedef float Vector[4] __attribute__((aligned(16)));
 typedef struct {
     float vertex[4][4];
     unsigned int color[4];
     float uv[4][2];
     char tail[32];
-} DrawBatch;
+} __attribute__((aligned(16))) DrawBatch;
 extern int D_0018C0B4[];
 extern float D_L00_001AF750 __attribute__((sda));
 extern int D_L00_001AF74C __attribute__((sda));
@@ -57,10 +45,10 @@ extern void func_00280B90(void *, void *, int);
 /* Builds and submits the two quads for each active effect record. */
 void func_L00_003A8940(char *object)
 {
-    DrawBatch first, second;
-    float forward[4], right[4], up[4];
-    float position[4], normal[4];
-    float scaled[4], local[4], rotated[4];
+    DrawBatch first, second __attribute__((aligned(16)));
+    Vector forward, right, up;
+    Vector position, normal;
+    Vector scaled, local, rotated;
     char *base;
     char *record;
     float alphaScale = 128.0f;
@@ -83,7 +71,7 @@ void func_L00_003A8940(char *object)
             alpha = func_00283CF0(alphaScale * age);
             color = func_00283D38(D_L00_001AF74C, D_L00_001AF748,
                 func_00282C48(func_00283198(func_002ABB18(age * 3.1415927f * D_L00_001AF750))));
-            color |= alpha << 24;
+            color |= (unsigned int)alpha << 24;
             first.color[0] = color;
             first.color[1] = color;
             first.color[2] = color;
@@ -94,7 +82,8 @@ void func_L00_003A8940(char *object)
             second.color[3] = color;
             radius = *(float *)(record + 28);
             distance = (D_L00_001AF720 - radius) * age;
-            *(Quadword *)position = *(Quadword *)record;
+            radius += distance;
+            qcopy(position, record);
             func_00282CF0(forward, D_L00_001B8DC0, position);
             func_00282F20(forward, forward, 1.0f);
             if (D_L00_001A8FF0[0])
@@ -109,19 +98,24 @@ void func_L00_003A8940(char *object)
             sine = func_00283180(*(float *)(record + 20));
             cosine = func_00283198(*(float *)(record + 20));
             for (side = 0; side < 4; ++side) {
+                short *shapeCursor = &D_L00_001AF6D8[side * 4][0];
+                short *uvCursor = &D_L00_001AF6DA[side * 8];
+                float *weights = (float *)(record + 40);
                 for (corner = 0; corner < 4; ++corner) {
-                    index = D_L00_001AF6D8[side * 4 + corner][0];
-                    texture = D_L00_001AF6DA[(side * 4 + corner) * 2];
-                    if (*(float *)(record + 40 + index * 4) == 0.0f)
-                        *(Quadword *)scaled = *(Quadword *)D_L00_001A8F20;
+                    index = *shapeCursor;
+                    shapeCursor += 2;
+                    texture = *uvCursor;
+                    uvCursor += 2;
+                    if (weights[index] == 0.0f)
+                        qcopy(scaled, D_L00_001A8F20);
                     else
-                        func_00282F20(scaled, D_L00_00294A80[index], *(float *)(record + 40 + index * 4));
+                        func_00282F20(scaled, D_L00_00294A80[index], weights[index]);
                     func_00282CC0(local, D_L00_00294A80[index], scaled);
                     rotated[0] = local[0];
                     rotated[1] = local[1] * sine - local[2] * cosine;
                     rotated[2] = local[1] * cosine + local[2] * sine;
                     rotated[3] = 1.0f;
-                    func_00282D30(first.vertex[corner], rotated, radius + distance);
+                    func_00282D30(first.vertex[corner], rotated, radius);
                     width = (1.0f - age) * 0.075f;
                     first.uv[corner][0] = D_L00_00294B10[texture][0];
                     first.uv[corner][1] = D_L00_00294B14[texture][0];

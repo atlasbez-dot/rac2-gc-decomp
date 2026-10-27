@@ -1,8 +1,8 @@
-/* Retained complete manual C; no linked byte credit.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Compiled text: 1696 bytes. us: 0/28, us2: 0/28, pal: 0/28.
- * Residual: Register allocation, float division scheduling and dead-store elimination differ. In particular the explicit packet clear is overwritten before an opaque call and is removed by ordinary C optimization.
- * Reopen: Independent original projection object layout and genuine compiler macro-lowering evidence; do not add source barriers.
+/* M20, 26 October 2026: retail is a -g unit (nop pairs before every div.s): with
+ * -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g this C is 1932/1972 B (1704 without -g).
+ * Retail keeps %hi(D_001B9040) in s2 and re-adds %lo into a fresh base per stretch
+ * (v1, v0, s0, s1), and holds -8388080.0f in f22 from the prologue; a single p, a p
+ * reassigned per stretch, and direct D_001B9040 accesses all miss that shape.
  */
 #include "include_asm.h"
 typedef unsigned int ProjectionQuad __attribute__((mode(TI)));

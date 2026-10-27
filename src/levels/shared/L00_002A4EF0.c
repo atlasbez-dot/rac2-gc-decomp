@@ -31,4 +31,3 @@ void *func_L00_002A4FE8(int kind)
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002A5048);

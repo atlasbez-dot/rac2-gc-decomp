@@ -1,5 +1,15 @@
-/* Unmatched plain-C reconstruction. 1036 bytes versus 1044; -G8.
- * instruction at +0x4 differs. Full behavior and linked-image equality remain unverified.
+/* Retained near miss, 26 October 2026 (fam5to9, F9 seed). Not linked.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier (own unit).
+ * 1044/1044 bytes, frame 0xE0, 259/261 opcodes; every block, branch and the collision tail
+ * now equal. What closed the gap: qcopy+barrier (register-address lq/sq and the col->normal
+ * pointer in $s1), the material table as an array of 0xE0-byte records read through a pointer,
+ * the packet vector copied through a pointer, packet stores in retail order, `col` reassigned
+ * after the `||` (the reassignment is stolen into both branch delay slots), for (i<16) loop.
+ * Residual: (1) entry: retail sched1 keeps the velocity zero store (sq 0x10) ahead of the ctx
+ * load; here sched1 hoists the load (same with every statement order; -fno-schedule-insns
+ * gives the retail entry, so it is a sched1 priority/dependence difference). (2) else arm:
+ * hit/hi-part copy in $a1/$a0 swapped and the L_second loads use v0/a0/a1 where retail uses
+ * v1/a0/v0 (local allocation after sched1).
  */
 /* Collision response attempt; ordinary TI vector copies. */
 typedef unsigned int Quad __attribute__((mode(TI)));
@@ -9,7 +19,8 @@ extern char *D_0018C0B0;
 extern int D_L00_001AC850;
 typedef struct { char pad[0x18]; char *hit; int count; Vec point; char gap[0x10]; Vec normal; } Collision;
 extern Collision D_L00_001BF200;
-extern char D_L00_00262570[];
+typedef struct { char pad[0x70]; float material; char pad2[0x6C]; } Material;
+extern Material D_L00_00262570[];
 extern int D_L00_001B2630 __attribute__((sda)),D_L00_001B2638 __attribute__((sda));
 extern void func_00282CC0(void *,void *,void *);
 extern void func_002FEE70(int,void *,int);
@@ -55,12 +66,14 @@ void func_L00_0038D750(unsigned char *obj) {
     frame.packet.moby=obj; frame.packet.flags=0x830000;
     if(*(int *)(ctx+0x18)<0x122) frame.packet.flags=0x830001;
     frame.packet.enabled=1;
-    frame.packet.material=*(float *)(D_L00_00262570+D_00139574*0xE0+0x70);
-    frame.packet.vector.q=*(Quad *)ctx;
-    func_00282F70(&frame.packet.vector,&frame.packet.vector,1.0f);
-    frame.packet.class_id=*(unsigned short *)(obj+0xAA);
+    { Material *mt=&D_L00_00262570[D_00139574]; frame.packet.material=mt->material; }
+    { Vec *v=&frame.packet.vector;
+    v->q=*(Quad *)ctx;
+    func_00282F70(v,v,1.0f); }
     frame.packet.vector.f[2]=1.0f; frame.packet.vector.f[3]=5627.925f;
-    frame.packet.kind=2; frame.packet.active=1;
+    frame.packet.kind=2;
+    frame.packet.class_id=*(unsigned short *)(obj+0xAA);
+    frame.packet.active=1;
     if(func_002761F8(&frame.old,position,0x10,obj,&frame.packet)) {
         if(!func_00278E78() && *(float *)(ctx+8)<0.0f) {
             func_002FD1B8(D_L00_001B2630,D_L00_001B2638,1,*(float *)(obj+0x10),*(float *)(obj+0x14),0.5f,-0.35f);
@@ -71,26 +84,25 @@ void func_L00_0038D750(unsigned char *obj) {
             frame.position.f[2]=D_L00_001BF200.point.f[2];
             hit=func_00312D58(&frame.position,2.0f);
             if(hit) hit[0x23]=0x70;
-            i=15;
-            do {
-                --i; angle=func_002A7940(); speed=func_002A7878(0.0f,0.050000004f);
+            for(i=0;i<16;i++) { angle=func_002A7940(); speed=func_002A7878(0.0f,0.050000004f);
                 frame.spread.f[0]=func_00283180(angle)*speed;
                 frame.spread.f[1]=func_00283198(angle)*speed;
                 frame.spread.f[2]=func_002A7878(0.050000004f,0.10833334f);
                 lifetime=func_002A7820(90,120);
                 func_002BFB38(&frame.position,&frame.spread,func_002A77E0(2),lifetime);
-            } while(i>=0);
+            }
         } else {
-            hit=D_L00_001BF200.hit;
-            if(hit) {
-                if((hit==D_0018C0B0 || *(short *)(hit+0xAA)==0xC0) && *(int *)(ctx+0x18)>0x121) goto finish;
-                if(*(int *)(hit+0x64)==D_L00_001AC850 && *(short *)(hit+0xAA)!=0x336) goto finish;
-            } else if(D_L00_001BF200.count<1) goto finish;
+            { Collision *col=&D_L00_001BF200;
+            if(col->hit) {
+                if((col->hit==D_0018C0B0 || *(short *)(col->hit+0xAA)==0xC0) && *(int *)(ctx+0x18)>0x121) goto finish;
+                col=&D_L00_001BF200;
+                if(*(int *)(col->hit+0x64)==D_L00_001AC850 && *(short *)(col->hit+0xAA)!=0x336) goto finish;
+            } else if(col->count<1) goto finish;
             obj[0xBC]=1;
-            *(Quad *)(obj+0x10)=D_L00_001BF200.point.q;
-            func_00283028(&frame.velocity,ctx,&D_L00_001BF200.normal);
+            *(Quad *)(obj+0x10)=col->point.q;
+            func_00283028(&frame.velocity,ctx,&col->normal);
             func_00282F20(&frame.velocity,&frame.velocity,0.033333335f);
-            func_00282F20(&frame.normal,&D_L00_001BF200.normal,1.0f);
+            func_00282F20(&frame.normal,&col->normal,1.0f); }
         }
     } else if(func_00282948(ctx+0x18)) {
         obj[0xBC]=1; func_00282CC0(&frame.velocity,&frame.velocity,ctx);

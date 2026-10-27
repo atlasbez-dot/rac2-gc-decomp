@@ -1,38 +1,45 @@
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 5828 bytes; retail 5868 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: The true 32-bit cooldown, canonical metadata words and complete aligned
+ * query/vector buffers are retained. Retail transient query addresses at SP+0x2C0 and SP+0x2D0,
+ * and subsequent endpoint reuse at SP+0x2D0, justify the disjoint-lifetime workspace views. This
+ * restores frame 0x440 instead of 0x470. The measured dual-target branches now retain 132 static
+ * calls, as retail does. Register allocation, target-loop phase placement and packet schedules
+ * remain different; matching frame and call count do not establish semantic or byte equality.
+ * Reopen: Independent target-selection and per-arc lifetime evidence within the now-correct
+ * workspace; preserve the 128-entry hidden-object list, full hit fields and four five-point
+ * strips.
  */
 
-/* Nonmatching manual reconstruction.
-   Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
-   5796 bytes, expected 5868; frame 0x470 instead of 0x440; US and US2 fail.
-   The damage packet has its measured 0x24-byte fields; hidden objects use a real
-   128-entry pointer array. Global vector arrays have incomplete outer extents
-   rather than invented complete object sizes. The four five-point strips are
-   evidenced by the 0x50-byte loop stride. No inherited HI value is used: the
-   decompiler artifact comes from ordinary address multiply-add instructions.
-   The fourth lane of the local side-offset is not initialized in retail.
-   Its semantic role is unverified; the spatial components are measured.
-   The ignored-result contracts of sphere collision, hit application, rotation
-   and particle emission remain inferred from their complete observed inputs.
-   Reopen with a packet/vector lifetime and stack-slot reuse hypothesis.
-*/
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 typedef struct { int a,b,c,d; } __attribute__((aligned(16))) Quad16;
 typedef struct {
-    float direction[4]; void *owner; int flags;
+    float direction[4] __attribute__((aligned(16))); void *owner; int flags;
     u8 type,active; u16 oclass; float damage; int enabled;
-} DamoselHit;
-typedef struct { u8 pad[0x70]; float damage; u8 tail[0x6C]; } DamoselDamage;
+} __attribute__((aligned(16))) DamoselHit;
+
+/* Retail gives the two transient query packets overlapping slots at +0x2C0
+ * and +0x2D0, then reuses the latter address for the arc endpoint. Their
+ * query lifetimes do not overlap; the simultaneous arc vectors are the
+ * separate first and second rows of this workspace. */
+typedef union {
+    DamoselHit secondary;
+    struct { u8 gap[16]; DamoselHit packet; } primary;
+    struct { u8 gap[16]; float vector[4]; } temporary;
+} DamoselWorkspace;
+
+typedef struct { u8 pad[4]; u8 dual; u8 gap[0x6B]; float damage; u8 tail[0x6C]; } DamoselDamage;
 #define F(p,o) (*(float *)((u8 *)(p)+(o)))
 #define I(p,o) (*(int *)((u8 *)(p)+(o)))
 #define S(p,o) (*(short *)((u8 *)(p)+(o)))
 #define P(p,o) (*(u8 **)((u8 *)(p)+(o)))
 extern DamoselDamage D_L23_00266A70[];
-extern u8 D_0013957A;
+extern struct { u8 prefix[0x12]; u8 selected; } D_00139568;
 extern u8 *D_0018C0B0,*D_L23_001FC560[],*D_L23_001C0A98;
 extern float D_00189EA0[4],D_00189EB8,D_0018A0E0[4],D_0018A560[4],D_0018A570[4];
 extern float D_L23_001BA640[],D_L23_001C0AA0[4],D_L23_001A8F20[4];
@@ -40,7 +47,8 @@ extern int D_L23_001A8FF0;
 extern float D_L23_0023B1D0[][4],D_L23_0023B310[][4];
 extern float D_L23_0023B450[],D_L23_0023B4A0[][4],D_L23_0023B5E0[];
 extern float D_L23_0023B630[][5][4];
-extern short D_L23_001B3040,D_L23_001B3048[],D_L23_001B3050[],D_L23_001B3058[],D_L23_001B3060[];
+extern int D_L23_001B3040;
+extern short D_L23_001B3048[],D_L23_001B3050[],D_L23_001B3058[],D_L23_001B3060[];
 extern unsigned int D_L23_001AF028 __attribute__((sda));
 extern float D_L23_001AEFC4 __attribute__((sda));
 extern float D_L23_001AEFC8 __attribute__((sda));
@@ -68,7 +76,7 @@ extern void func_00282CF0(void *,void *,void *),func_00282CC0(void *,void *,void
 extern void func_00282D30(void *,void *,float),func_00282F20(void *,void *,float);
 extern float func_00282DB0(void *,void *),func_00282DF0(void *),func_00282E20(void *);
 extern float func_00282E48(void *,void *),func_00283248(float,float),func_00283C80(float,float),func_002831B0(float);
-extern int func_00282948(void *),func_00282978(short *);
+extern int func_00282948(int *),func_00282978(short *);
 extern void func_00282C88(Quad *);
 extern void func_002A8C00(char *,int,int,float,Quad16 *);
 extern int func_00277F48(void *,int,void *,void *,float);
@@ -79,20 +87,21 @@ extern int func_002A7820(int,int),func_002A77E0(int),func_00283CF0(float);
 extern void func_00300190(void *,void *);
 extern void func_00282D08(void *,void *,void *,float);
 extern int func_002761F8(void *,void *,int,void *,void *),func_002A8E20(void *,void *);
-extern int func_002C2210(void *,int,unsigned int,int,int,void *,int,float,float,float);
+extern void *func_002C2210(void *,int,unsigned int,int,int,void *,int,float,float,float);
 
 void func_L23_00399C10(u8 *object)
 {
-    float primaryPoint[4],secondaryPoint[4],scratch[4],direction[4],axis[4],delta[4],blend[4],stepVector[4],toward[4],temporary[4],offset[4];
-    float ripple[4][4];
-    DamoselHit hit,primaryHit,secondaryHit;
+    float primaryPoint[4] __attribute__((aligned(16))),secondaryPoint[4],scratch[4],direction[4],axis[4],delta[4],blend[4],stepVector[4],toward[4],offset[4];
+    float ripple[4][4] __attribute__((aligned(16)));
+    DamoselHit hit;
+    DamoselWorkspace work;
     u8 *hidden[128];
     u8 *state=P(object,0x68),*candidate,*properties,*best=0,*second=0;
     u8 **list;
     int hasSecondary,hitWall=0,hiddenCount=0,n,j,k,spin,remaining,difference;
     float bestScore=0.0f,secondScore=0.0f,score,distance,angle,pitch,a,b,c,length;
     float step=D_L23_001AEFC4*0.05f,segmentAngle,amplitude,wave,oldWave,blendWeight,sideAngle,phase1,phase2,sign;
-    hasSecondary=((u8 *)&D_L23_00266A70[D_0013957A])[4]!=0;
+    hasSecondary=D_L23_00266A70[D_00139568.selected].dual!=0;
     D_L23_001AEFDC=func_00283B98(D_L23_001AEFDC,D_L23_001AEFE0);
     D_L23_001AEFE4=func_00283BE0(D_L23_001AEFE4,D_L23_001AEFE8);
     D_L23_001AEFF8=func_00283B98(D_L23_001AEFF8,D_L23_001AEFFC);
@@ -152,21 +161,21 @@ targetsReady:
     distance=0.0f;
     if (P(state,0x20)) {
         properties=(u8 *)func_002AB1F0(P(state,0x20));
-        *(Quad *)primaryPoint=*(Quad *)(P(state,0x20)+0x10);
+        qcopy(primaryPoint,(P(state,0x20)+0x10));
         func_00282D30(secondaryPoint,P(state,0x20)+0xE0,F(properties,0x10));
         func_00282CC0(primaryPoint,primaryPoint,secondaryPoint);
         distance=func_00282E48(state,primaryPoint); step=distance*0.05f;
     }
     if (P(state,0x38)) {
         properties=(u8 *)func_002AB1F0(P(state,0x38));
-        *(Quad *)secondaryPoint=*(Quad *)(P(state,0x38)+0x10);
+        qcopy(secondaryPoint,(P(state,0x38)+0x10));
         func_00282D30(scratch,P(state,0x38)+0xE0,F(properties,0x10));
         func_00282CC0(secondaryPoint,secondaryPoint,scratch);
         step=(func_00282E48(primaryPoint,secondaryPoint)+distance)*0.05f;
     }
     D_L23_001AF028=hasSecondary?0x207F20:0x7F2020;
     func_00282C88((Quad *)scratch);
-    func_002A8C00((char *)&hit,(int)object,0x210000,D_L23_00266A70[D_0013957A].damage,(Quad16 *)scratch);
+    func_002A8C00((char *)&hit,(int)object,0x210000,D_L23_00266A70[D_00139568.selected].damage,(Quad16 *)scratch);
     hit.oclass=*(u16 *)(object+0xAA); hit.active=1; hit.type=5; S(state,0x3E)=20;
     func_00277F48(state,16,D_0018C0B0,&hit,0.3f);
     func_00282CF0(direction,state+0x10,state);
@@ -176,8 +185,8 @@ targetsReady:
         func_002ACEC0(direction,direction,axis,0.17453295f);
     }
     func_00282D30(stepVector,direction,step);
-    *(Quad *)D_L23_0023B1D0[0]=*(Quad *)state;
-    *(Quad *)D_L23_0023B310[0]=*(Quad *)state;
+    qcopy(D_L23_0023B1D0[0],state);
+    qcopy(D_L23_0023B310[0],state);
     for (n=1;n<=19;n++) {
         amplitude=D_L23_001AEFD4+(D_L23_001AEFD8-D_L23_001AEFD4)*func_00283CE0(n)*0.05f;
         segmentAngle=func_002ABB18(D_L23_001AEFDC+(float)n*D_L23_001AEFD0);
@@ -189,11 +198,11 @@ targetsReady:
         func_00282CF0(delta,D_L23_0023B1D0[n],D_L23_0023B1D0[n-1]);
         func_00282D08(blend,delta,stepVector,0.85f);
         length=func_00282DF0(blend);
-        if (length==0.0f) *(Quad *)D_L23_0023B1D0[n]=*(Quad *)D_L23_0023B1D0[n-1];
+        if (length==0.0f) qcopy(D_L23_0023B1D0[n],D_L23_0023B1D0[n-1]);
         else {
             func_00282D30(blend,blend,step/length);
             func_00282CC0(D_L23_0023B1D0[n],D_L23_0023B1D0[n-1],blend);
-            *(Quad *)stepVector=*(Quad *)blend;
+            qcopy(stepVector,blend);
         }
         D_L23_0023B1D0[n][2]+=wave;
         func_00282CF0(axis,D_L23_0023B1D0[n],D_L23_0023B1D0[n-1]);
@@ -209,7 +218,8 @@ targetsReady:
                     func_00282D08(stepVector,stepVector,toward,blendWeight);
                 }
             } else {
-                func_00282CF0(toward,n<10?primaryPoint:secondaryPoint,D_L23_0023B1D0[n]);
+                if (n<10) func_00282CF0(toward,primaryPoint,D_L23_0023B1D0[n]);
+                else func_00282CF0(toward,secondaryPoint,D_L23_0023B1D0[n]);
                 length=func_00282DF0(toward);
                 if (length!=0.0f) {
                     if (n==9 || n==19) { blendWeight=0.7f; step=length; }
@@ -225,7 +235,7 @@ targetsReady:
             phase1=func_002ABB18(D_L23_001AEFE4+(float)n*D_L23_001AEFEC);
             phase2=func_002ABB18(D_L23_001AEFF8+(float)n*D_L23_001AF000);
             a=D_L23_001AEFF0*func_00283198(phase2);
-            *(Quad *)D_L23_0023B310[n]=*(Quad *)D_L23_0023B1D0[n];
+            qcopy(D_L23_0023B310[n],D_L23_0023B1D0[n]);
             b=func_00283198(phase1); c=func_002A78D8(0.0f,0.1f);
             D_L23_0023B5E0[n]=a*b+c;
             D_L23_0023B310[n][2]+=D_L23_0023B5E0[n];
@@ -234,13 +244,13 @@ targetsReady:
             offset[0]=func_00283180(sideAngle)*a;
             offset[1]=func_00283198(sideAngle)*a;
             offset[2]=0.0f;
-            *(Quad *)D_L23_0023B4A0[n]=*(Quad *)offset;
+            qcopy(D_L23_0023B4A0[n],offset);
             func_00282CC0(D_L23_0023B310[n],D_L23_0023B310[n],offset);
         } else {
-            *(Quad *)D_L23_0023B310[n]=*(Quad *)D_L23_0023B1D0[n];
+            qcopy(D_L23_0023B310[n],D_L23_0023B1D0[n]);
             D_L23_0023B310[n][2]+=D_L23_0023B5E0[21-n];
             func_00282CC0(D_L23_0023B310[n],D_L23_0023B310[n],D_L23_0023B4A0[21-n]);
-            *(Quad *)offset=*(Quad *)D_L23_0023B4A0[n];
+            qcopy(offset,D_L23_0023B4A0[n]);
         }
         if (n>1 && (n==19 || !(n&1))) {
             func_00282CF0(scratch,D_L23_0023B1D0[n],D_L23_001BA640);
@@ -254,7 +264,7 @@ targetsReady:
             if (length==0.0f) scratch[2]=1.0f;
             else func_00282D30(scratch,scratch,1.0f/length);
             scratch[3]=5627.9248f;
-            *(Quad *)hit.direction=*(Quad *)scratch;
+            qcopy(hit.direction,scratch);
             hitWall=func_002761F8(D_L23_0023B1D0[n-2],D_L23_0023B1D0[n],16,object,0);
             candidate=D_L23_001C0A98;
             if (hitWall) {
@@ -264,9 +274,9 @@ targetsReady:
                     else { hitWall=0; hidden[hiddenCount++]=candidate; I(candidate,0x98)=0; }
                 }
                 if (hitWall) {
-                    *(Quad *)D_L23_0023B1D0[n]=*(Quad *)D_L23_001C0AA0;
+                    qcopy(D_L23_0023B1D0[n],D_L23_001C0AA0);
                     S(state,0x3E)=n;
-                    *(Quad *)(state+0x10)=*(Quad *)D_L23_001C0AA0;
+                    qcopy((state+0x10),D_L23_001C0AA0);
                     if (!D_L23_001C0A98) { P(state,0x20)=0; S(state,0x40)=0; }
                     break;
                 }
@@ -274,18 +284,18 @@ targetsReady:
         }
     }
     for (j=0;j<hiddenCount;j++) I(hidden[j],0x98)=I(P(hidden[j],0x24),0x10);
-    if (!hitWall) *(Quad *)(state+0x10)=*(Quad *)D_L23_0023B1D0[19];
+    if (!hitWall) qcopy((state+0x10),D_L23_0023B1D0[19]);
     if (P(state,0x20) && (*(u64 *)(state+0x40)&0xFFFF0000FFFFULL)==0) {
         func_00282CF0(toward,P(state,0x20)+0x10,D_L23_001BA640);
         if (!D_L23_001A8FF0) toward[2]=0.0f;
         else {
             a=func_00282DB0(toward,D_0018C0B0+0xE0);
-            func_00282D30(temporary,D_0018C0B0+0xE0,a); func_00282CF0(toward,toward,temporary);
+            func_00282D30(work.temporary.vector,D_0018C0B0+0xE0,a); func_00282CF0(toward,toward,work.temporary.vector);
         }
         func_00282F20(toward,toward,1.0f); toward[3]=5627.9248f;
-        func_002A8C00((char *)&primaryHit,(int)object,0x210000,D_L23_00266A70[D_0013957A].damage,(Quad16 *)toward);
-        primaryHit.oclass=*(u16 *)(object+0xAA); primaryHit.active=3; primaryHit.type=5;
-        func_002A8E20(P(state,0x20),&primaryHit);
+        func_002A8C00((char *)&work.primary.packet,(int)object,0x210000,D_L23_00266A70[D_00139568.selected].damage,(Quad16 *)toward);
+        work.primary.packet.oclass=*(u16 *)(object+0xAA); work.primary.packet.active=3; work.primary.packet.type=5;
+        func_002A8E20(P(state,0x20),&work.primary.packet);
         properties=(u8 *)func_002AB1F0(P(state,0x20));
         S(state,0x44)=properties && S(properties,4)==1?1:5;
     }
@@ -294,17 +304,17 @@ targetsReady:
         if (!D_L23_001A8FF0) toward[2]=0.0f;
         else {
             a=func_00282DB0(toward,D_0018C0B0+0xE0);
-            func_00282D30(temporary,D_0018C0B0+0xE0,a); func_00282CF0(toward,toward,temporary);
+            func_00282D30(work.temporary.vector,D_0018C0B0+0xE0,a); func_00282CF0(toward,toward,work.temporary.vector);
         }
         func_00282F20(toward,toward,1.0f); toward[3]=5627.9248f;
-        func_002A8C00((char *)&secondaryHit,(int)object,0x210000,D_L23_00266A70[D_0013957A].damage,(Quad16 *)toward);
-        secondaryHit.oclass=*(u16 *)(object+0xAA); secondaryHit.active=3; secondaryHit.type=5;
-        func_002A8E20(P(state,0x38),&secondaryHit);
+        func_002A8C00((char *)&work.secondary,(int)object,0x210000,D_L23_00266A70[D_00139568.selected].damage,(Quad16 *)toward);
+        work.secondary.oclass=*(u16 *)(object+0xAA); work.secondary.active=3; work.secondary.type=5;
+        func_002A8E20(P(state,0x38),&work.secondary);
         properties=(u8 *)func_002AB1F0(P(state,0x38));
         S(state,0x46)=properties && S(properties,4)==1?1:5;
     }
     for (j=0;j<4;j++) {
-        *(Quad *)temporary=*(Quad *)(j<2?state:state+0x10);
+        qcopy(work.temporary.vector,(j<2?state:state+0x10));
         if (!func_00282978(&D_L23_001B3048[j])) {
             for (k=0;k<4;k++) {
                 func_00282CF0(ripple[k],D_L23_0023B630[j][k+1],D_L23_0023B630[j][k]);
@@ -312,7 +322,7 @@ targetsReady:
                 ripple[k][1]+=func_002A78D8(0.0f,0.1f);
                 ripple[k][2]+=func_002A78D8(0.0f,0.1f);
             }
-            *(Quad *)D_L23_0023B630[j][0]=*(Quad *)temporary;
+            qcopy(D_L23_0023B630[j][0],work.temporary.vector);
             for (k=0;k<4;k++) func_00282CC0(D_L23_0023B630[j][k+1],D_L23_0023B630[j][k],ripple[k]);
             difference=D_L23_001B3048[j]-D_L23_001B3060[j];
             if (difference<0) difference=-difference;
@@ -322,13 +332,13 @@ targetsReady:
             a=func_002A78D8(0.52359885f,1.0471977f); b=func_002A7878(-1.0471977f,0.17453295f);
             func_00282D30(toward,direction,j<2?0.4f:0.5f);
             func_002ACEC0(toward,toward,D_0018A560,b); func_002ACEC0(toward,toward,D_0018A570,a);
-            *(Quad *)D_L23_0023B630[j][0]=*(Quad *)temporary;
-            func_00282CC0(D_L23_0023B630[j][1],temporary,toward);
+            qcopy(D_L23_0023B630[j][0],work.temporary.vector);
+            func_00282CC0(D_L23_0023B630[j][1],work.temporary.vector,toward);
             sign=1.0f;
             for (k=1;k<=3;k++) {
-                func_00282CF0((float *)&secondaryHit,D_L23_0023B630[j][k],D_L23_001BA640);
+                func_00282CF0((float *)&work.secondary,D_L23_0023B630[j][k],D_L23_001BA640);
                 a=func_002A7878(0.17453295f,0.9599312f)*sign; sign=-sign;
-                func_002ACEC0(toward,toward,&secondaryHit,a);
+                func_002ACEC0(toward,toward,&work.secondary,a);
                 func_00282CC0(D_L23_0023B630[j][k+1],D_L23_0023B630[j][k],toward);
             }
         }

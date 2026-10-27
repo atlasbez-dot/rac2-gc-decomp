@@ -16,7 +16,6 @@ INCLUDE_ASM("asm/levels", func_L20_002D6488);
    dispatch through the level's own jump table jtbl_002B2A40, the join points
    with their predecessor counts, the exits, the callees, the $gp accesses,
    and the -G8 unit it needs). */
-INCLUDE_ASM("asm/levels", func_L20_002D7730);
 
 extern unsigned char D_L20_0018C0D4;
 

@@ -1,11 +1,10 @@
-/* Retained plain-C near miss; measured 23 October 2026, USA v1.01.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -mno-split-addresses.
- * 360/368 bytes, 0/27 placements. Most of the body agrees; the table-clear tail folds
- * base+0x106c into its relocation and has different loop fill. Corrects random helper
- * ABI, the collision-vector copy and destroy-path control flow. A separate pointer
- * assignment did not preserve the base.
- */
+/* func_L00_004170A8 (368 B, 27 places): this C matches at every place on its own
+   (tools/check.py, -frac2-qcopy -frac2-qcopy-barrier), but levels 08, 09, 19 and 30
+   link func_L00_002E6EF8 to a different level-local function (would be at
+   0x002e2fd0 / 0x002e4968 / 0x002edd78 / 0x002f2d10), so one shared body cannot
+   name its callee in all 27 programs. Reopen once the catalogue gives that callee
+   one name per level (see catalogue false folds), or split the unit per level. */
+
 #include "include_asm.h"
 typedef int TI128 __attribute__((mode(TI)));
 extern char D_L00_0025A920[];

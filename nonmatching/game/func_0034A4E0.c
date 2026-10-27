@@ -1,3 +1,11 @@
+/* M13, 26 October 2026: 788/804 B under -O2 -G0 -ffunction-sections (opcode score 74 -> 59).
+ * D_L00_001A904C_3 is macro-addressed (lui/lw in one register); the table copies are
+ * assigned after the declarations in retail's interleaved order. Left: retail keeps
+ * object and the last pointer in s0/s1 from the prologue (object's register is reused
+ * for object + 0xA8), so each branch's stores are scheduled differently and 16 bytes
+ * are missing. Reopen: why object and last get callee-saved registers.
+ */
+#include "common.h"
 /* Complete manual reconstruction; not linked.
  * Profile: -O2 -G0 -ffunction-sections.
  * us: 0/28 placements; exit 1.
@@ -13,25 +21,27 @@ extern StageFloatTable D_001AE628, D_001AE638;
 extern StageIntTable D_001AE648, D_001AE658;
 extern void func_003363C0(unsigned char *, float);
 
-typedef unsigned char u8;
-extern char *D_L00_001A904C_3 __attribute__((sda));
+extern char *D_L00_001A904C_3 MACRO_ADDR;
 extern void func_00336390(char *, char *, int);
 
 float func_0034A4E0(char *object, int value, int *count, int *group,
                     float *scale, int *first, int *second, int *last,
                     float *offset)
 {
-    StageFloatTable scales = D_001AE628;
-    StageFloatTable results = D_001AE638;
-    StageIntTable firsts = D_001AE648;
-    StageIntTable seconds = D_001AE658;
-    int index = value - 1;
+    StageFloatTable scales, results;
+    StageIntTable firsts, seconds;
+    int index;
     float position, result = 0.0f;
     char *left, *right;
 
+    scales = D_001AE628;
+    results = D_001AE638;
     *last = 0;
+    index = value - 1;
     *group = value < 21 ? 1 : 2;
     if (index < 0) index = 0;
+    firsts = D_001AE648;
+    seconds = D_001AE658;
     if ((unsigned int)(value - 1) < 20) {
         position = (float)(index / 4);
         *count = 6;

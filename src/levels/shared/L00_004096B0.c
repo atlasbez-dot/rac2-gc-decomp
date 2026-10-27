@@ -86,11 +86,10 @@ INCLUDE_ASM("asm/levels", func_L00_00409E48);
 
 INCLUDE_ASM("asm/levels", func_L00_0040A4A8);
 
-INCLUDE_ASM("asm/levels", func_L00_0040AFB8);
 
 INCLUDE_ASM("asm/levels", func_L00_0040B098);
 
-INCLUDE_ASM("asm/levels", func_L00_0040B2C0);
+/* func_L00_0040B2C0 is defined in L00_0040B2C0-flags-g8.c. */
 
 
 INCLUDE_ASM("asm/levels", func_L00_0040B398);
@@ -101,7 +100,7 @@ INCLUDE_ASM("asm/levels", func_L00_0040BA30);
 
 INCLUDE_ASM("asm/levels", func_L00_0040C7D8);
 
-INCLUDE_ASM("asm/levels", func_L00_0040CCA0);
+/* func_L00_0040CCA0 is in L00_0040CCA0.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_0040D058);
 
@@ -120,12 +119,11 @@ void func_L00_0040DF00(char *object)
 
 INCLUDE_ASM("asm/levels", func_L00_0040DF58);
 
-INCLUDE_ASM("asm/levels", func_L00_0040F6A0);
+/* func_L00_0040F6A0 is in L00_0040F6A0-g16.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_00410178);
 
 
-INCLUDE_ASM("asm/levels", func_L00_00410508);
 
 INCLUDE_ASM("asm/levels", func_L00_00410690);
 
@@ -210,11 +208,9 @@ void func_L00_004117B8(char *a0)
     func_L00_00411F48(s2);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_004118A8);
 
 INCLUDE_ASM("asm/levels", func_L00_00411B30);
 
-INCLUDE_ASM("asm/levels", func_L00_00411F48);
 
 /* resets a state record: zero words, plus/minus one float flags and two 64-bit fields in the retail store order */
 void func_L00_00412088(char *p)
@@ -249,7 +245,7 @@ void func_L00_00412088(char *p)
 
 INCLUDE_ASM("asm/levels", func_L00_00412110);
 
-INCLUDE_ASM("asm/levels", func_L00_00412230);
+/* func_L00_00412230 is defined in x-qcopy.c. */
 
 /* Derives a 16-byte element at index-1 from its index-2 and index-3 neighbours through two bound helpers; original game role is unknown. */
 void func_L00_00412408(Vec16_Fc936841d *object, int index)

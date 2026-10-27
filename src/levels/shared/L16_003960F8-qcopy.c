@@ -1,6 +1,6 @@
 #include "common.h"
 typedef int Vector128 __attribute__((mode(TI)));
-extern int func_00277F48(void *,int,void *,void *,float);
+extern int func_00277F48(float, void *, int, void *, void *);
 extern char *D_L16_001C3FC0[];
 int func_L16_003960F8(char *object)
 {
@@ -9,7 +9,7 @@ int func_L16_003960F8(char *object)
     int i;
     char *entry;
     *(Vector128 *)position = *(Vector128 *)(object+0x10);
-    count=func_00277F48(position,0,object,0,5.0f);
+    count=func_00277F48(5.0f, position, 0, object, 0);
     if (count != 0) {
     for (i=0;i<count;i++) {
         entry=D_L16_001C3FC0[i];

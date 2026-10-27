@@ -1,3 +1,13 @@
+/* M13, 26 October 2026: 1252/1252 B under -O2 -G0 -ffunction-sections, 7 words off,
+ * all in the initial-rectangle setup (+0x174..+0x198): retail forms obj[0x1C] - 4 in
+ * its own register and adds obj[0x24] to it; this draft reassociates the -4 after the
+ * add and swaps a1/a3. Everything else matches, using the func_002D84B0 forms
+ * (exact): rectangle declared before initial, active before font, rows reread
+ * through the list base, int colour, macro-addressed check-box globals, if/else
+ * spacing and the field stores in this order. us: 0/28; us2/pal absent.
+ * Reopen: a source form for fields[1] that keeps (x - 4) + w unreassociated.
+ */
+#include "common.h"
 /* Complete manual reconstruction; not linked.
  * Profile: -O2 -G0 -ffunction-sections.
  * us: 0/28 placements; exit 1.
@@ -10,7 +20,7 @@
 typedef struct { short fields[12]; } MenuTextRectangle;
 extern char *D_001F2854;
 extern char D_00263B50[], D_00264290[], D_00263EF0[];
-extern unsigned char D_001A7A60[], D_001A7BB4;
+extern unsigned char D_001A7A60[] MACRO_ADDR, D_001A7BB4 MACRO_ADDR;
 extern void func_002FC560(unsigned int, unsigned long long);
 extern void func_0027C540(int);
 extern void *func_00115484(void *, int, int);
@@ -24,14 +34,14 @@ extern void func_0028FAB8(int, int, int, int, int, int);
 
 int func_002D89D8(char *object)
 {
-    MenuTextRectangle initial, rectangle;
+    MenuTextRectangle rectangle, initial;
     short *row;
-    char *font = D_00263B50;
     int height, texture = 1, lineHeight, spacing, top;
     int count, index, selected, enabled, text;
     int active = *(char **)(D_001F2854 + 0xE8) == object;
+    char *font = D_00263B50;
     unsigned long textureWord;
-    long colour;
+    int colour;
     height = (*(int *)(object + 0x30) & 0x40000) ? 16 : 12;
     if (*(int *)(object + 0x30) & 4) {
         height = (*(int *)(object + 0x30) & 0x40000) ? 18 : 14;
@@ -48,27 +58,27 @@ int func_002D89D8(char *object)
     row = *(short **)(object + 0x34);
     count = 0;
     while (row[0]) { row += 6; count++; }
-    spacing = height + 3;
-    if (!(*(int *)(object + 0x30) & 16)) spacing = *(int *)(object + 0x24) / (count + 1);
+    if (*(int *)(object + 0x30) & 16) spacing = height + 3;
+    else spacing = *(int *)(object + 0x24) / (count + 1);
     top = spacing - height / 2 + *(int *)(object + 0x1C);
     func_00115484(&initial, 0, 24);
-    initial.fields[0] = *(int *)(object + 0x1C) + 4;
-    initial.fields[1] = *(int *)(object + 0x24) + *(int *)(object + 0x1C) - 4;
     initial.fields[2] = *(int *)(object + 0x18);
+    initial.fields[0] = *(int *)(object + 0x1C) + 4;
     initial.fields[3] = *(int *)(object + 0x18) + *(int *)(object + 0x20) - 2;
     initial.fields[5] = top - *(int *)(object + 0x44);
+    initial.fields[1] = *(int *)(object + 0x24) + *(int *)(object + 0x1C) - 4;
     initial.fields[8] = lineHeight;
     rectangle = initial;
     textureWord = func_0027C878(texture);
-    for (index = 0; (row = *(short **)(object + 0x34) + index * 6)[0]; index++) {
+    for (index = 0; (*(short **)(object + 0x34))[index * 6]; index++) {
         selected = active && *(int *)(object + 0x40) == index;
-        enabled = row[1] != 0;
+        enabled = (*(short **)(object + 0x34))[index * 6 + 1] != 0;
         if (*(int *)(object + 0x30) & 2) colour = (int)0x80F0F0F0u;
         else if (selected) colour = enabled ? (int)0x8020FFFFu : (int)0x80006060u;
         else colour = enabled ? (int)0x80F0F0F0u : (int)0x80303030u;
         if (!(*(int *)(object + 0x30) & 0x10000) && selected && rectangle.fields[5] < rectangle.fields[0])
             *(int *)(object + 0x44) -= 4;
-        text = func_00288FB8(row[0]);
+        text = func_00288FB8((*(short **)(object + 0x34))[index * 6]);
         rectangle.fields[4] = (*(int *)(object + 0x30) & 0xA00) ? 32 : 4;
         if (*(int *)(object + 0x30) & 0x400) {
             rectangle.fields[9] = 1;
@@ -81,10 +91,9 @@ int func_002D89D8(char *object)
             func_002D9CF8(15, rectangle.fields[5] + 9, D_001A7A60[index] != 0);
         if (*(int *)(object + 0x30) & 0x800)
             func_002D9CF8(15, rectangle.fields[5] + 9, D_001A7BB4 == *(int *)(*(short **)(object + 0x34) + index * 6 + 2));
-        row = *(short **)(object + 0x34) + index * 6;
         rectangle.fields[5] += rectangle.fields[7];
-        if (row[4]) {
-            text = func_00288FB8(row[4]);
+        if ((*(short **)(object + 0x34))[index * 6 + 4]) {
+            text = func_00288FB8((*(short **)(object + 0x34))[index * 6 + 4]);
             rectangle.fields[4] = 20;
             func_0027FC70(rectangle.fields, colour, text, -1, textureWord, font);
             rectangle.fields[5] += spacing;

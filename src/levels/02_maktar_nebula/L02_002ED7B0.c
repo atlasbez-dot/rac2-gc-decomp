@@ -280,7 +280,7 @@ INCLUDE_ASM("asm/levels", func_L02_0033C8B8);
 
 INCLUDE_ASM("asm/levels", func_L02_0035BD60);
 
-INCLUDE_ASM("asm/levels", func_L02_00363D78);
+/* func_L02_00363D78 is defined in L02_00363D78.c. */
 
 ASM_FUNC("asm/levels", func_L02_00364A18);
 
@@ -298,7 +298,6 @@ INCLUDE_ASM("asm/levels", func_L02_003CA4A8);
 
 /* func_L02_003CB090 is matched in L02_003CB090.c (built with -mno-split-addresses). */
 
-INCLUDE_ASM("asm/levels", func_L02_003CB0F0);
 
 extern u16 *D_L02_001FC060[];
 
@@ -330,7 +329,6 @@ u8 *func_L02_003CD5B0(int group) {
 
 INCLUDE_ASM("asm/levels", func_L02_003CFAC8);
 
-INCLUDE_ASM("asm/levels", func_L02_003D0238);
 
 INCLUDE_ASM("asm/levels", func_L02_003D0408);
 
@@ -540,4 +538,21 @@ void func_L02_003D2488(char *self, int flag1, int flag2) {
         func_L02_003D2390(self);
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003D25C8);
+extern float func_00283180(float);
+extern float func_00283198(float);
+
+/* Same body as func_L02_003F1A88, with this function's own callees. */
+void func_L02_003D25C8(char *arg0, char *arg1) {
+    char *state;
+    float angle;
+    float radius;
+
+    angle = func_00283248(*(float *)(arg0 + 0x10) - *(float *)arg1,
+                          *(float *)(arg0 + 0x14) - *(float *)(arg1 + 4));
+    angle += func_002A7878(-0.78539824f, 0.78539824f);
+    radius = func_002A7878(-2.0f, 2.0f) + 8.0f;
+    state = *(char **)(arg0 + 0x68);
+    qcopy(state + 0x2D0, arg1);
+    *(float *)(state + 0x2D0) += radius * func_00283180(angle);
+    *(float *)(state + 0x2D4) += radius * func_00283198(angle);
+}

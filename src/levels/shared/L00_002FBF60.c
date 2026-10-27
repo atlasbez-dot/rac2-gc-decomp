@@ -35,7 +35,6 @@ void func_L00_002FC028(void)
     ref_L00_002FC028_00 = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002FC058);
 
 
 

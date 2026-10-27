@@ -1,8 +1,14 @@
-/* Measured with -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. US: 01_oozla: 988
-   bytes, expected 992; 0/1 placements. US2: 0/1 placements. PAL: canonical function absent. One
-   reconstruction trial plus release verification. Saved target records, movement and nearest-peer
-   selection reconstructed. GP-versus-absolute frame-counter access and register allocation remain.
-   Reopen with a legitimate mixed-access representation and a peer-iteration witness.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * 1000/992 bytes; 0/1 USA v1.01 and USA v2.00 places.
+ * The canonical function is absent from the PAL catalogue.
+ * Remaining: The saved target records use real qcopy. The mixed GP/absolute frame-counter
+ * reads use one canonical symbol with honest extern views; current AB1F0
+ * integer-return source contract is preserved before its pointer interpretation.
+ * Object/state saved registers, peer-iteration temporaries and branch schedule
+ * still differ; the absolute alias alone adds four bytes versus the helper trial.
+ * Reopen with: Independent peer iterator or saved-record lifetime evidence. Do not
+ * invent a second counter object, volatile access or a guessed array extent.
  */
 
 #include "common.h"
@@ -15,11 +21,13 @@ extern float D_L01_001B94C0[];
 extern char D_00189E20[];
 extern float D_00189EA0[];
 extern int D_L01_001B2088 __attribute__((sda));
+/* The final frame-counter read uses an absolute address in retail. */
+extern int oozla_frame_absolute __asm__("D_L01_001B2088") NOT_SDA;
 extern float func_00282E48(void *,void *);
 extern void func_002A93B0(void *);
 extern int func_002B3BA8(void *,int,int,int,float,float);
 extern float func_00282E80(void *,void *);
-extern char *func_002AB1F0(void *);
+extern s32 func_002AB1F0(u8 *);
 extern int func_002B0ED8(void *,void *,int);
 extern void func_L01_003B4BD8(void *);
 extern void func_L01_003B5290(void *);
@@ -44,18 +52,18 @@ void func_L01_003B53C8(u8 *object)
         func_002A93B0(object);
         object[0x6F] = 22;
     }
-    saved[0] = *(OozlaQuad *)(state+0x230);
-    saved[1] = *(OozlaQuad *)(state+0x240);
+    qcopy(&saved[0], state+0x230);
+    qcopy(&saved[1], state+0x240);
     if (func_002B3BA8(object,I(state,0x398),0,0,F(state,0x388),0.5f) != 1 && ((int *)saved)[5] == 1) {
         target = ((u8 **)saved)[4];
         if (target && target[0x20] != 254 && target[0x20] != 253 && func_00282E80(object+0x10,target+0x10) < F(state,0x39C)) {
-            *(OozlaQuad *)(state+0x230) = saved[0];
-            *(OozlaQuad *)(state+0x240) = saved[1];
+            qcopy(state+0x230, &saved[0]);
+            qcopy(state+0x240, &saved[1]);
             target = C(state,0x240);
             if (target == C(D_00189E20,0x2290)) {
-                *(OozlaQuad *)(state+0x230) = *(OozlaQuad *)(D_00189E20+0xD0);
+                qcopy((state+0x230), (D_00189E20+0xD0));
             } else {
-                *(OozlaQuad *)(state+0x230) = *(OozlaQuad *)(target+0x10);
+                qcopy((state+0x230), (target+0x10));
                 detail = (u8 *)func_002AB1F0(target);
                 if (detail) F(state,0x238) += F(detail,0x10);
             }
@@ -98,7 +106,7 @@ void func_L01_003B53C8(u8 *object)
                 }
                 func_002A86E8(iterator,iterator[0],0,0);
             }
-            *P(state,0x368) = D_L01_001B2088;
+            *P(state,0x368) = oozla_frame_absolute;
         }
     }
 }

@@ -38,6 +38,14 @@ static __inline__ void qzero(void *dst) {
     __asm__ __volatile__("sq $0,0x0(%0)" : : "r"(dst) : "memory");
 }
 
+/* rac1-decomp's qzero: the same store with no clobbers at all, so the asm is a bare
+ * volatile ASM_OPERANDS. cse flushes everything it knows at one, so an address used
+ * before it is built again (a fresh lui) after it. Use it only where retail rebuilds.
+ */
+static __inline__ void qzero_nc(void *dst) {
+    __asm__ __volatile__("sq $0,0x0(%0)" : : "r"(dst));
+}
+
 /* RAC1's non-clobbering variant: callers must establish that surrounding C
  * accesses do not depend on the copied memory. Keep qcopy as the default.
  */

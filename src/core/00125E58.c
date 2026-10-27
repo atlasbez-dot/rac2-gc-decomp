@@ -38,4 +38,29 @@ short func_00125E58(short psm, short w, short h) {
 
 INCLUDE_ASM("asm/core", func_00125F20);
 
-INCLUDE_ASM("asm/core", func_00126104);
+extern void r1_func_0011A6C8();
+extern char r1_D_00153178[];
+
+/* rac1-decomp src/core/001224B0.c: func_001224B0 */
+/* Kicks a DMA transfer on the GIF channel (D2 at 0x1000A000), waiting
+   for the channel with a timeout. Every register access is volatile. */
+int func_00126104(void *arg0) {
+    int p = (int)arg0;
+    unsigned int i;
+
+    i = 0;
+    while (*(volatile int *)0x1000A000 & 0x100) {
+        if (i++ > 0x1000000) {
+            r1_func_0011A6C8(r1_D_00153178);
+            return -1;
+        }
+    }
+    *(volatile int *)0x1000A020 = (int)(*(long *)arg0 & 0x7FFF) + 1;
+    if ((p & 0x70000000) == 0x70000000) {
+        *(volatile int *)0x1000A010 = (p & 0x0FFFFFFF) | 0x80000000;
+    } else {
+        *(volatile int *)0x1000A010 = p & 0x0FFFFFFF;
+    }
+    *(volatile int *)0x1000A000 = 0x101;
+    return 0;
+}

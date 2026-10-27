@@ -1,1 +1,69 @@
-/* func_L00_003B3158 - 756 bytes, level 00_aranos_tutorial. Screened with the wave-12 screening script (the disassembly of tools/w8_dump.py): 12 call(s); MMI words [+0x001C:0x700014A9 +0x0040:0x7FA20030 +0x004C:0x7E020000 +0x00D0:0x7E220000]; $gp-relative small-data accesses: 0; float constants [none]. Not a C row: the body carries the SPECIAL2 word(s) 0x700014A9 (opcode 0x1C, the MMI0 family). Plain C cannot reach them: this cc1 emits lq/sq for a mode(TI) local and ldl/ldr/sdl/sdr for a struct assignment, never the packed MMI copy. ASM_FUNC candidate, as for the rest of the family. */
+/* func_L00_003B3158 - 748 bytes, 27 places. Opus near miss (M18): plain C, por = qzero under -frac2-zero-ti-por (own -G0 unit with that flag). Size and shape match retail; the one difference is the fade block: retail reloads st->life there (both incoming likely-branches carry lwc1 f0,0x14 in their slots), this cc1 PREs the compare load into it (mov.s in the bc1f slot plus an inserted load on the stuck path). Five tail spellings tried. 9 diff lines. */
+   unit takes -frac2-zero-ti-por. */
+#include "common.h"
+
+typedef int TI128 __attribute__((mode(TI)));
+typedef union { TI128 q; float f[4]; } V4_3B3158;
+
+typedef struct {
+    char pad00[0x14];
+    float life;
+    float fade;
+    char pad1C[0x26 - 0x1C];
+    s16 timer;
+    char pad28[0x34 - 0x28];
+    s32 stuck;
+} Shard_3B3158;
+
+extern char D_00189E20[];
+extern char D_L00_001BF220[];
+
+extern void func_002AF000(void *, float, float, float);
+extern void func_00282CC0(void *, void *, void *);
+extern int func_002761F8(void *, void *, int, void *, void *);
+extern int func_00277258(void *, int, void *, float);
+extern void func_00283028(void *, void *, void *);
+extern void func_00282F20(void *, void *, float);
+extern void func_002ABBB8(void *, void *, void *, float, float, int, int, int, float, float, float, float, int, float, int, int, int, int, int);
+extern void func_L00_003B3090(void *, void *, void *);
+extern int func_00282978(void *);
+extern void func_0029F338(void *);
+extern void func_002A9288(void *, float);
+
+void func_L00_003B3158(char *obj)
+{
+    Shard_3B3158 *st;
+    V4_3B3158 from, dir, at;
+    char *game;
+
+    st = *(Shard_3B3158 **)(obj + 0x68);
+    dir.q = 0;
+    dir.f[2] = 0.13333334f;
+    qcopy(&from, obj + 0x10);
+    func_002AF000(st, st->fade, *(float *)(obj + 0xF8), -*(float *)(obj + 0xF4));
+    func_00282CC0(obj + 0x10, obj + 0x10, st);
+    game = D_00189E20;
+    if (func_002761F8(&from, obj + 0x10, 0, *(void **)(game + 0x2290), 0)
+        || func_00277258(obj + 0x10, 1, *(void **)(game + 0x2290), 0.3f)) {
+        qcopy(&at, D_L00_001BF220);
+        func_00283028(&dir, st, D_L00_001BF220 + 0x20);
+        func_00282F20(&dir, &dir, 0.033333335f);
+        func_002ABBB8(obj, &dir, &at, 0.0f, 0.0f, 0, 0, 4, 0.0f, 0.0f, 9.0f, 0.4f, -1, 0.0f, 0, 0, -1, 0, 0x810001);
+        func_L00_003B3090(obj, st, &at);
+        func_0029F338(obj);
+        return;
+    }
+    if (*(float *)(obj + 0x10) < 2.0f || *(float *)(obj + 0x10) > 1021.0f
+        || *(float *)(obj + 0x14) < 2.0f || *(float *)(obj + 0x14) > 1021.0f
+        || *(float *)(obj + 0x18) < 2.0f || *(float *)(obj + 0x18) > 1021.0f) {
+        func_0029F338(obj);
+        return;
+    }
+    if (st->stuck == 0 && (func_00282978(&st->timer) || st->life < 0.0f)) {
+        func_002ABBB8(obj, &dir, 0, 0.0f, 0.0f, 0, 0, 4, 0.0f, 0.0f, 9.0f, 0.4f, -1, 0.0f, 0, 0, -1, 0, 0x810001);
+        func_0029F338(obj);
+        return;
+    }
+    st->life = st->life - st->fade;
+    func_002A9288(obj, 0.2f);
+}

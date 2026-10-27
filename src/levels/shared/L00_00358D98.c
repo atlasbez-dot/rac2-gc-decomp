@@ -238,11 +238,9 @@ int func_L00_00367720(void) {
     return (int)r1_D_0012F86C_00367720;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00368F58);
 
 
 
-INCLUDE_ASM("asm/levels", func_L00_0036AE00);
 
 INCLUDE_ASM("asm/levels", func_L00_0036BE28);
 
@@ -361,13 +359,11 @@ void func_L00_00374B78(void) {
 
 INCLUDE_ASM("asm/levels", func_L00_00374C18);
 
-INCLUDE_ASM("asm/levels", func_L00_00375718);
 
 INCLUDE_ASM("asm/levels", func_L00_00376600);
 
 INCLUDE_ASM("asm/levels", func_L00_003769C0);
 
-INCLUDE_ASM("asm/levels", func_L00_00377330);
 
 INCLUDE_ASM("asm/levels", func_L00_00377580);
 

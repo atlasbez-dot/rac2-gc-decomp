@@ -1,32 +1,21 @@
-/* Signature/interface follow-up, 23 October 2026.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g.
- * USA v1.01: 576/584 bytes, 0/1 carrying placements.
- * USA v2.00: 576/584 bytes, 0/1 carrying placements.
- * PAL: 576/584 bytes, 0/1 carrying placements.
- * func_0026FEB8 follows the canonical const-char-pointer variadic logger interface; both
- * existing diagnostic integer arguments remain.
- * This follows the current linked C contract; it does not independently prove the original
- * source declaration.
- * The retained C remains nonmatching. Earlier sizes and residual offsets below are
- * historical and superseded by this measurement; their reopening hypotheses remain
- * unqualified. No linked build was run for this follow-up.
- */
-
-/* Historical measurements, superseded where inconsistent with the follow-up above. */
-/* Nonmatching reconstruction, 23 October 2026.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g.
- * Final check.py coverage: us 0/1, us2 0/1, pal 0/1; no linked build run.
- * Scalar TI local versus stack vector; qcopy/barrier, initialization placement and -g: 572/576 versus 584.
- * Remaining: Local point address lifetime and handle-table register/branch scheduling differ.
- * Reopen with a matching stack-vector lifetime witness.
+/* Retained complete manual C reconstruction; nonmatching, not linked.
+ * Checked source: src/levels/06_notak/L06_003F3448-helpers.c
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g
+ * Retail US extent: 584 bytes.
+ * Actual final coverage: us: 0/1, exit1, 576 compiled bytes; us2: 0/1, exit1, 576 compiled bytes; pal: 0/1, exit1, 576 compiled bytes.
+ * Residual: 576/584 bytes; frame 0x40 versus retail 0x50. The saved-point address is not held in retail s3, and handle/branch scheduling differs. The observed pointer argument and pointer interpretation of func_L00_00345AF0 are retained; the shared zero stub family has no globally qualified unified C contract.
+ * Reopen only with: A measured saved-point address lifetime witness plus a qualified shared-stub-family ABI resolution before any promotion. Do not delete the caller pointer slot to conform to the current zero-stub source index.
+ * Earlier complete variants are retained privately. No native execution or
+ * complete linked-program equality is claimed by these placement measurements.
  */
 #include "common.h"
+
 typedef int VectorBits __attribute__((mode(TI)));
 extern int func_002A8600(char **, int, int, int);
 extern char *func_L00_00345AF0(char *);
 extern void func_002AB650(char *);
 extern void func_002A0F48(char *);
-extern char *func_002AB1F0(char *);
+extern s32 func_002AB1F0(u8 *);
 extern void func_0026FEB8(const char *, ...);
 extern char D_L06_001AF990[];
 extern int D_L06_001B2348;
@@ -34,9 +23,9 @@ extern int D_L06_001B2348;
 /* Allocate a child and initialize its rendering, health and parent linkage. */
 char *func_L06_003F3448(char *parent, VectorBits *position)
 {
-    float point[4];
+    VectorBits point;
     char *state, *child, *result, *component;
-    *(VectorBits *)point = *position;
+    qcopy(&point, position);
     if (!parent)
         return 0;
     state = *(char **)(parent + 0x68);
@@ -44,7 +33,7 @@ char *func_L06_003F3448(char *parent, VectorBits *position)
     child = 0;
     if (func_002A8600(&child, *(int *)(state + 0x84), 1, 1) == 0) {
         (*(unsigned char *)(state + 0x81))++;
-        *(VectorBits *)(child + 0x10) = *(VectorBits *)point;
+        qcopy(child + 0x10, &point);
         *(int *)(child + 0x1C) = 0;
         *(unsigned char *)(child + 0x20) = 0;
         *(unsigned char *)(child + 0xBC) = 0;
@@ -79,7 +68,7 @@ char *func_L06_003F3448(char *parent, VectorBits *position)
         func_002AB650(child);
         func_002A0F48(child);
         result = child;
-        component = func_002AB1F0(result);
+        component = (char *)func_002AB1F0((u8 *)result);
         if (component) {
             *(int *)(component + 0x24) = 0;
             *(int *)(component + 0x20) = 0;

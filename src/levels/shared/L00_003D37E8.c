@@ -70,8 +70,6 @@ INCLUDE_ASM("asm/levels", func_L00_003D4548);
 INCLUDE_ASM("asm/levels", func_L00_003D4A20);
 
 
-INCLUDE_ASM("asm/levels", func_L00_003D5358);
-
 /* shared native body of family a04928c6 */
 void func_L00_003D6FB8(char *p)
 {
@@ -143,7 +141,6 @@ INCLUDE_ASM("asm/levels", func_L00_003DB118);
 INCLUDE_ASM("asm/levels", func_L00_003DBF50);
 
 
-INCLUDE_ASM("asm/levels", func_L00_003DC350);
 
 INCLUDE_ASM("asm/levels", func_L00_003DC3E0);
 
@@ -507,7 +504,5 @@ INCLUDE_ASM("asm/levels", func_L00_003E2180);
 
 INCLUDE_ASM("asm/levels", func_L00_003E2510);
 
-INCLUDE_ASM("asm/levels", func_L00_003E2BD0);
 
 INCLUDE_ASM("asm/levels", func_L00_003E2E80);
-

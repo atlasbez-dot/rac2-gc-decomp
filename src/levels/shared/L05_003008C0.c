@@ -146,9 +146,9 @@ void func_L05_0037AB88(int index, int step)
         D_002A1800[slot].value = D_002A1800[slot].limit;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0037AC00);
+/* func_L05_0037AC00 is matched in its own unit, src/levels/shared/L05_0037AC00.c (default flags). */
 
-INCLUDE_ASM("asm/levels", func_L05_0037AC40);
+/* func_L05_0037AC40 is matched in its own unit, src/levels/shared/L05_0037AC40.c (default flags). */
 
 /* func_L05_0037AC80 lives in L05_0037AC80.c:
    its state and damage flow are kept in a separate unit. */

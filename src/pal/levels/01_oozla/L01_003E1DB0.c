@@ -7,7 +7,7 @@ extern f32 func_310580(f32 x, f32 y);
 extern s32 func_310528(s32 a, s32 b);
 extern f32 func_2E3A48(f32 x);
 extern f32 func_2E3A60(f32 x);
-extern s32 func_00277F48(void *pos, s32 flag, void *obj, s32 arg, f32 radius);
+extern s32 func_00277F48(f32 radius, void *pos, s32 flag, void *obj, s32 arg);
 extern u32 D_L01_001C3980[];
 extern void func_002AB8C0(void *, void *);
 extern void func_00282978(void *);

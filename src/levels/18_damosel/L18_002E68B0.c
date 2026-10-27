@@ -21,14 +21,14 @@ extern float func_00283180(float);
 extern float func_00283198(float);
 extern u8 *D_L18_001FF4D4;
 
-INCLUDE_ASM("asm/levels", func_L18_002E68B0);
+/* func_L18_002E68B0 is in the sibling file L18_002E68B0-decider.c (its own profile). */
 
 INCLUDE_ASM("asm/levels", func_L18_003170F8);
 
 
 /* Fills the record with the requested fields and derived coordinates. */
-char *func_L18_0035B6B8(char *p0, s16 p1, char *p2, s32 p3, char *p4, float f0, float f1,
-                         float f2, float f3, float f4)
+char *func_L18_0035B6B8(char *p0, float f0, float f1, float f2, float f3, float f4, s16 p1,
+                         char *p2, s32 p3, char *p4)
 {
     char *s0 = func_002B9030(0x65);
     char *s1 = s0 + 0x20;

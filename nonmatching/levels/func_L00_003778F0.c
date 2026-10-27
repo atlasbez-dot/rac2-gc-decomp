@@ -1,35 +1,18 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G0 -ffunction-sections.
- * Reported final C / retail: 856 / 860 bytes; size equality is not a match.
- * us: 0/27 placements; 856/860 bytes.
- * us2: absent from catalogue (not a match).
- * pal: absent from catalogue (not a match).
- * Residual: Four-byte text gap plus register/base scheduling differences. Standard G0 scalar macros recover the retail 0x160 frame and 16 bytes. A whole-model pointer expression does not close the remaining differences. The gradient is a complete 16-byte record and the text buffer is 256 bytes. Reopen on model/gradient lifetimes and store ordering.
- * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+/* Retained near miss; not matching.
+ * Profile: -O2 -G0 -ffunction-sections. 856/860 bytes, US 0/27.
+ * M8, 26 October 2026: the D_L00_001B1BBC clear is retail's `lui $at; sw` store kept out of
+ * the copy's slots, which an sda object at a nonzero offset reproduces (D_L00_001B1BB8[1]);
+ * the item fields go through a 28-byte ShopItem view. That fixes the opening copy and
+ * leaves about 35 instructions: retail computes model + index*28 twice (once into $v0 for the
+ * price, again into $s1 for the name) while this source CSEs it into one register, and the
+ * 4-byte gap sits in that tail.
  */
-
-/*
- * Manual C reconstruction retained after bounded retail comparison.
- * Profile: -O2 -G0 -ffunction-sections
- * Measured text: 856 bytes; retail: 860 bytes. Stack frame 0x160.
- * Final coverage: US 0/27, US2 absent, PAL absent. Absences are not matches.
- * 3 measured source/profile forms. Four-byte text gap plus register/base scheduling
- * differences. Standard G0 scalar macros recover the retail 0x160 frame and 16 bytes. A
- * whole-model pointer expression does not close the remaining differences. The gradient is a
- * complete 16-byte record and the text buffer is 256 bytes. Reopen on model/gradient
- * lifetimes and store ordering.
- * All carrying checks ended as nonmatches (exit 1); no linked-build credit.
- */
-
 typedef struct { unsigned int word[4]; } PanelColors;
+typedef struct { int price; int pad[3]; unsigned char *name; int pad2[2]; } ShopItem;
 extern PanelColors D_L00_001AD768;
 extern char D_L00_0022F7C0[];
 extern float D_L00_001B25E0 __attribute__((sda));
-extern int D_L00_001B1BBC;
+extern int D_L00_001B1BB8[] __attribute__((sda));
 extern int D_001A7340 __attribute__((sda));
 extern int D_001A79FC __attribute__((sda));
 extern int func_0028E588(int, int);
@@ -47,7 +30,7 @@ void func_L00_003778F0(void) {
     char *model = D_L00_0022F7C0;
     int index = *(int *)(model + 0x80);
     colors = D_L00_001AD768;
-    D_L00_001B1BBC = 0;
+    D_L00_001B1BB8[1] = 0;
     func_0028EA58(func_0028E588(0xEAA8, 0), 16, (int)(D_L00_001B25E0 * 51.0f + 0.5f),
                   192, (int)(D_L00_001B25E0 * 96.0f + 0.5f), colors.word);
     func_0028EA58(func_0028E588(0xEAA8, 0), 400, (int)(D_L00_001B25E0 * 51.0f + 0.5f),
@@ -58,10 +41,10 @@ void func_L00_003778F0(void) {
                   -192, -(int)(D_L00_001B25E0 * 96.0f + 0.5f), colors.word);
     func_0027FA10(270, (int)(D_L00_001B25E0 * 218.0f + 0.5f), 0x80F0F0F0ULL,
                   (unsigned char *)func_00288FB8(0x318C), -1);
-    func_002F9BC0(text, *(int *)(model + 0x144 + index * 28));
+    func_002F9BC0(text, ((ShopItem *)(model + 0x144))[index].price);
     func_0027F5B8(270, (int)(D_L00_001B25E0 * 218.0f + 0.5f), 0x80F0F0F0ULL, (unsigned char *)text, -1);
     func_0027FB40(D_001A7340 >> 1, (int)(D_L00_001B25E0 * 277.0f + 0.5f), 0x80F0F0F0ULL,
-                  *(unsigned char **)(model + 0x154 + index * 28), -1);
+                  ((ShopItem *)(model + 0x144))[index].name, -1);
     colors.word[0] = 0x60F0F0B0;
     colors.word[1] = 0x60F0F0B0;
     colors.word[2] = 0x60F0F0B0;

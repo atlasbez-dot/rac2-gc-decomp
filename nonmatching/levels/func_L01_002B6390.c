@@ -1,31 +1,15 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g.
- * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Retained complete manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections -g
+ * 1336/1336 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: Full shared-helper snapshots retain the retail size/frame but preserve the known
+ * pointer-register mismatch at +0x238, plus later scheduling. Ordered float guards are
+ * unchanged.
+ * Reopen: A genuinely new planar/global versus horizontal-local interference remedy supported by
+ * allocator evidence; do not repeat the surviving source-pointer tie.
+ * Trial-only source markers and profiles are restored after checking.
  */
 
-/*
- * Retained manual reconstruction, 23 October 2026; NOT MATCHING.
- *
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g
- *
- * Meaningful bounded trials: 10.
- *
- * USA v1.01 and USA v2.00: 1336/1336 bytes, 0/1 placements each; PAL does not carry this
- * canonical name. First structural mismatch is +0x238, where the planar pointer and local
- * horizontal-vector pointer use s3/s2 instead of s2/s3. Other scheduling differences remain.
- * Typed TI transfers and an accessed resident prefix recovered the frame and initial instruction
- * sequence. Projection locals preserve f0 across clamps. The forward-distance clamp follows the
- * retail less-than test, including unordered float behavior; a prior equal-size draft with
- * different NaN behavior was corrected. Named pointer and unsplit-edge trials did not resolve
- * allocation.
- *
- * Reopen with measured source lifetime evidence that exchanges the planar/global and local
- * projection pointer allocation without artificial operations.
- *
- * No strict linked build or runtime validation is claimed.
- */
 #include "common.h"
 
 typedef struct MotionVector { float x, y, z, w; } MotionVector;
@@ -66,10 +50,12 @@ extern void func_00282F20(void *, void *, float);
 /* Apply pending movement, resolve contacts, then retain the resulting displacement. */
 void func_L01_002B6390(void)
 {
-    MotionVector start, horizontal, vertical;
+    MotionVector start __attribute__((aligned(16)));
+    MotionVector horizontal __attribute__((aligned(16)));
+    MotionVector vertical __attribute__((aligned(16)));
     float amount, zero;
 
-    *(VectorBits *)&start = *(VectorBits *)(&D_00189E20.position);
+    qcopy(&start, (&D_00189E20.position));
     func_L00_002D4140(D_00189E20.collisionObject, (&D_00189E20.additional), &D_00189E20.orientation);
     if (D_00189E20.state == 20 || D_00189E20.state == 91 ||
         D_00189E20.state == 88 || D_00189E20.state == 129) {
@@ -103,8 +89,8 @@ void func_L01_002B6390(void)
         func_L01_002B5218();
     }
     func_00282CF0((&D_00189E20.actual), (&D_00189E20.position), &start);
-    *(VectorBits *)(&D_00189E20.normal) = *(VectorBits *)(&D_00189E20.actual);
-    *(VectorBits *)(&D_00189E20.planar) = *(VectorBits *)(&D_00189E20.actual);
+    qcopy((&D_00189E20.normal), (&D_00189E20.actual));
+    qcopy((&D_00189E20.planar), (&D_00189E20.actual));
     zero = 0.0f;
     func_00282F20((&D_00189E20.actual), (&D_00189E20.actual), 1.0f);
     {
@@ -112,7 +98,7 @@ void func_L01_002B6390(void)
         if (projection < zero) projection = zero;
         func_00282F20((&D_00189E20.actual), (&D_00189E20.velocity), projection);
     }
-    *(VectorBits *)&horizontal = *(VectorBits *)(&D_00189E20.velocity);
+    qcopy(&horizontal, (&D_00189E20.velocity));
     func_L00_002D3960((char *)&horizontal, (char *)&horizontal);
     func_L00_002D3960((char *)(&D_00189E20.normal), (char *)(&D_00189E20.normal));
     func_00282F20((&D_00189E20.normal), (&D_00189E20.normal), 1.0f);
@@ -121,7 +107,7 @@ void func_L01_002B6390(void)
         if (projection < zero) projection = zero;
         func_00282F20((&D_00189E20.normal), &horizontal, projection);
     }
-    *(VectorBits *)&vertical = *(VectorBits *)(&D_00189E20.velocity);
+    qcopy(&vertical, (&D_00189E20.velocity));
     func_L00_002D3BD8((char *)&vertical, (int)&vertical, zero);
     func_L00_002D3BD8((char *)(&D_00189E20.planar), (int)(&D_00189E20.planar), zero);
     func_00282F20((&D_00189E20.planar), (&D_00189E20.planar), 1.0f);
@@ -132,11 +118,11 @@ void func_L01_002B6390(void)
     }
     D_00189E20.distance = func_00282DF0((&D_00189E20.actual));
     D_00189E20.planarDistance = func_L00_002D3A58((char *)(&D_00189E20.actual));
-    *(VectorBits *)&horizontal = *(VectorBits *)(&D_00189E20.actual);
+    qcopy(&horizontal, (&D_00189E20.actual));
     D_00189E20.forwardDistance = func_L00_002B5590(&horizontal);
     D_00189E20.height = func_L00_002D3B00((char *)(&D_00189E20.actual));
     if (D_00189E20.forwardDistance < zero) D_00189E20.forwardDistance = zero;
-    *(VectorBits *)&horizontal = *(VectorBits *)(&D_00189E20.position);
+    qcopy(&horizontal, (&D_00189E20.position));
     if (0.0001f < func_00282DF0((&D_00189E20.additional))) {
         float saved;
         func_00282CC0((&D_00189E20.position), (&D_00189E20.position), (&D_00189E20.additional));

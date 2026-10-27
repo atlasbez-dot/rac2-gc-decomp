@@ -1,27 +1,19 @@
-/* Signature/interface follow-up, 23 October 2026.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
- * USA v1.01: 628/628 bytes, 0/1 carrying placements.
- * USA v2.00: 628/628 bytes, 0/1 carrying placements.
- * PAL: canonical name absent from the catalogue.
- * The ignored func_002A7CA0 result is declared float; its scalar controller-field address
- * uses a float pointer.
- * This follows the current linked C contract; it does not independently prove the original
- * source declaration.
- * The retained C remains nonmatching. Earlier sizes and residual offsets below are
- * historical and superseded by this measurement; their reopening hypotheses remain
- * unqualified. No linked build was run for this follow-up.
+/*
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-zero-ti-por
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 628 bytes; retail: 628 bytes.
+ * Remaining difference: 628/628 bytes and frame 0x50 agree, but entry register ownership differs
+ * from +8 and scalar/controller scheduling remains different. The final rotation/angle copies
+ * intentionally remain ordinary TI transfers: retail interleaves their loads/stores and puts the
+ * final SQ in a JAL delay slot; opaque qcopy increased the body to 632 bytes.
+ * Reopen when: Independent controller/object field and allocation evidence; do not force shared
+ * copies where the measured call-delay schedule requires ordinary transfers.
  */
 
-/* Historical measurements, superseded where inconsistent with the follow-up above. */
-/* USA v1.01/v2.00: 0/1 places, 628/628 bytes with -O2 -G8
- * -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
- * PAL has no catalogue entry. Remaining differences: object/data s0/s1 allocation, global base address
- * and final TI-copy scheduling. Tried nested controller guards, local speed
- * and copy order. Reopen with allocation and source aggregate evidence.
- */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef float f32;
+#include "common.h"
+
 typedef int TI128 __attribute__((mode(TI)));
 extern f32 D_L04_001B1870 __attribute__((sda));
 extern u8 D_L04_001BFAC0[];

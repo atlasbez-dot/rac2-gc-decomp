@@ -104,7 +104,6 @@ void func_00294BC8(int id, int arg)
 
 INCLUDE_ASM("asm/game", func_00294C40);
 
-INCLUDE_ASM("asm/game", func_00294D80);
 
 s32 func_00294E48(s32 index)
 {
@@ -157,7 +156,6 @@ int func_00295680(int arg)
     return -1;
 }
 
-INCLUDE_ASM("asm/game", func_002956E8);
 
 void func_00295788(int a0, int a1)
 {
@@ -207,7 +205,55 @@ int func_00295A10(int param_1)
     return index;
 }
 
-INCLUDE_ASM("asm/game", func_00295A80);
+extern int func_00295A10(int);
+
+extern int func_00282C30(int);
+
+int func_00295A80(void)
+{
+    int i;
+    int t;
+    int bestdiff = 0;
+    int best = -1;
+
+    if (D_001C4FA0[0x8C] == 0) {
+        int j;
+
+        for (j = 4; j >= 0; j--) {
+            if (D_001C4FA0[0xA2 + j] != 0 &&
+                j != D_001C4FA0[0xAC] &&
+                D_001C4FA0[0xA7 + j] == -1)
+                return j;
+        }
+    }
+    t = func_00295A10(D_001C4FA0[0x8C]);
+    if (t == -1)
+        return 1;
+    for (i = 0; i < 5; i++) {
+        int d;
+
+        if (D_001C4FA0[0xA2 + i] == 0)
+            continue;
+        if (i == D_001C4FA0[0xAC])
+            continue;
+        if (D_001C4FA0[0xA7 + i] == -1)
+            return i;
+        d = func_00282C30(func_00295A10(D_001C4FA0[0xA7 + i] & 0xFF) - t);
+        if (bestdiff < d) {
+            bestdiff = d;
+            best = i;
+        }
+    }
+    if (best == -1)
+        best = 0;
+    {
+        int off = 0x29C;
+        char *base = (char *)D_001C4FA0;
+        *(int *)(base + off + best * 4) = -1;
+    }
+    return best;
+}
+
 
 
 void func_00295BE8(u8 *a0,u8 *a1,u8 *a2,u8 *a3) {
@@ -260,7 +306,7 @@ int func_00295C70(void)
     return D_001C4FA0[0x9] != 0;
 }
 
-INCLUDE_ASM("asm/game", func_00295D00);
+/* func_00295D00 is defined in 00295D00-g8.c (-G8 -g). */
 
 INCLUDE_ASM("asm/game", func_00295F60);
 

@@ -1,21 +1,26 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Reported final C / retail: 1440 / 1432 bytes; size equality is not a match.
- * us: 0/1 placements; 1440/1432 bytes.
- * us2: absent from catalogue (not a match).
- * pal: absent from catalogue (not a match).
- * Residual: 8 excess bytes and extra saved register/frame16 bytes. Absolute/GP mixed global accesses and damage-phase control-flow selection remain.
- * Reopening condition: New measured source/data-layout or allocator hypothesis; do not repeat retained flag/control-flow trials or use artificial aliases/barriers.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 1432 bytes; retail 1432 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: canonical name absent; no match credit.
+ * pal: canonical name absent; no match credit.
+ * Remaining: The complete three-row basis and position handoff uses clobbering qcopy before
+ * replacement flags and old-object destruction. Ten actual adjacent part pointers form one
+ * array at +0x358, with the second five-slot window at +0x36C; paired indices stay within
+ * that array. The 64-byte joint matrix and explosion stack tail remain. Local old/replacement
+ * pointer scopes reach the exact retail size, but the frame remains 0xD0 versus 0xC0 with one
+ * additional saved GPR. The callback takes its actual object pointer; the explosion allocator
+ * returns a pointer and its final GPR is a nullable object pointer. Branch/allocation and
+ * global access differences remain; equal size is not a match.
+ * Reopen: Independent old/replacement loop lifetime evidence removing the extra saved
+ * register while preserving all destruction and handoff ordering.
  */
 
-/* 1440/1432 bytes after4 trials. GPR allocation, mixed absolute/GP globals remain. All stack-tail explosion arguments came from retail stores.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. */
-#include "include_asm.h"
+#include "common.h"
 typedef int Quad __attribute__((mode(TI)));
+/* Ten adjacent pointers are one measured table; the second five-slot
+ * window begins at +0x36C. Shared-array indices remain within that table. */
+typedef struct { u8 prefix[0x358]; char *parts[10]; } PartState;
 extern char *D_L23_001B1484 __attribute__((sda));
 extern int D_L23_001B1468 __attribute__((sda));
 extern int D_L23_001B1434 __attribute__((sda));
@@ -28,22 +33,22 @@ extern void func_002A6C58(char *, int, int);
 extern void func_L23_0041D9B0(void);
 extern void func_L00_003294F0(unsigned char *, int);
 extern void func_0029F338(void *);
-extern void func_0032C700(void *, int, int, int, int, int, int, int, float, float, int, int, int, int);
+extern void *func_0032C700(void *, int, int, int, int, int, int, int, float, float, int, int, int, void *);
 extern int func_002E5CF8(int, int, char *);
 extern void func_0029FC20(char *, int, char *);
 extern void func_00282D30(char *, char *, float);
 extern float func_002A7878(float, float);
 extern void func_00282CC0(char *, char *, char *);
 extern char *func_00273730(char *, int, int, int, char *, char *, float *, int, float, float);
-extern void func_00310C88(void);
+extern void func_00310C88(u8 *);
 extern int func_002A77E0(int);
 
 /* Move through the encounter's damage phases, detaching pieces and spawning debris. */
 void func_L23_0041D398(char *object) {
     struct { Quad velocity, matrix[4], random; } local;
-    char *state = *(char **)(D_L23_001B1484 + 0x68);
+    PartState *state = *(PartState **)(D_L23_001B1484 + 0x68);
     char **parts;
-    char *old, *replacement, *particle;
+    char *old, *particle;
     int i, index;
     unsigned short timer;
     float scale;
@@ -51,9 +56,11 @@ void func_L23_0041D398(char *object) {
         if ((unsigned short)*(short *)(object + 0x96) <= D_L23_001B1468 + 200 || func_002F5D10()) {
             if (!D_001A7AFD && (unsigned short)*(short *)(object + 0x96) > D_L23_001B1468 + 60) {
                 if (!D_L23_001B13D0) return;
-                state = *(char **)(D_L23_001B13D0 + 0x68);
-                state[13] = 1;
-                state[8] = 0;
+                {
+                    char *entryState = *(char **)(D_L23_001B13D0 + 0x68);
+                    entryState[13] = 1;
+                    entryState[8] = 0;
+                }
                 func_L00_003294F0((unsigned char *)D_L23_001B13D0, 1);
                 D_L23_001B13D0 = 0;
                 return;
@@ -66,7 +73,7 @@ void func_L23_0041D398(char *object) {
     return;
 update_parts:
     if (D_L23_001B1434) {
-        parts = (char **)(state + 0x36C);
+        parts = state->parts + 5;
         for (i = 5; i < 10; i++, parts++) {
             if (!D_L23_001B3720) {
                 func_0029F338(*parts);
@@ -83,7 +90,7 @@ update_parts:
                 func_00282CC0((char *)&local.velocity, (char *)&local.velocity, (char *)&local.random);
                 old = *parts;
                 particle = func_00273730(old, 1, *(short *)(old + 0xAA), index, old + 16, old + 0xF0, (float *)&local.velocity, 255, 140.0f, 25.0f);
-                if (particle) *(void (**)(void))(particle + 0x64) = func_00310C88;
+                if (particle) *(void (**)(u8 *))(particle + 0x64) = func_00310C88;
             }
         }
         D_L23_001B3720--;
@@ -91,17 +98,17 @@ update_parts:
     }
     timer = *(unsigned short *)(object + 0x96);
     if ((D_L23_001B1468 << 1) / 3 < timer) {
-        parts = (char **)(state + 0x358);
+        parts = state->parts;
         func_0032C700(object + 16, 1, 45, 30, 40, 25, 85, 1, 4.5f, 20.0f, 1, 1, 1, 0);
         func_002E5CF8(11, 0, object);
         for (i = 4; i >= 0; i--, parts++) {
-            replacement = parts[5];
-            if (replacement && *parts) {
-                old = *parts;
-                *(Quad *)(replacement + 0xC0) = *(Quad *)(old + 0xC0);
-                *(Quad *)(replacement + 0xD0) = *(Quad *)(old + 0xD0);
-                *(Quad *)(replacement + 0xE0) = *(Quad *)(old + 0xE0);
-                *(Quad *)(replacement + 0x10) = *(Quad *)(old + 0x10);
+            char *replacement = parts[5];
+            char *old = *parts;
+            if (replacement && old) {
+                qcopy((replacement + 0xC0) ,(old + 0xC0));
+                qcopy((replacement + 0xD0) ,(old + 0xD0));
+                qcopy((replacement + 0xE0) ,(old + 0xE0));
+                qcopy((replacement + 0x10) ,(old + 0x10));
                 *(unsigned short *)(replacement + 0x34) &= 0xFFF9;
                 *(unsigned short *)(parts[5] + 0x34) |= 0x4000;
                 *(unsigned short *)(parts[5] + 0x34) &= 0xFFBE;
@@ -116,7 +123,7 @@ update_parts:
     if (D_L23_001B1468 / 3 < timer) {
         if (timer & 15) return;
     index = func_002A77E0(5);
-    parts = (char **)(state + 0x358 + index * 4);
+    parts = state->parts + index;
     old = *parts;
     scale = func_002A7878(4.0f, 12.0f);
     func_00282D30((char *)&local.velocity, old + 0xD0, scale);
@@ -128,7 +135,7 @@ update_parts:
     }
     if (timer & 31) return;
     index = func_002A77E0(5);
-    parts = (char **)(state + 0x358 + index * 4);
+    parts = state->parts + index;
     old = *parts;
     scale = func_002A7878(4.0f, 12.0f);
     func_00282D30((char *)&local.velocity, old + 0xD0, scale);

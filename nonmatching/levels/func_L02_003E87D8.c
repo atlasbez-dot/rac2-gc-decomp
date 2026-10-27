@@ -1,10 +1,19 @@
-/* Nonmatching: game -O2 -G8 -frac2-zero-ti-barrier; USA v1.01 and v2.00: 0/1 carrying places, 1272/1292 bytes; PAL absent. Original frame 0x60. Two initial trials plus ABI repair: func_L00_00424F58 takes (char *, float, float); retail passes actor + 0x10 in a0, 0.78539824f (0x3F490FDC) in f12 and +0.0f in f13. Corrected from the invalid three-register declaration; size unchanged. Remaining saved-register roles/block scheduling and field typing require a separate source hypothesis. In particular, the current D_0018B274 int store differs from retail's halfword store; this ABI-only repair leaves it for follow-up. No linked builds. */
+/* Retained complete C; not linked or counted. Updated25 October2026.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-zero-ti-barrier.
+ * 1276/1292 bytes. The halfword store to the resident field is corrected, and
+ * the effect vector is one aligned16-byte object whose fourth field is read
+ * directly. AAA00 has its genuine ignored float return.
+ * Remaining differences are saved-register allocation, state/target pointer
+ * lifetimes and block scheduling. Preserve the complete effect vector and
+ * actual store widths; no speculative initializer was added.
+ */
+
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 extern char *D_L02_001B359C;
 extern char *D_0018A3E0;
 extern char D_00189EA0[], D_00188660[];
-extern int D_0018B274;
+extern unsigned short D_0018B274;
 extern unsigned short D_0018CA6C;
 extern float D_L02_001B0B80 __attribute__((sda));
 extern float D_L02_001B0B84 __attribute__((sda));
@@ -13,8 +22,7 @@ extern float D_L02_001B0B8C __attribute__((sda));
 extern float D_L02_001B0B90 __attribute__((sda));
 extern float D_L02_001B0B94 __attribute__((sda));
 extern float D_L02_001B0BA0 __attribute__((sda));
-extern float D_L02_001B0BFC;
-extern char D_L02_001B0BF0 __attribute__((sda));
+extern float D_L02_001B0BF0[4] __attribute__((sda, aligned(16)));
 extern void func_002A7750(void *, int, int);
 extern char *func_0029EFD0(int);
 extern void func_002B37E8(void *, void *);
@@ -25,7 +33,7 @@ extern void func_00282C88(void *);
 extern float func_00283248(float, float);
 extern float func_00283B98(float, float);
 extern float func_00283C80(float, float);
-extern void func_002AAA00(void *, void *, int, float, float, float, float);
+extern float func_002AAA00(void *, void *, int, float, float, float, float);
 extern void func_L02_003E8CE8(void *);
 extern int func_002E5CF8(int, int, void *);
 extern void func_L00_00424F58(char *, float, float);
@@ -46,7 +54,7 @@ extern void func_L02_003E98A8(char *);
 void func_L02_003E87D8(char *actor) {
     char *state = *(char **)(actor + 0x68);
     char *target = D_L02_001B359C + *(int *)state * 0x100;
-    float local[4];
+    float local[4] __attribute__((aligned(16)));
     int nextState;
     switch (*(unsigned char *)(actor + 0x20)) {
     case 0:
@@ -130,7 +138,7 @@ transition:
         func_00283098(local, &D_L02_001B0BF0, actor + 0xC0);
         func_00282CC0(*(char **)(state + 0x54) + 0x10, local, actor + 0x10);
         *(float *)(*(char **)(state + 0x54) + 0xF8) = *(float *)(actor + 0xF8);
-        *(float *)(*(char **)(state + 0x54) + 0x2C) = *(float *)(*(char **)(*(char **)(state + 0x54) + 0x24) + 0x24) * D_L02_001B0BFC;
+        *(float *)(*(char **)(state + 0x54) + 0x2C) = *(float *)(*(char **)(*(char **)(state + 0x54) + 0x24) + 0x24) * D_L02_001B0BF0[3];
     }
     if (func_002B38B8(target)) func_L00_002E6CF0(func_L02_003E98A8, actor);
 }

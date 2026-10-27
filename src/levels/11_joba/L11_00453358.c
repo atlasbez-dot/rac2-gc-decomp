@@ -111,7 +111,37 @@ void func_L11_00454AE0(char *p)
         *(unsigned short *)(p + 0x96) = c + 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00454B60);
+extern void func_002A7750_4b60();
+extern int func_002B3BA8_4b60(void *, u32, float, float, int, int);
+
+/* Same body as func_L02_0040CF68, with this function's own callees. */
+void func_L11_00454B60(u8 *a0) {
+    u8 *s1 = *(u8 **)(a0 + 0x68);
+
+    if (a0[0x20] < 4) {
+        *(u16 *)(s1 + 0x1EC) = 0;
+        *(s32 *)(s1 + 0x1C4) = 0;
+    } else {
+        if (*(s16 *)(s1 + 0x1EC) == 1) {
+            *(s16 *)(s1 + 0x1EA) = func_002B3BA8_4b60(a0, *(u32 *)(s1 + 0x1E4), 100.0f, 100.0f, 0, 0);
+            *(s32 *)(s1 + 0x1C4) = *(s32 *)(s1 + 0x160);
+        } else {
+            if (a0[0x31] != 0 && func_L11_00441868(*(void **)(a0 + 0xB8), *(s16 *)(a0 + 0xAA)) != 0) {
+                *(u16 *)(s1 + 0x1EC) = 1;
+                *(s16 *)(s1 + 0x1EA) = func_002B3BA8_4b60(a0, *(u32 *)(s1 + 0x1E4), 100.0f, 100.0f, 0, 0);
+                *(s32 *)(s1 + 0x1C4) = *(s32 *)(s1 + 0x160);
+            } else {
+                *(u16 *)(s1 + 0x1EC) = 0;
+                if (a0[0x20] == 0xB || a0[0x20] == 8) {
+                    if (*(s32 *)(s1 + 0x1C0) != -1)
+                        func_002A7750_4b60(a0, 7, 3);
+                    else
+                        func_002A7750_4b60(a0, 5, 2);
+                }
+            }
+        }
+    }
+}
 
 
 /* Aims the object's stage, re-arms its effect and stores the new heading. */
@@ -202,9 +232,35 @@ void func_L11_00456010(char *p)
 
 INCLUDE_ASM("asm/levels", func_L11_00456070);
 
-INCLUDE_ASM("asm/levels", func_L11_00456378);
+extern int func_002B3BA8_6378(char *, int, float, float, int, int);
 
-INCLUDE_ASM("asm/levels", func_L11_00456438);
+/* Same body as func_L02_003F16F0, with this function's own callees. */
+void func_L11_00456378(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    if (*(unsigned char *)(arg0 + 0x20) < 4) {
+        *(int *)(state + 0x240) = 0;
+        goto done;
+    }
+
+    if (*(short *)(state + 0x256) == 1) {
+        *(short *)(state + 0x254) =
+            func_002B3BA8_6378(arg0, *(int *)(state + 0x24C), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x240) = *(int *)(state + 0x220);
+    } else {
+        if (func_L11_00441868(*(int *)(arg0 + 0xB8), *(short *)(arg0 + 0xAA)) == 0)
+            goto done;
+        *(short *)(state + 0x256) = 1;
+        *(short *)(state + 0x254) =
+            func_002B3BA8_6378(arg0, *(int *)(state + 0x24C), 100.0f, 100.0f, 0, 0);
+        *(int *)(state + 0x240) = *(int *)(state + 0x220);
+    }
+    return;
+
+done:
+    *(short *)(state + 0x256) = 0;
+}
+
 
 /* Retires the state's counter and drops the object to its idle flag block. */
 void func_L11_00456540(char *p)
@@ -224,7 +280,21 @@ void func_L11_00456540(char *p)
     *(char *)(p + 0x31) = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L11_004565D8);
+/* Same body as func_L02_003F1A88, with this function's own callees. */
+void func_L11_004565D8(char *arg0, char *arg1) {
+    char *state;
+    float angle;
+    float radius;
+
+    angle = func_00283248(*(float *)(arg0 + 0x10) - *(float *)arg1,
+                          *(float *)(arg0 + 0x14) - *(float *)(arg1 + 4));
+    angle += func_002A7878(-0.78539824f, 0.78539824f);
+    radius = func_002A7878(-2.0f, 2.0f) + 8.0f;
+    state = *(char **)(arg0 + 0x68);
+    qcopy(state + 0x230, arg1);
+    *(float *)(state + 0x230) += radius * func_00283180(angle);
+    *(float *)(state + 0x234) += radius * func_00283198(angle);
+}
 
 INCLUDE_ASM("asm/levels", func_L11_004566C0);
 
@@ -329,7 +399,7 @@ void func_L11_00458F58(char *p)
     func_002A7750(p, 1, -1);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00458F90);
+/* func_L11_00458F90 is defined in L11_00458F90-qcopy-barrier-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L11_004590F0);
 
@@ -380,11 +450,10 @@ void func_L11_00459EA0(char *p)
 
 INCLUDE_ASM("asm/levels", func_L11_00459F30);
 
-INCLUDE_ASM("asm/levels", func_L11_0045A3C8);
+/* func_L11_0045A3C8 is defined in L11_0045A3C8-flags-g8.c. */
 
 /* func_L11_0045A578 lives in the sibling small-data unit (L11_00453358-g8.c). */
 
-INCLUDE_ASM("asm/levels", func_L11_0045A8C0);
 
 INCLUDE_ASM("asm/levels", func_L11_0045B5C8);
 

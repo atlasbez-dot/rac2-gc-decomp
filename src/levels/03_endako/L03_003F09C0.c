@@ -136,8 +136,6 @@ void func_L03_003F6080(u8 *entity) {
     if (timer <= 0xFFFE) *(u16 *)(entity + 0x96) = (u16)(timer + 1);
 }
 
-INCLUDE_ASM("asm/levels", func_L03_003F6158);
-
 /* func_L03_003F62C8 lives in L03_003F09C0-g8.c (it reaches D_L03_001B108C
  * through $gp). */
 
@@ -342,7 +340,7 @@ void func_L03_0041F008(u8 *entity, u32 value) {
     *(u32 *)(state + 0x338) = value;
 }
 
-INCLUDE_ASM("asm/levels", func_L03_0041F048);
+/* func_L03_0041F048 is defined in L03_0041F048-qcopy-barrier.c. */
 
 /* func_L03_0041F090 lives in L03_003F09C0-g8.c (it reaches D_L03_001B1C00
  * and D_L03_001B1C04 through $gp). */

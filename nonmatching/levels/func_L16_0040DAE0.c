@@ -1,16 +1,22 @@
-/* -O2 -G8 -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses; US and US2: 16_snivelak: 400 bytes, expected 396; 0/1 each.
-   PAL: absent from catalogue. Default G8 reached 396 bytes; explicit four-vector loop and qcopy profiles tried. Final qcopy loop has an extra nop and early argument scheduling differs. Reopen with a matching grouped-copy loop scheduling idiom. */
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections
+ * 400/396 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: The full 64-byte matrix copy loop still has an extra alignment nop; initial argument scheduling differs.
+ * Reopen: A measured real matrix-copy loop lifetime/layout idiom that removes the residue without padding or source barriers.
+ * Trial-only markers and profiles are restored after checking.
+ */
+
 #include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
 typedef struct { TI128 row[4]; } SnivelakMatrix;
-extern void func_002A7470(void *, s32, s32, void *);
+extern void func_002A7470(void *, s32, s32, s32);
 extern void *func_0029EFD0(s32);
 extern float func_L07_003F90E8(s32, s32, float, float);
 extern void func_L00_00310748(void *, s32, void *, float, float);
 extern void func_002B37E8(void *, void *);
 extern void func_002AAC80(void *, float, float, float, float);
-extern void func_0032C700(void *, s32, s32, s32, s32, s32, s32, s32, float, float,
-                          s32, s32, s32, s32);
+extern u8 *func_0032C700(void *, s32, s32, s32, s32, s32, s32, s32, float, float,
+                          s32, s32, s32, void *);
 extern u8 D_L16_001A8F20[] __attribute__((nosda));
 extern float D_L16_001B1648 __attribute__((sda));
 extern float D_L16_001B1658 __attribute__((sda));
@@ -33,16 +39,16 @@ u8 *func_L16_0040DAE0(u8 *owner, SnivelakMatrix *matrix)
         *(s32 *)(state + 0x68) = -1;
         func_002B37E8(obj, owner);
         pos = obj + 0x10;
-        *(TI128 *)pos = matrix->row[0];
+        qcopy(pos, matrix->row);
         func_0032C700(pos, 0, 0, 0, 0, 20, 45, 1, 2.0f, 20.0f, 1, 0, 0, 0);
         dst = (TI128 *)state;
         src = matrix->row;
         n = 3;
-        do { *dst++ = *src++; } while (--n >= 0);
+        do { qcopy(dst, src); dst++; src++; } while (--n >= 0);
         func_002AAC80(state + 0x50, 1.0f, 1.0f,
                       D_L16_001B1648 * 0.00027777778f,
                       D_L16_001B1658 * 0.016666668f);
-        if (obj[0x43] != 1) func_002A7470(obj, 1, 0, (void *)1);
+        if (obj[0x43] != 1) func_002A7470(obj, 1, 0, 1);
         *(float *)(obj + 0x2C) = *(float *)(*(u8 **)(obj + 0x24) + 0x24) * D_L16_001B1668;
     }
     return obj;

@@ -6,7 +6,6 @@ typedef struct { int status; u8 reserved[36]; } GornStatusRecord156;
 
 extern GornStatusRecord156 D_L10_002A3C70[];
 
-INCLUDE_ASM("asm/levels", func_L10_0037D200);
 
 /* Report whether any configured status in the selected eleven records is nonzero */
 int func_L10_0037F510(void)
@@ -69,7 +68,6 @@ void func_L10_0039D9C0(void *a0) {
 
 INCLUDE_ASM("asm/levels", func_L10_0039DA48);
 
-INCLUDE_ASM("asm/levels", func_L10_00418D88);
 
 /* func_L10_004190F0 lives in L10_004190F0.c. */
 
@@ -111,8 +109,6 @@ void func_L10_004191E8(void *a0)
     *(int *)((char *)s1 + 0x268) = 0x19;
 }
 
-INCLUDE_ASM("asm/levels", func_L10_00419348);
 
 /* func_L10_004235A0 lives in L10_004235A0-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L10_00423698);

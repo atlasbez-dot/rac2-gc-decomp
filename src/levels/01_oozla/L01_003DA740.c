@@ -22,7 +22,7 @@ extern void func_32EF38(void *buf, s32 a1, s32 a2, s32 a3, f32 x, f32 y);
 
 extern void func_00115484(void *buf, s32 value, s32 count);
 
-extern s32 func_00277F48(void *pos, s32 flag, void *obj, s32 arg, f32 radius);
+extern s32 func_00277F48(f32 radius, void *pos, s32 flag, void *obj, s32 arg);
 
 /* The level's table of the records the spawner looks through. */
 extern u32 D_L01_001C3980[];
@@ -34,11 +34,10 @@ INCLUDE_ASM("asm/levels", func_L01_003DAB98);
 INCLUDE_ASM("asm/levels", func_L01_003DAE58);
 
 /* Scatters the measured primitive around the object, a1 times. */
-INCLUDE_ASM("asm/levels", func_L01_003DBB88);
 
-INCLUDE_ASM("asm/levels", func_L01_003DBCB8);
+/* func_L01_003DBCB8 is defined in L01_003DBCB8-qcopy-barrier.c. */
 
-INCLUDE_ASM("asm/levels", func_L01_003DBF38);
+/* func_L01_003DBF38 is defined in L01_003DBF38-qcopy-barrier.c. */
 
 INCLUDE_ASM("asm/levels", func_L01_003DC078);
 
@@ -53,7 +52,7 @@ void func_L01_003DC8B8(u8 *a0, void *a1, void *a2) {
 
     func_00115484(out, 0, 4);
     *count = 0;
-    n = func_00277F48(a0 + 0x10, 1, a0, 0, 3.0f);
+    n = func_00277F48(3.0f, a0 + 0x10, 1, a0, 0);
     if (n <= 0)
         return;
     for (i = 0; i < n; i++) {
@@ -81,9 +80,7 @@ void func_L01_003DC9A8(void **a0, s32 *a1) {
 
 INCLUDE_ASM("asm/levels", func_L01_003DC9E0);
 
-INCLUDE_ASM("asm/levels", func_L01_003DCD40);
 
-INCLUDE_ASM("asm/levels", func_L01_003DCDD8);
 
 INCLUDE_ASM("asm/levels", func_L01_003DCE70);
 
@@ -148,13 +145,12 @@ INCLUDE_ASM("asm/levels", func_L01_0040F958);
 
 INCLUDE_ASM("asm/levels", func_L01_00410AD0);
 
-INCLUDE_ASM("asm/levels", func_L01_00412E00);
+/* func_L01_00412E00 is defined in L01_00412E00-flags-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L01_00412F18);
 
 INCLUDE_ASM("asm/levels", func_L01_00416440);
 
-INCLUDE_ASM("asm/levels", func_L01_00416A50);
 
 /* Arms the measured primitive block of the given object. */
 

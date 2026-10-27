@@ -1,10 +1,8 @@
-/* Bounded manual reconstruction; not linked.
- * Profile: -O2 -G8 -ffunction-sections.
- * 608/600 bytes; us: 0/27 places; us2: 0/27 places; pal: 0/27 places.
- * Three-row transforms and the 144-byte packet have explicit truthful extents. A new retail-
- * shaped loop CFG reaches 608 bytes, with a 0x130 frame; flag packing, address lifetimes and
- * allocation still differ. Earlier companion code in func_L00_003EFA98.c is preserved. Reopen
- * with a matching renderer lifetime/allocation witness.
+/* M13, 26 October 2026: 608/600 B under -O2 -G8 -ffunction-sections (opcode score 49 -> 35).
+ * The GS flags word is built as a linear or-chain over separate statements (retail's
+ * order). Left: the face loop: retail keeps the face counter in s6 and spills the u/v
+ * cursors (0xD4/0xD8), with the table bases hoisted into s7/fp; this draft spills the
+ * counter instead. Reopen: the loop's counter/cursor form.
  */
 typedef int RenderWord128 __attribute__((mode(TI)));
 typedef union { RenderWord128 word; struct { float x,y,z,w; } f; } RenderVector;
@@ -40,9 +38,10 @@ void func_L00_003EFD00(char *object) {
     unsigned int color;
     long long flags;
     packet.texture = func_0027C878(D_L00_001B0884);
-    flags = (long long)D_L00_001B0870 | (long long)D_L00_001B0874 << 2 |
-            (long long)D_L00_001B0878 << 4 | (long long)D_L00_001B087C << 6 |
-            (long long)D_L00_001B0880 << 32;
+    flags = (long long)D_L00_001B0870 | (long long)D_L00_001B0874 << 2;
+    flags |= (long long)D_L00_001B0878 << 4;
+    flags |= (long long)D_L00_001B087C << 6;
+    flags |= (long long)D_L00_001B0880 << 32;
     packet.flags = flags;
     packet.state = 0xFF9000000260LL;
     packet.zero = 0;

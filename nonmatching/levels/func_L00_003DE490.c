@@ -1,48 +1,52 @@
-/* Retained plain-C attempt: 376/376 bytes; first difference +0x8.
- * us: 0/27, pal: 0/27, us2: 0/27.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-schedule-insns.
- * Register allocation and scheduling differ despite the correct frame size and grouped quadword copies. Next: independent lifetimes for the output walker and four stack axes.
+/* func_L00_003DE490 (376 bytes) - NEAR MISS (M22, 2026-10-26).
+ * Profile: src/levels/shared/L00_003DE490-g8.c, "-O2 -G8 -ffunction-sections" (qcopy helper).
+ * 376/376; the frame, calls and copies match.  Left: the callee-saved choice
+ * (retail out $s0, i $s1, obj $s3; here i $s0, out $s3, obj $s4) and the i < 4
+ * test is scheduled after its argument setup.  The table, floats and push vector
+ * move between levels (ref_ names); the push vector is MACRO_ADDR so its la is
+ * rebuilt in the loop like retail.  On the permuter.
  */
-typedef int Quad __attribute__((mode(TI)));
-extern char D_00189E20[] __attribute__((nosda));
-extern char *D_L00_001B043C __attribute__((sda));
-extern int D_L00_001B2B4C;
-extern float D_L00_001B0448 __attribute__((sda));
-extern float D_L00_001B044C __attribute__((sda));
-extern char D_L00_00247800[] __attribute__((nosda));
-extern Quad D_L00_001B2B30 __attribute__((sda));
-extern char *func_0029EFD0(int type);
-extern void func_002833F0(void *out, void *vector);
-extern int func_002A0F48(void *object);
-extern int func_002FED90(void *object, int mode, float x, float y, float z);
-extern void func_00282D30(void *out, void *source, float scale);
-extern void func_00282F20(void *out, void *source, float scale);
-extern void func_00282CC0(void *out, void *left, void *right);
+#include "include_asm.h"
+#include "common.h"
 
+typedef float L00_003DE490_V4[4] __attribute__((aligned(16)));
 
-void func_L00_003DE490(char *object)
+extern char ref_L00_003DE490_00[];
+extern float ref_L00_003DE490_01 __attribute__((sda));
+extern float ref_L00_003DE490_02 __attribute__((sda));
+extern L00_003DE490_V4 ref_L00_003DE490_03 MACRO_ADDR;
+
+extern void func_00282D30(void *, void *, float);
+extern void func_00282F20(void *, void *, float);
+extern void func_00282CC0(void *, void *, void *);
+
+/* Builds the eight corner points of an object's box from its two axes into the
+   level's point table: each corner is scaled, moved to the object and pushed out. */
+void func_L00_003DE490(char *obj)
 {
-    Quad axes[4];
-    Quad offset, point;
+    L00_003DE490_V4 ax[4];
+    L00_003DE490_V4 push;
+    L00_003DE490_V4 tip;
+    char *out = ref_L00_003DE490_00;
     int i;
-    char *out = D_L00_00247800;
-    axes[0] = *(Quad *)(object + 0xc0);
-    axes[3] = *(Quad *)(object + 0xd0);
-    func_00282D30(axes + 1, axes, -1.0f);
-    func_00282D30(axes + 2, axes + 3, -1.0f);
-    *(Quad *)(out + 0x40) = axes[0];
-    *(Quad *)(out + 0x50) = axes[1];
-    *(Quad *)(out + 0x60) = axes[2];
-    *(Quad *)(out + 0x70) = axes[3];
-    object += 0x10;
+
+    qcopy(ax[0], obj + 0xC0);
+    qcopy(ax[3], obj + 0xD0);
+    func_00282D30(ax[1], ax[0], -1.0f);
+    func_00282D30(ax[2], ax[3], -1.0f);
+    qcopy(out + 0x40, ax[0]);
+    qcopy(out + 0x50, ax[1]);
+    qcopy(out + 0x60, ax[2]);
+    qcopy(out + 0x70, ax[3]);
+    obj += 0x10;
     for (i = 0; i < 8; i++) {
         if (i < 4)
-            func_00282CC0(out, axes + (i >> 1), axes + ((i & 1) + 2));
-        func_00282F20(out, out, D_L00_001B044C);
-        func_00282CC0(out, out, object);
-        func_00282F20(&offset, &D_L00_001B2B30, -D_L00_001B0448);
-        func_00282CC0(out, out, &offset);
-        func_00282CC0(&point, &offset, object);
+            func_00282CC0(out, ax[i >> 1], ax[2 + (i & 1)]);
+        func_00282F20(out, out, ref_L00_003DE490_01);
+        func_00282CC0(out, out, obj);
+        func_00282F20(push, ref_L00_003DE490_03, -ref_L00_003DE490_02);
+        func_00282CC0(out, out, push);
         out += 0x10;
+        func_00282CC0(tip, push, obj);
     }
 }

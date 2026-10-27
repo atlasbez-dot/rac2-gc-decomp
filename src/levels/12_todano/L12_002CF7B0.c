@@ -6,13 +6,10 @@ extern float D_L12_001AD230;
 
 extern float D_L12_001AD234;
 
-INCLUDE_ASM("asm/levels", func_L12_002CF7B0);
+/* func_L12_002CF7B0 is in the sibling file L12_002CF7B0-decider.c (its own profile). */
 
 /* func_L12_002FFF88 is in the sibling file L12_002CF7B0-g8.c: it reads a
    small-data global through $gp. */
-
-/* Refresh the two tuning factors, or zero them on the two states that ask for it. */
-INCLUDE_ASM("asm/levels", func_L12_00300138);
 
 INCLUDE_ASM("asm/levels", func_L12_00300410);
 
@@ -21,7 +18,7 @@ INCLUDE_ASM("asm/levels", func_L12_0035A838);
 /* func_L12_00388038 is in the sibling file L12_002CF7B0-g8.c: its body
    reads a small-data global through $gp. */
 
-INCLUDE_ASM("asm/levels", func_L12_00388090);
+/* func_L12_00388090 is defined in L12_00388090-flags-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L12_00389988);
 

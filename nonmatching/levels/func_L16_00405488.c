@@ -1,5 +1,11 @@
-/* -O2 -G8 -frac2-qcopy -frac2-qcopy-barrier; US and US2: 16_snivelak: instruction at +0xa4 differs; 0/1 each.
-   PAL: absent from catalogue. Equal 540-byte qcopy/barrier body first differs at +0xa4. Repeated constant address caching and scheduling remain. Reopen with a matching spawn-family profile. */
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections
+ * 540/540 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: The full-vector transfers agree; FPR assignment of zero versus scale, later store scheduling and constant-address caching differ.
+ * Reopen: Independent zero/scale lifetime or field-layout evidence; equivalent scalar rescoping and GCSE control tied.
+ * Trial-only markers and profiles are restored after checking.
+ */
+
 #include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
 extern u8 *func_0029EFD0(s32);
@@ -10,7 +16,7 @@ extern float func_00283248(float, float);
 extern float func_00283B98(float, float);
 extern float func_00282E20(void *);
 extern void func_002ACEC0(void *, void *, void *, float);
-extern void func_002C2210(void *, s32, s32, s32, s32, void *, s32, float, float, float);
+extern u8 *func_002C2210(void *, s32, s32, s32, s32, void *, s32, float, float, float);
 extern float D_L16_001B1500 __attribute__((sda));
 extern s32 D_L16_001B1460 __attribute__((sda));
 extern s32 D_L16_001B1464 __attribute__((sda));
@@ -33,9 +39,9 @@ u8 *func_L16_00405488(float speed, u8 *owner, float *velocity, TI128 *position)
         obj[0x20] = 0;
         *(s64 *)(obj + 0x38) = *(s64 *)(owner + 0x38);
         pos = obj + 0x10;
-        *(TI128 *)pos = *position;
+        qcopy(pos, position);
         state = *(u8 **)(obj + 0x68);
-        *(TI128 *)state = *(TI128 *)velocity;
+        qcopy(state, velocity);
         *(u8 **)(state + 0x10) = owner;
         *(float *)(state + 0x14) = speed;
         *(float *)(state + 0x20) = 0.15f;

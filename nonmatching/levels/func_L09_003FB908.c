@@ -1,52 +1,38 @@
-/* 0 of 1 places match - last line: 09_dobbo: instruction at +0x20 differs (240 bytes, retail 240)
-   Starts a record slot of the record-slot manager: it finds the slot that holds
-   the id in either half, moves the slot's flag from 1 to 2 or from 4 to 3,
-   copies 0x40 bytes into the slot's block, and copies the two ids' own 8 bytes
-   into the slot's two vectors.  Needs the grouped quadword copy
-   (-frac2-qcopy) for the two 8-byte copies.
+/* Nonmatching: 240/240 bytes.
+ * Profile: -O2 -G0 -ffunction-sections.
+ * Placement checks: US: 0/1; US2: 0/1; PAL: 0/1.
+ * 240/240 bytes. The source keeps real actor-pointer pairs,64-byte record blocks and16-byte secondary vectors with incomplete outer extents. Separate field cursors recover the frame and main loop, but initial global materialization, the registers for constants1/2 and cursor-increment scheduling differ.
+ * Reopen with actual manager-column cursor lifetimes and allocator evidence. Do not permute prototypes, invent extents or add loop padding.
+ */
+#include "common.h"
 
-   Measured with -O2 -G0 -ffunction-sections -frac2-qcopy: 31 of the 60 words
-   differ, and every one of them is the same instruction with a different
-   register; the shape is retail's word for word otherwise - the `beql`/`bnel`
-   pair, the flag's two-step test (1 to 2, 4 to 3) with the stores in the
-   delay slots, the frame (0x20), the save order and the 0x40/0x40/0x10/0x08
-   strides.
-   What differs: the register allocation of the loop's values.  Retail puts the
-   index in $a2, the memcpy's destination in $a3 and the flag word's pointer in
-   $v1, and the constants 1, 2, 4, 3 in $t3, $t2, $t0, $t1; this cc1 puts the
-   memcpy's destination in $a2, the flag word's pointer in $a3, the index in
-   $v1 and the constant 4 in $a3 - the index is again the value retail holds in
-   an argument register and this cc1 holds in the last free one.
-   The address materialisation is retail's: the block at 0x255F40 comes from
-   0x255F10 + 0x30 in retail's own `addiu $s1,$v0,0x30`, so the source must
-   name one symbol and add the offset.
-   Tried (about six compiles): the flag value in a local, the copy's
-   destination named as its own symbol and derived from 0x255F10 + 0x30, the
-   index form against explicit pointer walks, `i <= 15`, and -frac2-qcopy with
-   -mno-split-addresses, -fno-schedule-insns, -fno-gcse, -fno-strength-reduce
-   and -mastra-keep-frame-order; none of them moves the index.
-   Would unblock: a cc1 lever that gives the loop's induction variable an
-   argument register. */
-typedef int TI __attribute__((mode(TI)));
-
-extern int D_L09_00255E90[];
+typedef int Quad __attribute__((mode(TI)));
+typedef struct { char *first, *second; } RecordActors;
+typedef struct { unsigned char fields[0x30]; Quad position; } RecordBlock;
+extern RecordActors D_L09_00255E90[];
 extern int D_L09_001B35E0[];
-extern unsigned char D_L09_00255F10[];
-extern unsigned char D_L09_00256310[];
+extern RecordBlock D_L09_00255F10[];
+extern Quad D_L09_00256310[];
 extern void func_00282B50(void *, void *, int);
 
-int func_L09_003FB908(int id, void *src) {
+int func_L09_003FB908(char *object, void *src)
+{
+    RecordActors *actors = D_L09_00255E90;
+    RecordBlock *block = D_L09_00255F10;
+    Quad *position = &block->position;
+    Quad *secondary = D_L09_00256310;
+    int *flag = D_L09_001B35E0;
     int i;
-    for (i = 0; i < 16; i++) {
-        if (D_L09_00255E90[i * 2] == id || D_L09_00255E90[i * 2 + 1] == id) {
-            int f = D_L09_001B35E0[i];
-            if (f == 1)
-                D_L09_001B35E0[i] = 2;
-            else if (f == 4)
-                D_L09_001B35E0[i] = 3;
-            func_00282B50(D_L09_00255F10 + i * 0x40, src, 0x40);
-            *(TI *)(D_L09_00255F10 + i * 0x40 + 0x30) = *(TI *)(D_L09_00255E90[i * 2] + 0x10);
-            *(TI *)(D_L09_00256310 + i * 0x10) = *(TI *)(D_L09_00255E90[i * 2 + 1] + 0x10);
+    for (i = 0; i < 16; i++, actors++, block++, flag++, secondary++,
+                             position = (Quad *)((char *)position + 0x40)) {
+        if (actors->first == object || actors->second == object) {
+            if (*flag == 1)
+                *flag = 2;
+            else if (*flag == 4)
+                *flag = 3;
+            func_00282B50(block, src, 0x40);
+            qcopy(position, actors->first + 0x10);
+            qcopy(secondary, actors->second + 0x10);
             return 1;
         }
     }

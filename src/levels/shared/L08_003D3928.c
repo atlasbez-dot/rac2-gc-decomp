@@ -39,8 +39,6 @@ void func_L08_003D3EB8(u8 *a0)
 
 INCLUDE_ASM("asm/levels", func_L08_003D4190);
 
-INCLUDE_ASM("asm/levels", func_L08_003D4600);
-
 INCLUDE_ASM("asm/levels", func_L08_003D4690);
 
 /* The same resident word, but the 8 case falls through to a 1/2 selector. */
@@ -58,21 +56,17 @@ s32 func_L08_003DB4E8(void)
 
 INCLUDE_ASM("asm/levels", func_L08_003DB518);
 
-INCLUDE_ASM("asm/levels", func_L08_003DB8E8);
+/* func_L08_003DB8E8 is matched in its own unit, L08_003DB8E8-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L08_003DE5E8);
 
 INCLUDE_ASM("asm/levels", func_L08_003E5BB8);
 
-INCLUDE_ASM("asm/levels", func_L08_003F6018);
 
-INCLUDE_ASM("asm/levels", func_L08_003F6348);
 
-INCLUDE_ASM("asm/levels", func_L08_003F6568);
 
 INCLUDE_ASM("asm/levels", func_L08_003F6610);
 
-INCLUDE_ASM("asm/levels", func_L08_0041E4F8);
+/* func_L08_0041E4F8 is defined in L08_0041E4F8-flags-g8.c. */
 
 /* shared native body of family c459a266b43242d6 */
 void func_L08_0041E630(float *a0, float *a1, float *a2, float *a3, float *p4)
@@ -123,7 +117,7 @@ INCLUDE_ASM("asm/levels", func_L08_0042E678);
 
 INCLUDE_ASM("asm/levels", func_L08_0042EF00);
 
-INCLUDE_ASM("asm/levels", func_L08_00435600);
+/* func_L08_00435600 is defined in L08_00435600-helpers.c. */
 
 /* Stores one 16-byte block through the pointer at 0x68 of the argument. */
 void func_L08_004356A0(u8 *a0, void *a1)

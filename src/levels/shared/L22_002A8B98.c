@@ -136,7 +136,6 @@ INCLUDE_ASM("asm/levels", func_L22_002B8E10);
 
 INCLUDE_ASM("asm/levels", func_L22_002C8610);
 
-INCLUDE_ASM("asm/levels", func_L22_002C9898);
 
 extern unsigned char D_0018C0D4;
 

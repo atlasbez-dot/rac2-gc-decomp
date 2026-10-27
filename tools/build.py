@@ -243,21 +243,34 @@ def compile_key(source: Path, flags: str) -> str:
     return json.dumps([flags, os.environ.get("RAC2_LINUX", ""), digests])
 
 
+def split_flags(flags: str) -> tuple[list[str], list[str]]:
+    """A unit's flags as (compiler arguments, assembler arguments).
+
+    Both frontends stop at assembly, so standard -Wa, options are forwarded here. SDK units
+    (flags starting with "sdk") also get --r5900-pool-li-d: the SDK's objects pool li.d
+    constants in .lit8, while the game code builds them inline, the assembler's default
+    (docs/COMPILER-NOTES.md, "Double constants in general registers")."""
+    compiler_args, assembler_args = [], []
+    sdk = flags.startswith("sdk")
+    if sdk:
+        assembler_args.append("--r5900-pool-li-d")
+    for arg in shlex.split(flags[3:] if sdk else flags):
+        if arg == "-Wa" or arg.startswith("-Wa,"):
+            forwarded = arg[4:].split(",")
+            if not all(forwarded):
+                raise ValueError("-Wa, requires nonempty comma-separated assembler arguments")
+            assembler_args.extend(forwarded)
+        else:
+            compiler_args.append(arg)
+    return compiler_args, assembler_args
+
+
 def compile_c(source: Path) -> Path:
     """build/obj/<source>.o, reused only with the same source, headers and toolchain."""
     out = BUILD / "obj" / (source.relative_to(ROOT).as_posix() + ".o")
     flags = flags_for(source)
-    # Both frontends stop at assembly; forward standard -Wa, options ourselves.
-    compiler_args, assembler_args = [], []
     try:
-        for arg in shlex.split(flags[3:] if flags.startswith("sdk") else flags):
-            if arg == "-Wa" or arg.startswith("-Wa,"):
-                forwarded = arg[4:].split(",")
-                if not all(forwarded):
-                    raise ValueError("-Wa, requires nonempty comma-separated assembler arguments")
-                assembler_args.extend(forwarded)
-            else:
-                compiler_args.append(arg)
+        compiler_args, assembler_args = split_flags(flags)
     except ValueError as error:
         sys.exit(f"{source.relative_to(ROOT)} has invalid compiler flags: {error}")
     compiler_flags = shlex.join(compiler_args)
@@ -372,8 +385,17 @@ class Placement:
         data, ref = sec["data"], self.retail(address, len(sec["data"]))
         if len(ref) != len(data):
             return {}, "outside the program"
-        relocs = sorted(obj["relocations"].get(index, []))
+        in_order = obj["relocations"].get(index, [])
+        relocs = sorted(in_order)
         touched = {o for o, _, _ in relocs}
+        # The assembler lists each %hi just before the %lo it pairs with (mips_frob_file),
+        # which can lie at a lower address: a %hi in a loop's last delay slot pairs with the
+        # %lo at the loop's top. Pair them in the object's order, as the linker does.
+        pair = {}
+        for k, (at, kind, sym) in enumerate(in_order):
+            if kind == elf.R_MIPS_HI16:
+                pair[at] = next((o for o, t, s in in_order[k + 1:]
+                                 if t == elf.R_MIPS_LO16 and s == sym), None)
         for at in range(0, len(data), 4):
             if at not in touched and data[at:at + 4] != ref[at:at + 4]:
                 return {}, f"instruction at +{at:#x} differs"
@@ -402,12 +424,10 @@ class Placement:
                 err = agree(symbol, ((address & 0xF0000000) | ((theirs & 0x3FFFFFF) << 2))
                             - ((mine & 0x3FFFFFF) << 2))
             elif kind == elf.R_MIPS_HI16:
-                # value = retail address - addend, both from the %hi and its first %lo
-                j = next((k for k in range(i + 1, len(relocs)) if relocs[k][1] == elf.R_MIPS_LO16
-                          and relocs[k][2] == sym), None)
-                if j is None:
+                # value = retail address - addend, both from the %hi and its paired %lo
+                lo_at = pair.get(at)
+                if lo_at is None:
                     return {}, f"%hi at +{at:#x} has no %lo"
-                lo_at = relocs[j][0]
                 if (mine ^ theirs) & 0xFFFF0000:
                     return {}, f"%hi at +{at:#x} differs"
                 target = ((theirs & 0xFFFF) << 16) + sext(word(ref, lo_at) & 0xFFFF)
@@ -570,8 +590,19 @@ class Placement:
         if len(owners) != 1:
             return False
         relocs = sorted(obj["relocations"].get(index, []))
-        if [r[0] for r in relocs] != list(range(0, size, 4)):
+        # Every word is a case entry, except the zero words the compiler's `.align 4`
+        # puts between two tables of one function: each gap is shorter than 16 bytes
+        # and ends at a 16-byte boundary where the next table starts.
+        offsets = [r[0] for r in relocs]
+        covered = set(offsets)
+        if not offsets or offsets[0] != 0 or len(covered) != len(offsets) or any(o % 4 for o in offsets):
             return False
+        for at in range(0, size, 4):
+            if at in covered:
+                continue
+            gap_end = next((o for o in offsets if o > at), None)
+            if gap_end is None or gap_end % 16 or gap_end - at >= 16 or sec["data"][at:at + 4] != bytes(4):
+                return False
         values, why = self.derive(obj, index, address)
         if why:
             return False

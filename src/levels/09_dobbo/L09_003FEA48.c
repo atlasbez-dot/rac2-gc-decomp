@@ -2,9 +2,9 @@
 
 extern void func_L08_00328BB0();
 
-extern void func_L01_00321178();
+extern int func_L01_00321178(char *, char *);
 
-extern void func_002B4FF0(f32 a);
+extern int func_002B4FF0(char *, float *, float);
 
 extern char *D_L09_001B285C __attribute__((sda));
 
@@ -148,12 +148,12 @@ void func_L09_00406C68(s32 a0) {
     func_L08_00328BB0(a0);
 }
 
-void func_L09_00404F90(char *a0, s32 a1, s32 a2) {
+void func_L09_00404F90(char *a0, char *a1, s32 a2) {
     char *p = *(char **)(a0 + 0x68);
     if (a2 == 0) {
-        func_L01_00321178();
+        func_L01_00321178(a0, a1);
     } else {
-        func_002B4FF0(*(f32 *)(p + 0x33C));
+        func_002B4FF0(a0, (float *)a1, *(f32 *)(p + 0x33C));
     }
 }
 
@@ -199,7 +199,6 @@ INCLUDE_ASM("asm/levels", func_L09_00403398);
 /* func_L09_00403700: 152 bytes, one register off - the loop's trip test compares
    into $v0 where retail compares into $v1.  Deposited in
    nonmatching/levels/func_L09_00403700.c. */
-INCLUDE_ASM("asm/levels", func_L09_00403700);
 
 INCLUDE_ASM("asm/levels", func_L09_00403798);
 
@@ -305,6 +304,6 @@ INCLUDE_ASM("asm/levels", func_L09_0040B0C8);
 
 INCLUDE_ASM("asm/levels", func_L09_0041D650);
 
-INCLUDE_ASM("asm/levels", func_L09_00421B80);
+/* func_L09_00421B80 is in L09_003FEA48-zp-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L09_00421D60);

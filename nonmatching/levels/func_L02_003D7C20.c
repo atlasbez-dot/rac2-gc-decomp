@@ -1,37 +1,20 @@
 /*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por -g.
- * Reported final C / retail: 5416 / 5504 bytes; size equality is not a match.
- * us: 0/1 placements; 5416/5504 bytes.
- * us2: absent from catalogue (not a match).
- * pal: absent from catalogue (not a match).
- * Residual: 88 bytes short; correct frame0xb0, but state/resident saved-register assignment, switch lower bound, branch sharing and schedule differ. Final -g/non-g trials tie.
- * Reopening condition: Original switch or local lifetime evidence, rather than another equivalent profile trial.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ * Retained complete manual reconstruction; not linked or counted.
+ * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-zero-ti-por -g
+ * Retail: 5504 bytes; compiled: 5416 bytes.
+ * Final coverage: us: 0/1; us2: catalogue absent; pal: catalogue absent.
+ * Residual: 5416/5504 bytes with the 0xB0 frame. The complete sentry state machine, full
+ * target transfers and particle/child constructor stack inputs are retained.
+ * Resident/effect globals are externally incomplete and accessed through measured
+ * prefixes. State/resident register assignment, switch lower bound and branch/schedule
+ * sharing differ. Full retail semantics is not yet qualified.
+ * Reopen: A real dispatch/local-field lifetime witness. The explicit resident local
+ * produced 5404 bytes and is preserved privately. The older source-only compiler-copy
+ * profiles and neutral debug toggles are not new evidence; preserve the whole body and
+ * actual integer mode width.
  */
+#include "common.h"
 
-/* Nonmatching manual reconstruction of the second Maktar sentry state machine.
- * Retail US: 5504 bytes; final trial: 5416 bytes, 0/1 placements, exit 1.
- * US2 and PAL do not carry this canonical function in their catalogues.
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy
- *          -frac2-qcopy-barrier -frac2-zero-ti-por -g.
- * Four bounded trials: 5440, 5412, 5416 and 5416 bytes, with frame 0xb0.
- * Final two profiles tie. Differences include state/resident register allocation,
- * dispatch lower bound, branch sharing and instruction schedules. Reopen with
- * evidence for those local lifetimes or the original switch/control-flow form.
- * All states and all five death emissions are present. Unsigned field loads,
- * the immediate phase-two transition break and unordered stage-eight condition
- * follow retail. ResidentView and EffectTuning are partial measured views.
- * SoundSlot has the observed 0x70 stride, owner at 0x18 and active byte at 4.
- * The particle constructor consumes 12 GPR and two FP inputs: four caller
- * stack words at 0,8,0x10,0x18 are real inputs. The child constructor consumes
- * nine GPR and one FP input, including the duplicated quaternion at stack 0.
- * These stack inputs were checked against the callees rather than discarded
- * because the reference decompiler export omitted them.
- */
-typedef unsigned char u8;
 typedef int Quadword __attribute__((mode(TI)));
 typedef struct { u8 prefix[0x2C0]; float waypoint[4]; float previousPosition[4]; } WaypointView;
 /* Partial current dispatch context; the payload's full extent is not inferred. */
@@ -40,7 +23,8 @@ typedef struct {
 } Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext;
 typedef unsigned long Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchFlags;
 typedef struct { u8 prefix[0x20]; float amount; int reserved24; int kind; int detail; } EffectTuning;
-extern EffectTuning D_L02_001BA500;
+extern u8 D_L02_001BA500[];
+#define EFFECT ((EffectTuning *)D_L02_001BA500)
 extern float D_L02_001B3F58 __attribute__((sda));
 extern float D_L02_001B01B0[4] __attribute__((sda));
 extern float D_L02_001B01C0[4] __attribute__((sda));
@@ -48,8 +32,9 @@ extern float D_L02_001B01D0[4] __attribute__((sda));
 extern int D_L02_001B01E0 __attribute__((sda));
 extern int D_L02_001A903C;
 typedef struct { u8 prefix[0x229C]; int motion; u8 reserved22A0[0x1FC]; char *damage; } ResidentView;
-extern ResidentView D_00189E20;
-#define D_0018C2BC D_00189E20.damage
+extern u8 D_00189E20[];
+#define RESIDENT ((ResidentView *)D_00189E20)
+#define D_0018C2BC RESIDENT->damage
 extern u8 D_001A7A61;
 extern float D_00189EA0[4];
 extern void func_L02_003D4308(char *);
@@ -64,7 +49,7 @@ extern void func_L02_003D5B90(char *);
 /* The retail callback site supplies a parent even though this leaf ignores it. */
 extern int func_L00_0042AB40();
 extern void func_002A7470(char *, int, int, int);
-extern void func_002A7750(u8 *, u8, int);
+extern void func_002A7750(u8 *, s32, s32);
 extern void func_L02_003D4ED0(char *);
 extern void func_L02_003D4FD0(char *, Quadword *, float, float);
 extern float func_002A7878(float, float);
@@ -75,7 +60,7 @@ extern void func_L02_003FC020(char *, char *);
 extern void func_002B5258(char *);
 extern void func_L02_003D4AF0(char *, int);
 extern float func_L02_002F21C0(void *, void *);
-extern void func_L01_00321178(char *, char *);
+extern int func_L01_00321178(char *, char *);
 extern float func_00283C80(float, float);
 extern void func_L02_003D69F0(void);
 extern void func_L02_003D5118(char *, int);
@@ -84,7 +69,7 @@ extern int func_L02_003D4D00(char *);
 extern int func_L02_003D4A60(char *);
 extern Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchFlags func_002B1C20(void *, Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext *);
 /* Extra caller slots are retained at this legacy entry; its leaf ignores them. */
-extern void func_L02_003FC248();
+extern void func_L02_003FC248(void *, int, int);
 extern int func_002E5E58(int, int, void *);
 extern void func_002B0A18(int, int);
 extern void func_L01_003E9CF8(char *, int, void (*)(char *));
@@ -104,14 +89,14 @@ extern void func_L02_003D46B8(char *);
 #define W(o) (*(unsigned int *)(state+(o)))
 #define F(o) (*(float *)(state+(o)))
 #define P(o) (*(char **)(state+(o)))
-#define SET_MODE(m,r) func_002A7750((u8 *)self,(u8)(m),(r))
+#define SET_MODE(m,r) func_002A7750((u8 *)self,(m),(r))
 
 extern char *D_L02_001B359C;
 extern float D_L02_001B03F0[4] __attribute__((sda));
 extern float D_L02_001B0400[4] __attribute__((sda));
 extern float D_L02_001A8F20[4] __attribute__((nosda));
 extern u8 D_001A7A73;
-#define D_0018C0BC D_00189E20.motion
+#define D_0018C0BC RESIDENT->motion
 typedef struct { u8 prefix[4]; u8 active; u8 reserved05[0x13]; char *owner; u8 reserved1C[0x54]; } SoundSlot;
 extern SoundSlot D_001886D0[];
 extern void func_L02_003D91A0(char *);
@@ -140,7 +125,7 @@ extern int func_002E5DA0(int, int, char *, int);
 extern void *func_0032C700(void *, int, int, int, int, int, int, int, int, int, int, int, float, float);
 extern void func_0029FCC0(char *, int, char *);
 extern void func_002A7A00(float *, float, float);
-extern void func_002B0A68(char *, int, int, unsigned char, float, float, float, float);
+extern void func_002B0A68(char *, int, float *, unsigned char, float, float, float, float);
 extern void func_L02_003DB6D8(char *);
 extern void func_L02_003D9608(char *);
 #define PROXY (D_L02_001B359C + (*(int *)(*(char **)(self+0x68)+0x244) << 8))
@@ -152,7 +137,9 @@ void func_L02_003D7C20(char *self)
     char *state;
     char *object;
     char *child;
-    float target[4], direction[4], curve[4];
+    float target[4] __attribute__((aligned(16)));
+    float direction[4] __attribute__((aligned(16)));
+    float curve[4] __attribute__((aligned(16)));
     float distance, yaw, frame, facing, value;
     short damageKind;
     int sound, animation, phase;
@@ -161,7 +148,7 @@ void func_L02_003D7C20(char *self)
     func_L02_003D91A0(self);
     state=*(char **)(self+0x68);
     *(Quadword *)target=0;
-    if (P(0x240)) *(Quadword *)target=*(Quadword *)(P(0x240)+0x10);
+    if (P(0x240)) qcopy(target, P(0x240)+0x10);
     distance=func_00282E80(self+0x10,target);
     yaw=func_00283248(target[0]-*(float *)(self+0x10),target[1]-*(float *)(self+0x14));
     frame=func_0029F530(self);
@@ -212,7 +199,7 @@ void func_L02_003D7C20(char *self)
             value=func_0029F530(self);
             if (value>2.0f && !H(0x292)) { H(0x292)=1; func_002E5CF8(0,0,self); }
             if (actor[0x60]&2) {
-                D_L02_001BA500.amount=0.35f; D_L02_001BA500.kind=25; D_L02_001BA500.detail=0;
+                EFFECT->amount=0.35f; EFFECT->kind=25; EFFECT->detail=0;
                 func_00282C88((Quadword *)(state+0xF0));
                 if (actor[0x43]) func_002A7470(self,0,0,0);
                 object=PROXY; if (((u8 *)object)[0x43]) func_002A7470(object,0,0,0);
@@ -222,7 +209,7 @@ void func_L02_003D7C20(char *self)
         break;
     case 3:
         if (func_002B3868((u8 *)self)) {
-            actor[0xBC]=0; *(Quadword *)(state+0x230)=*(Quadword *)D_L02_001B0400;
+            actor[0xBC]=0; qcopy(state+0x230, D_L02_001B0400);
             if (actor[0x43]!=1) func_002A7470(self,1,0,10);
             func_L02_003DB938(self); func_L02_003D4990(P(0x264));
             func_L02_003FC020(*(char **)(self+0xB8),P(0x264));
@@ -372,7 +359,7 @@ void func_L02_003D7C20(char *self)
                 D_001A7A73=1; func_002E5E58(1,0,0); func_002B0A18(0x1233,-1); D_L02_001A903C=1;
             }
             *(int *)(self+0x48)=0; *(int *)(PROXY+0x48)=0; *(short *)(self+0x96)=0;
-            func_00282CF0(direction,&D_L02_001BA500,PROXY+0x10);
+            func_00282CF0(direction,D_L02_001BA500,PROXY+0x10);
             func_00282F20(direction,direction,func_002A7878(0.083333336f,0.116666675f));
             direction[2]+=0.06666667f;
             child=*(char **)(*(char **)(self+0x68)+0x260);
@@ -402,9 +389,9 @@ void func_L02_003D7C20(char *self)
             func_0029FCC0(self,8,(char *)direction);
             func_0032C700(self+0x10,0,5,15,5,25,25,1,0,0,0,0,0.7f,20.0f);
             func_002A7A00(curve,0.10000001f,0.20000002f);
-            func_002B0A68(self,0xFFF,(int)curve,255,3.0f,6.0f,3.0f,6.0f);
+            func_002B0A68(self,0xFFF,curve,255,3.0f,6.0f,3.0f,6.0f);
             func_002A7A00(curve,0.13333334f,0.26666668f);
-            func_002B0A68(PROXY,0x1F,(int)curve,255,3.0f,6.0f,3.0f,6.0f);
+            func_002B0A68(PROXY,0x1F,curve,255,3.0f,6.0f,3.0f,6.0f);
             func_002E5DA0(5,0,self,0xA44); func_L02_003DB6D8(self);
             F(0x210)=1.0f; F(0x218)=1.0f; F(0x214)=1.0f; B(0x1F2)=0;
             child=P(0x264);

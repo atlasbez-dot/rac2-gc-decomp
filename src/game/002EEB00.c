@@ -154,7 +154,6 @@ int func_002EEE50(int tag, unsigned int index, int start, int count)
     return 0;
 }
 
-INCLUDE_ASM("asm/game", func_002EEED0);
 
 typedef struct StashBlock_r002EEFE0 {
     /* 0x00 */ int   ram;      /* IOP stash RAM address */
@@ -175,9 +174,6 @@ int func_002EEFE0(unsigned int arg0) {
     return r1_D_001DD568[arg0].qwc;
 }
 
-INCLUDE_ASM("asm/game", func_002EF010);
-
-INCLUDE_ASM("asm/game", func_002EF080);
 
 /* func_002EF1E8 is in 002EEB00-g8.c. */
 
@@ -205,7 +201,7 @@ void func_002EF310(void)
     }
 }
 
-INCLUDE_ASM("asm/game", func_002EF3B0);
+/* func_002EF3B0 is matched in its own unit, 002EF3B0.c. */
 
 ASM_FUNC("asm/game", func_002EF480);
 

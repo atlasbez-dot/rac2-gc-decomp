@@ -38,8 +38,6 @@ INCLUDE_ASM("asm/levels", func_L20_0039D680);
    and belongs in this -G8 unit. */
 INCLUDE_ASM("asm/levels", func_L20_0039E368);
 
-INCLUDE_ASM("asm/levels", func_L20_0039E5F0);
-
 extern char *D_L20_001FBB20[];
 
 extern int D_L20_001B2FB8;

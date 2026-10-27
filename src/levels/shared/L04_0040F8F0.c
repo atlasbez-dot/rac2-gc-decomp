@@ -78,11 +78,66 @@ INCLUDE_ASM("asm/levels", func_L04_00413A38);
 INCLUDE_ASM("asm/levels", func_L04_00414698);
 
 /* func_L04_00415E28 is a near miss: nonmatching/levels/func_L04_00415E28.c */
-INCLUDE_ASM("asm/levels", func_L04_00415E28);
 
 /* func_L04_00415EA8 is a near miss: nonmatching/levels/func_L04_00415EA8.c */
 
-INCLUDE_ASM("asm/levels", func_L04_00415EE8);
+static __inline__ void qcopy(void *dst, const void *src) {
+    __asm__ __volatile__("lq $2,0x0(%1)\n\tsq $2,0x0(%0)"
+                         : : "r"(dst), "r"(src) : "$2", "memory");
+}
+
+typedef struct {
+    f32 start[4];
+    u8 pad10[0x80 - 0x10];
+    f32 origin[4];
+    u8 pad90[0x100 - 0x90];
+    f32 dir[4];
+    f32 *from;
+    f32 *to;
+    s16 h118;
+    u8 pad11A[0x128 - 0x11A];
+    s16 h128;
+    u8 pad12A[0x138 - 0x12A];
+    s32 i138;
+    s32 i13C;
+    u32 color;
+    s32 active;
+    u8 *owner;
+    u8 pad14C[0x150 - 0x14C];
+} L04_5EE8Bolt;
+
+extern void func_00282CC0(void *, void *, void *);
+extern void func_002830C0(void *, void *, void *);
+extern void func_00283698(void *, void *);
+
+void func_L04_00415EE8(u8 *owner, f32 *pos, f32 *to, f32 *from)
+{
+    f32 d[4] __attribute__((aligned(16)));
+    f32 m[16] __attribute__((aligned(16)));
+    L04_5EE8Bolt *b;
+    s32 i;
+
+    for (i = 0; i < 140; i++) {
+        b = &((L04_5EE8Bolt *)D_L04_00254E10)[i];
+        if (b->active == 0) {
+            b->active = 1;
+            func_00282CC0(d, from, pos);
+            func_00282CC0(b->start, d, to);
+            func_00283698(m, owner + 0xC0);
+            func_002830C0(b->dir, pos, m);
+            qcopy(b->origin, pos);
+            b->to = to;
+            b->i138 = 1;
+            b->from = from;
+            b->i13C = 0x1E;
+            b->owner = owner;
+            b->color = 0x80858585;
+            b->h128 = 0;
+            b->h118 = 0;
+            return;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/levels", func_L04_00416018);
 

@@ -30,9 +30,55 @@ INCLUDE_ASM("asm/levels", func_L14_00304190);
 
 /* func_L14_00304280 lives in the -g8 sibling file (it reaches a global through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L14_00304588);
+typedef struct {
+    unsigned char pad00[0x34];
+    unsigned short flags;
+    unsigned char pad36[0x68 - 0x36];
+    unsigned int p68;
+    unsigned char pad6C[0xAA - 0x6C];
+    short type;
+} Mob_L14_00304588;
 
-INCLUDE_ASM("asm/levels", func_L14_00328E70);
+typedef struct {
+    unsigned char pad00[0x30];
+    int mode;
+    unsigned char pad34[0x44 - 0x34];
+    short count;
+    unsigned char pad46[0x18C - 0x46];
+    Mob_L14_00304588 *mobs[1];
+} MobList_L14_00304588;
+
+extern MobList_L14_00304588 ref_L14_00304588_00;
+extern int D_001A79F0 __attribute__((sda));
+extern void func_L00_002FC980(void);
+extern void func_002E64A0(void *);
+extern void func_L00_00326048(void *, void *, int, int, float);
+extern void func_L08_0037E6D8(void);
+extern void func_L03_00326458(int);
+
+/* Walks the level's list of mobs like func_L02_00300CE8; when the game state is 0xE and the
+   list's word at +0x30 is zero it then runs two more calls, the second with the list's word at +0x194. */
+void func_L14_00304588(void) {
+    int i;
+
+    func_L00_002FC980();
+    for (i = 0; i < ref_L14_00304588_00.count; i++) {
+        Mob_L14_00304588 *mob = ref_L14_00304588_00.mobs[i];
+
+        if (mob != 0 && mob->type == 0xE29)
+            mob->flags |= 0x800;
+        if (mob->type == 0xD54)
+            func_002E64A0(mob);
+        if (mob != 0 && mob->type == 0xFA0 && mob->p68 != 0)
+            func_L00_00326048(mob, (unsigned char *)mob->p68 + 0xC, 0x80AAAAD2, 0x80396464, 0.0610865355f);
+    }
+    if (D_001A79F0 == 0xE && ref_L14_00304588_00.mode == 0) {
+        func_L08_0037E6D8();
+        func_L03_00326458(*(int *)((char *)&ref_L14_00304588_00 + 0x194));
+    }
+}
+
+/* func_L14_00328E70 is matched in its own unit, src/levels/14_aranos_prison/L14_00328E70-qcopy.c (-frac2-qcopy). */
 
 void func_L14_00328E90(char *arg0, char *arg1, char *arg2) {
     char buf[16];
@@ -46,7 +92,7 @@ void func_L14_00328E90(char *arg0, char *arg1, char *arg2) {
 
 INCLUDE_ASM("asm/levels", func_L14_0035F510);
 
-INCLUDE_ASM("asm/levels", func_L14_00390DF8);
+/* func_L14_00390DF8 is defined in L14_00390DF8-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L14_00390EC0);
 
@@ -87,12 +133,9 @@ int func_L14_003C9548(char *arg0) {
     return (arg0[0x95] ^ 1) == 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L14_003C9658);
-
-
 INCLUDE_ASM("asm/levels", func_L14_003CB258);
 
-INCLUDE_ASM("asm/levels", func_L14_003CB4D8);
+/* func_L14_003CB4D8 is defined in L14_003CB4D8-g8.c. */
 
 extern void func_00283698(void *dst, void *src);
 
@@ -170,9 +213,8 @@ void func_L14_003CB608(char *self) {
 
 INCLUDE_ASM("asm/levels", func_L14_003CB868);
 
-INCLUDE_ASM("asm/levels", func_L14_003D18C8);
+/* func_L14_003D18C8 is defined in L14_003D18C8.c. */
 
-INCLUDE_ASM("asm/levels", func_L14_003D54A8);
 
 INCLUDE_ASM("asm/levels", func_L14_003DDD38);
 
@@ -345,7 +387,7 @@ void func_L14_003DF690(char *arg0, int arg1) {
     *(int *)(*(int *)(arg0 + 0x68) + 0x7C) = arg1;
 }
 
-INCLUDE_ASM("asm/levels", func_L14_003DF6A0);
+/* func_L14_003DF6A0 is defined in L14_003DF6A0-g8.c. */
 
 /* func_L14_003DF7F8 is defined in L14_00304190-g8.c (this unit has no $gp access for it). */
 

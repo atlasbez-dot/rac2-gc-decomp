@@ -24,7 +24,7 @@ INCLUDE_ASM("asm/core", func_001334B8);
 INCLUDE_ASM("asm/core", func_00133580);
 
 
-INCLUDE_ASM("asm/core", func_001336C0);
+/* func_001336C0 is matched in its own unit, src/core/001336C0.c (-O2 -G8 -ffunction-sections). */
 
 
 extern int func_00132DF0(int, int, void *, int, int);

@@ -79,11 +79,11 @@ extern void func_L00_002E6EF8(void *, void *);
 
 extern void func_L02_003D28E0(void);
 
-extern void func_L02_00333438(void);
+extern void func_L02_00333438(char *, char *);
 
-extern void func_L01_00321178(void);
+extern int func_L01_00321178(char *, char *);
 
-extern void func_002B4FF0(float);
+extern int func_002B4FF0(char *, float *, float);
 
 extern struct S_001A63A8 D_001A63A8;
 
@@ -216,15 +216,10 @@ void func_L02_003C46E0(struct Outer *p)
         func_002E5DA0(1, 0, g->arr[0], 2198);
 }
 
-/* Clears the sub-object flags of three inline pointer arrays, turns a frame counter into a
-   rotation, and pushes each element's 128-bit block one object forward.
-   The C is in nonmatching/levels/func_L02_003C4848.c: it needs the -frac2-qcopy unit and
-   the counter increment of the second and third loop still lands in the loop header. */
-INCLUDE_ASM("asm/levels", func_L02_003C4848);
+/* Clears the three pointer-list flags, updates their counters and copies the vectors. */
+/* Defined in L02_003C4848-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L02_003C49A0);
-
-INCLUDE_ASM("asm/levels", func_L02_003C4C80);
 
 /* Reads three angles through a helper, bends the object's own angle at +0xF8 into the same
    range, converts all four and hands them to the four-argument report, then applies the
@@ -419,7 +414,6 @@ void func_L02_003CD4A8(struct L02GroupObject *arg0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003CD758);
 
 extern int D_L02_001B35B8 __attribute__((sda));
 
@@ -451,15 +445,15 @@ INCLUDE_ASM("asm/levels", func_L02_003CE4D0);
 
 /* Runs the kind's entry hook: the first when the level flag is set, the second when the third
    argument is clear, the third with the object's own angle otherwise. */
-void func_L02_003CE8B0(char *a0, int a1, int a2) {
+void func_L02_003CE8B0(char *a0, char *a1, int a2) {
     char *p = *(char **)(a0 + 0x68);
 
     if (D_L02_001A8FF0)
-        func_L02_00333438();
+        func_L02_00333438(a0, a1);
     else if (a2 == 0)
-        func_L01_00321178();
+        func_L01_00321178(a0, a1);
     else
-        func_002B4FF0(*(float *)(p + 0x31C));
+        func_002B4FF0(a0, (float *)a1, *(float *)(p + 0x31C));
 }
 
 /* Clears the two angle words at +0x310 and +0x312 and counts up the +0x96 word, then runs the
@@ -487,7 +481,7 @@ void func_L02_003CE908(char *a0) {
    compiler gives the kind byte the other register. 116 bytes against 124.
    wave5-09: same wall from a -G8 unit (needs the .extern for the one-instruction $gp load);
    candidate 128 bytes, the same two register copies plus a `nop` the retail loop does not have. */
-INCLUDE_ASM("asm/levels", func_L02_003CE9A8);
+/* func_L02_003CE9A8 is defined in L02_003CE9A8-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L02_003CEA28);
 
@@ -731,7 +725,7 @@ void func_L02_003D6BC0(char *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003D6DF8);
+/* Defined in L02_003D6DF8-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L02_003D6EE0);
 
@@ -805,18 +799,6 @@ void func_L02_003D78A8(char *a0) {
     func_002A7750(a0, 3, -1);
 }
 
-/* Near miss (see work/wave7-20261013/w04/drafts and nonmatching/levels/func_L02_003DBEC8.c):
-   body, store order, table lookup and the lq/sq copy all in the retail sequence; the parameter
-   copy and the context land in $t0/$t1 here against retail's $a2/$a3 (a dead second parameter
-   does not move them), and with the context load written first this cc1 fills the bnez delay
-   slot with it and sinks the epilogue's `ld $ra` instead, so 108 bytes against 120. */
-INCLUDE_ASM("asm/levels", func_L02_003DBEC8);
-
-/* Near miss: nonmatching/levels/func_L02_003D7B88.c - body, store order and both lookups
-   reproduced; the parameter copy lands in $t2 and this cc1 sinks the epilogue's `ld $ra`
-   into the bnez delay slot where retail loads the context (140 bytes against 148). */
-INCLUDE_ASM("asm/levels", func_L02_003D7B88);
-
 void func_L02_003DED08(void) {
     func_L00_0037E5F0(10000.0f);
 }
@@ -838,7 +820,8 @@ void func_L02_003F0628(char *a0) {
    jr $ra; nop`), so the catalogue row starts inside the function before it. Not a function. */
 
 /* Forwards the first argument with a null second and a third of three. */
-void func_L02_003FC248(void *a0) {
+/* Its callback callers also supply two integer slots that this body ignores. */
+void func_L02_003FC248(void *a0, int unused_a1, int unused_a2) {
     func_002A6C58(a0, 0, 3);
 }
 
@@ -938,7 +921,6 @@ void func_L02_004012A0(char *a0) {
 
 /* func_L02_004013C0 lives in the -g8 sibling: it reads a $gp-relative scalar. */
 
-INCLUDE_ASM("asm/levels", func_L02_00401480);
 
 INCLUDE_ASM("asm/levels", func_L02_00401530);
 

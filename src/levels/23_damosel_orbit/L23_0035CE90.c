@@ -282,9 +282,7 @@ void func_L23_003C0F88(char *arg0, unsigned long long mask, int mode, int check)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L23_003C1420);
 
-INCLUDE_ASM("asm/levels", func_L23_003C16D8);
 
 void func_L23_003C1960(char *arg0) {
     D_L23_001B36B0 = 0;
@@ -318,9 +316,8 @@ void func_L23_003C1AB0(int arg0) {
 
 /* func_L23_003C1B58 is matched in L23_003C1B58.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 
-INCLUDE_ASM("asm/levels", func_L23_003C1E88);
+/* func_L23_003C1E88 is defined in L23_003C1E88-g8.c. */
 
-INCLUDE_ASM("asm/levels", func_L23_003D4140);
 
 
 INCLUDE_ASM("asm/levels", func_L23_00415988);

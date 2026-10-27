@@ -1,12 +1,9 @@
-/* Retained manual C reconstruction; not linked and not credited as exact.
- * Checked source: src/game/00301F18-copy.c
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Retail US size: 900 bytes.
- * Final checks: us: 0/28, exit 1, 896 compiled bytes; us2: 0/28, exit 1, 896 compiled bytes; pal: 0/28, exit 1, 896 compiled bytes.
- * Residual: 896/900 bytes with the correct 0x110 frame, actual 48-byte rotation matrices, terminal sixteen-byte copies and unsigned state loads. Position/angle address pseudos occupy s7/fp in the opposite order; parent-state tests fold into a range check and one branch-copy shape remains different. Initial helper-only source was 872 bytes with a 0x100 frame. Named pointer aliases regressed to 860 bytes; terminal qcopy_nc tied and was reverted.
- * Reopen only with: A measured lifetime/control-flow policy explaining the address-pseudo allocation and parent-state branch chain, without false prototypes, fake extents or artificial dependencies.
- * Reviewed EE helpers follow the source-method policy in AGENTS.md.
- * No complete linked build or native runtime validation was performed here.
+/* Retained near miss (M4, 26 October 2026); not linked.
+ * Unit: src/game/00301F18-qcopy.c, profile -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 900/900 bytes, 0/28 places: only the &position/&angles address pseudos take $s7/$fp the other way
+ * round (8 words). Closed here: the parent-state test as an if/else-if chain (the `||` form folds into a
+ * range check) and the found-parent arm first. Declaring angles before position gives retail's
+ * registers but swaps the two stack slots (4 words). Queued for the permuter.
  */
 #include "common.h"
 
@@ -44,18 +41,20 @@ void func_00301F18(u8 *object, void *outPosition, void *outAngles)
     }
     if (object[0x20]==3 && *(char **)(state+0x5c)) {
         parent=*(char **)(state+0x5c);
-        detach=*(u8 *)(parent+0x20)==254 || *(u8 *)(parent+0x20)==253;
-        if (!detach) detach=!func_00277258(object+0x10,0x22,object,0.25f);
+        detach=0;
+        if (*(u8 *)(parent+0x20)==254) detach=1;
+        else if (*(u8 *)(parent+0x20)==253) detach=1;
+        else if (!func_00277258(object+0x10,0x22,object,0.25f)) detach=1;
         if (detach) {
             object[0x20]=1;
             func_00282C88((ParticleWord *)(state+0x30));
             *(float *)(state+0x3c)=1.0f;
             parent=(char *)func_002AD0B0((u8 *)*(char **)(state+0x5c));
-            if (!parent) {
-                func_00282C88((ParticleWord *)(state+0x20));
+            if (parent) {
+                qcopy(state+0x20, parent+0x10);
                 *(char **)(state+0x5c)=0;
             } else {
-                qcopy(state+0x20, parent+0x10);
+                func_00282C88((ParticleWord *)(state+0x20));
                 *(char **)(state+0x5c)=0;
             }
         }

@@ -1,6 +1,6 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/levels", func_L03_002CCB70);
+/* func_L03_002CCB70 is in the sibling file L03_002CCB70-decider.c (its own profile). */
 
 INCLUDE_ASM("asm/levels", func_L03_002D3498);
 

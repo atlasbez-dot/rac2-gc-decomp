@@ -1,28 +1,19 @@
-/* Plain-C reconstruction, 23 October 2026. Profile: -O2 -G8
- * -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -frac2-zero-ti-barrier -g. USA and USA v2: 0/7 placements,
- * 1296/1336 bytes; canonical name absent from the PAL catalogue.
- * Six bounded trials: a do/while with signed pointer comparison fixes the
- * initial loop shape. The vertex reset uses the current strip, but each
- * switch arm updates its independently named strip; using packet[i] there
- * compiles to 1356 bytes and hides that distinct alias structure. Separate
- * named-strip container and -g trials did not improve the match.
- * Reopen on inner-loop pointer induction and lifetimes (retail keeps several
- * independent strip/UV pointers and spills the vertex counter with sq).
- * The por zero and quadword operations all compile from ordinary C.
+/*
+ * Retained complete manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-zero-ti-por -g
+ * 1296/1336 bytes.
+ * us: 0/7 placements; us2: 0/7 placements; pal: absent from catalogue.
+ * Residual: Four complete144-byte packets, the64-byte affine frame,48-byte rotation, angle
+ * clear and real position capture are retained. The frame is0x350 versus retail0x360. Separate
+ * UV/color/vertex cursors shorten to1260 bytes with a0x340 frame and are not retained; inner-
+ * loop induction and spill allocation still differ.
+ * Reopen: Independent packet/UV/color cursor lifetime and scalar-spill evidence beyond the
+ * measured simultaneous-cursor form; no fake local space or reduced packets.
+ * Trial-only source markers and profiles are restored after checking.
  */
 
-/* Superseded historical screen, retained for provenance. */
-/* MMI (SPECIAL2) instruction: no C spelling. 1336 bytes, level
-   02_maktar_nebula. Retail at 0x00410F68 carries the SPECIAL2 word
-   0x70001CA9 (+0x04CC) - opcode 0x1C, which rabbitizer prints as `INVALID`;
-   it is the MMI family (pcpyld and its relatives) the sixth wave recorded
-   and that no C spelling reaches. This cc1 emits `lq`/`sq` for a `mode(TI)`
-   local and `ldl`/`ldr`/`sdl`/`sdr` for a struct assignment, never the
-   packed copy. ASM_FUNC candidate, as for the rest of the family. */
+#include "common.h"
 
-typedef unsigned char u8;
-typedef unsigned long long u64;
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
 typedef struct {
@@ -38,7 +29,7 @@ extern int ref_L02_00410F68_3 __attribute__((sda));
 extern int ref_L02_00410F68_4 __attribute__((sda));
 extern float ref_L02_00410F68_5 __attribute__((sda));
 extern unsigned int ref_L02_00410F68_6[2] __attribute__((sda));
-extern float ref_L02_00410F68_7[8] __attribute__((sda));
+extern float ref_L02_00410F68_7[] __attribute__((sda));
 extern float ref_L02_00410F68_8 __attribute__((sda));
 extern float ref_L02_00410F68_9 __attribute__((sda));
 extern u8 D_00189E20[];
@@ -65,13 +56,13 @@ void func_L02_00410F68(u8 *object)
     float alpha,spread,shrink,time;
     int i,j;
     func_00283658(frame,object+0xC0);
-    frame[3].q=*(Quad *)(object+0x10);
+    qcopy(&frame[3],object+0x10);
     p=packet;
     do {
         p->texture=func_0027C878(ref_L02_00410F68_0);
         p->setup=0xFF9000000260ULL;
         p->reserved=0;
-        p->state=(long long)ref_L02_00410F68_1 | ((long long)ref_L02_00410F68_2<<2) | ((long long)ref_L02_00410F68_3<<4) | ((long long)ref_L02_00410F68_4<<6) | 0x8000000000ULL;
+        p->state=(long long)ref_L02_00410F68_1 | ((u64)(long long)ref_L02_00410F68_2<<2) | ((u64)(long long)ref_L02_00410F68_3<<4) | ((u64)(long long)ref_L02_00410F68_4<<6) | 0x8000000000ULL;
         p++;
     } while ((int)p<(int)(packet+4));
     time=*(float *)(effect+0x34);

@@ -103,7 +103,6 @@ INCLUDE_ASM("asm/levels", func_L05_003A40F8);
 
 INCLUDE_ASM("asm/levels", func_L05_003A96D8);
 
-INCLUDE_ASM("asm/levels", func_L05_003D8E98);
 
 INCLUDE_ASM("asm/levels", func_L05_00414F90);
 
@@ -150,7 +149,7 @@ void func_L05_004158B0(char *object)
     *(int *)(s1 + 0x268) = 0x14;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_00415958);
+/* func_L05_00415958 is defined in L05_00415958-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L05_00415B38);
 
@@ -239,7 +238,6 @@ INCLUDE_ASM("asm/levels", func_L05_004161B0);
 
 INCLUDE_ASM("asm/levels", func_L05_00416468);
 
-INCLUDE_ASM("asm/levels", func_L05_00416698);
 
 INCLUDE_ASM("asm/levels", func_L05_00416918);
 
@@ -263,8 +261,6 @@ char *func_L05_00416D68(char *a0, int a1)
     }
     return obj;
 }
-
-INCLUDE_ASM("asm/levels", func_L05_00416E08);
 
 /* Builds the sub-record's three planes and blends them onto the object's transform. */
 
@@ -335,8 +331,6 @@ void func_L05_0041CA70(char *obj)
 
 INCLUDE_ASM("asm/levels", func_L05_0041CB68);
 
-INCLUDE_ASM("asm/levels", func_L05_0041CE00);
-
 INCLUDE_ASM("asm/levels", func_L05_0041CFE8);
 
 /* shared native body of family 5a97ab89858c */
@@ -362,7 +356,6 @@ void func_L05_0041D1B0(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/levels", func_L05_0041D218);
 
 INCLUDE_ASM("asm/levels", func_L05_0041DA20);
 

@@ -1,24 +1,13 @@
-/* Reconstruction checked 23 October 2026.
+/* Complete nonmatching reconstruction: 1204/1204 bytes.
  * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Final check.py coverage: us 0/27, us2 0/27, pal 0/27.
- * Manual144-byte beam-quad reconstruction1224/1204 with qcopy/barrier.
- * Remaining: Quad/register initialization scheduling, stack/workspace allocation and segment-loop registers differ.
- * Reopen with a verified complete render-quad declaration and matching loop witness.
- * The qualified R5900 view decodes the cited SPECIAL2 word as por, not an unknown instruction.
- * Historical screening below is preserved; its blanket C/ISA claims are not acceptance evidence.
+ * Placement checks: US: 0/27; US2: 0/27; PAL: 0/27.
+ * Both144-byte packets, the64-byte frame and both width vectors are complete and16-byte aligned. All twelve real capture/row-transfer sites use clobbering helpers. Capturing the two U values and writing all four U fields before endpoint copies removes the extra post-copy reloads and reaches1204/1204 bytes with the retail0x200 frame. The first mismatch is+0x8; entry spills, texture/opacity setup, geometry-pointer allocation and segment-loop scheduling differ. The retail packet initialization is preserved, including fields not initialized in this caller; no missing colors or packet words are zeroed speculatively.
+ * Reopen with actual initial-versus-loop geometry-pointer lifetimes and packet setup evidence. Preserve the full frame/packets, both submissions and the U capture before copies; do not add barriers or shrink extents.
  */
-
-/* MMI (SPECIAL2) instruction: no C spelling. 1204 bytes, level
-   00_aranos_tutorial. Retail at 0x003A2668 carries the SPECIAL2 word
-   0x700014A9 (+0x00C4) - opcode 0x1C, which rabbitizer prints as `INVALID`;
-   it is the MMI family (pcpyld and its relatives) the sixth wave recorded
-   and that no C spelling reaches. This cc1 emits `lq`/`sq` for a `mode(TI)`
-   local and `ldl`/`ldr`/`sdl`/`sdr` for a struct assignment, never the
-   packed copy. ASM_FUNC candidate, as for the rest of the family. */
-
 #include "common.h"
 typedef int VectorBits __attribute__((mode(TI)));
-typedef struct { float vertices[4][4]; unsigned int colors[4]; float uv[4][2]; u64 registers[4]; } BeamQuad;
+typedef float Vector[4] __attribute__((aligned(16)));
+typedef struct { float vertices[4][4]; unsigned int colors[4]; float uv[4][2]; u64 registers[4]; } __attribute__((aligned(16))) BeamQuad;
 extern u64 func_0027C878(int);
 extern void func_L00_003A2570(void *, int);
 extern void func_L00_003A2B28(char *);
@@ -34,12 +23,12 @@ extern float D_L00_001B8DC0[4];
 /* Draw a two-layer ribbon along a sequence of sampled beam points. */
 void func_L00_003A2668(void *owner, unsigned int opacity, float points[][4], int count)
 {
-    BeamQuad outer, inner;
-    float frame[4][4], outerWidth[4], innerWidth[4];
+    BeamQuad outer, inner __attribute__((aligned(16)));
+    Vector frame[4], outerWidth, innerWidth;
     float *current = points[1];
     int index;
-    outer.registers[3] = ((u64)opacity << 32) | 0x68;
     outer.registers[1] = func_0027C878(43);
+    outer.registers[3] = ((u64)opacity << 32) | 0x68;
     outer.colors[0] = 0x7F7F7F7F;
     outer.colors[1] = 0x7F7F7F7F;
     outer.registers[2] = 0xFF9000000260ULL;
@@ -73,19 +62,19 @@ void func_L00_003A2668(void *owner, unsigned int opacity, float points[][4], int
     func_00282DD8(frame[2], frame[1], frame[0]);
     func_00282F20(frame[2], frame[2], 1.0f);
     func_00282DD8(frame[1], frame[0], frame[2]);
-    *(VectorBits *)frame[3] = *(VectorBits *)points[0];
-    *(VectorBits *)outer.vertices[0] = *(VectorBits *)outerWidth;
+    qcopy(frame[3], points[0]);
+    qcopy(outer.vertices[0], outerWidth);
     func_00282D30(outer.vertices[1], outer.vertices[0], -1.0f);
     func_002830C0(outer.vertices[0], outer.vertices[0], frame);
     func_002830C0(outer.vertices[1], outer.vertices[1], frame);
-    *(VectorBits *)inner.vertices[0] = *(VectorBits *)innerWidth;
+    qcopy(inner.vertices[0], innerWidth);
     func_00282D30(inner.vertices[1], inner.vertices[0], -1.0f);
     func_002830C0(inner.vertices[0], inner.vertices[0], frame);
     func_002830C0(inner.vertices[1], inner.vertices[1], frame);
     for (index = 1; index < count - 1; index++) {
-        *(VectorBits *)outer.vertices[2] = *(VectorBits *)outerWidth;
+        qcopy(outer.vertices[2], outerWidth);
         func_00282D30(outer.vertices[3], outer.vertices[2], -1.0f);
-        *(VectorBits *)inner.vertices[2] = *(VectorBits *)innerWidth;
+        qcopy(inner.vertices[2], innerWidth);
         func_00282D30(inner.vertices[3], inner.vertices[2], -1.0f);
         func_00282CF0(frame[0], points[index + 1], current);
         func_00282F20(frame[0], frame[0], 1.0f);
@@ -93,7 +82,7 @@ void func_L00_003A2668(void *owner, unsigned int opacity, float points[][4], int
         func_00282DD8(frame[2], frame[1], frame[0]);
         func_00282F20(frame[2], frame[2], 1.0f);
         func_00282DD8(frame[1], frame[0], frame[2]);
-        *(VectorBits *)frame[3] = *(VectorBits *)current;
+        qcopy(frame[3], current);
         func_002830C0(outer.vertices[2], outer.vertices[2], frame);
         func_002830C0(outer.vertices[3], outer.vertices[3], frame);
         func_002830C0(inner.vertices[2], inner.vertices[2], frame);
@@ -102,18 +91,22 @@ void func_L00_003A2668(void *owner, unsigned int opacity, float points[][4], int
         inner.colors[2] = inner.colors[3] = 0x7FFF0000;
         func_00280B90(&outer, 0, 0);
         func_00280B90(&inner, 0, 0);
-        inner.uv[0][0] = func_00283CE0(index) * 0.33f;
-        inner.uv[2][0] = inner.uv[0][0] + 0.33f;
-        if (inner.uv[0][0] >= 1.0f) {
-            inner.uv[0][0] -= 1.0f;
-            inner.uv[2][0] -= 1.0f;
+        {
+            float startU = func_00283CE0(index) * 0.33f;
+            float endU = startU + 0.33f;
+            if (startU >= 1.0f) {
+                startU -= 1.0f;
+                endU -= 1.0f;
+            }
+            inner.uv[0][0] = startU;
+            inner.uv[2][0] = endU;
+            inner.uv[1][0] = startU;
+            inner.uv[3][0] = endU;
         }
-        *(VectorBits *)outer.vertices[0] = *(VectorBits *)outer.vertices[2];
-        *(VectorBits *)outer.vertices[1] = *(VectorBits *)outer.vertices[3];
-        *(VectorBits *)inner.vertices[0] = *(VectorBits *)inner.vertices[2];
-        *(VectorBits *)inner.vertices[1] = *(VectorBits *)inner.vertices[3];
+        qcopy(outer.vertices[0], outer.vertices[2]);
+        qcopy(outer.vertices[1], outer.vertices[3]);
+        qcopy(inner.vertices[0], inner.vertices[2]);
+        qcopy(inner.vertices[1], inner.vertices[3]);
         current += 4;
-        inner.uv[1][0] = inner.uv[0][0];
-        inner.uv[3][0] = inner.uv[2][0];
     }
 }

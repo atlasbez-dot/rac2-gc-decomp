@@ -1,26 +1,15 @@
-/* 0 of 1 places match - last line: 23_damosel_orbit: 1448 bytes, expected 1520
-   Built in src/levels/23_damosel_orbit/L23_00416388-g8.c: it has no $gp access, but it calls
-   func_L23_00419088 with an int while the -G0 file defines that function with an s16
-   parameter (which would add a sign-extension retail does not have).
-   Matching: the prologue, the n == 0 and mode-0 paths (`dir *= -1`, `v == 0 ? 1 : -1`, a
-   function-scope `k` that retail keeps in $s0 for the tail too), the fill loop's shape, the
-   switch tree (case 2 shares default), and the case-1, case-3 and first default loops apart
-   from scratch registers (one counter `j` per loop, `ok`/`d`/`f` block-scoped: retail gives
-   each loop its own pseudos).
-   The wall is the second default loop: retail copies its four 16-byte vectors through
-   pointers held in registers (`lq $v0,0($v1)` / `sq $v0,0($s2)`, the pointers hoisted as loop
-   invariants and spilled to 0xF0-0x100), the shape of an inline-asm qcopy; this cc1's CSE
-   folds the frame offset back into every `lq`/`sq` (`*(TI128 *)a = *(TI128 *)n1`, an inline
-   copy helper and TI scalars all measured the same).  With those four addresses no longer
-   loop invariants, fewer pseudos spill (frame 0x170 against 0x180, the res base in 0xF0
-   against 0x104) and reload picks other scratch registers in the earlier loops, which is
-   most of what remains.  The fill loop also allocates k*4 to $s0 and swaps $a0/$a1 against
-   retail; declaration orders, statement orders and branch polarity (16 variants) do not move
-   it.  `-0.35f` is a local set before the loop guard ($f22), as in retail. */
+/* Retained C reconstruction; not linked or counted. Updated by Opus big44, 26 October 2026.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * 379/380 instructions, 319 identical; 16 register-blind lines off (was 25).
+ * Fixed: func_L23_00419088 is called unprototyped (as in L23_00418DC0.c), so the int index
+ * passes without a sign extension; the final direction is an if/else.
+ * Remaining: the first loop's sll/sw order, the d2 argument load order in the last loop,
+ * and the tail, where retail loads idx[best] in the join before storing dir (bnez slot
+ * holds the idx address, then-arm ends in b).
+ */
 
+#include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
-
-typedef unsigned long long u64;
 
 /* The level state fields the target picker reads. */
 typedef struct {
@@ -63,7 +52,7 @@ extern int func_L23_00418F30(PickMoby *, u64, int *, int);
 
 extern int func_L23_00418FD0(PickMoby *, int, short);
 
-extern void func_L23_00419088(PickMoby *, int);
+extern void func_L23_00419088();
 
 extern int func_L23_00419CE0(u64);
 
@@ -212,10 +201,10 @@ void func_L23_004190C8(PickMoby *arg0, u64 mask, int mode, int check) {
                 func_00282CF0(d2, pts[j], state->origin);
                 func_00282F20(n1, d1, 1.0f);
                 func_00282F20(n2, d2, 1.0f);
-                *(TI128 *)a = *(TI128 *)n1;
-                *(TI128 *)b = *(TI128 *)n2;
-                *(TI128 *)up1 = arg0->up;
-                *(TI128 *)up2 = arg0->up;
+                qcopy(a ,n1);
+                qcopy(b ,n2);
+                qcopy(up1,&arg0->up);
+                qcopy(up2,&arg0->up);
                 func_00282DD8(c1, up1, a);
                 func_00282DD8(c2, up2, b);
                 func_L00_00325600(a, state->frame, 0);
@@ -229,8 +218,11 @@ void func_L23_004190C8(PickMoby *arg0, u64 mask, int mode, int check) {
         }
         break;
     }
+    if (res[best] == 0)
+        state->dir = 1;
+    else
+        state->dir = -1;
     k = idx[best];
-    state->dir = res[best] == 0 ? 1 : -1;
     state->res = res[best];
     func_L23_00419088(arg0, k);
 }

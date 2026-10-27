@@ -1,20 +1,23 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-gcse.
- * Reported final C / retail: 2080 / 2120 bytes; size equality is not a match.
- * us: 0/1 placements; 2080/2120 bytes.
- * us2: 0/1 placements; 2080/2120 bytes.
- * pal: absent from catalogue (not a match).
- * Residual: 40 fewer bytes and frame16-byte difference.16-argument4256F0 interface read from actual C, four stack arguments verified. Ringrow7-to0 address arithmetic resolved manually;48-byte matrix qualified from current source.
- * Reopening condition: New measured source/data-layout or allocator hypothesis; do not repeat retained flag/control-flow trials or use artificial aliases/barriers.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 2064 bytes; retail 2120 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: All eight vertices, the 48-byte rotation output, complete aligned position/joint
+ * values, 8x3 live-effect tables and sixteen constructor inputs including four stack words
+ * are preserved. One scalar C identity now represents D_L23_001B378C throughout: the clamp
+ * compares the newly incremented value, including the 9+2/max10 case. The earlier dual-name
+ * alias was removed because it allowed the compiler to clamp the old value. Retail mixes GP
+ * and absolute accesses to this single float; the honest single view leaves an addressing
+ * residual. Frame 0x200 now equals retail; allocation and schedules still differ. Caller
+ * query-result bytes were not given an invented zero initializer.
+ * Reopen: Independent axis/vertex/query lifetime or compiler evidence for the remaining
+ * allocation/addressing differences; preserve one scalar identity, updated-value clamp and
+ * the complete effect-call stack tail.
  */
 
-/* 2080/2120 bytes after2 trials. Real16-argument effect API with four verified stack arguments. Matrix is48 bytes, ring boundary connects row7 to0. Remaining frame/allocation and mixed absolute/GP accesses.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-gcse. */
-#include "include_asm.h"
+#include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 extern int D_L23_001B3788 __attribute__((sda));
 extern float D_L23_001B378C __attribute__((sda));
@@ -58,7 +61,7 @@ extern char *D_L23_00259380[8][3];
 extern int D_L23_00259320[8][3];
 extern Quad D_L23_002593E0[8][3];
 extern unsigned char D_00189E20[];
-extern void func_00282948(char *);
+extern int func_00282948(int *);
 extern float func_00282C48(float);
 extern int func_002E5CF8(int, int, char *);
 extern void func_L23_0041E290(char *);
@@ -76,9 +79,9 @@ extern void func_L23_0041AFE8(char *, char *, char *, Quad *, int *);
 extern void func_0029FCC0(char *, int, char *);
 extern void *func_L23_004256F0(unsigned char *, unsigned char *, unsigned char *, unsigned char, unsigned char, short, short, int, float, float, float, float, int, int, int, int);
 extern float func_00282E48(char *, char *);
-extern void func_0032C700(void *, int, int, int, int, int, int, int, float, float, int, int, int, int);
-extern void func_L23_0041E5B0(unsigned char *, int, int, void *, int, int);
-extern void func_002E5DA0(int, int, char *, int);
+extern void *func_0032C700(void *, int, int, int, int, int, int, int, float, float, int, int, int, void *);
+extern void func_L23_0041E5B0(unsigned char *, int, int, Quad *, float *, int);
+extern int func_002E5DA0(int, int, char *, int);
 extern int func_002A7820(int, int);
 extern int func_002761F8(void *, void *, int, void *, void *);
 
@@ -108,7 +111,7 @@ void func_L23_0041A7A0(char *object) {
         if (!D_L23_001B3788) {
             if (D_L23_001B150C != -1) func_00291450(D_L23_001B150C);
         } else {
-            func_00282948((char *)&D_L23_001B3788);
+            func_00282948(&D_L23_001B3788);
             func_L23_0041E290(object);
         }
         if (D_L23_001B3788 < D_L23_001B15A4 / 2) {
@@ -126,26 +129,26 @@ void func_L23_0041A7A0(char *object) {
         D_L23_001B146C = func_L00_002FCF18(state + 0x3E0, 35.0f, 0.0f, x, y, z);
     }
     *(int *)(state + 0x5B0) = 1;
-    D_L23_001B37A0 = *(Quad *)(object + 16);
+    qcopy(&D_L23_001B37A0,object+16);
     func_L23_00418650((char *)&D_L23_001B37A0, D_L23_001B157C);
-    local.axes[0] = *(Quad *)(object + 0xC0);
-    local.axes[1] = *(Quad *)(object + 0xD0);
-    local.axes[2] = *(Quad *)(object + 0xE0);
+    qcopy(&local.axes[0],(object + 0xC0));
+    qcopy(&local.axes[1],(object + 0xD0));
+    qcopy(&local.axes[2],(object + 0xE0));
     random = func_002A7878(0.98f, 1.02f);
     *(float *)(state + 0x380) = func_00283B98(*(float *)(state + 0x380), D_L23_001B1578 * random * 0.00029088825f);
-    local.euler = 0;
+    qzero(&local.euler);
     ((float *)&local.euler)[2] = *(float *)(state + 0x380);
     func_002833F0((char *)local.matrix, (char *)&local.euler);
     func_00283738((char *)local.axes, (char *)local.axes, (char *)local.matrix);
-    local.scaled[0] = local.axes[0];
-    local.scaled[1] = local.axes[1];
+    qcopy(&local.scaled[0],&local.axes[0]);
+    qcopy(&local.scaled[1],&local.axes[1]);
     func_00282D30((char *)&local.scaled[0], (char *)&local.scaled[0], D_L23_001B36A4);
     func_00282D30((char *)&local.scaled[1], (char *)&local.scaled[1], D_L23_001B36A4);
-    local.vertex[0] = local.scaled[0];
+    qcopy(&local.vertex[0],&local.scaled[0]);
     func_00282D30((char *)&local.vertex[4], (char *)&local.vertex[0], -1.0f);
     func_00282CC0((char *)&local.vertex[1], (char *)&local.scaled[0], (char *)&local.scaled[1]);
     func_00282D30((char *)&local.vertex[1], (char *)&local.vertex[1], 0.5f);
-    local.vertex[2] = local.scaled[1];
+    qcopy(&local.vertex[2],&local.scaled[1]);
     func_00282CC0((char *)&local.vertex[3], (char *)&local.scaled[1], (char *)&local.vertex[4]);
     func_00282D30((char *)&local.vertex[3], (char *)&local.vertex[3], 0.5f);
     func_00282D30((char *)&local.vertex[5], (char *)&local.vertex[1], -1.0f);
@@ -183,13 +186,13 @@ void func_L23_0041A7A0(char *object) {
             func_00282D30((char *)&local.blast, *(char **)(D_00189E20 + 0x2290) + 0xE0, 3.0f);
             func_00282CC0((char *)&local.blast, (char *)&local.blast, (char *)D_00189E20 + 0x80);
             func_0032C700(&local.blast, 1, 35, 20, 20, 15, 25, 1, 2.5f, 20.0f, 0, 1, 0, 0);
-            local.position = *(Quad *)(object + 16);
+            qcopy(&local.position,(object + 16));
             func_L23_0041E5B0((unsigned char *)object, 3, (int)D_L23_001B1508, &local.position, 0, 1);
             *(int *)(state + 0x5C4) = 25;
             func_002E5DA0(2, 0, *(char **)(D_00189E20 + 0x2290), 0xF7F);
         }
     }
-    if (*(int *)(state + 0x5C4)) func_00282948(state + 0x5C4);
+    if (*(int *)(state + 0x5C4)) func_00282948((int *)(state+0x5C4));
     i = func_002A7820(1, 4);
     if ((*(unsigned short *)(object + 0x96) & ((1U << i) - 1)) == 0) {
         hit.owner = object; hit.flags = 0x8B0000; hit.kind = 3; hit.mode = 3;

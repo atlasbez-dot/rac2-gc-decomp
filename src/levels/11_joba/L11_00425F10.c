@@ -28,11 +28,60 @@ extern void func_L11_004320F8(u8 *a0, f32 *a1);
 
 
 
-INCLUDE_ASM("asm/levels", func_L11_00425F10);
+/* func_L11_00425F10 lives in L11_00425F10-g-g8.c (-G8 -g: it reaches level globals
+   through $gp and needs the -g line labels before its divisions). */
 
 INCLUDE_ASM("asm/levels", func_L11_004295A0);
 
-INCLUDE_ASM("asm/levels", func_L11_0042A158);
+extern float func_00282DF0(void *);
+extern void func_00282CF0(void *, void *, void *);
+extern void func_L02_0032E998(void *, void *, void *, void *, int, void *, void *, f32, f32);
+extern void func_002AAA00(void *, f32, f32, f32, f32, void *, int);
+extern f32 func_00283C80(f32, f32);
+extern void func_002AA548(void *, void *, f32, f32, f32, f32);
+extern f32 func_002AA2E8(f32 *, f32, f32);
+extern void func_00282F20(void *, void *, f32);
+extern int func_002A7EA0(void *, void *, void *, f32, f32, f32, f32, int);
+
+/* Same body as func_L04_00450D50, with this function's own callees. */
+int func_L11_0042A158(u8 *object, void *target, f32 desiredHeading, f32 speed, f32 stopDistance, f32 margin) {
+    f32 delta[4], displacement[4], destination[4];
+    f32 angle, frameSpeed = 0.0f;
+    u8 *data = *(u8 **)(object + 0x68);
+    int done = 0;
+    f32 distance, acceleration;
+    func_00282CF0(delta, target, object + 0x10);
+    delta[2] = 0.0f;
+    distance = func_00282DF0(delta);
+    acceleration = speed * 0.0008333333535119891f;
+    if (stopDistance < distance) {
+        int collision = *(int *)(data + 0x520);
+        angle = 0.0f;
+        func_L02_0032E998(object + 0x10, target, &angle, data + 0x320, collision, data + 0x530, data + 0x534, margin, 0.4f);
+        func_002AAA00(object + 0xF8, angle, 0.006981317885220051f, 0.0034906589426100254f, 0.20943954586982727f, data + 0x27C, 0);
+        if (func_00283C80(*(f32 *)(object + 0xF8), angle) < 0.523598849773407f) {
+            func_002AA548(&frameSpeed, data + 0x538, distance, acceleration, acceleration, speed * 0.01666666753590107f);
+        } else {
+            *(f32 *)(data + 0x538) = 0.0f;
+        }
+    } else {
+        func_002AAA00(object + 0xF8, desiredHeading, 0.006981317885220051f, 0.2f, 0.20943954586982727f, data + 0x27C, 0);
+        func_002AA2E8((f32 *)(data + 0x538), 0.0f, acceleration);
+        if (*(f32 *)(data + 0x538) == 0.0f && func_00283C80(*(f32 *)(object + 0xF8), desiredHeading) < 0.0872664749622345f) {
+            *(f32 *)(data + 0x27C) = 0.0f;
+            done = 1;
+        }
+    }
+    func_00282F20(displacement, object + 0xC0, *(f32 *)(data + 0x538));
+    func_00282CC0(destination, displacement, object + 0x10);
+    if (!func_002A7EA0(object, object + 0x10, destination, 0.75f, 0.75f, 0.4f, 0.523598849773407f, 0))
+        *(int *)(data + 0x53C) += 1;
+    if (*(int *)(data + 0x53C) >= 30) {
+        *(int *)(data + 0x53C) = 0;
+        done = 1;
+    }
+    return done;
+}
 
 /* Same preparation as func_L11_00431D50 with the class setup on 0x260 and a two-stage
    animation seeded on 0x2A0. */
@@ -65,7 +114,6 @@ void func_L11_0042EF90(u8 *arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L11_0042F018);
 
 INCLUDE_ASM("asm/levels", func_L11_00431860);
 
@@ -106,6 +154,3 @@ void func_L11_00431E30(u8 *arg0) {
     func_L11_004320F8(s0, v);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00431EE8);
-
-INCLUDE_ASM("asm/levels", func_L11_004320F8);

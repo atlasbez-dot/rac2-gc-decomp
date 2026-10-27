@@ -1,12 +1,13 @@
 /* Complete manual reconstruction; not linked.
- * Profile: -O2 -G0 -ffunction-sections.
- * us: 0/28 placements; exit 1.
- * us2: 0/28 placements; exit 1.
- * pal: 0/28 placements; exit 1.
- * USA compiled 924 bytes; retail 900 bytes.
- * The frame is 0xA0 versus retail 0xB0, with colour-pointer lifetime and mixed GP/absolute clip access differences. Reopen after a truthful source/storage profile is qualified for the complete 16-byte clip rectangle.
+ * Profile: -O2 -G8 -ffunction-sections. 900/900 bytes, frame 0xB0 as retail; us 0/28.
+ * 26 October 2026 (M10): -G8 with D_001A7340/D_001A7344 and the clip rectangle as plain
+ * declarations (retail:  in delay slots, lui/lw elsewhere) gives the right size and frame
+ * (the &alternate pseudo spills to 0x30). 90 differing lines remain: retail keeps object+0x28 as
+ * a loop-invariant base in  (ours folds 0x28 into the load), the colour word read order,
+ * and the clip copy addressing ( la, unshared lui/lw field reads). Pointer locals, struct
+ * views and do/while forms did not hoist the base.
  */
-
+#include "common.h"
 typedef struct { float x, y; } VEC_F6bf9ce42;
 typedef struct { unsigned int values[4]; } MenuColourQuad;
 typedef struct { int x0, x1, y0, y1; } MenuClipRectangle;
@@ -17,8 +18,8 @@ extern MenuColourQuad D_001AE1D8, D_001AE1E8;
 extern float D_001AE1D0 __attribute__((sda));
 extern int D_001AE1D4 __attribute__((sda));
 extern int D_001B23C0 __attribute__((sda));
-extern MenuClipRectangle D_001B23B0 __attribute__((sda));
-extern int D_001A7340 __attribute__((sda)), D_001A7344;
+extern MenuClipRectangle D_001B23B0;
+extern int D_001A7340, D_001A7344;
 extern void func_002FC620(int, int, int, int);
 extern int func_0028E588(int, int);
 extern void func_0028EA58(int, int, int, int, int, unsigned int *);
@@ -38,8 +39,7 @@ void func_00342BE8(char *object)
             index <= *(int *)(object + 0x24) && *(int *)(object + 0x10); index++) {
         normal = D_001AE1D8;
         alternate = D_001AE1E8;
-        entry = D_00239BA0 + D_00139568[*(int *)(object + 0x28 +
-                        (*(int *)(object + 0x14) + index) * 4)] * 224;
+        entry = D_00239BA0 + D_00139568[((int *)(object + 0x28))[*(int *)(object + 0x14) + index]] * 224;
         colours = &normal;
         if (*(int *)entry && entry[4]) colours = &alternate;
         current = (float)index;
@@ -62,8 +62,7 @@ void func_00342BE8(char *object)
             D_001B23B0 = clip;
         }
         func_002FC620(D_001B23B0.x0, D_001B23B0.x1, D_001B23B0.y0, D_001B23B0.y1);
-        entry = D_00239BA0 + D_00139568[*(int *)(object + 0x28 +
-                        (*(int *)(object + 0x14) + index) * 4)] * 224;
+        entry = D_00239BA0 + D_00139568[((int *)(object + 0x28))[*(int *)(object + 0x14) + index]] * 224;
         texture = func_0028E588(*(unsigned short *)(entry + 0x3C), 0);
         func_0028EA58(texture, (int)(*(VEC_F6bf9ce42 **)object)->x,
                 (int)((*(VEC_F6bf9ce42 **)object)->y + *(float *)(object + 0xC) * current + (float)*(int *)(object + 0x90)),

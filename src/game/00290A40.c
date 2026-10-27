@@ -61,7 +61,7 @@ void func_00291128(void) {
 }
 
 
-INCLUDE_ASM("asm/game", func_00291158);
+/* func_00291158 is matched in its own unit, 00291158.c. */
 
 /* func_00291268 is in 00290A40-g8.c. */
 
@@ -71,10 +71,61 @@ void func_002912F0(void)
 }
 
 
-INCLUDE_ASM("asm/game", func_00291308);
+static __inline__ void qcopy(void *dst, const void *src) {
+    __asm__ __volatile__("lq $2,0x0(%1)\n\tsq $2,0x0(%0)"
+                         : : "r"(dst), "r"(src) : "$2", "memory");
+}
+
+typedef struct {
+    float color[3];
+    float radius;
+    float position[3];
+    float range;
+} LightDef;
+
+typedef struct {
+    char pad0[0xC];
+    char *buffer;
+    int active;
+    char pad14[0x30 - 0x14];
+} LightSlot;
+
+extern float func_00283CE0(int);
+extern char D_001C2DC0[];
+extern char D_001C2B40[];
+extern char D_001C2C40[];
+extern void func_00282A88(void *, int);
+
+int func_00291308(float *position, float range, float radius, int color)
+{
+    LightDef *def;
+    LightSlot *slot;
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        if (((LightSlot *)D_001C2C40)[i].active == 0) {
+            break;
+        }
+    }
+    if (i == 8) {
+        return -1;
+    }
+    def = (LightDef *)(D_001C2B40 + (i << 5));
+    slot = (LightSlot *)(D_001C2C40 + i * 0x30);
+    qcopy(def->position, position);
+    def->range = range;
+    def->color[0] = func_00283CE0(color & 0xFF) * 0.0078125f;
+    def->color[1] = func_00283CE0((color >> 8) & 0xFF) * 0.0078125f;
+    def->color[2] = func_00283CE0((color >> 16) & 0xFF) * 0.0078125f;
+    def->radius = radius;
+    func_00282A88(slot, 0x30);
+    slot->active = 1;
+    slot->buffer = D_001C2DC0 + (i << 10);
+    return i;
+}
 
 
-extern void func_00291788(void);
+extern void func_00291788(int index);
 extern void func_00282A88(void *, int);
 extern char D_001C2B40[];
 extern char D_001C2C40[];
@@ -82,7 +133,7 @@ extern char D_001C2C40[];
 void func_00291450(int index) {
     if ((unsigned int)index >= 8)
         return;
-    func_00291788();
+    func_00291788(index);
     func_00282A88((void *)(D_001C2B40 + (index << 5)), 0x20);
     func_00282A88((void *)(D_001C2C40 + index * 0x30), 0x30);
 }

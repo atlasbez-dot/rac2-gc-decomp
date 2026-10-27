@@ -203,7 +203,6 @@ void func_0028FDD8(int a0, int a1, int a2, int a3, long long a4, int a5, int a6)
     D_L02_001B3D08 = (int *)((char *)D_L02_001B3D08 + 48);
 }
 
-INCLUDE_ASM("asm/game", func_0028FF50);
 
 
 /* func_00290010 is in the -G8 sibling. */

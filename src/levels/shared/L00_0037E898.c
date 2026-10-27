@@ -283,7 +283,6 @@ void func_L00_003827C0(void)
 INCLUDE_ASM("asm/levels", func_L00_00382AE8);
 
 
-INCLUDE_ASM("asm/levels", func_L00_00382CE8);
 
 INCLUDE_ASM("asm/levels", func_L00_00382F28);
 
@@ -299,7 +298,6 @@ INCLUDE_ASM("asm/levels", func_L00_00384678);
 
 /* func_L00_00384CA8 is defined in L00_00384CA8-qcopy.c. */
 
-INCLUDE_ASM("asm/levels", func_L00_00384D40);
 
 INCLUDE_ASM("asm/levels", func_L00_00384E08);
 
@@ -309,7 +307,6 @@ INCLUDE_ASM("asm/levels", func_L00_003851A0);
 
 INCLUDE_ASM("asm/levels", func_L00_003852A0);
 
-INCLUDE_ASM("asm/levels", func_L00_00385370);
 
 /* func_L00_00387370 is defined in L00_00387370-g8-qcopy.c. */
 
@@ -446,7 +443,7 @@ void func_L00_003883B8(char *p)
 
 INCLUDE_ASM("asm/levels", func_L00_00388790);
 
-INCLUDE_ASM("asm/levels", func_L00_00389E18);
+/* func_L00_00389E18 is defined in L00_00389E18-g8-qcopy.c. */
 
 /* Family 6eb4f363e5305bed: seed body at func_L00_00387408. */
 void func_L00_00389EB0(char *object)
@@ -577,7 +574,6 @@ void func_L00_0038AA40(char *p)
 
 /* func_L00_0038AAD0 is defined in L00_0038AAD0.c. */
 
-INCLUDE_ASM("asm/levels", func_L00_0038ADD0);
 
 INCLUDE_ASM("asm/levels", func_L00_0038B208);
 
@@ -613,9 +609,7 @@ int func_L00_0038B848(void)
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0038B888);
 
-INCLUDE_ASM("asm/levels", func_L00_0038BA80);
 
 extern unsigned char D_001A7B2A __attribute__((sda));
 
@@ -734,7 +728,6 @@ void func_L00_0038BE70(char *object)
         angle * ((limit - scaled) * 0.1637022197246551513671875f + 0.699999988079071044921875f));
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0038BF18);
 
 /* Dispatches on a byte mode at object+32: mode 0 updates two float angles from a linked node and runs a follow-up call; mode 1 refreshes a 16-byte block and a node copy then calls a final update. */
 void func_L00_0038D468(char *object)
@@ -765,7 +758,6 @@ void func_L00_0038D468(char *object)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0038D530);
 
 INCLUDE_ASM("asm/levels", func_L00_0038D650);
 

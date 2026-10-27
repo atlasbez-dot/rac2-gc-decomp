@@ -1,34 +1,37 @@
-/* RAC1-helper follow-up, 2026-10-25: NOT MATCHING; no exact-C credit.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Fresh local measurement: 724/732 bytes, 0/27 US placements, frame 0x30.
- * Change: Approved qcopy preserves five real aligned transfers. Two readable inline predicates distinguish the active standard and upgraded weapon families.
- * Residual: The predicates improve the previous 652-byte body. A common-return form measured 716 and no-split-addresses 704; null-guard, predicate/list block order and allocation remain different.
- * Reopen: Reopen on measured list-count/global base lifetimes or predicate materialization; do not add padding or change the 64-byte list and 0xE0 weapon strides.
- * Earlier measurements/screens below are historical; they do not prohibit
- * the currently approved shared transfer helpers or establish linked equality.
+/* M13, 26 October 2026: 732/732 B under -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier,
+ * 88 words off. Size fixed by: if(actor) wrapper, D_L00_001B1E9C as MACRO_ADDR, the
+ * weapon index read through a pointer local (retail keeps %hi of D_00139568 and adds
+ * %lo per use, then lbu 0x11), and the projectile list held in a pointer local (s3)
+ * while counts read the macro-addressed global. Left: retail's weapon test is
+ * 'kind == 2 || kind == 1' as a jump chain into v0 (no range fold), the second test
+ * lands in a2, and the init/state constant stores are in a different order.
+ * Reopen: the source shape of the two weapon-kind tests.
  */
-/* Nonmatching: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L00_00398810: 0 of 27 places match (src/levels/shared/L00_00398810.c); us2: func_L00_00398810: 0 of 27 places match (src/levels/shared/L00_00398810.c); pal: func_L00_00398810: 0 of 27 places match (src/levels/shared/L00_00398810.c). One full reconstruction652/732 bytes, original frame0x30. Truthful64-byte projectile list(count+31 short indices), E0-byte weapon records and16-byte copies. Current predicates/list walks compile more compactly than retail; pool/global identity and source predicate expansion remain hypotheses. Factory pointer/handle banks and current integer-pointer list helper APIs verified. Reopen with measured source predicate/list lifetime evidence; no padding or aliases added. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 typedef struct { int active; unsigned char kind; char pad05[0xDB]; } WeaponRecord;
 typedef struct { short count; short index[31]; } ProjectileList;
 extern char *D_0018C0B0;
-extern unsigned char D_00139579;
+extern unsigned char D_00139568[];
 extern WeaponRecord D_L00_00262570[];
 extern ProjectileList D_L00_001B1FF0 MACRO_ADDR;
-extern char *D_L00_001B1E9C;
+extern char *D_L00_001B1E9C MACRO_ADDR;
 extern char *func_0029EFD0(int);
 extern int func_002FED90(void *, int, float, float, float);
 extern void func_002AB650(u8 *);
 extern void func_002ACAD0(int, unsigned short *), func_002ACA50(int, short *, short), func_002A0F48(void *);
 /* Separate predicates match the weapon pool's two active families. */
 static __inline__ int projectile_standard_weapon(void) {
-    WeaponRecord *entry = D_L00_00262570 + D_00139579;
+    unsigned char *game = D_00139568;
+    WeaponRecord *entry = D_L00_00262570 + game[0x11];
     if (!entry->active) return 0;
-    return entry->kind == 2 || entry->kind == 1;
+    if (entry->kind == 2) return 1;
+    if (entry->kind == 1) return 1;
+    return 0;
 }
 static __inline__ int projectile_upgraded_weapon(void) {
-    WeaponRecord *entry = D_L00_00262570 + D_00139579;
+    unsigned char *game = D_00139568;
+    WeaponRecord *entry = D_L00_00262570 + game[0x11];
     if (!entry->active) return 0;
     return entry->kind == 3;
 }
@@ -38,7 +41,8 @@ char *func_L00_00398810(char *position, char *direction) {
     char *state, *hero, *oldest;
     int i, age, oldestAge;
     short *slot;
-    if (!actor) return 0;
+    ProjectileList *list;
+    if (actor) {
     *(unsigned short *)(actor + 0x32) = 0x1FF;
     *(unsigned char *)(actor + 0x30) = 0xFF;
     *(unsigned short *)(actor + 0x34) |= 0x100;
@@ -69,11 +73,12 @@ char *func_L00_00398810(char *position, char *direction) {
     *(int *)(state + 0x38) = 0;
     if (projectile_standard_weapon() || projectile_upgraded_weapon()) *(float *)(state + 0x24) = 60.0f;
     else *(float *)(state + 0x24) = 6.0f;
+    list = &D_L00_001B1FF0;
     while (D_L00_001B1FF0.count > 5) {
         oldest = 0;
         oldestAge = 0;
-        slot = D_L00_001B1FF0.index;
-        for (i = D_L00_001B1FF0.count; i > 0; i--, slot++) {
+        slot = list->index;
+        for (i = D_L00_001B1FF0.count; i != 0; i--, slot++) {
             char *candidate = D_L00_001B1E9C + *slot * 0x100;
             if (candidate && *(short *)(candidate + 0xAA) == 0xCB && *(unsigned char *)(candidate + 0x20) < 4) {
                 age = *(int *)(*(char **)(candidate + 0x68) + 0x3C);
@@ -82,12 +87,13 @@ char *func_L00_00398810(char *position, char *direction) {
         }
         if (oldest) {
             *(unsigned char *)(oldest + 0x20) = 5;
-            func_002ACAD0((int)oldest, (unsigned short *)&D_L00_001B1FF0);
+            func_002ACAD0((int)oldest, (unsigned short *)list);
             *(int *)(*(char **)(oldest + 0x68) + 0x40) = 1;
         }
     }
     func_002ACA50((int)actor, (short *)&D_L00_001B1FF0, 31);
     func_002A0F48(actor);
+    }
     return actor;
 }
 

@@ -1,46 +1,42 @@
-/*
- * Retained complete reconstruction, 23 October 2026. USA v1.01 and v2.00: 4992/4972 bytes, 0/1
- * placement each. Canonical row absent from PAL. No matching or strict-build credit is claimed.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-expensive-
- * optimizations.
- * Six bounded meaningful trials: default 4996 bytes; cached dispatch indices and moving the
- * state load after the measured initial position copy gave 4988. Disabling GCSE gave 4968 with
- * different saved GPR roles. Preserving animation reads before RNG draws and a NaN-sensitive
- * frame guard gave 4992. Disabling expensive optimizations gave 4984 and recovered the retail
- * 0x150 frame/save banks; truthful resident/collision prefix views gave the retained 4992. The
- * last null-callback type qualification does not change the verdict.
- * Remaining differences include branch/call scheduling, the first helper's redundant a0 move,
- * and mixed absolute/GP accesses to the same frame counter. No artificial argument, volatile
- * qualifier, stack padding or address alias was added to force them. The two eight-entry
- * dispatch tables were read from retail, including repeated/default destinations; their source
- * label arrays follow the existing computed-goto pattern.
- * The 64-byte matrices, 16-byte vectors, complete 64-bit dispatch flags, independent RNG draw
- * order, and live GPR/FP helper inputs were checked. An independent read-only ABI review found
- * no missing live input, stack tail or consumed return-bank mismatch. Ignored returns of marker
- * helpers remain unqualified. A8D70 retains the current canonical void* formal while this caller
- * supplies its measured integer selector. The nullable callback of 3E9CF8 is represented as
- * callable here, but its original return declaration is unknown.
- * Reopen with independently supported control-flow, original data-layout or live-range evidence.
- * Do not repeat equivalent source forms, invent callback/data identities, or reinterpret a
- * scheduling miss as handwritten assembly.
+/* Retained complete manual C reconstruction; nonmatching, not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections -fno-expensive-optimizations -frac2-zero-ti-por
+ * Final checks: US 0/1 and US2 0/1; 4968/4972 bytes, frame 0x150 in C and retail.
+ * PAL: this canonical name is absent from both catalogues, not a pass.
+ * AAA00 retains its established float return. Correcting only the old void return
+ * changes no object bytes in this caller. Both used eight-entry const label tables,
+ * all 64-byte matrix outputs and the dispatcher full 64-bit return contract remain.
+ * The caller explicitly consumes only status bits 0/1 from the low return word.
+ * Raw state-word snapshots preserve the observed LW/SW transfers without FP conversion.
+ * Retail phase/fallthrough order, NaN-sensitive guards and RNG draw order are preserved.
+ * The frame counter is one mutable MACRO_ADDR object: pursuit-weave reads it absolutely,
+ * pursuit-leave reads the GP form. One declaration reproduces both measured accesses;
+ * the old explicit SDA alias forced GP access in both phases and is removed.
+ * The group pointer and attack-animation word retain their measured SDA forms.
+ * The local target-to-delta transfer stays ordinary C: retail separates its stack LQ/SQ
+ * around the rotation call. The subsequent matrix/target selection keeps its real lifetimes.
+ * Dispatcher payload and resident/query total extents are unknown, so only opaque context
+ * and incomplete external storage with measured prefix views are declared.
+ * Separate scalar locals retain the measured stack slots after the vector/matrix workspace.
+ * This recovers the retail F21 zero across the scale call, store and duration comparison
+ * at +0x270..+0x2F8. The 0x150 frame and the full matrix extents remain unchanged.
+ * Remaining: airborne F0/F1 roles, branch displacement/joins, target-address roles and
+ * final easing setup differ. Equal size in an earlier variant was not a match.
+ * Reopen with independent target/control lifetime or CFG evidence; preserve the
+ * measured access identities, complete tables/matrices, call banks/stack and store order.
+ * Bank-preserving interleavings were measured, not prohibited or assumed to solve this caller.
+ * Normal/dump-enabled compilation agrees. No native-port or strict linked equality is claimed.
  */
-
 #include "common.h"
 
 typedef int Quadword __attribute__((mode(TI)));
 typedef struct {
     Quadword previous_position, delta, target;
     Quadword rotation[4], inverse[4], object_inverse[4];
-    float duration, weave, straight, pursuit;
 } MotionWorkspace;
 struct family_27f9_object { unsigned char reserved[248]; float heading; };
 typedef unsigned char QwenRecovery_84e23fd54f9f_AbiByte16;
-typedef struct {
-    unsigned char reserved_00[0x18];
-    unsigned char enabled, count, kind;
-    unsigned char reserved_1b[0x65];
-    unsigned char payload[1];
-} Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext;
+/* The dispatcher context is opaque here; its payload extent is not established. */
+typedef struct DispatchContext Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext;
 typedef unsigned long Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchFlags;
 
 extern void func_L01_003B53C8(u8 *);
@@ -50,7 +46,7 @@ extern int func_00282948(int *);
 extern int func_002A7820(int,int);
 extern int func_002A77E0(int);
 extern void func_002A7470(u8 *,int,int,int);
-extern void func_002A7750(u8 *,u8,int);
+extern void func_002A7750(u8 *,int,int);
 extern void func_L01_003B49D8(u8 *,void *);
 extern int func_L01_003B4AD0(u8 *,void *,float *);
 extern void func_L01_003B57A8(u8 *,void *);
@@ -76,8 +72,8 @@ extern float func_00282E80(void *,void *);
 extern float func_00283C80(float,float);
 extern int func_L01_003B4C20(u8 *);
 extern void func_L01_003B4BD8(u8 *);
-extern void func_002AAA00(float *,float *,int,float,float,float,float);
-extern int func_002A8D70(float,float,float,void *,void *,int,int,int,int);
+extern float func_002AAA00(float *,float *,int,float,float,float,float);
+extern int func_002A8D70(float,float,float,void *,int,int,int,int,int);
 extern Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchFlags func_002B1C20(void *,Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext *);
 extern void func_0029F338(void *);
 extern void func_L01_003B4480(u8 *);
@@ -100,15 +96,17 @@ typedef struct {
     u8 *object;
 } HeroTargetPrefix;
 typedef struct { u8 prefix[0x18]; u8 *object; } CollisionQueryPrefix;
-extern HeroTargetPrefix D_00189E20;
-extern int D_L01_001B2088;
-extern int D_L01_001AFDB0;
-extern u8 *D_L01_001B255C;
+extern u8 D_00189E20[];
+#define HERO_TARGET ((HeroTargetPrefix *)D_00189E20)
+/* Mixed absolute/GP reads of the same mutable frame counter. */
+extern int D_L01_001B2088 MACRO_ADDR;
+extern int D_L01_001AFDB0 __attribute__((sda));
+extern u8 *D_L01_001B255C __attribute__((sda));
 extern u8 *D_L01_001B264C NOT_SDA;
-extern CollisionQueryPrefix D_L01_001BF900;
+extern u8 D_L01_001BF900[];
+#define COLLISION_QUERY ((CollisionQueryPrefix *)D_L01_001BF900)
 extern Quadword D_L01_001AC5A0;
-extern void *D_L01_002A4570[];
-extern void *D_L01_002A4590[];
+
 
 #define STATE_INT(o) (*(int *)(state+(o)))
 #define STATE_UINT(o) (*(unsigned int *)(state+(o)))
@@ -118,24 +116,26 @@ extern void *D_L01_002A4590[];
 /* Updates this creature's idle, pursuit, airborne, attack and recovery phases. */
 void func_L01_003B5878(u8 *object)
 {
-    /* Keep local labels reachable while dispatching through the measured retail tables. */
-    static void *phases[]={&&phase_idle,&&phase_wait,&&phase_airborne,&&phase_pursuit,
+    /* These used compiler-owned label tables preserve the two measured dispatches. */
+    static void *const phases[8]={&&phase_idle,&&phase_wait,&&phase_airborne,&&phase_pursuit,
                            &&phase_attack,&&phase_dispatch,&&phase_removed,&&phase_removed};
-    static void *actions[]={&&pursuit_idle,&&pursuit_wait,&&pursuit_weave,&&pursuit_done,
+    static void *const actions[8]={&&pursuit_idle,&&pursuit_wait,&&pursuit_weave,&&pursuit_done,
                             &&pursuit_straight,&&pursuit_done,&&pursuit_group,&&pursuit_leave};
     MotionWorkspace local;
+    float duration, weave, straight, pursuit;
     u8 *state;
     u8 *target;
     float speed,frame,angle,pitch,yaw;
     int animation,first,i;
     unsigned int phase,action;
-    Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchFlags flags;
+    /* The callee returns 64 bits; this caller consumes only low-word bits 0/1. */
+    u32 flags;
 
-    local.previous_position=*(Quadword *)(object+0x10);
+    qcopy(&local.previous_position, object+0x10);
     state=*(u8 **)(object+0x68);
     if (object[0x95]) func_L01_003B53C8(object);
     phase=object[0x95];
-    if (phase<8) goto *D_L01_002A4570[phase];
+    if (phase<8) goto *phases[phase];
     goto phase_done;
 
 phase_idle:
@@ -162,7 +162,7 @@ phase_wait:
         }
         break;
     case 2:
-        *(Quadword *)(state+0x2E0)=*(Quadword *)(state+0x2D0);
+        qcopy(state+0x2E0, state+0x2D0);
         break;
     case 3:
         if (func_00282948((int *)(state+0x360))) {
@@ -172,24 +172,24 @@ phase_wait:
                 speed=func_00282DF0(&local.delta)*0.03333333507180214f;
             else speed=0.13333334028720856f;
             func_00282F20(&local.delta,&local.delta,speed);
-            local.duration=0.0f;
-            ((float *)&local.delta)[2]=func_L00_0031CDD0(object+0x10,&local.target,&local.duration,speed,-0.004999999888241291f);
-            *(Quadword *)(state+0x2F0)=local.delta;
-            *(Quadword *)(state+0x2E0)=local.target;
+            duration=0.0f;
+            ((float *)&local.delta)[2]=func_L00_0031CDD0(object+0x10,&local.target,&duration,speed,-0.004999999888241291f);
+            qcopy(state+0x2F0, &local.delta);
+            qcopy(state+0x2E0, &local.target);
             func_002E5CF8(5,0,(char *)object);
             if (object[0x43]!=3) func_002A7470(object,3,0,10);
-            if (local.duration>0.0f) *(float *)(object+0x48)=38.0f/local.duration;
+            if (duration>0.0f) *(float *)(object+0x48)=38.0f/duration;
             func_002A7750(object,1,2);
         }
         break;
     }
     if (object[0x20]!=3 && STATE_INT(0x310)!=-1 && object[0x95]==1) {
-        STATE_FLOAT(0x398)=STATE_FLOAT(0x390);
+        STATE_UINT(0x398)=STATE_UINT(0x390);
         STATE_INT(0x39C)=0;
         if (STATE_INT(0x244)==1 || STATE_INT(0x330)) {
             *(float *)(object+0x18)=STATE_FLOAT(0x34C);
             STATE_INT(0x39C)=0;
-            STATE_FLOAT(0x398)=STATE_FLOAT(0x390);
+            STATE_UINT(0x398)=STATE_UINT(0x390);
             func_002A7750(object,3,1);
         }
     }
@@ -207,8 +207,8 @@ phase_airborne:
     if (!(STATE_FLOAT(0x2F8)<0.0f)) goto phase_done;
     if (!(func_00282C48(*(float *)(object+0x18)-STATE_FLOAT(0x2E8)) < -STATE_FLOAT(0x2F8))) goto phase_done;
     *(int *)(object+0x98)=*(int *)(*(u8 **)(object+0x24)+0x10);
-    STATE_FLOAT(0x14C)=STATE_FLOAT(0x30C);
-    *(Quadword *)(state+0x200)=*(Quadword *)(object+0x10);
+    STATE_UINT(0x14C)=STATE_UINT(0x30C);
+    qcopy(state+0x200, object+0x10);
     object[0xBC]=1;
     STATE_INT(0x330)=240;
     func_002B6318(object);
@@ -217,7 +217,7 @@ phase_airborne:
 
 phase_pursuit:
     action=object[0x20];
-    if (action<8) goto *D_L01_002A4590[action];
+    if (action<8) goto *actions[action];
     goto pursuit_done;
 pursuit_idle:
     if (STATE_INT(0x32C)>=21)
@@ -257,9 +257,9 @@ pursuit_wait:
     }
     goto pursuit_done;
 pursuit_weave:
-    local.weave=func_00283198(func_002ABB18(func_00283CE0(D_L01_001B2088)*0.01163553074002266f))*0.8726646900177002f;
-    if (func_00282E80(object+0x10,state+0x230)<4.75f) local.weave=0.0f;
-    func_L01_003B4AD0(object,state+0x2E0,&local.weave);
+    weave=func_00283198(func_002ABB18(func_00283CE0(D_L01_001B2088)*0.01163553074002266f))*0.8726646900177002f;
+    if (func_00282E80(object+0x10,state+0x230)<4.75f) weave=0.0f;
+    func_L01_003B4AD0(object,state+0x2E0,&weave);
     func_L01_003B50C8((char *)object,1,-1.0f);
     target=STATE_POINTER(0x240);
     if (func_00282E80(object+0x10,target+0x10)<3.75f) {
@@ -268,7 +268,7 @@ pursuit_weave:
             target=STATE_POINTER(0x240);
             angle=func_00283248(*(float *)(target+0x10)-*(float *)(object+0x10),*(float *)(target+0x14)-*(float *)(object+0x14));
             if (func_00283C80(*(float *)(object+0xF8),angle)<0.174532949924469f) {
-                *(Quadword *)(state+0x1B0)=0;
+                qzero(state+0x1B0);
                 state[0x35C]=0;
                 if (object[0x43]!=10) func_002A7470(object,10,D_L01_001AFDB0,func_002A7820(16,22));
                 func_002A7750(object,1,4);
@@ -277,9 +277,9 @@ pursuit_weave:
     }
     goto pursuit_done;
 pursuit_straight:
-    local.straight=0.0f;
-    if (STATE_INT(0x310)==-1) func_L01_003B4AD0(object,state+0x2D0,&local.straight);
-    else func_L01_003B4AD0(object,D_L01_001B264C+STATE_INT(0x310)*128+0x30,&local.straight);
+    straight=0.0f;
+    if (STATE_INT(0x310)==-1) func_L01_003B4AD0(object,state+0x2D0,&straight);
+    else func_L01_003B4AD0(object,D_L01_001B264C+STATE_INT(0x310)*128+0x30,&straight);
     func_L01_003B50C8((char *)object,1,-1.0f);
     if ((object[0x60]&2) && (*(u64 *)(state+0x1A0)&0x18000000000ULL)!=0x10000000000ULL) {
         animation=object[0x43];
@@ -292,7 +292,7 @@ pursuit_straight:
     }
     goto pursuit_done;
 pursuit_group:
-    STATE_FLOAT(0x398)=STATE_FLOAT(0x390);
+    STATE_UINT(0x398)=STATE_UINT(0x390);
     STATE_FLOAT(0x39C)=STATE_FLOAT(0x388);
     func_L01_003B49D8(object,state+0x200);
     func_L01_003B50C8((char *)object,1,-1.0f);
@@ -300,9 +300,9 @@ pursuit_group:
         D_L01_001B255C[STATE_INT(0x38C)*256+0xBC])) func_002A7750(object,7,-1);
     goto pursuit_done;
 pursuit_leave:
-    local.pursuit=func_00283198(func_002ABB18(func_00283CE0(D_L01_001B2088)*0.01163553074002266f))*0.8726646900177002f;
-    *(Quadword *)(state+0x2E0)=*(Quadword *)(D_L01_001B264C+STATE_INT(0x380)*128+0x30);
-    func_L01_003B4AD0(object,state+0x2E0,&local.pursuit);
+    pursuit=func_00283198(func_002ABB18(func_00283CE0(D_L01_001B2088)*0.01163553074002266f))*0.8726646900177002f;
+    qcopy(state+0x2E0, D_L01_001B264C+STATE_INT(0x380)*128+0x30);
+    func_L01_003B4AD0(object,state+0x2E0,&pursuit);
     func_L01_003B50C8((char *)object,1,-1.0f);
     if ((STATE_UINT(0x1A4)&0x80) && !object[0x31]) {
         func_0029F338(object);
@@ -310,12 +310,11 @@ pursuit_leave:
     }
 
 pursuit_done:
-    if (object[0x95]!=3 || object[0x20]==4 || object[0x20]==7 || object[0x20]==6) {
-        if (STATE_POINTER(0x240)==D_00189E20.object)
-            *(Quadword *)(state+0x2E0)=*(Quadword *)D_00189E20.position;
-        goto pursuit_distance;
-    }
-    STATE_FLOAT(0x398)=STATE_FLOAT(0x394);
+    if (object[0x95]!=3) goto mirror_hero;
+    if (object[0x20]==4) goto mirror_hero;
+    if (object[0x20]==7) goto mirror_hero;
+    if (object[0x20]==6) goto mirror_hero;
+    STATE_UINT(0x398)=STATE_UINT(0x394);
     STATE_FLOAT(0x39C)=STATE_FLOAT(0x388);
     if (STATE_INT(0x244)==1 || STATE_INT(0x330)) {
         if (object[0x21]!=255 && **(int **)(state+0x36C)!=*(short *)(object+0xB2) &&
@@ -324,15 +323,12 @@ pursuit_done:
         if (!(func_00282C48(*(float *)(object+0x18)-*(float *)(target+0x18))<1.0f)) goto cancel_pursuit;
         STATE_INT(0x330)=240;
         object[0xBC]=1;
-        STATE_FLOAT(0x14C)=STATE_FLOAT(0x30C);
-        if (object[0x20]==2) {
-            *(Quadword *)(state+0x2E0)=*(Quadword *)(STATE_POINTER(0x240)+0x10);
-            goto pursuit_distance;
-        }
+        STATE_UINT(0x14C)=STATE_UINT(0x30C);
+        if (object[0x20]==2) goto copy_pursuit_target;
         if (object[0x21]!=255 && **(int **)(state+0x33C)>1) goto pursuit_distance;
         if (STATE_INT(0x334)) goto pursuit_distance;
         if (!(func_00282E80(object+0x10,STATE_POINTER(0x240)+0x10)<14.0f)) goto pursuit_distance;
-        *(Quadword *)(state+0x2E0)=*(Quadword *)(STATE_POINTER(0x240)+0x10);
+        qcopy(state+0x2E0, STATE_POINTER(0x240)+0x10);
         animation=19;
         if (*(u16 *)(object+0xB2)&1) animation=8;
         func_002A7470(object,animation,0,func_002A7820(20,30));
@@ -340,6 +336,9 @@ pursuit_done:
         func_002A7750(object,2,-1);
         goto pursuit_distance;
     }
+copy_pursuit_target:
+    qcopy(state+0x2E0, STATE_POINTER(0x240)+0x10);
+    goto pursuit_distance;
 cancel_pursuit:
     if (object[0x20]==2) {
         func_L01_003B4BD8(object);
@@ -352,6 +351,10 @@ cancel_pursuit:
         }
         func_002A7750(object,1,-1);
     }
+    goto pursuit_distance;
+mirror_hero:
+    if (STATE_POINTER(0x240)==HERO_TARGET->object)
+        qcopy(state+0x2E0, HERO_TARGET->position);
 pursuit_distance:
     if (func_00282E80(object+0x10,STATE_POINTER(0x240)+0x10)<3.5f) {
         target=STATE_POINTER(0x240);
@@ -359,7 +362,7 @@ pursuit_distance:
             target=STATE_POINTER(0x240);
             angle=func_00283248(*(float *)(target+0x10)-*(float *)(object+0x10),*(float *)(target+0x14)-*(float *)(object+0x14));
             if (func_00283C80(*(float *)(object+0xF8),angle)<0.523598849773407f) {
-                *(Quadword *)(state+0x1B0)=0;
+                qzero(state+0x1B0);
                 state[0x35C]=0;
                 if (object[0x43]!=10) func_002A7470(object,10,D_L01_001AFDB0,func_002A7820(8,12));
                 func_002A7750(object,1,4);
@@ -374,42 +377,42 @@ pursuit_distance:
 
 phase_attack:
     target=STATE_POINTER(0x240);
-    if (!target) {
-        if (!func_002A77E0(7)) func_002B5258((char *)object);
-    } else if (!func_002A77E0(7)) {
-        target=STATE_POINTER(0x240);
-        angle=func_00283248(*(float *)(target+0x10)-*(float *)(object+0x10),*(float *)(target+0x14)-*(float *)(object+0x14));
-        func_002B5278(object,angle);
-    } else {
-        target=STATE_POINTER(0x240);
-        angle=func_00283248(*(float *)(target+0x10)-*(float *)(object+0x10),*(float *)(target+0x14)-*(float *)(object+0x14));
-        func_002AAA00((float *)(object+0xF8),(float *)(state+0x1C4),0,angle,STATE_FLOAT(0x124),STATE_FLOAT(0x128),STATE_FLOAT(0x12C));
-    }
+    if (target) {
+        if (!func_002A77E0(7)) {
+            target=STATE_POINTER(0x240);
+            angle=func_00283248(*(float *)(target+0x10)-*(float *)(object+0x10),*(float *)(target+0x14)-*(float *)(object+0x14));
+            func_002B5278(object,angle);
+        } else {
+            target=STATE_POINTER(0x240);
+            angle=func_00283248(*(float *)(target+0x10)-*(float *)(object+0x10),*(float *)(target+0x14)-*(float *)(object+0x14));
+            func_002AAA00((float *)(object+0xF8),(float *)(state+0x1C4),0,angle,STATE_FLOAT(0x124),STATE_FLOAT(0x128),STATE_FLOAT(0x12C));
+        }
+    } else if (!func_002A77E0(7)) func_002B5258((char *)object);
     frame=func_0029F530((char *)object);
     if (object[0x42]==10 && frame>=18.0f && frame<=25.0f) {
         for (i=0;i<5;i++) {
-            if (func_002A8D70(0.5f,(float)state[0x34],1.0f,object,(void *)i,0x4000001,0,1,0) &&
-                D_L01_001BF900.object==D_00189E20.object) state[0x35C]=1;
+            if (func_002A8D70(0.5f,(float)state[0x34],1.0f,object,i,0x4000001,0,1,0) &&
+                COLLISION_QUERY->object==HERO_TARGET->object) state[0x35C]=1;
         }
     }
     if (!(frame>30.0f) && (object[0x42]==10 || object[0x43]==10)) goto phase_done;
-    if (!state[0x35C]) {
-        STATE_INT(0x334)=40;
-        if (object[0x43]!=8) func_002A7470(object,8,0,func_002A7820(25,30));
-    } else {
+    if (state[0x35C]) {
         STATE_INT(0x334)=100;
         if (object[0x43]!=11) func_002A7470(object,11,0,func_002A7820(25,30));
+    } else {
+        STATE_INT(0x334)=40;
+        if (object[0x43]!=8) func_002A7470(object,8,0,func_002A7820(25,30));
     }
     state[0x35C]=0;
     func_L01_003B4BD8(object);
 finish_attack:
-    STATE_FLOAT(0x398)=STATE_FLOAT(0x394);
+    STATE_UINT(0x398)=STATE_UINT(0x394);
     STATE_FLOAT(0x39C)=STATE_FLOAT(0x388);
     func_002A7750(object,1,3);
     goto phase_done;
 
 phase_dispatch:
-    flags=func_002B1C20(object,(Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext *)(state+0x60));
+    flags=(u32)func_002B1C20(object,(Rac2Native_bf55aa2a4d0dd351_SDataCallDispatchContext *)(state+0x60));
     if (flags&1) func_002A7750(object,0,7);
     else if (flags&2) {
         *(int *)(object+0x98)=*(int *)(*(u8 **)(object+0x24)+0x10);
@@ -419,7 +422,7 @@ phase_dispatch:
             if (object[0x43]!=4) func_002A7470(object,4,0,110);
             func_002A7750(object,0,6);
         } else {
-            STATE_FLOAT(0x398)=STATE_FLOAT(0x394);
+            STATE_UINT(0x398)=STATE_UINT(0x394);
             STATE_FLOAT(0x39C)=STATE_FLOAT(0x388);
             STATE_INT(0x384)=-1;
             animation=19;
@@ -447,9 +450,9 @@ phase_done:
         func_00283410(local.rotation,&local.delta);
         func_00283698(local.inverse,local.rotation);
         func_00283698(local.object_inverse,object+0xC0);
-        if (!STATE_POINTER(0x198) || func_L00_0031BE88((char *)STATE_POINTER(0x198)))
-            func_00282F20(&local.target,state+0x160,1.0f);
-        else local.target=D_L01_001AC5A0;
+        if (STATE_POINTER(0x198) && !func_L00_0031BE88((char *)STATE_POINTER(0x198)))
+            qcopy(&local.target, &D_L01_001AC5A0);
+        else func_00282F20(&local.target,state+0x160,1.0f);
         func_00283098(&local.target,&local.target,local.inverse);
         yaw=func_00283248(((float *)&local.target)[2],((float *)&local.target)[0]);
         pitch=-func_00283248(((float *)&local.target)[2],((float *)&local.target)[1]);

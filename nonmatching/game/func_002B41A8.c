@@ -1,4 +1,9 @@
-/* func_002B41A8 (boot 0x2B41A8, 788 bytes, 28 places): NEAR MISS. This plain C compiles to 756 bytes (189
+/* M5 update: under the per-file -frac2-qcopy profile the TI copies below compile to retail's
+ * register-address lq/sq, so this plain C is 788/788 bytes with the same 35 of 197 words off
+ * (obj/p2 renamed, the 0x34 sh before the two argument spills, the c/f pointer pair swapped).
+ * Ternary order, declaration order and the flag statement's position all tie or lose.
+ *
+ * func_002B41A8 (boot 0x2B41A8, 788 bytes, 28 places): NEAR MISS. This plain C compiles to 756 bytes (189
  * instructions) against retail's 788 (197); `tools/check.py` matches 0 of 28 places.
  *
  * What differs, and why it stays out of reach of plain C:

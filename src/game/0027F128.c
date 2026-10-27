@@ -300,7 +300,8 @@ ASM_FUNC("asm/game", func_00282C30);
 /* Measured target: byte-identical across all 27 levels. */
 f32 func_00282C48(f32 a0) { return __builtin_fabsf(a0); }
 
-INCLUDE_ASM("asm/game", func_00282C50);
+/* func_00282C50 (the float minimum) is matched in its own unit, src/game/00282C50.c: it needs
+   the -O1 -ffast-math profile. */
 
 ASM_FUNC("asm/game", func_00282C58);
 

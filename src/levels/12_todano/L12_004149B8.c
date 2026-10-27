@@ -177,13 +177,10 @@ void func_L12_004149B8(Ent49B8 *a0)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L12_00414AB8);
 
 INCLUDE_ASM("asm/levels", func_L12_00414C60);
 
 INCLUDE_ASM("asm/levels", func_L12_00414EB8);
-
-INCLUDE_ASM("asm/levels", func_L12_00415128);
 
 INCLUDE_ASM("asm/levels", func_L12_004163E8);
 
@@ -197,7 +194,7 @@ INCLUDE_ASM("asm/levels", func_L12_00418D20);
 
 INCLUDE_ASM("asm/levels", func_L12_004190A8);
 
-INCLUDE_ASM("asm/levels", func_L12_00419D68);
+/* func_L12_00419D68 is matched in its own unit, L12_00419D68.c. */
 
 /* func_L12_0041A5F8 (160 B): best attempt is 156 bytes with the node pointer in $v1
    where the retail has it in $a3, and the 128-bit copy using a displacement where the

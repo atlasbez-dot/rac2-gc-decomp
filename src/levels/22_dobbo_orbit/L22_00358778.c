@@ -1,12 +1,6 @@
 #include "include_asm.h"
+#include "common.h"
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed char s8;
-typedef signed short s16;
-typedef unsigned int u32;
-typedef int s32;
-typedef float f32;
 typedef int TI128 __attribute__((mode(TI)));
 
 extern s32 D_L22_001B2128 __attribute__((sda));
@@ -48,12 +42,10 @@ INCLUDE_ASM("asm/levels", func_L22_003955D8);
 
 INCLUDE_ASM("asm/levels", func_L22_003B9450);
 
-INCLUDE_ASM("asm/levels", func_L22_003CCA50);
 
 INCLUDE_ASM("asm/levels", func_L22_003D0840);
 
-/* func_L22_003E87B8 is a near miss: nonmatching/levels/func_L22_003E87B8.c */
-INCLUDE_ASM("asm/levels", func_L22_003E87B8);
+/* func_L22_003E87B8 is in L22_003E87B8.c. */
 
 void func_L22_003E8830(s32 a0) {
     s32 x = *(u32 *)(a0 + 0x68);
@@ -71,7 +63,6 @@ void func_L22_003FA2A8(s32 a0) {
     *(u8 *)(a0 + 0x30) = 0xFF;
 }
 
-INCLUDE_ASM("asm/levels", func_L22_003FD140);
 
 INCLUDE_ASM("asm/levels", func_L22_0040C888);
 
@@ -113,11 +104,69 @@ void func_L22_0040DC40(s32 a0, s32 a1, s32 a2, f32 f12) {
 
 /* The existing implementation is in L22_0040DD20-rc2.c. */
 
-INCLUDE_ASM("asm/levels", func_L22_0040DE00);
+/* Spawns moby 0xF5D at pos moving along vel: copies both in, sets its colour and life
+   from *scale, and builds its three-point trail (vel, vel + offset from the pos's
+   reference point, and that again) with zeroed fourth components. */
+typedef struct {
+    float vel[4];
+    int life;
+    int f14;
+    int f18;
+    float scale;
+} TrailVars0040DE00;
+typedef struct {
+    u8 pad0[0x10];
+    float pos[4];
+    u8 flag20;
+    u8 pad21[0xF];
+    u8 alpha;
+    u8 pad31;
+    short colour;
+    u8 pad34[0x34];
+    TrailVars0040DE00 *vars;
+    u8 pad6C[0x54];
+    float p0[4];
+    float p1[4];
+    float p2[4];
+} TrailMoby0040DE00;
+extern void func_002AFFD8(void *, void *, int);
+extern TrailMoby0040DE00 *func_0029EFD0(int);
+extern void func_00282F20(void *, void *, float);
+extern void func_00282DD8(void *, void *, void *);
+
+TrailMoby0040DE00 *func_L22_0040DE00(float *pos, float *vel, float *scale)
+{
+    float ref[4];
+    float scaled[4];
+    TrailMoby0040DE00 *moby;
+    TrailVars0040DE00 *vars;
+
+    func_002AFFD8(pos, ref, 1);
+    moby = func_0029EFD0(0xF5D);
+    if (moby != 0) {
+        vars = moby->vars;
+        vars->scale = *scale;
+        vars->life = 0x50;
+        moby->alpha = 0xFF;
+        moby->colour = 0xFF;
+        moby->flag20 = 0;
+        qcopy(moby->pos, pos);
+        qcopy(vars->vel, vel);
+        vars->f18 = 0;
+        vars->f14 = 0;
+        func_00282F20(scaled, vel, 1.0f);
+        qcopy(moby->p0, scaled);
+        func_00282DD8(moby->p1, moby->p0, ref);
+        func_00282F20(moby->p1, moby->p1, 1.0f);
+        func_00282DD8(moby->p2, moby->p1, moby->p0);
+        moby->p0[3] = moby->p1[3] = moby->p2[3] = 0.0f;
+    }
+    return moby;
+}
 
 INCLUDE_ASM("asm/levels", func_L22_0040DF28);
 
-INCLUDE_ASM("asm/levels", func_L22_0040E098);
+/* func_L22_0040E098 uses the profile in L22_0040E098-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L22_0040F1C0);
 
@@ -126,4 +175,3 @@ INCLUDE_ASM("asm/levels", func_L22_004135F8);
 INCLUDE_ASM("asm/levels", func_L22_00413B70);
 
 
-INCLUDE_ASM("asm/levels", func_L22_0042ACA0);

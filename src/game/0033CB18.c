@@ -75,8 +75,6 @@ int func_0033CB18(char *a0, int a1)
     return (a1 >> 6) & 1;
 }
 
-INCLUDE_ASM("asm/game", func_0033CC20);
-
 char *func_0033CD80(char *object)
 {
     extern void func_003363D0(void *);
@@ -190,7 +188,6 @@ int func_0033D868(char *a0, int a1)
     return (a1 >> 6) & 1;
 }
 
-INCLUDE_ASM("asm/game", func_0033D970);
 
 char *func_0033DAD0(char *object)
 {

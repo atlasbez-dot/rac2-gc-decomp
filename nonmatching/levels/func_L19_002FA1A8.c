@@ -1,25 +1,22 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por -g.
- * Reported final C / retail: 1912 / 1932 bytes; size equality is not a match.
- * us: 0/1 placements; 1912/1932 bytes.
- * us2: absent from catalogue (not a match).
- * pal: absent from catalogue (not a match).
- * Residual: Cutscene high/base lifetime and loop allocation, mixed GP/absolute scalar fields.
- * Reopening condition: Independent cutscene/particle scheduling witness; actual short actor count must be preserved.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * 1912/1932 bytes. us: 0/1 places; us2: absent; pal: absent.
+ * Remaining: The actor-position snapshot uses real qcopy; signed short actor count,
+ * three emission phases and all 47 terminal emissions are retained. Packed
+ * color shifts use unsigned 32-bit operands, and grouped particle factories
+ * retain pointer results and their GPR/FP input banks. The 0xC0 frame agrees;
+ * cutscene high/base lifetime, mixed scalar accesses and loop allocation differ.
+ * Retail genuinely reads the null-path class delay slot and consumes axis.X
+ * without first initializing its stack word; these constraints are recorded
+ * rather than silently replaced by initialization or new guards.
+ * Reopen with: Independent cutscene-record and particle-loop lifetime evidence. A native
+ * safety alternative for the recorded pre-initialization/low-memory reads must
+ * be distinguished from this retained retail reconstruction.
+ * Review correction: The overlapping float words at 0x1B2834/3C/40 are words 1/3/4 of the single incomplete D_L19_001B2830 array; no separate C objects or invented complete extent remain.
  */
 
-/* Retained plain C reconstruction, 23 October 2026; not matched or linked.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por -g
- * USA final: 1912/1932 bytes; zero placements match.
- * Cutscene-base and loop register allocation, absolute versus GP accesses, particle argument scheduling.
- * Reopen on independently supported source/address-lifetime evidence.
- */
-typedef unsigned char u8;
-typedef unsigned int u32;
+#include "common.h"
+
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
 extern int D_001A79F0 __attribute__((sda));
@@ -34,10 +31,9 @@ extern u8 D_L19_001BD740[];
 #define CUT_SECONDARY (*(u8 **)(D_L19_001BD740 + 0x19c))
 extern u8 *D_L19_001B2814 __attribute__((sda));
 extern Vector D_L19_001B2820;
+/* One observed float block: the earlier separate 2834/283C/2840
+ * names alias words 1/3/4. Its complete external extent is unknown. */
 extern float D_L19_001B2830[];
-extern float D_L19_001B2834 __attribute__((sda));
-extern float D_L19_001B283C __attribute__((sda));
-extern float D_L19_001B2840 __attribute__((sda));
 extern int D_L19_001B2844;
 extern float D_L19_001B9A60;
 extern int D_L19_001B9A68, D_L19_001B9A6C;
@@ -75,6 +71,8 @@ void func_L19_002FA1A8(void)
             actor = *slot;
             if (actor && *(short *)(actor + 0xaa) == 0xe29)
                 *(unsigned short *)(actor + 0x34) |= 0x800;
+            /* Retail reads this class in the normal null-branch delay slot;
+             * the retained path assumes the same readable low-memory state. */
             if (*(short *)(actor + 0xaa) == 0xd54)
                 func_002E64A0(actor);
             if (actor && *(short *)(actor + 0xaa) == 4000 && *(u8 **)(actor + 0x68))
@@ -96,21 +94,21 @@ void func_L19_002FA1A8(void)
                 D_L19_001B2844 = CUT_FRAME;
                 actor = CUT_PRIMARY;
             }
-            D_L19_001B2820.q = *(Quad *)(actor + 0x10);
+            qcopy(&D_L19_001B2820, (actor + 0x10));
             if (CUT_FRAME == 750) {
                 D_L19_001B9A60 = 1.0f;
                 D_L19_001B9A68 = 15;
                 D_L19_001B9A6C = 0;
             }
             if ((u32)(CUT_FRAME - 750) < 21) {
-                D_L19_001B2840 += D_L19_001B2830[2];
-                if (D_L19_001B2840 >= 1.0f) {
+                D_L19_001B2830[4] += D_L19_001B2830[2];
+                if (D_L19_001B2830[4] >= 1.0f) {
                     do {
                         direction.q = 0;
                         direction.f[1] = -0.72f;
                         direction.f[0] = 0.72f;
                         direction.f[3] = 1.0f;
-                        color = (func_002A7820(96, 128) << 16) | 0x1e00;
+                        color = ((u32)func_002A7820(96, 128) << 16) | 0x1e00;
                         position.f[0] = 0.0f;
                         position.f[1] = D_L19_001B2830[0] * func_002A7878(0.9f, 1.1f);
                         position.f[2] = 0.0f;
@@ -121,7 +119,7 @@ void func_L19_002FA1A8(void)
                         func_00282F20(&direction, &direction, func_002A7878(1.5f, 2.5f));
                         func_00282CC0(&position, &position, &direction);
                         func_00282CC0(&position, &position, &direction);
-                        D_L19_001B2840 = D_L19_001B2830[4] - 1.0f;
+                        D_L19_001B2830[4] = D_L19_001B2830[4] - 1.0f;
                         life = func_002A7820(4, 8);
                         speed = func_002A7878(0.6f, 0.8f) * 210000.0f;
                         func_002C7970(&position, &D_L19_001A8F20, 24, color, life, 128, 32, 0, speed, 21000.0f, 0.0f);
@@ -133,8 +131,8 @@ void func_L19_002FA1A8(void)
                 }
             }
             if ((u32)(CUT_FRAME - 761) < 79) {
-                D_L19_001B283C = D_L19_001B2830[3] + D_L19_001B2834;
-                if (D_L19_001B283C >= 1.0f) {
+                D_L19_001B2830[3] = D_L19_001B2830[3] + D_L19_001B2830[1];
+                if (D_L19_001B2830[3] >= 1.0f) {
                     do {
                         color = func_00283D38(func_002A7878(0.0f, 1.0f), 0x803c14, 0x400000);
                         position.f[2] = D_L19_001B2830[0] * -0.8f;
@@ -142,6 +140,8 @@ void func_L19_002FA1A8(void)
                         position.f[1] = 0.0f;
                         direction.f[1] = 0.0f;
                         direction.f[2] = 0.0f;
+                        /* Retail first consumes axis.X without initializing its
+                         * stack word; do not silently fabricate a zero here. */
                         axis.f[1] = 0.0f;
                         position.f[3] = 1.0f;
                         direction.f[0] = 1.0f;
@@ -158,8 +158,8 @@ void func_L19_002FA1A8(void)
                         speed = func_002A7878(0.5f, 1.0f) * 21000.0f;
                         other = func_002A7878(0.7f, 1.0f) * 21000.0f;
                         func_002C7BB8(&position, &D_L19_001A8F20, life, color, style, 128, 0, 3, speed, other, 0.0033333334f);
-                        D_L19_001B283C = D_L19_001B2830[3] - 1.0f;
-                    } while (D_L19_001B283C >= 1.0f);
+                        D_L19_001B2830[3] = D_L19_001B2830[3] - 1.0f;
+                    } while (D_L19_001B2830[3] >= 1.0f);
                 }
             }
         }
@@ -181,8 +181,8 @@ void func_L19_002FA1A8(void)
                 gray = func_002A7820(100, 220);
                 speed = func_002A7878(70000.0f, 150000.0f);
                 life = func_002A7820(13, 42);
-                func_002BDBC0(&direction, &position, (red << 24) | (gray << 16) | (gray << 8) | gray,
-                    (gray << 16) | (gray << 8) | gray, life, speed);
+                func_002BDBC0(&direction, &position, ((u32)red << 24) | ((u32)gray << 16) | ((u32)gray << 8) | gray,
+                    ((u32)gray << 16) | ((u32)gray << 8) | gray, life, speed);
             } while (i >= 0);
         }
     }

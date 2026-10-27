@@ -57,11 +57,60 @@ INCLUDE_ASM("asm/levels", func_L19_00420818);
 
 INCLUDE_ASM("asm/levels", func_L19_00420B48);
 
-INCLUDE_ASM("asm/levels", func_L19_00420EF0);
+extern int D_L19_001C9FC0[];
+extern void func_L00_00323448(char *, char *, int, int, int, int, int, int);
+extern void func_L00_00323958(char *, char *);
+extern void func_002833F0(void *, void *);
+extern void func_00283738(void *, void *, void *);
+
+/* Arms the rig object once its data arrives, then, when the level word matches the rig's tag, applies the stored rotations to the object and to every joint record. */
+void func_L19_00420EF0(char *obj)
+{
+    char *rig = *(char **)(obj + 0x68);
+    float turn[4] __attribute__((aligned(16)));
+    char mat[0x30] __attribute__((aligned(16)));
+    char *joint;
+    int tag;
+
+    switch (*(u8 *)(obj + 0x20)) {
+    case 0:
+        if (*(long *)rig != -1) {
+            { u8 a = 0xFF; *(u8 *)(obj + 0x30) = a; }
+            func_L00_00323448(obj, rig + 0x30, 0x32, *(s32 *)(rig + 4), *(s32 *)rig, *(s32 *)(rig + 8), 7, 0);
+            if (*(u8 *)(rig + 0x7A) == 0) {
+                func_0029F338((u8 *)obj);
+            } else {
+                *(u8 *)(rig + 0x7D) = 1;
+                *(u16 *)(obj + 0x34) |= 0x104;
+                func_002833F0(obj + 0xC0, obj + 0xF0);
+                *(u8 *)(obj + 0x20) = 1;
+            }
+        }
+        return;
+    case 1:
+        if (D_L19_001C9FC0[0] == *(s32 *)(rig + 0xC)) {
+            turn[0] = *(float *)(rig + 0x10) * 0.00029088825f;
+            turn[1] = *(float *)(rig + 0x14) * 0.00029088825f;
+            turn[2] = *(float *)(rig + 0x18) * 0.00029088825f;
+            func_002833F0(mat, turn);
+            func_00283738(obj + 0xC0, obj + 0xC0, mat);
+            joint = rig + 0x30;
+            do {
+                turn[0] = *(float *)(rig + 0x1C) * 0.00029088825f;
+                turn[1] = *(float *)(rig + 0x20) * 0.00029088825f;
+                turn[2] = *(float *)(rig + 0x24) * 0.00029088825f;
+                func_002833F0(mat, turn);
+                func_00283738(joint, joint, mat);
+                tag = *(u8 *)(joint + 0x4A);
+                joint += 0x50;
+            } while (tag != 1);
+            func_L00_00323958(obj, rig + 0x30);
+        }
+        break;
+    }
+}
 
 /* func_L19_00421E80 is defined in L19_00421E80-g8.c. */
-
-INCLUDE_ASM("asm/levels", func_L19_00422178);
 
 INCLUDE_ASM("asm/levels", func_L19_00422238);
 
@@ -146,7 +195,7 @@ void func_L19_00422810(u8 *a0)
     func_0029F338(a0);
 }
 
-INCLUDE_ASM("asm/levels", func_L19_00422A98);
+/* func_L19_00422A98 is defined in L19_00422A98-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L19_00423270);
 

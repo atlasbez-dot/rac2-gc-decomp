@@ -262,7 +262,6 @@ INCLUDE_ASM("asm/levels", func_L14_004295D0);
 
 INCLUDE_ASM("asm/levels", func_L14_004298F0);
 
-INCLUDE_ASM("asm/levels", func_L14_00429A18);
 
 extern void *func_801234F0(float scale);
 

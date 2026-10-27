@@ -138,7 +138,7 @@ void func_L00_00426480(char *object)
     func_00282CC0_4(object + 48, D_00189EA0 + 208, object + 48);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00426560);
+/* func_L00_00426560 is defined in L00_00426560-helpers.c. */
 
 /* clears the seven words of the sub-object at +0x70 (the last after a refresh call), then
    clears the flag word and the identity word-16 of the table entry and the owner's +0x7E. */
@@ -271,7 +271,34 @@ small:
     *(float *)(b + 0x2A8) = 0.018f;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00427620);
+extern void func_002EE0D0(void *);
+extern void func_002EE970(void *, void *);
+extern void func_002EEBD8(void *, void *);
+
+void func_L00_00427620(unsigned char *a0) {
+    unsigned char buf[0x40];
+    unsigned char *p;
+
+    *(int *)(*(unsigned char **)(a0 + 0x70) + 0xC0) = 4;
+    p = *(unsigned char **)(a0 + 0x70) + 0x30;
+    *(float *)(p + 0x20) = 0.05f;
+    *(float *)(p + 0x24) = 0.3f;
+    *(float *)(p + 0x28) = 1.0f;
+    *(unsigned short *)(p + 0x2C) = 1;
+    func_002EE0D0(p);
+    {
+        unsigned char *q = *(unsigned char **)(a0 + 0x70);
+
+        *(float *)(q + 0x10) = 0.3f;
+        *(float *)(q + 0x14) = 0.3f;
+        *(float *)(q + 0x18) = 1.0f;
+        *(unsigned short *)(q + 0x1C) = 1;
+        func_002EE0D0(q);
+    }
+    func_002EE970(buf, a0 + 0x40);
+    func_002EEBD8(a0, buf);
+    *(unsigned short *)(a0 + 0x7E) = 0;
+}
 
 INCLUDE_ASM("asm/levels", func_L00_004276E8);
 
@@ -320,10 +347,7 @@ extern void func_L00_002D7958_1(float *, void *, float);
 /* 128-bit copies reach lq/sq only through TImode. */
 typedef int TQ_00427BE8 __attribute__((mode(TI)));
 
-/* func_L00_00427BE8: five spellings give the same 128-byte object, retail is 144 -
-   both quadword destinations stay folded on $s0 here where retail holds each in a
-   register. Deposited in nonmatching/levels/func_L00_00427BE8.c. */
-INCLUDE_ASM("asm/levels", func_L00_00427BE8);
+/* func_L00_00427BE8 is defined in L00_00427BE8-helpers.c. */
 
 /* resets a sub-object reached through field +112 of its argument: two int zeros through a pointer 176 bytes in, twelve float constants (0.3/0.04/0.07/1.0/0.99) and three int zeros over offsets 40..172, then four calls (sub-object, +80, +144, the argument) and a 16-bit zero at +126 */
 void func_L00_00427C78(char *self)
@@ -360,7 +384,6 @@ void func_L00_00427C78(char *self)
 
 INCLUDE_ASM("asm/levels", func_L00_00427D50);
 
-INCLUDE_ASM("asm/levels", func_L00_00428000);
 
 INCLUDE_ASM("asm/levels", func_L00_004282F0);
 
@@ -394,7 +417,7 @@ int func_L00_004284A8(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_004284B0);
+/* func_L00_004284B0 is defined in L00_004284B0-helpers.c. */
 
 void func_L00_00428580(void)
 {
@@ -413,9 +436,12 @@ void func_L00_00428EB0(char *a0)
     ref_L00_00428EB0_01(a0);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00428EE0);
+/* A method that does nothing and returns 0, reached through a data pointer in every
+   level that has it. Its entry is 24 bytes into the catalogued row, after linker fill. */
+int func_L00_00428EE0(void) {
+    return 0;
+}
 
-INCLUDE_ASM("asm/levels", func_L00_00428F00);
 
 /* When the global identity differs from the signed owner identity at offset 0x86 and the global mode is not 6, clear the owner byte at offset 0x7D and write signed short value 3 at offset 0x7E. */
 void func_L00_00428FE8(Rac2Native_6af85cabb56d3b41_SmallConditional52Owner *owner)
@@ -442,7 +468,6 @@ void func_L00_00429020(int i) {
     q[0x39] = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00429048);
 
 INCLUDE_ASM("asm/levels", func_L00_004290C0);
 
@@ -528,7 +553,6 @@ void func_L00_0042A500(int i)
     *(int *)(q + 0x20) = 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L00_0042A520);
 
 INCLUDE_ASM("asm/levels", func_L00_0042A698);
 
@@ -616,7 +640,7 @@ void func_L00_0042C6C8(void)
 }
 
 /* Return the complete supplied unsigned-long 64-bit value unchanged. */
-/* Target: FUN_003427B0 — identity function returning its first argument */
+/* Target: FUN_003427B0 â€” identity function returning its first argument */
 /* Disassembly: jr ra; move v0,a0 (MIPS delay slot) */
 /* Compiled with: -O2 -G0 -ffunction-sections */
 

@@ -91,11 +91,10 @@ INCLUDE_ASM("asm/levels", func_L16_00404E40);
 
 /* func_L16_00404F50 is defined in L16_00404F50.c. */
 
-INCLUDE_ASM("asm/levels", func_L16_004050D8);
+/* func_L16_004050D8 is defined in L16_004050D8-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_00405488);
 
-INCLUDE_ASM("asm/levels", func_L16_004056A8);
 
 INCLUDE_ASM("asm/levels", func_L16_0040C840);
 
@@ -139,9 +138,6 @@ INCLUDE_ASM("asm/levels", func_L16_0040D4E8);
 
 INCLUDE_ASM("asm/levels", func_L16_0040DAE0);
 
-INCLUDE_ASM("asm/levels", func_L16_0040DC70);
-
-INCLUDE_ASM("asm/levels", func_L16_0040ECC0);
 
 INCLUDE_ASM("asm/levels", func_L16_00410618);
 
@@ -165,7 +161,7 @@ INCLUDE_ASM("asm/levels", func_L16_00410E40);
 
 INCLUDE_ASM("asm/levels", func_L16_00410FA8);
 
-INCLUDE_ASM("asm/levels", func_L16_004110D0);
+/* func_L16_004110D0 is compiled from L16_004110D0-g8.c. */
 
 INCLUDE_ASM("asm/levels", func_L16_00411368);
 
@@ -201,12 +197,10 @@ INCLUDE_ASM("asm/levels", func_L16_004117A8);
 
 /* func_L16_00411B40 is defined in L16_00411B40-g16.c. */
 
-INCLUDE_ASM("asm/levels", func_L16_00411D00);
+/* func_L16_00411D00 is defined in L16_00411D00-g8.c. */
 
 /* Builds a 16-byte query record from the game speed and the handle's byte field and
    hands it with a prepared buffer to the generic path. */
-INCLUDE_ASM("asm/levels", func_L16_00411ED0);
-
 INCLUDE_ASM("asm/levels", func_L16_00411F80);
 
 INCLUDE_ASM("asm/levels", func_L16_00412560);

@@ -1,31 +1,26 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * -frac2-zero-ti-por.
- * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh checks on the qualified current compiler, 2026-10-25.
+ * Profile: -O2 -G8 -ffunction-sections
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 5680 bytes; retail text: 5868 bytes.
+ * Remaining difference: The complete 5868-byte target remains a 5680-byte reconstruction with
+ * frame 0x460 versus 0x440. All 128 disabled pointers, 20-point chains, collision contexts and
+ * four spark vectors are retained. Lexically scoped hit contexts do not fix the frame. Retail late
+ * context bases 0x2D0 and 0x2C0 overlap, but this alone does not prove a source union.
+ * Reopen when: Trace all actual local addresses and context lifetimes, including 40-byte helper
+ * copies and the later spark-axis use, before introducing any storage overlay.
  */
 
-/*
- * Manual C reconstruction retained after bounded retail comparison.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por
- * Measured text: 5680 bytes; retail: 5868 bytes. Stack frame 0x460; retail 0x440.
- * Final coverage: US 0/1, US2 0/1, PAL absent. Absences are not matches.
- * 2 measured source/profile forms. The complete body is retained: target selection, 20-point
- * chain, collision disabling/restoration, two-target hit contexts, four five-vector sparks
- * and final emitters. Local/spill lifetimes enlarge the frame by 0x20 and register/address
- * allocation differs. Arrays retain full extents; contexts retain the 40 bytes copied by
- * engine helpers. Reopen on the mutually exclusive vector/context lifetimes; no omitted
- * paths, fabricated padding or interior aliases are used.
- * All carrying checks are nonmatches (exit 1); no linked-build credit.
- */
+#include "common.h"
 
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad q; float f[4]; } Vector;
 /* A collision record is copied through byte 39 by the engine helpers. */
 typedef struct {
     Vector direction;
-    int owner, flags;
+    char *owner;
+    int flags;
     unsigned char mode, enabled;
     unsigned short id;
     float material;
@@ -80,7 +75,7 @@ extern char *D_L26_001BEFD8;
 extern Vector D_L26_001BEFE0;
 extern float func_00283B98(float, float);
 extern float func_00283BE0(float, float);
-extern char *func_002AB1F0(void *);
+extern s32 func_002AB1F0(u8 *);
 extern void func_00282CF0(void *, void *, void *);
 extern float func_00282DB0(void *, void *);
 extern void func_00282D30(void *, void *, float);
@@ -152,7 +147,7 @@ void func_L26_00391520(char *object) {
                 !*(char **)(target + 0x24) || *(short *)(*(char **)(target + 0x24) + 0x46) != 5 ||
                 (signed char)target[0x20] == -2 || (signed char)target[0x20] == -3)
                 continue;
-            if (!func_002AB1F0(target)) continue;
+            if (!func_002AB1F0((u8 *)target)) continue;
             func_00282CF0(&primary_point, target + 0x10, private);
             if (!D_L26_001A8FF0) distance = func_00282E20(&primary_point);
             else {
@@ -216,8 +211,8 @@ targets_ready:
     }
     primary = *(char **)(private + 0x20);
     if (primary) {
-        descriptor = func_002AB1F0(primary);
-        primary_point.q = *(Quad *)(primary + 0x10);
+        descriptor = (char *)func_002AB1F0((u8 *)primary);
+        qcopy(&primary_point, (primary + 0x10));
         func_00282D30(&secondary_point, primary + 0xE0, *(float *)(descriptor + 0x10));
         func_00282CC0(&primary_point, &primary_point, &secondary_point);
         primary_length = func_00282E48(private, &primary_point);
@@ -225,8 +220,8 @@ targets_ready:
     }
     secondary = *(char **)(private + 0x38);
     if (secondary) {
-        descriptor = func_002AB1F0(secondary);
-        secondary_point.q = *(Quad *)(secondary + 0x10);
+        descriptor = (char *)func_002AB1F0((u8 *)secondary);
+        qcopy(&secondary_point, (secondary + 0x10));
         func_00282D30(&scratch, secondary + 0xE0, *(float *)(descriptor + 0x10));
         func_00282CC0(&secondary_point, &secondary_point, &scratch);
         range = func_00282E48(&primary_point, &secondary_point) + primary_length;
@@ -248,8 +243,8 @@ targets_ready:
         func_002ACEC0(&direction, &direction, &delta, 0.17453295f);
     }
     func_00282D30(&heading, &direction, step_length);
-    D_L26_00239710[0].q = *(Quad *)private;
-    D_L26_00239850[0].q = *(Quad *)private;
+    qcopy(&D_L26_00239710[0], private);
+    qcopy(&D_L26_00239850[0], private);
 
     for (i = 1; i < 20; i++) {
         amplitude = D_L26_001AF054 + (D_L26_001AF058 - D_L26_001AF054) * func_00283CE0(i) * 0.05f;
@@ -261,11 +256,11 @@ targets_ready:
         func_00282CF0(&delta, D_L26_00239710 + i, D_L26_00239710 + i - 1);
         func_00282D08(&proposed, &delta, &heading, 0.85f);
         length = func_00282DF0(&proposed);
-        if (length == 0.0f) D_L26_00239710[i].q = D_L26_00239710[i - 1].q;
+        if (length == 0.0f) qcopy(&D_L26_00239710[i], &D_L26_00239710[i - 1]);
         else {
             func_00282D30(&proposed, &proposed, step_length / length);
             func_00282CC0(D_L26_00239710 + i, D_L26_00239710 + i - 1, &proposed);
-            heading.q = proposed.q;
+            qcopy(&heading, &proposed);
         }
         D_L26_00239710[i].f[2] += jitter;
         func_00282CF0(&delta, D_L26_00239710 + i, D_L26_00239710 + i - 1);
@@ -298,7 +293,7 @@ targets_ready:
             phase = func_002ABB18(D_L26_001AF064 + (float)i * D_L26_001AF06C);
             angle2 = func_002ABB18(D_L26_001AF078 + (float)i * D_L26_001AF080);
             frequency = D_L26_001AF070 * func_00283198(angle2);
-            D_L26_00239850[i].q = D_L26_00239710[i].q;
+            qcopy(&D_L26_00239850[i], &D_L26_00239710[i]);
             wave = frequency * func_00283198(phase) + func_002A78D8(0.0f, 0.1f);
             D_L26_00239B20[i] = wave;
             D_L26_00239850[i].f[2] += wave;
@@ -306,14 +301,14 @@ targets_ready:
             magnitude = D_L26_001AF074 * func_00283180(phase);
             lateral.f[0] = func_00283180(angle2) * magnitude;
             lateral.f[1] = func_00283198(angle2) * magnitude;
-            D_L26_002399E0[i].q = lateral.q;
+            qcopy(&D_L26_002399E0[i], &lateral);
             lateral.f[2] = 0.0f;
             func_00282CC0(D_L26_00239850 + i, D_L26_00239850 + i, &lateral);
         } else {
-            D_L26_00239850[i].q = D_L26_00239710[i].q;
+            qcopy(&D_L26_00239850[i], &D_L26_00239710[i]);
             D_L26_00239850[i].f[2] += D_L26_00239B20[21 - i];
             func_00282CC0(D_L26_00239850 + i, D_L26_00239850 + i, D_L26_002399E0 + 21 - i);
-            lateral.q = D_L26_002399E0[i].q;
+            qcopy(&lateral, &D_L26_002399E0[i]);
         }
         if (i > 1 && (i == 19 || !(i & 1))) {
             func_00282CF0(&scratch, D_L26_00239710 + i, &D_L26_001B8B80);
@@ -327,12 +322,12 @@ targets_ready:
             if (length == 0.0f) scratch.f[2] = 1.0f;
             else func_00282D30(&scratch, &scratch, 1.0f / length);
             scratch.f[3] = 5627.925f;
-            context.direction.q = scratch.q;
+            qcopy(&context.direction, &scratch);
             collided = func_002761F8(D_L26_00239710 + i - 2, D_L26_00239710 + i, 16, object, 0);
             if (collided) {
                 hit = D_L26_001BEFD8;
                 if (hit) {
-                    descriptor = func_002AB1F0(hit);
+                    descriptor = (char *)func_002AB1F0((u8 *)hit);
                     if (!descriptor || !*(char **)(hit + 0x24) || *(short *)(*(char **)(hit + 0x24) + 0x46) != 5)
                         func_002A8E20(hit, &context);
                     else {
@@ -342,9 +337,9 @@ targets_ready:
                     }
                 }
                 if (collided) {
-                    D_L26_00239710[i].q = D_L26_001BEFE0.q;
+                    qcopy(&D_L26_00239710[i], &D_L26_001BEFE0);
                     *(short *)(private + 0x3E) = i;
-                    *(Quad *)(private + 0x10) = D_L26_001BEFE0.q;
+                    qcopy((private + 0x10), &D_L26_001BEFE0);
                     if (!D_L26_001BEFD8) {
                         *(char **)(private + 0x20) = 0;
                         *(short *)(private + 0x40) = 0;
@@ -356,7 +351,7 @@ targets_ready:
     }
     for (i = 0; i < disabled_count; i++)
         *(int *)(disabled[i] + 0x98) = *(int *)(*(char **)(disabled[i] + 0x24) + 0x10);
-    if (!collided) *(Quad *)(private + 0x10) = D_L26_00239710[19].q;
+    if (!collided) qcopy((private + 0x10), &D_L26_00239710[19]);
     primary = *(char **)(private + 0x20);
     if (primary && !(*(unsigned long long *)(private + 0x40) & 0xFFFF0000FFFFULL)) {
         func_00282CF0(&hit_direction, primary + 0x10, &D_L26_001B8B80);
@@ -374,7 +369,7 @@ targets_ready:
         primary_context.enabled = 3;
         primary_context.mode = 5;
         func_002A8E20(primary, &primary_context);
-        descriptor = func_002AB1F0(primary);
+        descriptor = (char *)func_002AB1F0((u8 *)primary);
         kind = descriptor && *(short *)(descriptor + 4) == 1 ? 1 : 5;
         *(short *)(private + 0x44) = kind;
     }
@@ -395,12 +390,12 @@ targets_ready:
         secondary_context.enabled = 3;
         secondary_context.mode = 5;
         func_002A8E20(secondary, &secondary_context);
-        descriptor = func_002AB1F0(secondary);
+        descriptor = (char *)func_002AB1F0((u8 *)secondary);
         kind = descriptor && *(short *)(descriptor + 4) == 1 ? 1 : 5;
         *(short *)(private + 0x46) = kind;
     }
     for (i = 0; i < 4; i++) {
-        auxiliary.q = *(Quad *)(i < 2 ? private : private + 0x10);
+        qcopy(&auxiliary, (i < 2 ? private : private + 0x10));
         magnitude = i < 2 ? 0.4f : 0.5f;
         if (!func_00282978(D_L26_001B24C8 + i)) {
             for (j = 0; j < 4; j++) {
@@ -409,7 +404,7 @@ targets_ready:
                 spark_delta[j].f[1] += func_002A78D8(0.0f, 0.1f);
                 spark_delta[j].f[2] += func_002A78D8(0.0f, 0.1f);
             }
-            D_L26_00239B70[i][0].q = auxiliary.q;
+            qcopy(&D_L26_00239B70[i][0], &auxiliary);
             for (j = 0; j < 4; j++)
                 func_00282CC0(D_L26_00239B70[i] + j + 1, D_L26_00239B70[i] + j, spark_delta + j);
             difference = D_L26_001B24C8[i] - D_L26_001B24E0[i];
@@ -423,7 +418,7 @@ targets_ready:
             func_00282D30(&hit_direction, &direction, magnitude);
             func_002ACEC0(&hit_direction, &hit_direction, &D_0018A560, angle2);
             func_002ACEC0(&hit_direction, &hit_direction, &D_0018A570, angle);
-            D_L26_00239B70[i][0].q = auxiliary.q;
+            qcopy(&D_L26_00239B70[i][0], &auxiliary);
             func_00282CC0(D_L26_00239B70[i] + 1, &auxiliary, &hit_direction);
             sign = 1.0f;
             for (j = 0; j < 3; j++) {

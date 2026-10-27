@@ -1,3 +1,47 @@
+/* OF2 (2026-10-26): 176/176 bytes, default profile, own unit. D_001A63A8 is a plain extern
+   struct reached through a local pointer (compiler-split lui/addiu, base in $a1), and the
+   state load hoisted above the first test gives the bnez/bnel layout. Left (4 lines):
+   retail holds the table word in $v1 and stores `elapsed = 0` before the andi; ours uses
+   $v0 and puts that store in the jal delay slot. Store order, u32, a separate v
+   assignment, an int callee and MACRO_ADDR on D_L16_001B1888 changed nothing. */
+#include "common.h"
+
+typedef struct {
+    u8 pad[0x24];
+    s32 timer;
+    s32 elapsed;
+    u8 pad2[0x3C];
+    s32 busy;
+} Music;
+
+extern Music D_001A63A8;
+extern int D_L16_001B1888[];
+extern void func_002A6170(void *);
+
+void func_L16_00412BA8(u8 *arg, s32 idx)
+{
+    Music *m = &D_001A63A8;
+    u8 *s;
+    s32 v;
+
+    s = *(u8 **)(arg + 0x68);
+    if (m->busy == 0) {
+        if (m->timer == -1 && idx != *(s32 *)(s + 0x354)) {
+            if (idx < 20)
+                v = *(s32 *)(s + (idx << 2) + 0x280);
+            else
+                v = *(s32 *)(s + ((idx - 20) << 2) + 0x2D0);
+            m->elapsed = 0;
+            m->timer = (v & 0x3FFF) + 0x7D0;
+            func_002A6170(D_L16_001B1888);
+            *(u8 *)(s + idx + 0x310) = 1;
+            *(s32 *)(s + 0x350) = 0x384;
+            *(s32 *)(s + 0x354) = idx;
+        }
+    }
+}
+
+#if 0
 /* Selects one of two measured value tables by index and arms the resident channel. */
 void func_L16_00412BA8(u8 *arg, s32 idx)
 {
@@ -67,3 +111,5 @@ void func_L16_00412BA8_w24(u8 *arg, s32 idx)
     *(s32 *)(s0 + 0x350) = 0x384;
     *(s32 *)(s0 + 0x354) = idx;
 }
+
+#endif

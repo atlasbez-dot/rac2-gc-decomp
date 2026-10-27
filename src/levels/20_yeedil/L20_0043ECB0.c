@@ -61,7 +61,7 @@ INCLUDE_ASM("asm/levels", func_L20_00441CB8);
 
 INCLUDE_ASM("asm/levels", func_L20_004421A8);
 
-INCLUDE_ASM("asm/levels", func_L20_004424A0);
+/* func_L20_004424A0 is defined in L20_004424A0-helpers-g8.c. */
 /* func_L20_004424A0 reads four constants through $gp: its near miss is in
    nonmatching/levels/func_L20_004424A0.c and belongs in the -G8 sibling. */
 
@@ -88,7 +88,6 @@ void func_L20_004427C8(char *arg0, char *arg1, float f) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L20_00442890);
 
 INCLUDE_ASM("asm/levels", func_L20_004429F0);
 
@@ -205,7 +204,7 @@ ret0:
 
 INCLUDE_ASM("asm/levels", func_L20_004435A0);
 
-INCLUDE_ASM("asm/levels", func_L20_00443790);
+/* func_L20_00443790 is defined in L20_00443790-helpers-g8.c. */
 
 typedef int TI128 __attribute__((mode(TI)));
 typedef union {
@@ -239,7 +238,7 @@ void func_L20_00443908(char *arg0) {
 
 INCLUDE_ASM("asm/levels", func_L20_00443A10);
 
-INCLUDE_ASM("asm/levels", func_L20_00443B60);
+/* func_L20_00443B60 is defined in L20_00443B60-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L20_00443CF0);
 /* func_L20_00443CF0 is one word pair away: its near miss is in
@@ -384,6 +383,6 @@ INCLUDE_ASM("asm/levels", func_L20_00447930);
 
 INCLUDE_ASM("asm/levels", func_L20_00448858);
 
-INCLUDE_ASM("asm/levels", func_L20_00448A18);
+/* func_L20_00448A18 is defined in L20_00448A18-helpers-g8.c. */
 /* func_L20_00448A18 reaches four globals through $gp: its near miss is in
    nonmatching/levels/func_L20_00448A18.c and belongs in the -G8 sibling. */

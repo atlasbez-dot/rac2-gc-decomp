@@ -1,20 +1,21 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Reported final C / retail: 2264 / 2292 bytes; size equality is not a match.
- * us: 0/1 placements; 2264/2292 bytes.
- * us2: absent from catalogue (not a match).
- * pal: absent from catalogue (not a match).
- * Residual: 28 fewer bytes; local frame0x80 vs retail0x100 and global access/register allocation differ. Real8x3 tables,4-slot initial table and16-byte start vector retained.
- * Reopening condition: New measured source/data-layout or allocator hypothesis; do not repeat retained flag/control-flow trials or use artificial aliases/barriers.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections.
+ * Compiled 2264 bytes; retail 2292 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: canonical name absent; no match credit.
+ * pal: canonical name absent; no match credit.
+ * Remaining: The 24 vector-table entries now use the observed local zero construction followed
+ * by qcopy; both 8x3 scalar/pointer tables and all four initial slots remain. Origin/start
+ * captures, linked-list outputs and the genuine volatile MMIO read at 0x10000800 are preserved.
+ * Retail explicitly accesses local vectors only at SP+0 and SP+0x10, then saves registers from
+ * +0xA0; no caller access was found in SP+0x20..0x9F. The reconstructed frame is 0x80 versus
+ * 0x100. No unused table or placeholder frame object was added. Global-base/allocation and
+ * initialization scheduling remain different.
+ * Reopen: Independent original stack/object or ABI evidence explaining the 128-byte span without
+ * explicit caller accesses; preserve all real table stores and the consumed zero temporary.
  */
 
-/* 2264/2292 bytes after2 trials. Real8x3 tables and16-byte initial slot table. Remaining global address/allocation/local-frame differences. -fno-gcse regressed2188.
- * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. */
-#include "include_asm.h"
+#include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 typedef struct LvlSlotNode { char pad00[0x1C]; struct LvlSlotNode *next; } LvlSlotNode;
 typedef struct LvlSlotCtx { char pad00[0x50]; LvlSlotNode *head; } LvlSlotCtx;
@@ -74,19 +75,19 @@ extern char *D_L23_00259560[];
 extern unsigned char D_L23_002595C8[0xFE0];
 extern unsigned char D_00189E20[];
 extern unsigned int D_00138324;
-extern void func_00282948(char *);
+extern int func_00282948(int *);
 extern void func_001163A0(unsigned int);
 extern void func_00282CF0(char *, char *, char *);
 extern float func_00282DF0(char *);
 extern void func_L23_00418650(char *, float);
 extern void *func_002B60B0(unsigned char *, float, float, float, float);
-extern void func_002A7750(unsigned char *, unsigned char, int);
+extern void func_002A7750(unsigned char *, int, int);
 extern void *func_00115484(void *, int, unsigned int);
 extern void func_L23_004196B8(char *);
 extern void func_L23_0041CA58(char *);
 extern void func_L23_00419970(char *);
 extern void func_0029B758(int, int);
-extern void func_L23_0041B478(void);
+extern int func_L23_0041B478(void);
 extern int func_L23_0041DA48(void);
 extern void func_L00_002AF7D0(void);
 extern void func_L00_00310C88(LvlSlotCtx *, LvlSlotNode **);
@@ -109,7 +110,7 @@ void func_L23_004177F8(char *object) {
     char **parts, **out;
     int i, j, id;
     float health;
-    func_00282948((char *)&D_L23_001B3748);
+    func_00282948(&D_L23_001B3748);
     if (((unsigned char *)object)[0x20] == 0) {
         D_L23_001B3824 = 0; D_L23_001B3820 = 0;
         D_L23_001B1424 = 1; D_L23_001B13EC = 0;
@@ -133,20 +134,21 @@ void func_L23_004177F8(char *object) {
         D_L23_001B374C = -1; D_L23_001B3754 = 0; I(0x408) = 0;
         for (i = 0; i < 8; i++) {
             for (j = 0; j < 3; j++) {
+                qzero(&local.origin);
                 D_L23_00259320[i][j] = 0;
                 D_L23_00259380[i][j] = 0;
-                D_L23_002593E0[i][j] = 0;
+                qcopy(&D_L23_002593E0[i][j],&local.origin);
             }
         }
         for (i = 3; i >= 0; i--) D_L23_001B3790[i] = 0;
         D_L23_001B3894 = 0; D_L23_001B3890 = 0;
         F(0x57C) = 0.098174773f; I(0x578) = 0; D_L23_001B36AC = 0;
-        local.origin = 0;
+        /* The fixed nonempty initializer above leaves origin zero. */
         out = D_L23_00259560;
         for (entity = D_L23_001B279C; entity < D_L23_001B27A0; entity += 0x100) {
             id = *(short *)(entity + 0xAA);
             if (id == 0x7E5) *out++ = entity;
-            else if (id == 0x27D) { local.origin = *(Quad *)(entity + 16); *(Quad *)(D_00189E20 + 0x80) = *(Quad *)(entity + 16); }
+            else if (id == 0x27D) { qcopy(&local.origin,entity+16); qcopy((D_00189E20 + 0x80) ,(entity + 16)); }
             else if (id == 0xF7E) *parts++ = entity;
             else if (id == 0x120F) *(char **)(state + 0x610) = entity;
             else if (id == 0x123C) *(char **)(state + 0x614) = entity;
@@ -160,13 +162,13 @@ void func_L23_004177F8(char *object) {
         }
         func_00282CF0((char *)&local.origin, (char *)&local.origin, (char *)D_00189E20 + 0xB0);
         D_L23_001B36A4 = func_00282DF0((char *)&local.origin);
-        local.point = 0;
+        qzero(&local.point);
         ((float *)&local.point)[0] = 500.0f; ((float *)&local.point)[1] = 500.0f; ((float *)&local.point)[2] = 430.0f;
-        func_L23_00418650((char *)&local.point, 0.0f); D_L23_001B3760 = local.point;
-        local.point = 0;
+        func_L23_00418650((char *)&local.point, 0.0f); qcopy(&D_L23_001B3760,&local.point);
+        qzero(&local.point);
         ((float *)&local.point)[0] = 500.0f; ((float *)&local.point)[1] = 500.0f; ((float *)&local.point)[2] = 552.0f;
-        func_L23_00418650((char *)&local.point, 0.0f); D_L23_001B3770 = local.point;
-        *(Quad *)(object + 16) = D_L23_001B13F0;
+        func_L23_00418650((char *)&local.point, 0.0f); qcopy(&D_L23_001B3770,&local.point);
+        qcopy(object+16,&D_L23_001B13F0);
         func_L23_00418650(object + 16, D_L23_001B14D0);
         ((unsigned char *)object)[0x30] = 255; *(short *)(object + 0x32) = 255;
         *(unsigned short *)(object + 0x34) |= 0x100;

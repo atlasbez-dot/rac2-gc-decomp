@@ -64,6 +64,29 @@ class JumpTableValidation(unittest.TestCase):
                 self.obj["relocations"][0] = relocs
                 self.assertFalse(self.accepts())
 
+    def two_tables(self, padding=0, second=16):
+        """Two tables of one function in one section: three entries, then the compiler's
+        `.align 4` zero words, then a second table at offset SECOND."""
+        entries = [0, 8, 8]
+        data = words(*entries) + words(*([padding] * ((second - 12) // 4))) + words(4, 12)
+        self.obj["sections"][0].update(size=len(data), data=data, align=16)
+        self.obj["relocations"][0] = [(o, build.elf.R_MIPS_32, 0) for o in (0, 4, 8, second, second + 4)]
+        retail = words(0x2000, 0x2008, 0x2008) + words(*([padding] * ((second - 12) // 4))) + words(0x2004, 0x200C)
+        self.image["data"] = retail
+        self.image["segments"][0]["filesz"] = len(retail)
+        self.image["sections"][0]["size"] = len(retail)
+
+    def test_alignment_padding_between_two_tables_is_accepted(self):
+        self.two_tables()
+        self.assertTrue(self.accepts())
+
+    def test_padding_must_be_zero_and_end_at_an_aligned_table(self):
+        for padding, second in ((1, 16), (0, 20), (0, 32)):
+            with self.subTest(padding=padding, second=second):
+                self.setUp()
+                self.two_tables(padding, second)
+                self.assertFalse(self.accepts())
+
     def test_named_symbol_cannot_substitute_for_case_section(self):
         self.obj["symbols"][0].update(name="D_00002000", type=1)
         self.assertFalse(self.accepts())

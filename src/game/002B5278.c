@@ -13,7 +13,7 @@ void func_002B5278(QwenRecovery_84e23fd54f9f_AbiByte16 *param_1, float factor)
 }
 
 
-INCLUDE_ASM("asm/game", func_002B52A0);
+/* func_002B52A0 is defined in 002B52A0-g8.c. */
 
 /* func_002B5678 is defined in 002B5678-copy.c. */
 
@@ -31,7 +31,6 @@ void func_002B5CD8(char *first, char *second) {
 
 void *func_002B5D28(u8 *a0) { return *(void **)(*(u8 **)(a0 + 0x68) + 0x18); }
 
-INCLUDE_ASM("asm/game", func_002B5D38);
 
 /* func_002B5E48 is matched in 002B5E48.c (built with -frac2-qcopy -frac2-qcopy-barrier). */
 

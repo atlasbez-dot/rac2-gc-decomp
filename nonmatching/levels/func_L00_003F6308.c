@@ -1,14 +1,9 @@
-/* Nonmatching reconstruction of func_L00_003F6308 (retail 1524 bytes).
- * Measured 2026-10-23: 1432 bytes, 0/27 placements in US, US2 and PAL.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * An earlier absolute-global form was 1480 bytes; the final source preserves
- * measured GP scalar accesses. The pointer-walking alternative was 1432 bytes
- * before this correction. Remaining differences are
- * stack spills, loop addressing and scheduling; reopen with original ring
- * cursor/layout evidence. The ring buffer is the full 3 x 20 x 16 bytes.
- * Lookup helpers return pointers in v0; 00283CF0 returns an integer via mfc1.
- * Vector helpers and 00280B90 were qualified against retail, not inferred
- * from ignored results. No candidate or linked-build credit is claimed.
+/* Nonmatching C: Build the three ring layers and submit the surface and ribbon draw packets.
+ * Tested profile: -O2 -G8 -ffunction-sections.
+ * Measured US size: 1400 bytes; retail: 1524 bytes.
+ * Placement checks: US, US2 and PAL: 0/27 each.
+ * Remaining: Ring cursor spills, loop addressing, floating-point scheduling and pointer allocation differ.
+ * Reopen with independent ring and packet cursor lifetimes; preserve all three twenty-vector rings, the complete frame and packet, and unsigned color shifts.
  */
 #include "common.h"
 
@@ -74,11 +69,11 @@ void func_L00_003F6308(char *object)
     do {
         effect = &effects[effect_index];
         if (effect->active != 0) {
-            frame.row[0].word = effect->direction[0].word;
-            frame.row[2].word = effect->direction[1].word;
+            qcopy(&frame.row[0], &effect->direction[0]);
+            qcopy(&frame.row[2], &effect->direction[1]);
             func_00282DD8(&frame.row[1], &frame.row[0], &frame.row[2]);
             fade = (float)effect->lifetime * effect->fade;
-            color = (func_00283CF0(fade * (float)D_L00_001B0994) << 24) | D_L00_001B098C;
+            color = ((u32)func_00283CF0(fade * (float)D_L00_001B0994) << 24) | D_L00_001B098C;
             packet.color[0] = color;
             packet.color[1] = color;
             packet.color[2] = color;
@@ -86,7 +81,7 @@ void func_L00_003F6308(char *object)
             for (layer = 0; layer < 3; ++layer) {
                 Vector *circle = D_L00_0029F0D0;
                 Vector *output = rings[layer];
-                frame.position.word = effect->center[layer].word;
+                qcopy(&frame.position, &effect->center[layer]);
                 count = 19;
                 do {
                     func_00282D30(&temporary, circle, D_L00_001B0984);
@@ -102,10 +97,10 @@ void func_L00_003F6308(char *object)
                 v = 0.0f;
                 for (segment = 0; segment < 20; ++segment) {
                     next = (segment + 1) % 20;
-                    packet.vertex[0].word = rings[layer + 1][segment].word;
-                    packet.vertex[1].word = rings[layer + 1][next].word;
-                    packet.vertex[2].word = rings[layer][segment].word;
-                    packet.vertex[3].word = rings[layer][next].word;
+                    qcopy(&packet.vertex[0], &rings[layer + 1][segment]);
+                    qcopy(&packet.vertex[1], &rings[layer + 1][next]);
+                    qcopy(&packet.vertex[2], &rings[layer][segment]);
+                    qcopy(&packet.vertex[3], &rings[layer][next]);
                     v_next = v + D_L00_001B0980;
                     packet.uv[0][0] = u;
                     packet.uv[0][1] = v;
@@ -123,7 +118,7 @@ void func_L00_003F6308(char *object)
                 edge = color;
             }
             func_00281DE8((QuadPacket *)&packet, 0xe, 1, 0x80);
-            color = (func_00283CF0(fade * (float)D_L00_001B09AC) << 24) | D_L00_001B09A8;
+            color = ((u32)func_00283CF0(fade * (float)D_L00_001B09AC) << 24) | D_L00_001B09A8;
             edge = D_L00_001B09A4;
             packet.uv[0][0] = 0.0f;
             packet.uv[0][1] = 0.0f;
@@ -155,7 +150,7 @@ void func_L00_003F6308(char *object)
                 edge = color;
             }
             func_00281DE8((QuadPacket *)&packet, 0x17, 1, 0x80);
-            color = (func_00283CF0(fade * (float)D_L00_001B09BC) << 24) | D_L00_001B09B8;
+            color = ((u32)func_00283CF0(fade * (float)D_L00_001B09BC) << 24) | D_L00_001B09B8;
             edge = D_L00_001B09B4;
             phase = effect->ribbon_phase;
             packet.uv[0][0] = 0.0f;

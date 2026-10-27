@@ -42,4 +42,4 @@ INCLUDE_ASM("asm/levels", func_L20_00310E38);
 
 INCLUDE_ASM("asm/levels", func_L20_0039BEC8);
 
-INCLUDE_ASM("asm/levels", func_L20_002DEBE0);
+/* func_L20_002DEBE0 is in the sibling file L20_002DEBE0-decider.c (its own profile). */

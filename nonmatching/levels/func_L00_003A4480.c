@@ -1,25 +1,19 @@
-/* Reconstruction checked 23 October 2026.
+/* 26 October 2026 (M24): -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier (no -mno-split-addresses: retail keeps the hero %hi in a saved register and adds %lo at each use), 1104/1104 bytes, 96 lines off: retail hoists 0.5f out of the first fragment loop as well as 2.0f and 0.05f; store order and a fragment struct view do not move it. */
+/* Complete nonmatching reconstruction: 1112/1104 bytes.
  * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Final check.py coverage: us 0/27, us2 0/27.
- * Manual fragment/smoke loops1096/1104 with qcopy/barrier G8.
- * Remaining: Scalar and vector lifetimes, table address formation and particle-call setup differ. Conditional drift-buffer initialization follows retail and needs semantic investigation before native-port use.
- * Reopen with typed effect state and lifetime/ABI witnesses.
- * The qualified R5900 view decodes the cited SPECIAL2 word as por, not an unknown instruction.
- * Historical screening below is preserved; its blanket C/ISA claims are not acceptance evidence.
+ * Placement checks: US: 0/27; US2: 0/27; PAL absent from catalogue.
+ * The fragment and particle loops preserve all RNG calls and particle inputs. Seven complete16-byte-aligned vectors remain. Retail clears drift unconditionally at+0x250 before its conditional scale; the older draft omitted it. jitter W remains subject to the measured caller pre-initialization constraint. Real origin-to-fragment+0x20 and direction snapshots use clobbering helpers. Capturing fragment+0x30 before the helper calls follows the observed field access but remains1112/1104 bytes, with the retail0xf0 frame. Scalar/vector live ranges, table bases and particle-call setup still differ; the semantically incomplete older1096-byte form is not substituted.
+ * Reopen with independent effect-state ownership and actual phase-local pointer/FP lifetimes. Preserve the measured drift clear and RNG order; no unconditional jitter-W initialization is justified by this caller.
  */
-
-/* MMI (SPECIAL2) instruction: no C spelling. 1104 bytes, level
-   00_aranos_tutorial. Retail at 0x003A4480 carries the SPECIAL2 word
-   0x700014A9 (+0x0014) - opcode 0x1C, which rabbitizer prints as `INVALID`;
-   it is the MMI family (pcpyld and its relatives) the sixth wave recorded
-   and that no C spelling reaches. This cc1 emits `lq`/`sq` for a `mode(TI)`
-   local and `ldl`/`ldr`/`sdl`/`sdr` for a struct assignment, never the
-   packed copy. ASM_FUNC candidate, as for the rest of the family. */
-
 #include "common.h"
+typedef int HeroQ __attribute__((mode(TI)));
+typedef union { unsigned char b[0x2600]; signed char c[0x2600]; short h[0x1300]; unsigned short uh[0x1300]; int i[0x980]; unsigned int u[0x980]; float f[0x980]; char *ptr[0x980]; HeroQ q[0x260]; } Hero;
+extern unsigned char D_00189E20[];
+#define H ((Hero *)D_00189E20)
 typedef int VectorBits __attribute__((mode(TI)));
-extern float D_0018A550[4], D_0018A560[4], D_00189F30[4];
-extern int D_0018A160 NOT_SDA;
+typedef float Vector[4] __attribute__((aligned(16)));
+
+
 extern float D_L00_001AF62C __attribute__((sda));
 extern float D_L00_001AF630 __attribute__((sda));
 extern int D_L00_001AF634 __attribute__((sda));
@@ -44,12 +38,12 @@ extern void func_002ACDE8(void *, void *, void *);
 extern float func_002A78D8(float, float);
 extern int func_00283CF0(float);
 extern void func_00282CF0(void *, void *, void *);
-extern void func_002C16C0(void *, void *, unsigned int, int, int, int, float, float, float, float, float);
+extern char *func_002C16C0(void *, void *, unsigned int, int, int, int, float, float, float, float, float);
 
 /* Emit a rotating fan of fragments followed by smoke particles. */
 void func_L00_003A4480(char *moby)
 {
-    float rotation[4], direction[4], base[4], origin[4], velocity[4], jitter[4], drift[4];
+    Vector rotation, direction, base, origin, velocity, jitter, drift;
     float angle = 0.0f;
     int count;
     *(VectorBits *)base = 0;
@@ -59,33 +53,35 @@ void func_L00_003A4480(char *moby)
     func_00283098(base, base, moby + 0xC0);
     func_00282CC0(origin, moby + 0x10, base);
     *(unsigned char *)(moby + 0xBC) = 6;
-    func_002ACEC0(base, D_0018A550, D_0018A560, 0.3490659595f);
-    *(VectorBits *)direction = *(VectorBits *)base;
+    func_002ACEC0(base, (&H->f[460]), (&H->f[464]), 0.34906590f);
+    qcopy(direction, base);
     for (count = 19; count >= 0; count--) {
         char *fragment;
         angle = func_00283B98(angle, func_002A7878(0.0f, 0.6283186078f));
         func_00282D30(velocity, direction, func_002A7878(0.1000000089f, 0.3f));
         fragment = func_L00_00333F90(origin, velocity);
         if (fragment) {
+            char *tail = fragment + 0x30;
             func_00282D30(velocity, direction, 0.75f);
             func_00282CC0(fragment + 0x10, origin, velocity);
-            *(VectorBits *)(fragment + 0x20) = *(VectorBits *)origin;
-            *(float *)(fragment + 0x3C) = 2.0f;
+            qcopy((fragment + 0x20), origin);
+            *(float *)(tail + 0xC) = 2.0f;
             *(int *)(fragment + 0xC) = 0x307F7F7F;
             *(float *)(fragment + 0x1C) = 0.05f;
             *(float *)(fragment + 0x2C) = 0.5f;
             *(int *)(fragment + 4) = 0x307F7F7F;
         }
         if (func_00282C48(angle) > 0.00001f) {
-            func_002AB668(rotation, (int)D_0018A550, angle);
+            func_002AB668(rotation, (int)(&H->f[460]), angle);
             func_002ACDE8(direction, base, rotation);
         }
     }
     angle = 0.0f;
-    func_002ACEC0(base, D_0018A550, D_0018A560, D_L00_001AF62C * 0.017453294f);
-    *(VectorBits *)direction = *(VectorBits *)base;
-    if (D_0018A160)
-        func_00282D30(drift, D_00189F30, 1.7f);
+    func_002ACEC0(base, (&H->f[460]), (&H->f[464]), D_L00_001AF62C * 0.017453294f);
+    qcopy(direction, base);
+    qzero(drift);
+    if (H->i[208])
+        func_00282D30(drift, (&H->f[68]), 1.7f);
     for (count = 19; count >= 0; count--) {
         unsigned int color;
         int spin;
@@ -104,7 +100,7 @@ void func_L00_003A4480(char *moby)
         func_002C16C0(jitter, velocity, color, D_L00_001AF634, D_L00_001AF638, spin,
                       size, D_L00_001AF654, D_L00_001AF640, 0.0f, 0.0f);
         if (func_00282C48(angle) > 0.00001f) {
-            func_002AB668(rotation, (int)D_0018A550, angle);
+            func_002AB668(rotation, (int)(&H->f[460]), angle);
             func_002ACDE8(direction, base, rotation);
         }
     }

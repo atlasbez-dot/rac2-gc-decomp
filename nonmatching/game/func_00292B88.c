@@ -1,38 +1,30 @@
-/* Retained manual reconstruction, 2026-10-24.
- * Profile: -O2 -G0 -ffunction-sections.
- * Final measurements: us: 0/28 placements, exit1, 808 compiled bytes; us2:
- * 0/28 placements, exit1, 808 compiled bytes; pal: 0/28 placements, exit1,
- * 808 compiled bytes.
- * Remaining: Complete four-qword descriptor generation, both storage modes
- * and both negative-mode fallbacks are retained. The 0x60 frame agrees;
- * width-clamp allocation, OR expression scheduling and one extra word
- * remain. Pointer-advance form improved 776 to 808 bytes; no-split-
- * addresses did not improve it.
- * Reopen with: Concrete texture-field or expression-lifetime evidence that
- * resolves the remaining width/filter saved-register allocation without
- * artificial dependencies.
- * No byte-match or linked-build credit is claimed.
+/*
+ * Near miss (M19, 2026-10-26): 804/804 bytes, about 23 differing lines.
+ * Profile: -O2 -G0 -ffunction-sections. us: 0/28 placements.
+ * D_001A72F4 and D_001A7304 are MACRO_ADDR (retail's lui/lw share one register).
+ * Residual: $s3/$s4 swapped between filter and half_width (no statement order moves it),
+ * and the GS words of the storage==0 arm scheduled differently. Queued on the permuter.
  */
-/* Four GS A+D qwords. Only the low 64 bits of each qword are replaced. */
 typedef struct {
     int pixels;
     short width, height, storage, base, first, second;
 } Texture_292B88;
 extern int func_00282A18(int value);
-extern int D_001A72F4;
-extern int D_001A7304;
+#define MACRO_ADDR __attribute__((section(".sdata")))
+extern int D_001A72F4 MACRO_ADDR;
+extern int D_001A7304 MACRO_ADDR;
 extern long D_001B19B0[];
 extern long D_001B19C8[];
 
 void func_00292B88(long *out, Texture_292B88 *texture,
                     int k, int filter, int address, int clamp, int mode)
 {
-    int half_width = texture->width >> 7;
     int width = texture->width >> 6;
+    int half_width = texture->width >> 7;
     int log_width, log_height;
     int base, first, second, storage;
-    if (half_width <= 0) half_width = 1;
     if (width <= 0) width = 1;
+    if (half_width <= 0) half_width = 1;
     log_width = func_00282A18(texture->width);
     log_height = func_00282A18(texture->height);
     base = texture->base + (D_001A72F4 >> 8);
@@ -41,7 +33,7 @@ void func_00292B88(long *out, Texture_292B88 *texture,
     storage = texture->storage;
     if (mode >= 0) {
         if (!storage) {
-            int pixels = (D_001A7304 + (texture->pixels << 2)) >> 8;
+            int pixels = ((texture->pixels << 2) + D_001A7304) >> 8;
             long format = ((long)log_width << 26) | 0x01b00000;
             long tex = pixels | ((long)width << 14);
             long flags = ((long)k << 32) | 0x20;

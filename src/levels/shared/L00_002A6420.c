@@ -200,7 +200,6 @@ void func_L00_002A6420(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002A67F8);
 
-INCLUDE_ASM("asm/levels", func_L00_002A6DD0);
 
 /* reads a global mode value; for 8, 9 or 19 probes two engine queries and returns 1 if either reports true, else 0 */
 int func_L00_002A7000(void)
@@ -244,7 +243,6 @@ INCLUDE_ASM("asm/levels", func_L00_002A70F8);
 
 INCLUDE_ASM("asm/levels", func_L00_002A74A8);
 
-INCLUDE_ASM("asm/levels", func_L00_002A75D8);
 
 /* runs a three-float setup over two resident blocks when the mode is 124, then publishes a
    height once two resident flags are clear */
@@ -264,7 +262,7 @@ void func_L00_002A76B8(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002A7748);
 
-INCLUDE_ASM("asm/levels", func_L00_002A7958);
+/* func_L00_002A7958 is matched in its own unit, src/levels/shared/L00_002A7958-g8.c (-O2 -G8 -ffunction-sections). */
 
 /* raises the pending flag once: registers an update routine with the resident pointer */
 void func_L00_002A7A10(void)
@@ -279,14 +277,9 @@ void func_L00_002A7A10(void)
 
 INCLUDE_ASM("asm/levels", func_L00_002A7A50);
 
-INCLUDE_ASM("asm/levels", func_L00_002A7DE8);
-
-
-INCLUDE_ASM("asm/levels", func_L00_002A7E60);
-
 INCLUDE_ASM("asm/levels", func_L00_002A9460);
 
-INCLUDE_ASM("asm/levels", func_L00_002A9600);
+/* func_L00_002A9600 uses the quadword-copy profile in L00_002A9600-qcopy.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_002A9760);
 
@@ -403,6 +396,8 @@ void func_L00_002AA478(char *self, int arg1)
     }
 }
 
+/* Near miss: nonmatching/levels/func_L00_002AA570.c - 472/480 bytes; retail
+   keeps the base's %hi in $s5 and re-materialises it inside the loop. */
 INCLUDE_ASM("asm/levels", func_L00_002AA570);
 
 INCLUDE_ASM("asm/levels", func_L00_002AA750);
@@ -569,7 +564,7 @@ INCLUDE_ASM("asm/levels", func_L00_002AC1A0);
 
 INCLUDE_ASM("asm/levels", func_L00_002AC578);
 
-INCLUDE_ASM("asm/levels", func_L00_002ACA08);
+/* func_L00_002ACA08 is defined in L00_002ACA08-flags.c. */
 
 INCLUDE_ASM("asm/levels", func_L00_002ACF88);
 
@@ -582,7 +577,7 @@ void func_L00_002ADCF8(f32 *output) {
  func_L00_002D36E0(0.3f,0.0f,1.34f,output,1);
 }
 
-INCLUDE_ASM("asm/levels", func_L00_002ADD30);
+/* func_L00_002ADD30 is matched in its own unit, L00_002ADD30.c. */
 
 /* returns indexed resident word 0x1220 when field 0x1244 equals two, otherwise zero */
 u32 func_L00_002ADE68(s32 index) {

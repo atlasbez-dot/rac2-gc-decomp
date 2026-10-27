@@ -1,25 +1,19 @@
 /*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: default -O2 -G8 -ffunction-sections.
- * Reported final C / retail: 2496 / 2852 bytes; size equality is not a match.
- * us: 0/1 placements; 2496/2852 bytes.
- * us2: absent from catalogue (not a match).
- * pal: absent from catalogue (not a match).
- * Residual: 2496 bytes versus2852; matching60-byte frame; merged state1/state2 handling and allocation differ.
- * Reopening condition: Separate state1/state2 blocks as in retail and finish canonical helper return/API audit before scheduling trials.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G8 -ffunction-sections
+ * Coverage: US: 0/1; US2: absent from catalogue; PAL: absent from catalogue.
+ * Compiled text: 2756 bytes; retail: 2852 bytes.
+ * Remaining difference: Separating the real state1/state2 paths and reconstructing the observed
+ * kind dispatch improves2496 to2756/2852 while preserving frame0x60. Canonical int32/int16 timer
+ * interfaces and the true bone integer argument are retained. State-specific constants, branches,
+ * floating lifetimes and allocation remain different.
+ * Reopen when: Independent source/dataflow evidence for the remaining state-specific calls and
+ * float lifetimes, rather than remerging states or adding padding.
  */
 
-/* Manual reconstruction retained after measured nonmatching checks.
-   Profile: default -O2 -G8 -ffunction-sections.
-   2496 bytes versus2852; matching60-byte frame; merged state1/state2 handling and allocation differ.
-   Reopen: Separate state1/state2 blocks as in retail and finish canonical helper return/API audit before scheduling trials.
-   This is an unqualified draft, not an exact match or native behavior proof.
-*/
-typedef unsigned char u8;
-typedef unsigned short u16;
+#include "common.h"
+
 typedef int Quad __attribute__((mode(TI)));
 #define INT(p,o) (*(int *)((char *)(p)+(o)))
 #define FLOAT(p,o) (*(float *)((char *)(p)+(o)))
@@ -30,11 +24,11 @@ extern int D_001A79F0 __attribute__((sda));
 extern char *D_L04_001B24DC __attribute__((sda));
 extern float D_L04_001B1874 __attribute__((sda)), D_L04_001B1878 __attribute__((sda));
 extern void func_L04_0044D0C0(char *);
-extern void func_002A7750(void *,u8,int);
+extern void func_002A7750(void *,int,int);
 extern void func_002A7470(void *,int,int,int);
 extern void func_002A7398(char *,int,int);
-extern int func_00282948(void *);
-extern int func_00282978(void *);
+extern int func_00282948(int *);
+extern int func_00282978(short *);
 extern int func_002A77E0(int);
 extern int func_002A7820(int,int);
 extern float func_002A7878(float,float);
@@ -50,7 +44,7 @@ extern float func_002A7CA0(void *,float *,float,float,float,float);
 extern float func_00282E80(void *,void *);
 extern int func_002AEB60(char *,float);
 extern int func_002E5CF8(int,int,char *);
-extern int func_002A8D70(float,float,float,void *,void *,int,int,int,int);
+extern int func_002A8D70(float,float,float,void *,int,int,int,int,int);
 extern float func_00283180(float), func_00283198(float);
 extern void func_00282CD8(void *,void *,void *);
 extern int func_L04_0044D860(char *);
@@ -69,7 +63,8 @@ void func_L04_0044C598(char *object)
     vars=*(char **)(object+0x68);
     func_L04_0044D0C0(object);
     kind=(u8)object[0x95];
-    if(kind==1) {
+    switch(kind) {
+    case 1:
         if(INT(vars,0x254)==1) {
             func_002A7750(object,4,2);
             if(object[0x43]!=7) func_002A7470(object,7,0,14);
@@ -77,11 +72,13 @@ void func_L04_0044C598(char *object)
             func_002A7750(object,1,0);
             if(object[0x43]!=2) func_002A7470(object,2,0,12);
         }
-    } else if(kind==0) {
+
+        break;
+    case 0:
         other=D_L04_001B24DC+INT(vars,0x32c)*256;
         if(INT(vars,0x328)==-1 || INT(vars,0x32c)==-1 || other==object ||
             !other || other[0x20]==-2 || other[0x20]==-3) {
-            func_00282948(vars+0x31c);
+            func_00282948((int *)(vars+0x31c));
             if(INT(vars,0x254)==1) {
                 if(INT(vars,0x328)==-1) {
                     if(func_002A77E0(9)==0) {
@@ -117,7 +114,9 @@ void func_L04_0044C598(char *object)
                 goto resetTimer;
             }
         }
-    } else if(kind==2) {
+
+        break;
+    case 2:
         if(INT(vars,0x254)!=1 && func_002A77E0(19)==0) {
             func_002A7750(object,2,1);
             delay=FLOAT(vars,0x2f8);
@@ -126,7 +125,10 @@ resetTimer:
             INT(vars,0x2fc)=func_00283CF0(delay*60.0f);
             HALF(vars,0x300)=0;
         }
-    } else if(kind==3 && object[0x20]!=7) {
+
+        break;
+    case 3:
+        if(object[0x20]!=7) {
         flags=func_002B1C20(object,vars+0x60);
         if(flags&1) { HALF(vars,0x98)=0; func_002A6C58(object,0,3); func_L01_003E9CF8(object,0,0); return; }
         if(flags&2) {
@@ -140,6 +142,9 @@ resetTimer:
                 HALF(vars,0x300)=func_002A7820(120,700);
             }
         }
+
+        }
+        break;
     }
 heightCheck:
     if(FLOAT(object,0x18)-FLOAT(vars,0x2e8)>10.0f) goto removeObject;
@@ -148,25 +153,43 @@ heightCheck:
     state=(u8)object[0x20];
     switch(state) {
     case 1:
-    case 2:
-        func_00282978(vars+0x300);
+        func_00282978((short *)(vars+0x300));
         if(object[0x43]==0 && HALF(vars,0x300)) func_002A7470(object,7,0,14);
         func_002AA2E8((float *)(vars+0x124),HALF(vars,0x300)<21 ? 0.0f : D_L04_001B1878*0.01666666753590107f,0.0019444444915279746f);
         if(object[0x43]==7) {
             FLOAT(object,0x48)=0.8f;
             if(HALF(vars,0x300)==0) {
-                choice=func_002A77E0(state==1 ? 3 : 2)+(state==1 ? 0 : 5);
+                choice=func_002A77E0(3)+(0);
                 if((u8)object[0x43]!=choice) {
-                    choice=func_002A77E0(state==1 ? 3 : 2)+(state==1 ? 0 : 5);
+                    choice=func_002A77E0(3)+(0);
                     func_002A7470(object,choice,0,12);
                 }
             }
             func_002AE8C0(object,vars+0x110,0.35f,0.25f);
-        } else if((state==1 ? (u8)object[0x43]<=2 : (u8)(object[0x43]-5)<2) && (object[0x60]&2)) {
+        } else if(((u8)object[0x43]<=2) && (object[0x60]&2)) {
             HALF(vars,0x300)=func_002A7820(120,500);
             if(object[0x43]!=7) func_002A7470(object,7,0,12);
         }
-        if(state==2) FLOAT(object,0x48)=1.0f;
+        break;
+    case 2:
+        func_00282978((short *)(vars+0x300));
+        if(object[0x43]==0 && HALF(vars,0x300)) func_002A7470(object,7,0,14);
+        func_002AA2E8((float *)(vars+0x124),HALF(vars,0x300)<21 ? 0.0f : D_L04_001B1878*0.01666666753590107f,0.0019444444915279746f);
+        if(object[0x43]==7) {
+            FLOAT(object,0x48)=0.8f;
+            if(HALF(vars,0x300)==0) {
+                choice=func_002A77E0(2)+(5);
+                if((u8)object[0x43]!=choice) {
+                    choice=func_002A77E0(2)+(5);
+                    func_002A7470(object,choice,0,12);
+                }
+            }
+            func_002AE8C0(object,vars+0x110,0.35f,0.25f);
+        } else if(((u8)(object[0x43]-5)<2) && (object[0x60]&2)) {
+            HALF(vars,0x300)=func_002A7820(120,500);
+            if(object[0x43]!=7) func_002A7470(object,7,0,12);
+        }
+        FLOAT(object,0x48)=1.0f;
         break;
     case 3:
         delay=func_00283248(FLOAT(vars,0x240)-FLOAT(object,0x10),FLOAT(vars,0x244)-FLOAT(object,0x14));
@@ -183,7 +206,7 @@ heightCheck:
             func_002A7750(object,5,2);
             if(object[0x43]!=8) func_002A7470(object,8,2,6);
             FLOAT(vars,0x314)=0.0f;
-        } else if(func_00282948(vars+0x318)) {
+        } else if(func_00282948((int *)(vars+0x318))) {
             delay=func_002A7878(0.2617994248867035f,0.523598849773407f);
             if(func_002A77E0(2)==0) delay=-delay;
             FLOAT(vars,0x314)=delay;
@@ -220,7 +243,7 @@ heightCheck:
     return;
 removeObject:
     HALF(vars,0x98)=0;
-    *(Quad *)(object+0xf0)=0;
+    qzero((object+0xf0));
 destroyObject:
     func_002A6C58(object,0,3);
     func_0029F338(object);

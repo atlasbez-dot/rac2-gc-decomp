@@ -50,11 +50,6 @@ INCLUDE_ASM("asm/levels", func_L06_0039A2F0);
 
 INCLUDE_ASM("asm/levels", func_L06_003E0D88);
 
-/* func_L06_003E1040: the catalogue entry starts 8 bytes before the body (a stray
-   "addiu $sp,$sp,0x20 ; nop" tail). Not a function start — left as retail asm. */
-
-INCLUDE_ASM("asm/levels", func_L06_003E1040);
-
 INCLUDE_ASM("asm/levels", func_L06_003E11A0);
 
 INCLUDE_ASM("asm/levels", func_L06_003E1498);
@@ -73,7 +68,44 @@ INCLUDE_ASM("asm/levels", func_L06_003E3F28);
 INCLUDE_ASM("asm/levels", func_L06_003E4BE0);
 
 
-INCLUDE_ASM("asm/levels", func_L06_003E4FA0);
+extern char D_L17_001FE880[];
+extern char D_L17_00296F80[];
+extern u8 D_00189E20[];
+extern void func_00283098(void *, void *, void *);
+extern void func_2EEEB8(void *, void *, void *);
+
+/* Same body as func_L17_003C3250, with this function's own callees. */
+void func_L06_003E4FA0(char *a2)
+{
+    char *s5;
+    char *s0;
+    char *s2;
+    char *s4;
+    char *s3;
+    char *base;
+    int v1;
+    int i;
+
+    s5 = *(char **)(a2 + 0x68);
+    v1 = *(int *)(s5 + 0xF8);
+    if (v1 == -1)
+        return;
+    v1 = *(int *)(D_L17_001FE880 + v1 * 4);
+    if (*(int *)v1 != 7)
+        return;
+    s3 = a2 + 0xC0;
+    s4 = a2 + 0x10;
+    s2 = D_L17_00296F80;
+    s0 = v1 + 0x10;
+    for (i = 6; i >= 0; i--) {
+        func_00283098(s0, s2, s3);
+        s2 += 0x10;
+        func_2EEEB8(s0, s0, s4);
+        s0 += 0x10;
+    }
+    base = D_00189E20;
+    *(unsigned short *)(base + 0x24FE) = *(unsigned short *)(s5 + 0xF8);
+}
 
 INCLUDE_ASM("asm/levels", func_L06_003E5428);
 
@@ -117,4 +149,3 @@ INCLUDE_ASM("asm/levels", func_L06_0047A408);
 INCLUDE_ASM("asm/levels", func_L06_0047AC68);
 
 INCLUDE_ASM("asm/levels", func_L06_0047C1D0);
-

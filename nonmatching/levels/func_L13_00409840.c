@@ -1,50 +1,46 @@
-/* Near miss from src/levels/shared/L13_00406F18.c: the build refuses this body at its
-   place — 344 bytes, expected 348. Kept as a starting point;
-   not linked, not counted. */
+/* func_L13_00409840: M3 2026-10-26: rewritten (the old draft mixed up the arms): 348/348, 13 register-only lines, only the two parameters swap $s1/$s2. Callee func_L13_004094C0 is func_L00_003BFF58. In the permuter queue.
+ */
+typedef struct {
+    char pad0[0xC4];
+    char *path;
+    short cur;
+    short goal;
+} Walk_409840;
 
-/* Standalone declarations recovered from src/levels/shared/L13_00406F18.c. */
-extern int func_L13_004094C0(char *, char *);
+extern Walk_409840 *func_L00_003BFF58(char *, char *);
+extern int func_002B6228(void *, void *, int, int);
+extern void func_L13_004095F8(void *, void *);
+extern float func_00282E80(void *, void *);
+extern int D_001A79F0 __attribute__((section(".sdata")));
 
-extern void func_003357C8(char *, char *, int, int);
-
-extern void func_L13_004095F8(char *, char *);
-
-extern float func_002F8938(char *, char *);
-
-extern int D_001A79F0;
-
-int func_L13_00409840(char *a0, char *a1)
+int func_L13_00409840(char *obj, char *path)
 {
-    char *s0 = func_L13_004094C0(a0, a1);
+    Walk_409840 *w = func_L00_003BFF58(obj, path);
 
-    if (s0 == 0)
+    if (w == 0)
         return 0;
-
-    if (a1 != *(char **)(s0 + 0xC4))
-        func_003357C8(a0, a1, -1, 0);
-
+    if (path != w->path)
+        func_002B6228(obj, path, -1, 0);
     if (D_001A79F0 == 0x45) {
-        func_L13_004095F8(a0, a1 + ((short)*(s0 + 0xC8) << 4) + 0x10);
-        if (func_002F8938(a0 + 0x10, a1 + ((short)*(s0 + 0xC8) << 4) + 0x10) <= 0.5f) {
-            if (*(short *)(s0 + 0xCA) == *(short *)(s0 + 0xC8))
+        func_L13_004095F8(obj, path + (w->cur * 16 + 0x10));
+        if (func_00282E80(obj + 0x10, path + (w->cur * 16 + 0x10)) <= 0.5f) {
+            if (w->goal == w->cur)
                 return 1;
-            if (*(short *)(s0 + 0xCA) < *(short *)(s0 + 0xC8))
-                *(short *)(s0 + 0xC8) = *(short *)(s0 + 0xC8) - 1;
+            if (w->goal < w->cur)
+                w->cur = w->cur - 1;
             else
-                *(short *)(s0 + 0xC8) = *(short *)(s0 + 0xC8) + 1;
+                w->cur = w->cur + 1;
         }
-        return 0;
+    } else {
+        func_L13_004095F8(obj, path + (w->goal * 16 + 0x10));
+        if (func_00282E80(obj + 0x10, path + (w->goal * 16 + 0x10)) <= 0.5f) {
+            if (w->goal == w->cur)
+                return 1;
+            if (w->goal < w->cur)
+                w->cur = w->cur - 1;
+            else
+                w->cur = w->cur + 1;
+        }
     }
-
-    func_L13_004095F8(a0, a1 + ((short)*(s0 + 0xCA) << 4) + 0x10);
-    if (func_002F8938(a0 + 0x10, a1 + ((short)*(s0 + 0xCA) << 4) + 0x10) <= 0.5f) {
-        if (*(short *)(s0 + 0xCA) == *(short *)(s0 + 0xC8))
-            return 1;
-        if (*(short *)(s0 + 0xCA) < 1)
-            *(short *)(s0 + 0xC8) = *(unsigned short *)(s0 + 0xC8) - 1;
-        else
-            *(short *)(s0 + 0xC8) = *(unsigned short *)(s0 + 0xC8) + 1;
-    }
-
     return 0;
 }

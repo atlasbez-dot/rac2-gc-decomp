@@ -1,11 +1,17 @@
-/* -O2 -G8 -frac2-qcopy -frac2-qcopy-barrier -mno-split-addresses; US and US2: 16_snivelak: instruction at +0x4 differs; 0/1 each.
-   PAL: absent from catalogue. Qcopy and qcopy barrier reconstruct grouped transfers. Default split-address profile first differed at +0x98; mno-split changes allocation from prologue onward. Reopen when repeated address materialization can match without artificial barriers. */
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections
+ * 436/436 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: Allocation through the three real copies agrees; post-transform field scheduling and repeated external-address caching still differ. The transform receives both real pointer arguments.
+ * Reopen: Independent field-layout or repeated constant-address lifetime evidence for the constructor after its transform call.
+ * Trial-only markers and profiles are restored after checking.
+ */
+
 #include "common.h"
 typedef int TI128 __attribute__((mode(TI)));
 extern u8 *func_0029EFD0(s32);
-extern void func_002833F0(void *);
+extern void func_002833F0(void *, void *);
 extern float func_002A7878(float, float);
-extern void func_002C2210(void *, s32, s32, s32, s32, void *, s32, float, float, float);
+extern u8 *func_002C2210(void *, s32, s32, s32, s32, void *, s32, float, float, float);
 extern float D_L16_001B1998 __attribute__((sda));
 extern s32 D_L16_001B1908 __attribute__((sda));
 extern s32 D_L16_001B190C __attribute__((sda));
@@ -26,17 +32,17 @@ u8 *func_L16_00413D10(u8 *owner, TI128 *velocity, TI128 *position, float speed)
         obj[0x20] = 0;
         *(s64 *)(obj + 0x38) = *(s64 *)(owner + 0x38);
         pos = obj + 0x10;
-        *(TI128 *)pos = *position;
+        qcopy(pos, position);
         *(u16 *)(obj + 0x34) |= 0x41;
         state = *(u8 **)(obj + 0x68);
-        *(TI128 *)state = *velocity;
+        qcopy(state, velocity);
         *(float *)(state + 0x14) = speed;
         *(float *)(state + 0x20) = 0.15f;
         *(u8 **)(state + 0x10) = owner;
         *(u16 *)(obj + 0x34) |= 0x208;
-        *(TI128 *)(obj + 0xF0) = *(TI128 *)(owner + 0xF0);
+        qcopy(obj + 0xF0, owner + 0xF0);
         zero = 0.0f;
-        func_002833F0(obj + 0xC0);
+        func_002833F0(obj + 0xC0, obj + 0xF0);
         obj[0x23] = 128;
         *(u16 *)(obj + 0x34) |= 0x100;
         *(float *)(obj + 0x2C) = D_L16_001B1998;

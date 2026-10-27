@@ -150,9 +150,8 @@ void func_L10_004175C8(u8 *arg0) {
 }
 
 
-INCLUDE_ASM("asm/levels", func_L10_004177E8);
 
-INCLUDE_ASM("asm/levels", func_L10_00417A38);
+/* func_L10_00417A38 uses the profile in L10_003170D0-qcopy.c. */
 
 void func_L10_00417C40(u8 *arg0) {
     u8 *s1 = *(u8 **)(arg0 + 0x68);
@@ -229,7 +228,6 @@ void func_L10_004184F0(u8 *arg0) {
     *(f32 *)(arg0 + 0x2C) = 0.16f;
 }
 
-INCLUDE_ASM("asm/levels", func_L10_00418588);
 
 INCLUDE_ASM("asm/levels", func_L10_00418768);
 
@@ -247,7 +245,32 @@ void func_L10_00418968(u8 *arg0) {
     *(s32 *)(s0 + 0x26C) = -1;
 }
 
-INCLUDE_ASM("asm/levels", func_L10_004189D8);
+extern f32 func_002A7878(f32, f32);
+extern f32 func_002A7940(void);
+extern void func_002AF000(void *, f32, f32, f32);
+extern void func_00282CC0(void *, void *, void *);
+extern u8 *D_001B2614 __attribute__((sda));
+
+void func_L10_004189D8(u8 *arg0) {
+    u8 *s2 = *(u8 **)(arg0 + 0x68);
+    u8 *table;
+    f32 a, b, c;
+
+    arg0[0x20] = 1;
+    *(u16 *)(arg0 + 0x34) |= 0x100;
+    *(s32 *)((u8 *)func_0037BA88(arg0) + 0x148) = 10;
+    func_0037CCB0(arg0, 1);
+    table = D_001B2614 + *(s32 *)D_L10_00221CD0 * 128;
+    *(s32 *)(s2 + 0x26C) = -1;
+    *(f32 *)(s2 + 0x180) = 10.0f;
+    *(s32 *)(s2 + 0x268) = 0;
+    *(f32 *)(arg0 + 0x2C) = 0.04f;
+    a = func_002A7878(0.0f, *(f32 *)table);
+    b = func_002A7940();
+    c = func_002A7940();
+    func_002AF000(arg0 + 0x10, a, b, c);
+    func_00282CC0(arg0 + 0x10, table + 0x30, arg0 + 0x10);
+}
 
 /* arms one timed effect slot and records it in the state word, skipping out while the
    object is inactive */
@@ -264,7 +287,6 @@ void func_L10_00418AD8(u8 *arg0) {
     *(s32 *)(state + 0x268) = 0x1E;
 }
 
-INCLUDE_ASM("asm/levels", func_L10_00418BA0);
 
 INCLUDE_ASM("asm/levels", func_L10_00419188);
 
@@ -285,7 +307,6 @@ void func_L10_0041ED50(u8 *arg0) {
     *(f32 *)(arg0 + 0x2C) = *(f32 *)(*(u8 **)(arg0 + 0x24) + 0x24) * 4.1f;
 }
 
-INCLUDE_ASM("asm/levels", func_L10_0041EE00);
 
 INCLUDE_ASM("asm/levels", func_L10_00421288);
 

@@ -1,28 +1,14 @@
-/*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/3; US2 0/3; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+/* Manual reconstruction, wave8 (2026-10-25). Nonmatching; no linked or runtime credit.
+ * Profile: -O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Final checks: US 0/3; US2 0/3; PAL absent from catalogue.
+ * The initializer captures the complete aligned position with qcopy and snapshots the owner class before writes.
+ * Defaults remain seven floats (28 bytes); the movement call retains its four floating inputs.
+ * Initializer constant allocation, scalar-store scheduling and address construction differ; text 1196/1212 bytes.
+ * Reopen with measured field/owner lifetimes or original initializer ordering; no wider default record is inferred.
  */
-
-/* Historical analysis (summary).
- * Historical screening catalogued calls, vector operations and data addressing without a
- * complete manual reconstruction. Its generated call/address lists and decoded instruction
- * header remain private. The dated manual reconstruction and recorded worker profile below
- * supersede that screening; no unsupported impossibility or handwritten classification is
- * carried forward.
- */
-
-/* Wave4 manual reconstruction, 2026-10-23. Nonmatching; historical screening above
-   is summarized; generated listings and unsupported classifications remain private.
-   Trial source: src/levels/shared/L18_00427688-g32-qcopy.c
-   Profile: -O2 -G32 -Wa,-G32 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
-   Defaults retain observed seven-float28B record. G32/Wa32 preserves real storage extent.
-   us: func_L18_00427688: 0 of 3 places match (src/levels/shared/L18_00427688-g32-qcopy.c), exit 1; us2: func_L18_00427688: 0 of 3 places match (src/levels/shared/L18_00427688-g32-qcopy.c), exit 1; pal: absent_from_catalogue, exit 1
-*/
 #include "common.h"
 typedef int Vector128 __attribute__((mode(TI)));
-/* Seven adjacent float defaults are read by this initializer. */
+
 typedef struct { float f0,f4,f8,fC,f10,f14,f18; } MotionDefaults;
 extern MotionDefaults D_L18_001B1218 __attribute__((sda));
 extern int D_001A79F0 __attribute__((sda));
@@ -37,13 +23,15 @@ extern void func_L18_00426F78(unsigned char *);
 extern void func_L18_00427010(unsigned char *);
 extern int func_001163B0(void);
 extern void func_L18_00426F28(unsigned char *,int,int,float);
-extern void func_002A7750(unsigned char *,unsigned char,int);
+extern void func_002A7750(unsigned char *,int,int);
 int func_L18_00427688(unsigned char *object)
 {
     char *state;
     float randomAngle;
+    unsigned int ownerClass;
     if(object[0xb0]!=0xff && (D_0019B2E8[D_001A79F0*16+object[0xb0]]&0x80)!=0 && D_L18_0021EC14[*(short *)(object+0xb2)]!=0) return 1;
     state=*(char **)(object+0x68);
+    ownerClass=object[0x30];
     state[0x60]=10;
     *(float *)(state+0x6c)=0.1833333373f;
     *(float *)(state+0x70)=0.08333333582f;
@@ -52,7 +40,7 @@ int func_L18_00427688(unsigned char *object)
     state[0xbd]=6;
     *(float *)(state+0x80)=0.4f;
     *(float *)(state+0x84)=0.4f;
-    *(unsigned int *)(state+0x3e0)=object[0x30];
+    *(unsigned int *)(state+0x3e0)=ownerClass;
     state[0x66]=8; state[0x65]=9;
     *(float *)(state+0x7c)=0.004166666884f;
     state[0xbc]=3; state[0xc2]=5; state[0xc3]=11;
@@ -91,7 +79,11 @@ int func_L18_00427688(unsigned char *object)
     randomAngle=func_002A7878(20.0f,40.0f);
     *(short *)(state+0x1e2)=180; *(short *)(state+0x1e4)=120;
     *(float *)(state+0x1dc)=randomAngle*0.017453294f;
-    *(Vector128 *)(state+0x1f0)=*(Vector128 *)(object+0x10);
+    {
+        void *position=object+0x10;
+        void *initialPosition=state+0x1f0;
+        qcopy(initialPosition,position);
+    }
     *(float *)(state+0x200)=*(float *)(state+0x100);
     *(float *)(state+0x210)=5.0f;
     *(float *)(state+0x20c)=5.0f;

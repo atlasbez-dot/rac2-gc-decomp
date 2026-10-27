@@ -1,14 +1,19 @@
-/* Retained manual C reconstruction; not linked and not credited as matching.
- * Checked source: src/levels/01_oozla/L01_003CAFE0-render-g8.c
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Retail US extent: 1372 bytes.
- * us: 0/1 (exit 1, 1308 compiled bytes); us2: 0/1 (exit 1, 1308 compiled bytes); pal: 0/1 (exit 1, 1308 compiled bytes).
- * Residual: 1308/1372 bytes in the measured releases. The frame is 0x60. Global object bases are anchored at fields, and packet cursor/address operations differ. Complete two-frame interpolation and matrix/packet work are retained.
- * Reopen only with: Qualify global storage/alias declarations and mixed GP/absolute accesses against the real packet/state layout; do not add volatile or artificial side effects.
- * No complete linked build was run for this candidate.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
+ * Profile: -O2 -G16 -Wa,-G16 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 1316/1372 bytes; us: 0/1 placements; us2: 0/1 placements; pal: 0/1 placements.
+ * The full two-frame interpolation, 64-byte matrix and packet work remain, with real header-copy
+ * helpers and unsigned 32-bit color shifts. Complete16-byte GP constants use G16/assemblerG16.
+ * Retail uses both absolute and GP forms for the same real packet cursor; the current single
+ * declaration and global-field bases do not recover those address/lifetime forms. The targeted
+ * unsplit-address trial was negative.
+ * Reopen with independent containing-object and real alias/address-use evidence; do not invent a
+ * second identity, undersized extent or artificial reload.
+ * Original variants, retail context and allocator diagnostics remain private.
+ * No exact-C, linked-build or runtime credit is claimed.
  */
-#include "include_asm.h"
-typedef unsigned long u64;
+#include "common.h"
+
+
 typedef unsigned int Quad __attribute__((mode(TI)));
 extern unsigned char D_L01_001BD9C0[], D_L01_001BE0C0[];
 extern unsigned char D_L01_00297B50[], D_L01_0026A050[], D_L01_001AC740[];
@@ -58,16 +63,16 @@ void func_L01_003CAFE0(void)
     }
     func_0027AB40();
     func_00279D18();
-    *(Quad *)D_L01_001B2CC8 = D_L01_001B02E0;
+    qcopy(D_L01_001B2CC8, &D_L01_001B02E0);
     packet = D_L01_001B2CC8 + 0x10;
     D_L01_001B2CC8 = packet;
     func_00282AB0(packet, D_L01_00297B50, 0xa0);
     D_L01_001B2CC8 += 0xa0;
     PACKET_LONG(packet,0x20) = ((u64)D_L01_001B034C << 32) | 100;
     PACKET_LONG(packet,0x30) = (u64)((D_001A72D0 >> 8) | 0x18100000) | 0x580000000UL;
-    PACKET_LONG(packet,0x40) = D_L01_001B0340 | (D_L01_001B0344 << 8) | (D_L01_001B0348 << 16);
+    PACKET_LONG(packet,0x40) = (u32)D_L01_001B0340 | ((u32)D_L01_001B0344 << 8) | ((u32)D_L01_001B0348 << 16);
     if (D_L01_001B2054 == 1)
-        PACKET_LONG(packet,0x40) = CONTEXT_INT(0x230) | (CONTEXT_INT(0x234) << 8) | (CONTEXT_INT(0x238) << 16);
+        PACKET_LONG(packet,0x40) = (u32)CONTEXT_INT(0x230) | ((u32)CONTEXT_INT(0x234) << 8) | ((u32)CONTEXT_INT(0x238) << 16);
     PACKET_LONG(packet,0x50) = ((u64)((long)D_001A72D0 >> 8) << 32) | 0x1000000000000UL;
     PACKET_LONG(packet,0x90) = 0x5360a;
     if (D_L01_001B034C < 97) PACKET_LONG(packet,0x90) = 0x5370b;
@@ -94,7 +99,7 @@ void func_L01_003CAFE0(void)
         D_L01_001B2004 + *(unsigned short *)(entry0 + 10) * 16,
         D_L01_001B2004 + *(unsigned short *)(entry1 + 8) * 16,
         D_L01_001B2004 + *(unsigned short *)(entry1 + 10) * 16, 4096, fraction);
-    *(Quad *)D_L01_001B2CC8 = D_L01_001B02F0;
+    qcopy(D_L01_001B2CC8, &D_L01_001B02F0);
     *(unsigned char **)(D_L01_001B2CC8 + 4) = D_L01_001B035C;
     D_L01_001B2CC8 += 0x10;
     func_00282B50(D_L01_001B2CC8, D_L01_001B0300, 0x30);

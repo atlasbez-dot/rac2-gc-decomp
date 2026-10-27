@@ -1,20 +1,12 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G8 -ffunction-sections (suffix profile).
- * Reported final C / retail: 564 / 568 bytes; size equality is not a match.
- * us: 0/27 placements; 564/568 bytes.
- * us2: 0/27 placements; 564/568 bytes.
- * pal: 0/27 placements; 564/568 bytes.
- * Residual: Initializer remains564/568 bytes. The counter allocator, split address construction and store motion differ. The deliberately supplied zero to the allocator wrapper is preserved; its observed unused formal has separately passed all carrying releases.
- * Reopening condition: Use a unique dedicated reset source filename, preserving the existing G8 sibling and its FE280 definition. New allocator/address-materialization evidence is needed; the approved zero input to3F8DC8 is now retained.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
- */
-
-/* Retained complete manual reconstruction; not an exact match.
- * Source profile: -O2 -G8 -ffunction-sections (suffix profile).
- * Initializer remains564/568 bytes. The counter allocator, split address construction and store motion differ. The deliberately supplied zero to the allocator wrapper is preserved; its observed unused formal has separately passed all carrying releases.
+/* Complete manual reconstruction; not linked.
+ * Profile: -O2 -G8 -ffunction-sections, in its own unit (not the existing L00_003F8E08-g8.c).
+ * 568/568 bytes; us 0/27, ~92 differing lines.
+ * 26 October 2026 (M10): the slot reset as D_L00_002533B0[i].owner with i from 29 down and then
+ * i = 30 (the counter lives across the allocator call, so $s0 as retail; the giv base is
+ * la + 0x3B4 as retail); the three gp blocks sized ([8]) give retail's $gp address forms.
+ * Left: the tuning-table block. Ours emits the last store of each equal-constant group first
+ * and uses $a3 as the table base (retail $a0/$v0, constants f0/f1 swapped). Store climbing on
+ * the first two groups only reached 92.
  */
 #include "common.h"
 
@@ -31,9 +23,9 @@ typedef struct {
 extern EffectSpawnSlot D_L00_002533B0[];
 extern EffectTuning D_L00_00253770[];
 extern unsigned char *D_L00_001B0A20 __attribute__((sda));
-extern char D_L00_001B0A28[] __attribute__((sda));
-extern char D_L00_001B0A38[] __attribute__((sda));
-extern char D_L00_001B0A40[] __attribute__((sda));
+extern char D_L00_001B0A28[8] __attribute__((sda));
+extern char D_L00_001B0A38[8] __attribute__((sda));
+extern char D_L00_001B0A40[8] __attribute__((sda));
 extern char *D_L00_001B2BC8;
 extern char *D_L00_001B2BCC;
 extern char *D_L00_001B2BD0;
@@ -46,15 +38,12 @@ extern unsigned char *func_L00_003F8DC8(int unused);
 
 void func_L00_003F8E08(void) {
     int i;
-    char **slot = &D_L00_002533B0[29].owner;
     EffectTuning *entry;
-    for (i = 29; i >= 0; i--) {
-        *slot = 0;
-        slot -= 8;
-    }
+    for (i = 29; i >= 0; i--)
+        D_L00_002533B0[i].owner = 0;
+    i = 30;
     D_L00_001B0A20 = 0;
     func_L00_003F8DC8(0);
-    i = 30;
     D_L00_001B2BD4 = 3;
     D_L00_001B2BC8 = D_L00_001B0A28;
     D_L00_001B2BD8 = i;

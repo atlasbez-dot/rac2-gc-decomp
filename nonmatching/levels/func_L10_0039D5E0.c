@@ -1,26 +1,16 @@
-/* Current nonmatching reconstruction; game compiler, -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
-   us: 10_hrugis_cloud: instruction at +0x1c differs; func_L10_0039D5E0: 0 of 2 places match (src/levels/shared/L10_0039D5E0-copy.c).
-   us2: 10_hrugis_cloud: instruction at +0x1c differs; func_L10_0039D5E0: 0 of 2 places match (src/levels/shared/L10_0039D5E0-copy.c).
-   pal: func_L10_0039D5E0 is in neither catalogue of pal; func_L10_0039D5E0 is in neither catalogue of pal.
-   Same 324-byte extent; three preserved integer arguments are assigned different saved registers from +0x1c. Reordering stores, an explicit timer pointer and -mno-split-addresses did not improve allocation. Retained profile is the original qcopy/barrier one. Reopen with a natural argument/field lifetime model.
-   Historical screening comments below predate this measured C reconstruction. */
-/* func_L10_0039D5E0 - 324 bytes, 2 place(s), level 10_hrugis_cloud, retail
-   at 0x0039d5e0. Screened with tools/w10_screen.py: 1 call(s)
-   [func_0029EFD0@0039D648]; data addresses materialised [0x1b0000]; float
-   constants [-]; $gp-relative small data: no   saves: -; callee-saved
-   registers saved [-]; words plain C cannot emit [LQ/SQ 7AC20000@0x00c0,
-   LQ/SQ 7C620000@0x00c4, LQ/SQ 7AE20000@0x00cc, LQ/SQ 7C820000@0x00d0].
-   Head: addiu $sp, $sp, -0x70 ; sd $s7, 0x38($sp) ; sd $s0, 0x0($sp) ;
-   daddu $s7, $a0, $zero ; sd $s1, 0x8($sp) ; daddu $s0, $a3, $zero. Not
-   matched in this wave: the 128-bit copy needs an `lq`/`sq` pair; plain C
-   reaches it only through a `mode(TI)` local, and this cc1 folds the
-   destination offset into the `sq` where retail materialises the pointer
-   first. What would unblock it: the exact source expression tree, so this
-   cc1 picks the same registers in the same order. */
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections.
+ * 324/324 bytes. us: 0/2 places; us2: 0/2 places; pal: absent.
+ * Remaining: The real direction/position qcopy transfers agree. Three once-used input
+ * values still receive different saved registers from +0x1C, and the final
+ * timer-array address setup differs. Physical argument order, pointer/null
+ * allocator return and the four FP inputs are preserved.
+ * Reopen with: Natural input-value or state-field lifetime evidence; changing argument
+ * order or declaring false callee contracts is not a remedy.
+ */
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef int s32;
+#include "common.h"
+
 typedef int Quad __attribute__((mode(TI)));
 extern void *func_0029EFD0(s32);
 extern short D_L10_001B2DB8[4];
@@ -48,8 +38,8 @@ void *func_L10_0039D5E0(void *position, void *direction, s32 duration, s32 kind,
         *(float *)(state + 0x28) = fade;
         *(s32 *)(state + 0x30) = texture;
         *(float *)(state + 0x34) = jitter;
-        *(Quad *)state = *(Quad *)direction;
-        *(Quad *)(object + 0x10) = *(Quad *)position;
+        qcopy(state, direction);
+        qcopy((object + 0x10), position);
         for (i = 2; i >= 0; i--) D_L10_001B2DB8[i] = -1;
     }
     return object;

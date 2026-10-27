@@ -91,7 +91,7 @@ void func_L14_00304280(void) {
     func_385CB8(0x4E, 0x1000000 | (D_001A72E0 >> 13));
 }
 
-INCLUDE_ASM("asm/levels", func_L14_003E5030);
+/* func_L14_003E5030 is matched in its own unit, src/levels/shared/L14_003E5030-g8.c (-O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier). */
 
 void func_L14_003DF100(char *arg0, int arg1) {
     float a[4];
@@ -268,7 +268,8 @@ typedef struct {
     float dir[4];
 } L14_003F0F38_frame;
 
-void func_L14_003F0F38(char *arg0, char *arg1, int arg2, int arg3, int arg4) {
+/* The caller supplies an unused scale in F12; the body replaces it before use. */
+void func_L14_003F0F38(char *arg0, char *arg1, float unused_scale, int arg2, int arg3, int arg4) {
     L14_003F0F38_frame fr;
     char *s3;
     long long id;

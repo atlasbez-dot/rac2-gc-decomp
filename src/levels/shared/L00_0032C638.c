@@ -24,5 +24,3 @@ void func_L00_0032D100(int value, long address) {
 
 INCLUDE_ASM("asm/levels", func_L00_0032D208);
 
-
-INCLUDE_ASM("asm/levels", func_L00_0032EF10);

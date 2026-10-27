@@ -1,12 +1,9 @@
-/* Retained manual C reconstruction; not linked or counted.
- * Retail: 1136 bytes. Checked trial: src/levels/shared/L08_003D4190-g8.c
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * us: 0/3 placements (exit 1), 1100 compiled bytes
- * us2: 0/3 placements (exit 1), 1100 compiled bytes
- * pal: explicit catalogue absence (exit 1); no credit
- * Residual: The 0x50-byte frame agrees under the TI-copy profile. Entry allocation, the vector-copy schedule, floating compare scheduling and retirement tail still differ.
- * Reopen: Reopen with a concrete pointer-lifetime or compare-order hypothesis that preserves the complete three-state update and nibble history.
- * The ASM marker and trial-only file profile were restored after checks.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections
+ * 1104/1136 bytes; 0/3 placements in us and us2; pal has no catalogue entry.
+ * Residual: The real resident/pickup fields and 0x50 frame are retained; entry allocation, comparisons, vector-copy and retirement-tail scheduling still differ.
+ * Reopen: Independent lifetime/compare-order evidence preserving all three states, the full movement vector and nibble history.
+ * Trial-only source markers and profiles are restored after checking.
  */
 
 #include "common.h"
@@ -15,7 +12,19 @@ extern u8 D_L08_0021EAF0[];
 extern u8 D_0019B4A8[];
 extern int D_001A79F0;
 extern int D_001A79FC;
-extern u8 D_00189E20[];
+/* Partial resident view through the last state field read here. */
+typedef struct {
+    u8 unknown00[0x80];
+    PickupQuad position;
+    u8 unknown90[0x17A0];
+    u8 *vehicle;
+    u8 unknown1834[0xA60];
+    int mode;
+    u8 unknown2298[4];
+    int world;
+} ResidentPrefix;
+extern ResidentPrefix D_00189E20;
+typedef struct { int duration; int timer; float progress; } PickupState;
 extern int D_00138320;
 extern float D_L08_001B031C __attribute__((sda));
 extern float D_L08_001B0324 __attribute__((sda));
@@ -36,7 +45,7 @@ extern void func_L08_003D3EF8(u8 *object);
 
 void func_L08_003D4190(u8 *object)
 {
-    u8 *data = *(u8 **)(object + 0x68);
+    PickupState *data = *(PickupState **)(object + 0x68);
     u8 *vehicle;
     u8 *vehicleData;
     u8 *history;
@@ -44,7 +53,7 @@ void func_L08_003D4190(u8 *object)
     int nibble;
     float value;
     float cost;
-    float movement[4];
+    float movement[4] __attribute__((aligned(16)));
     if (object[0xb0] != 255) {
         id = *(short *)(object + 0xb2);
         if (D_L08_0021EAF0[0x464 + id])
@@ -60,7 +69,7 @@ void func_L08_003D4190(u8 *object)
         object[0x30] = 255;
         object[0x31] = 0;
         *(unsigned short *)(object + 0x34) |= 1;
-        *(int *)(data + 4) = *(int *)data * 60;
+        data->timer = data->duration * 60;
         if (object[0x43])
             func_002A7470(object, 0, 0, 2);
         object[0x20] = 1;
@@ -69,54 +78,54 @@ void func_L08_003D4190(u8 *object)
             *(float *)(object + 0x18) = value;
         break;
     case 1:
-        vehicle = *(u8 **)(D_00189E20 + 0x1830);
+        vehicle = D_00189E20.vehicle;
         if (vehicle == 0 || *(short *)(vehicle + 0xaa) != 0xeef ||
             vehicle[0x20] == 254 || vehicle[0x20] == 253 ||
-            *(int *)(D_00189E20 + 0x2294) != 0x31)
+            D_00189E20.mode != 0x31)
             return;
         vehicleData = *(u8 **)(vehicle + 0x68);
         *(u8 **)(vehicleData + 0x1b0) = object;
-        value = func_00282E80(object + 0x10, D_00189E20 + 0x80);
+        value = func_00282E80(object + 0x10, &D_00189E20.position);
         if (value < *(float *)(vehicleData + 0x68)) {
             *(float *)(vehicleData + 0x68) = value;
             *(u8 **)(vehicleData + 0x6c) = object;
         }
         if (!(value < D_L08_001B031C) || !(D_00138320 & 0x80))
             return;
-        vehicle = *(u8 **)(D_00189E20 + 0x1830);
+        vehicle = D_00189E20.vehicle;
         if (vehicle == 0 || (vehicle[0x42] != 2 && vehicle[0x43] != 2))
             return;
-        func_00282CF0(movement, D_00189E20 + 0x80, object + 0x10);
+        func_00282CF0(movement, &D_00189E20.position, object + 0x10);
         func_00282D30(movement, movement, 0.1f);
         movement[2] = 0;
         func_00282FB8(movement, movement, D_L08_001B0334 * 0.0166666675f);
         func_00282CC0(object + 0x10, object + 0x10, movement);
-        if (!func_00282948((int *)(data + 4)))
+        if (!func_00282948(&data->timer))
             return;
         *(short *)(vehicleData + 0x8e) = 180;
-        *(int *)(data + 4) = D_L08_001B0370;
-        *(PickupQuad *)(object + 0x10) = *(PickupQuad *)(D_00189E20 + 0x80);
+        data->timer = D_L08_001B0370;
+        qcopy(object + 0x10, &D_00189E20.position);
         object[0x31] = 1;
         *(unsigned short *)(object + 0x34) = (*(unsigned short *)(object + 0x34) & 0xfffe) | 0x800;
-        *(float *)(data + 8) = D_L08_001B032C;
+        data->progress = D_L08_001B032C;
         if (object[0x43] != 1)
             func_002A7470(object, 1, 0, 30);
         object[0x20] = 2;
-        *(float *)(object + 0x48) = *(float *)(data + 8) * 2.0f;
+        *(float *)(object + 0x48) = data->progress * 2.0f;
         break;
     case 2:
-        value = *(float *)(data + 8);
+        value = data->progress;
         value += (1.0f - value) * D_L08_001B0324;
-        *(float *)(data + 8) = value;
+        data->progress = value;
         *(float *)(object + 0x48) = value * 2.0f;
-        *(PickupQuad *)(object + 0x10) = *(PickupQuad *)(D_00189E20 + 0x80);
-        if (func_00282948((int *)(data + 4)) || *(float *)(object + 0x2c) <= 0.0f) {
+        qcopy(object + 0x10, &D_00189E20.position);
+        if (func_00282948(&data->timer) || *(float *)(object + 0x2c) <= 0.0f) {
             cost = D_L08_001B0330 * *(float *)(*(u8 **)(object + 0x24) + 0x24);
             value = *(float *)(object + 0x2c);
-            if (cost < value || *(int *)(D_00189E20 + 0x229c) == 20 ||
-                *(int *)(D_00189E20 + 0x229c) == 25 ||
-                *(int *)(D_00189E20 + 0x2294) == 0x39 ||
-                *(int *)(D_00189E20 + 0x2294) == 0x6f) {
+            if (cost < value || D_00189E20.world == 20 ||
+                D_00189E20.world == 25 ||
+                D_00189E20.mode == 0x39 ||
+                D_00189E20.mode == 0x6f) {
                 *(float *)(object + 0x2c) = value - cost;
             } else {
                 D_001A79FC++;

@@ -1,9 +1,17 @@
+/* Retained readable reconstruction; NOT MATCHING and no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por
+ * Fresh local measure: 1172/1156 bytes; 0/4 USA v1.01 placements; frame 0x200.
+ * Evidence: Approved full vector and matrix-row transfers retain the real 144-byte packets and 64-byte matrix. Register-fed TI clears preserve the retail por operation. A proved independent translation-row nc variant ties and remains private; final copies use qcopy.
+ * Reopen: Reopen with measured packet/template lifetimes or real loop/address allocation evidence, preserving all later memory dependencies.
+ * Older notes below are historical. Equal size and allocator diagnostics do
+ * not establish relocation/binding qualification or linked equality.
+ */
+#include "common.h"
+
 /* 1176/1156; us/us2/pal 0/4 each.
  * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-por.
  * Both camera-facing ribbon layers and complete 144-byte packets are reconstructed. Packet/template initialization and live pointer allocation differ. The old SPECIAL2-only ASM inference is withdrawn: the cited word is a por clear reachable through TImode. Reopen with packet source layout/lifetimes.
  */
-typedef unsigned int u32;
-typedef unsigned long u64;
 typedef int TI128 __attribute__((mode(TI)));
 typedef union { TI128 q; float f[4]; } RibbonVector;
 struct RibbonQuad { RibbonVector position[4]; u32 color[4]; float uv[4][2]; u64 clear, texture, giftag, flags; };
@@ -62,19 +70,19 @@ void func_L11_00397E68(RibbonVector *points, int count, int flags, u32 color0, u
     func_00282DD8(&basis[2], &basis[1], &basis[0]);
     func_00282F20(&basis[2], &basis[2], 1.0f);
     func_00282DD8(&basis[1], &basis[0], &basis[2]);
-    basis[3].q = points[0].q;
-    mainQuad.position[0].q = template0.q;
+    qcopy(&basis[3], &points[0]);
+    qcopy(&mainQuad.position[0], &template0);
     func_00282D30(&mainQuad.position[1], &mainQuad.position[0], -1.0f);
     func_002830C0(&mainQuad.position[0], &mainQuad.position[0], basis);
     func_002830C0(&mainQuad.position[1], &mainQuad.position[1], basis);
-    innerQuad.position[0].q = template1.q;
+    qcopy(&innerQuad.position[0], &template1);
     func_00282D30(&innerQuad.position[1], &innerQuad.position[0], -1.0f);
     func_002830C0(&innerQuad.position[0], &innerQuad.position[0], basis);
     func_002830C0(&innerQuad.position[1], &innerQuad.position[1], basis);
     for (i = 1; i < count - 1; i++) {
-        mainQuad.position[2].q = template0.q;
+        qcopy(&mainQuad.position[2], &template0);
         func_00282D30(&mainQuad.position[3], &mainQuad.position[2], -1.0f);
-        innerQuad.position[2].q = template1.q;
+        qcopy(&innerQuad.position[2], &template1);
         func_00282D30(&innerQuad.position[3], &innerQuad.position[2], -1.0f);
         func_00282CF0(&basis[0], &points[i + 1], &points[i]);
         func_00282F20(&basis[0], &basis[0], 1.0f);
@@ -82,7 +90,7 @@ void func_L11_00397E68(RibbonVector *points, int count, int flags, u32 color0, u
         func_00282DD8(&basis[2], &basis[1], &basis[0]);
         func_00282F20(&basis[2], &basis[2], 1.0f);
         func_00282DD8(&basis[1], &basis[0], &basis[2]);
-        basis[3].q = points[i].q;
+        qcopy(&basis[3], &points[i]);
         func_002830C0(&mainQuad.position[2], &mainQuad.position[2], basis);
         func_002830C0(&mainQuad.position[3], &mainQuad.position[3], basis);
         func_002830C0(&innerQuad.position[2], &innerQuad.position[2], basis);
@@ -99,10 +107,10 @@ void func_L11_00397E68(RibbonVector *points, int count, int flags, u32 color0, u
             u -= 1.0f;
             nextU -= 1.0f;
         }
-        mainQuad.position[0].q = mainQuad.position[2].q;
-        mainQuad.position[1].q = mainQuad.position[3].q;
-        innerQuad.position[0].q = innerQuad.position[2].q;
-        innerQuad.position[1].q = innerQuad.position[3].q;
+        qcopy(&mainQuad.position[0], &mainQuad.position[2]);
+        qcopy(&mainQuad.position[1], &mainQuad.position[3]);
+        qcopy(&innerQuad.position[0], &innerQuad.position[2]);
+        qcopy(&innerQuad.position[1], &innerQuad.position[3]);
         mainQuad.uv[0][0] = u; mainQuad.uv[1][0] = u;
         mainQuad.uv[2][0] = nextU; mainQuad.uv[3][0] = nextU;
         innerQuad.uv[0][0] = u; innerQuad.uv[1][0] = u;

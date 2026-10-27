@@ -1,51 +1,18 @@
-/* func_L23_00425AF8 (1516 bytes, level 23 only) -- NEAR MISS, not integrated.
-   Belongs in a unit of its own, src/levels/23_damosel_orbit/L23_00425AF8-g8.c, with the
-   config/cflags.txt line `-O2 -G8 -ffunction-sections -g`. It needs -G8 for the bare $gp load
-   of D_L23_001B19DC (0x29EC($gp)) and -g for the two nops before each of the three div.s. Its
-   marker stays in L23_0041E418.c (-G0, no -g); the caller func_L23_004259E0 declares the same
-   argument order.
-   This C compiles to 1464 bytes against 1516 (check.py: "1464 bytes, expected 1516"). With an
-   alignment on whole words, 263 of retail's 379 match; on opcodes alone, 338. Most of the rest
-   is register allocation.
-   Right:
-   - the frame (0x270), with draw records A (sp+0) and B (sp+0x90), each 0x90 bytes;
-   - the ten vector temporaries at 0x120..0x1B0 in declaration order. They must be float[4]
-     arrays: TI16 scalars get their slots in order of first use (v140 lands at 0x120);
-   - the five saved float registers. Each normalisation needs its own float variable; one
-     shared `len` takes a sixth saved register;
-   - the initialisation, the three normalise-and-scale blocks (retail's bc1tl and the -g nops),
-     both loops' calls, the colour selection and the closing call.
-   What differs:
-   - four quadword copies. In loop 1 they are `A.v[0] = A.v[2]; A.v[1] = A.v[3];` after the
-     draw call. Retail has `lq v0,0(s2); sq v0,0(sp); addiu v1,sp,0x10; lq v0,0(s3);
-     sq v0,0(v1)`, with s2/s3 set right after the A.v[3] call and kept across the colour chain
-     and the call. In loop 2 they are `v190 = v180` / `v180 = v190`. Retail has
-     `bc1fl {a0}; lq v0,0(s3); sq v0,0(s1); b {addiu s0,sp,0x160}`. Retail's copies take
-     pointer operands, never sit in a delay slot and have nothing scheduled into them: the
-     inline-asm quadword helpers again (see func_L23_002BBC50). This cc1 makes them
-     frame-relative, schedules them and puts them in delay slots;
-   - register allocation, which follows from that. Retail spends all nine saved registers in
-     loop 1 (s2/s3 on the copy pointers), so the frame addresses PRE makes available there are
-     spilled and rematerialised (`addiu a0,sp,0x140` at each use). Here loop.c hoists two of
-     them into the two free registers. obj/d/colA/&v140 take s6/s3/s4/fp where retail has
-     fp/s4/s6/s3. Copy pointers in plain C give retail's loop-1 rematerialisation and its
-     obj/d/colA registers, but cost the first block's float constants (253 words). Those
-     pointers are sources set after the A.v[3] call and read after the colour join, plus a
-     destination pointer set before the loop;
-   - loop 2: retail keeps pts+i spilled at 0x1E4 and pts+i+1 in $fp. Here recombine_givs
-     derives pts+i+1 from pts+i, because their lifetimes do not overlap. Explicit pointers,
-     with q set before p, keep both but allocate worse (233);
-   - retail copies colB into $v0 before the four B.col stores, a reload choice for the spilled
-     colB. A second variable, a chained assignment and `t = ...; colB = t` all compile
-     identically to this draft.
-   Measured: 32 combinations of four toggles. They are the loop-1 copy spelling (4), pointer
-   variables for v180/v190, explicit p/q in loop 2 and a pointer for n. All score at or below
-   this draft. -fno-gcse gives 152 words.
-*/
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections -g.
+ * Compiled 1488 bytes; retail 1516 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: 0/1 placements match (exit 1).
+ * Remaining: Shared qcopy transfers reach 1488 bytes, up from 1464. Both 144-byte packets and
+ * ten complete vector temporaries are retained, with the debug profile that reproduces division
+ * padding. Loop-1 pointer spills/rematerialization and loop-2 adjacent-point lifetimes still
+ * differ.
+ * Reopen: Independent adjacent-point and vector-copy lifetime evidence that reproduces the two
+ * loop allocation graphs.
+ */
 
-typedef unsigned char u8;
-typedef int s32;
-typedef unsigned long long u64;
+#include "common.h"
 typedef int TI16 __attribute__((mode(TI)));
 
 typedef struct {
@@ -158,8 +125,8 @@ void func_L23_00425AF8(TI16 *pts, s32 a, s32 b, s32 c, float x, float y, float z
             A.col[0] = colA;
         }
         func_00280B90(&A, 0, 0);
-        A.v[0] = A.v[2];
-        A.v[1] = A.v[3];
+        qcopy(&A.v[0],&A.v[2]);
+        qcopy(&A.v[1],&A.v[3]);
     }
     for (i = 0; i < c - 1; i++) {
         func_00282CF0(v180, &pts[i], D_L23_001BA640);
@@ -168,13 +135,13 @@ void func_L23_00425AF8(TI16 *pts, s32 a, s32 b, s32 c, float x, float y, float z
         lb = func_00282DF0(v190);
         if (lb < la) {
             if (lb == 0.0f) {
-                *(TI16 *)v190 = *(TI16 *)v180;
+                qcopy(v190 ,v180);
             } else {
                 func_00282D30(v190, v190, la / lb);
             }
         } else {
             if (la == 0.0f) {
-                *(TI16 *)v180 = *(TI16 *)v190;
+                qcopy(v180 ,v190);
             } else {
                 func_00282D30(v180, v180, lb / la);
             }

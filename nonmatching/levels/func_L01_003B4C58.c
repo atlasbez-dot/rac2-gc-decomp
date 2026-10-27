@@ -1,22 +1,13 @@
-/* Signature/interface follow-up, 23 October 2026.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * USA v1.01: 1140/1136 bytes, 0/1 carrying placements.
- * USA v2.00: 1140/1136 bytes, 0/1 carrying placements.
- * PAL: canonical name absent from the catalogue.
- * The ignored func_L01_003377C8 result is declared float.
- * This follows the current linked C contract; it does not independently prove the original
- * source declaration.
- * The retained C remains nonmatching. Earlier sizes and residual offsets below are
- * historical and superseded by this measurement; their reopening hypotheses remain
- * unqualified. No linked build was run for this follow-up.
- */
-
-/* Historical measurements, superseded where inconsistent with the follow-up above. */
-/* Measured with -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. US: 01_oozla: 1140
-   bytes, expected 1136; 0/1 placements. US2: 0/1 placements. PAL: canonical function absent. Four
-   source/profile trials. Initialization and paths reconstructed. Explicit positive-height predicate
-   preserves NaN behavior; float compare scheduling and global-address lifetimes still differ. No-
-   split-addresses did not improve size. Reopen with an exact initialization witness.
+/* Retained C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * 1140/1136 bytes; 0/1 USA v1.01 and USA v2.00 places.
+ * The canonical function is absent from the PAL catalogue.
+ * Remaining: Copy setup is reproduced; current pointer-return contracts for B60B0 and the
+ * matched A6280 allocator wrapper are retained. The +0x39C field is copied as
+ * float, matching its retail lwc1/swc1 bank. Absolute frame-counter address
+ * lifetime, float compare scheduling and control-flow register allocation differ.
+ * Reopen with: An independent initialization/global lifetime witness; do not add
+ * source aliases solely to break address CSE or change callee contracts.
  */
 
 #include "common.h"
@@ -35,12 +26,12 @@ extern float D_L01_001AFDD0 __attribute__((sda));
 extern float func_L01_003BAFB0(void);
 extern int func_00283CF0(float);
 extern int func_002A7820(int,int);
-extern void func_002B60B0(void *,float,float,float,float);
+extern void *func_002B60B0(u8 *,float,float,float,float);
 extern float func_L01_003377C8(unsigned char *);
 extern void func_002A7750(void *,int,int);
 extern void func_002A7470(void *,int,int,int);
 extern float func_002A89A8(void *,int,float);
-extern void func_L01_003A6280(void *,void *,int,float,float);
+extern void *func_L01_003A6280(u8 *,void *,u32,float,float);
 void func_L01_003B4C58(u8 *object)
 {
     u8 *state = *(u8 **)(object+0x68);
@@ -56,7 +47,7 @@ void func_L01_003B4C58(u8 *object)
         *P(state,0x36C) = -1;
         *P(state,0x370) = -1;
     }
-    *(OozlaQuad *)(state+0x2D0) = *(OozlaQuad *)(object+0x10);
+    qcopy((state+0x2D0), (object+0x10));
     state[0x48] = func_00283CF0(10.0f);
     state[0x4A] = func_00283CF0(8.0f);
     I(state,0xA8) = 5;
@@ -98,7 +89,7 @@ void func_L01_003B4C58(u8 *object)
         I(state,0x14C) = index;
         object[0xBC] = 0;
         I(state,0x398) = I(state,0x394);
-        I(state,0x39C) = I(state,0x388);
+        F(state,0x39C) = F(state,0x388);
         func_002A7750(object,1,3);
         if (object[0x43] != 0) func_002A7470(object,0,0,2);
         goto next;
@@ -114,10 +105,10 @@ next:
         if (object[0x43] != 20) func_002A7470(object,20,0,2);
         I(state,0x14C) = I(state,0x30C);
         I(state,0x398) = I(state,0x390);
-        I(state,0x39C) = I(state,0x388);
+        F(state,0x39C) = F(state,0x388);
         func_002A7750(object,6,3);
     }
-    *(OozlaQuad *)(state+0x200) = *(OozlaQuad *)(object+0x10);
+    qcopy((state+0x200), (object+0x10));
     func_L01_003A6280(object,object+0x10,5,0.2f,2.0f);
     I(state,0x39C) = 0;
     I(state,0x398) = I(state,0x390);

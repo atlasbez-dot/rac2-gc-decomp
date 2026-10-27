@@ -79,3 +79,23 @@ s32 func_L20_002B7A48(char *a0)
         return *(u8 *)(a0 + 0x1492) ? 0x67 : 0;
     return 0x51;
 }
+
+/* M18 (2026-10-26): a switch spelling reaches retail size, 192/192 B, ~40 lines off (the first 14 instructions and the case-1 block layout):
+int func_L20_002B7A48(char *a0)
+{
+    switch (*(u8 *)(D_00189E20 + 0x22B4)) {
+    case 1:
+        return 0;
+    case 4:
+        return 0xD;
+    }
+    if (a0 != 0 && *(u8 *)(D_00189E20 + 0x22BA) != 0 && *(s16 *)(D_00189E20 + 0x24EC) == 0) {
+        int idx = func_L00_002ADEA0(0);
+        return ((WeaponEntry_2B7A48 *)(D_L20_0026D970 + D_00139568[idx] * 224))->v;
+    }
+    a0 = D_00189E20;
+    if (*(int *)(a0 + 0x24CC) != 1)
+        return *(u8 *)(a0 + 0x1492) ? 0x67 : 0;
+    return 0x51;
+}
+*/

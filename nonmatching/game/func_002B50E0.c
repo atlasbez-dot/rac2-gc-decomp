@@ -1,3 +1,19 @@
+/* Current final accounting: 372/372 bytes; us0/21 and us2 0/21, exit1; PAL absent, exit1, not a match. Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. Full retained body was checked in its temporary unit; markers and trial profiles were restored afterward. No strict build or native-behavior claim. */
+
+/* 25 October 2026 diagnostic follow-up; retained near miss, not linked.
+ * The current paired allocator/scheduler diagnostic objects are identical to their
+ * normal baseline. The last stack-snapshot argument still comes from the permanent
+ * soft frame pointer, whereas the target argument is a dying pseudo. This explains
+ * the measured three-move scheduling tie; no pressure override was applied.
+ * Callee review:52A0 does not directly read its two scratch-pointer slots;5678 ignores its
+ * fourth pointer;5828 conditionally reads the complete16-byte saved position.
+ * The recorded caller slots/storage remain intact. Canonical282C88 returns void;
+ * its ignored return declaration below is aligned with the current C definition.
+ * Reopen on independent source-lifetime or general stack-base pressure evidence,
+ * with matched controls. Repeating helper/alias/flag forms is not new evidence.
+ * None of these observations establishes original-source identity or C impossibility.
+ */
+
 /* 25 October 2026 approved-helper experiment; original C below is preserved.
  * Trial profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
  * Trial checks: us: 0/21; us2: 0/21; pal: absent.
@@ -35,7 +51,7 @@ extern int D_001B1688 __attribute__((sda));
 extern char *func_002B5D28(void *);
 extern void func_002B5CD8(void *, void *);
 extern void func_002B5BC0(void *, void *, float);
-extern int func_00282C88(void *);
+extern void func_00282C88(void *);
 extern void func_002B52A0(void *, void *, void *, void *, void *, float);
 extern void func_002B5678(void *, void *, void *, void *);
 extern void func_002B5828(void *, void *, void *, void *);

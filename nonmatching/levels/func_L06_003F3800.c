@@ -1,27 +1,24 @@
-/* Signature/interface follow-up, 23 October 2026.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * USA v1.01: 1868/1776 bytes, 0/1 carrying placements.
- * USA v2.00: 1868/1776 bytes, 0/1 carrying placements.
- * PAL: canonical name absent from the catalogue.
- * func_002ACB48 follows its vector-plus-float current C interface. The removed delta-pointer
- * expression has no side effects.
- * This follows the current linked C contract; it does not independently prove the original
- * source declaration.
- * The retained C remains nonmatching. Earlier sizes and residual offsets below are
- * historical and superseded by this measurement; their reopening hypotheses remain
- * unqualified. No linked build was run for this follow-up.
+/*
+ * Complete manual reconstruction retained as nonmatching; no coverage credit.
+ * Fresh qualified-compiler checks, 2026-10-25.
+ * Profile: -O2 -G8 -ffunction-sections
+ * Coverage: US: 0/1; US2: 0/1; PAL: absent from catalogue.
+ * Compiled text: 1856 bytes; retail: 1776 bytes.
+ * Remaining difference: The path-index-valid branch now reads its descriptor unconditionally as
+ * retail does; the old extra descriptor-null guard changed behavior. The region pointer is
+ * initialized at its selection phase, and state-local child storage is scoped. The body improves
+ * to 1856/1776; frame 0xD0 still differs from retail 0xE0, with selection and call lifetimes
+ * unresolved. The current vector-plus-float 002ACB48 interface is preserved.
+ * The third 002ABBB8 argument is a nullable vector pointer, as its retail LQ reads prove;
+ * this call passes null and preserves the established integer/FP register banks.
+ * Reopen when: Trace the original region/selection temporaries and spills, plus actual
+ * caller/callee contracts, without inventing a fifth vector or changing the 002ACB48 argument
+ * list.
  */
 
-/* Historical measurements, superseded where inconsistent with the follow-up above. */
-/* Nonmatching reconstruction, 23 October 2026.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Final check.py coverage: us 0/1, us2 0/1; no linked build run.
- * Default 1856/1776; qcopy/barrier 1872/1776.
- * Remaining: Spawn-region selection, local lifetimes and call setup differ; no candidate.
- * Reopen with typed spawn-region/path structures and measured ABI controls.
- */
 #include "common.h"
 typedef int VectorBits __attribute__((mode(TI)));
+typedef float Vector[4] __attribute__((aligned(16)));
 extern void func_L06_003F3690(char *, char *);
 extern int func_00282978(void *);
 extern int func_002A77E0(int);
@@ -31,8 +28,8 @@ extern int func_L06_003F3760(void *, void *);
 extern char *D_L06_001FE500[];
 extern char *D_L06_001B290C __attribute__((sda));
 extern int D_L06_001B2348 __attribute__((sda));
-extern char D_00189EA0[];
-extern char D_L06_001B9840[];
+extern Vector D_00189EA0;
+extern Vector D_L06_001B9840;
 extern char D_L06_001A8F20[];
 extern float func_00282E48(void *, void *);
 extern void func_00282CF0(void *, void *, void *);
@@ -49,7 +46,7 @@ extern void func_002ACB48(float *, float);
 extern float func_L00_0031CDD0(void *, void *, int, float, float);
 extern char *func_L06_003F3EF0(void *, void *, void *, int, int);
 extern int func_002E5CF8(int, int, void *);
-extern void func_002ABBB8(void *, void *, int, int, int, int, int, int, int, int, int, int,
+extern void func_002ABBB8(void *, void *, void *, int, int, int, int, int, int, int, int, int,
                          float, float, float, float, float, float, float);
 extern void func_002E5DA0(int, int, void *, int);
 extern void func_L02_0032B468(void *, int, void *, void *, int, int, void *, void *, void *, float);
@@ -60,15 +57,15 @@ extern void func_002A93B0(void *);
 /* Select a spawn point, launch a child and retire the spawner when destroyed. */
 void func_L06_003F3800(char *moby)
 {
-    float point[4], delta[4], origin[4], step[4];
+    Vector point, delta, origin, step;
     char *state = *(char **)(moby + 0x68);
-    char *region = 0;
-    char *child;
+
     int slot, i;
     float distance;
     func_L06_003F3690(moby, state);
     switch (*(unsigned char *)(moby + 0x20)) {
-    case 0:
+    case 0: {
+        char *child;
         if (D_L06_001B2348) {
             child = 0;
             while (!func_002A8600(&child, *(int *)(state + 0x84), 0, 0))
@@ -76,22 +73,28 @@ void func_L06_003F3800(char *moby)
             *(unsigned char *)(moby + 0x20) = 1;
         }
         break;
-    case 1:
+    }
+    case 1: {
+        char *region;
         func_L06_003F3690(moby, state);
         if (!func_00282978(state + 0x7E))
             break;
         if (!func_002A77E0(7)) {
             void *anchor = 0;
-            char *path = 0;
+            char *path_points = 0;
+            int path_count = 0;
             int hasAnchor = 0;
             if (*(int *)(state + 0x74) != -1) {
                 anchor = state + 0x74;
                 hasAnchor = 1;
             }
-            if (*(int *)(state + 0x78) != -1)
-                path = D_L06_001FE500[*(int *)(state + 0x78)];
+            if (*(int *)(state + 0x78) != -1) {
+                char *path = D_L06_001FE500[*(int *)(state + 0x78)];
+                path_points = path + 0x10;
+                path_count = *(int *)path;
+            }
             func_L04_003429F8(moby, state + 0xF0, anchor, hasAnchor,
-                             path ? path + 0x10 : 0, path ? *(int *)path : 0,
+                             path_points, path_count,
                              *(float *)(state + 0x70));
         } else {
             char *target = *(char **)(state + 0x130);
@@ -100,7 +103,7 @@ void func_L06_003F3800(char *moby)
                 *(int *)(state + 0x130) = 0;
                 *(int *)(state + 0x134) = 2;
             } else {
-                *(VectorBits *)(state + 0xF0) = *(VectorBits *)(target + 0x10);
+                qcopy((state + 0xF0), (target + 0x10));
             }
         }
         if (*(int *)(state + 0x134) == 2)
@@ -108,6 +111,7 @@ void func_L06_003F3800(char *moby)
         slot = func_L06_003F3760(moby, state);
         if (*(unsigned char *)(state + 0x81) >= *(unsigned char *)(state + 0x80) || slot == -1)
             break;
+        region = 0;
         if (*(unsigned char *)(state + 0x82)) {
             float nearest = 100000.0f;
             for (i = 0; i < 4; i++) {
@@ -148,7 +152,7 @@ void func_L06_003F3800(char *moby)
             }
         }
         if (region) {
-            *(VectorBits *)point = *(VectorBits *)(region + 0x30);
+            qcopy(point, (region + 0x30));
             func_00282D30(delta, region, func_002A7878(-1.0f, 1.0f));
             func_00282CC0(point, point, delta);
             func_00282D30(delta, region + 0x10, func_002A7878(-1.0f, 1.0f));
@@ -171,6 +175,7 @@ void func_L06_003F3800(char *moby)
         (*(unsigned char *)(state + 0x81))++;
         *(short *)(state + 0x7E) = *(short *)(state + 0x7C);
         break;
+    }
     case 2:
         func_002ABBB8(moby, state + 0x60, 0, 30, 8, 20, 1, 1, 1, -1, 0, 0x810001,
                       0.0f, 0.0f, 8.0f, 4.0f, 18.0f, 1.0f, 15.0f);

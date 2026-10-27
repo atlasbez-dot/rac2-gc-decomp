@@ -37,16 +37,12 @@ void func_L08_00424ED0(char *a0) {
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L08_00424F40);
-
 INCLUDE_ASM("asm/levels", func_L08_00424FF8);
 
 /* Not C: the success arm is the single word 0x4600A028 (COP1 fmt=S funct=0x28,
    fd=$f0 fs=$f0 ft=$f20). See nonmatching/levels/func_L08_00425328.c - this cc1 has no
    max.s pattern, so the ternary and the if-assignment both come out eight bytes larger. */
-INCLUDE_ASM("asm/levels", func_L08_00425328);
 
-INCLUDE_ASM("asm/levels", func_L08_00425398);
 
 void func_L08_00425448(char *a0) {
     char *s0;
@@ -98,7 +94,6 @@ s32 func_L08_00425518(s32 a0) {
     return 1;
 }
 
-INCLUDE_ASM("asm/levels", func_L08_00425568);
 
 extern f32 func_002A7878(f32, f32);
 extern f32 func_00283180(f32);
@@ -255,7 +250,6 @@ INCLUDE_ASM("asm/levels", func_L08_00426730);
 
 INCLUDE_ASM("asm/levels", func_L08_00429238);
 
-INCLUDE_ASM("asm/levels", func_L08_00429350);
 
 extern s32 D_L08_001B39A0[];
 extern s32 D_L08_001B39E0[];
@@ -267,10 +261,6 @@ extern void func_00291450(s32 a0);
    the callee-saved allocation differ. */
 INCLUDE_ASM("asm/levels", func_L08_004290E8);
 
-/* Near miss: nonmatching/levels/func_L08_00429408.c - the address materialisation order
-   in the prologue differs (0x1B39E0 / 0x1B39A0 / 0x1B3A30 are grouped differently). */
-INCLUDE_ASM("asm/levels", func_L08_00429408);
-
 INCLUDE_ASM("asm/levels", func_L08_004294A0);
 
 INCLUDE_ASM("asm/levels", func_L08_00429560);
@@ -281,12 +271,7 @@ INCLUDE_ASM("asm/levels", func_L08_0042A0B0);
 
 INCLUDE_ASM("asm/levels", func_L08_0042A980);
 
-INCLUDE_ASM("asm/levels", func_L08_0042F440);
-
 INCLUDE_ASM("asm/levels", func_L08_0042F660);
 
-INCLUDE_ASM("asm/levels", func_L08_0042F938);
-
-INCLUDE_ASM("asm/levels", func_L08_0042FAC0);
 
 INCLUDE_ASM("asm/levels", func_L08_0042FCE0);

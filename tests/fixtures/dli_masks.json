@@ -28,5 +28,7 @@
   {"name":"target_plus1","literal":"0x0fffffffffffffff","value":"0fffffffffffffff","words_r2":["2402ffff","0002113a"],"baseline_words_r2":["2402ffff","0002113a"],"changed_by_fix":false},
   {"name":"unshifted_width33","literal":"0x00000001ffffffff","value":"00000001ffffffff","words_r2":["2402ffff","000217fa"],"baseline_words_r2":["2402ffff","000217fa"],"changed_by_fix":false},
   {"name":"touch_sign_width59","literal":"0xffffffffffffffe0","value":"ffffffffffffffe0","words_r2":["2402ffe0"],"baseline_words_r2":["2402ffe0"],"changed_by_fix":false},
-  {"name":"touch_sign_width33","literal":"0xffffffff80000000","value":"ffffffff80000000","words_r2":["3c028000"],"baseline_words_r2":["3c028000"],"changed_by_fix":false}
+  {"name":"touch_sign_width33","literal":"0xffffffff80000000","value":"ffffffff80000000","words_r2":["3c028000"],"baseline_words_r2":["3c028000"],"changed_by_fix":false},
+  {"name":"leading_ones_top16_lui","literal":"0xffff0000ffff0000","value":"ffff0000ffff0000","words_r2":["3c028000","00021078","3442ffff","00021438"],"baseline_words_r2":["3402ffff","0002103c","3442ffff","00021438"],"changed_by_fix":true},
+  {"name":"leading_ones_pure_shift_unchanged","literal":"0xffff000000000000","value":"ffff000000000000","words_r2":["3402ffff","0002143c"],"baseline_words_r2":["3402ffff","0002143c"],"changed_by_fix":false}
 ]

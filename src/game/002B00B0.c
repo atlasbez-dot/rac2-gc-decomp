@@ -153,7 +153,6 @@ float func_002B04E0(char *a0, float *src, char *third)
 }
 
 
-INCLUDE_ASM("asm/game", func_002B0520);
 
 INCLUDE_ASM("asm/game", func_002B0668);
 

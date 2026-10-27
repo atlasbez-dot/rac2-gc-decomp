@@ -69,7 +69,7 @@ extern void func_002833F0(void *, void *);
 
 extern float func_002A7878(float a, float b);
 
-extern int func_00277F48(char *a, int b, char *c, int d, float f);
+extern int func_00277F48(float f, char *a, int b, char *c, int d);
 
 extern void func_L20_00444C18(char *arg0, char *arg1);
 

@@ -25,7 +25,60 @@ extern u8 *D_L13_001B2A0C __attribute__((sda));
 extern u8 *D_L13_001B291C_2;
 extern u8 D_00189E20[];
 
-INCLUDE_ASM("asm/levels", func_L13_00306F38);
+typedef struct {
+    unsigned char pad00[0x34];
+    unsigned short flags;
+    unsigned char pad36[0x68 - 0x36];
+    unsigned int p68;
+    unsigned char pad6C[0xAA - 0x6C];
+    short type;
+} Mob_L13_00306F38;
+
+typedef struct {
+    unsigned char pad00[0x30];
+    int mode;
+    unsigned char pad34[0x44 - 0x34];
+    short count;
+    unsigned char pad46[0x18C - 0x46];
+    Mob_L13_00306F38 *mobs[1];
+} MobList_L13_00306F38;
+
+extern MobList_L13_00306F38 ref_L13_00306F38_00;
+extern int D_001A79F0 __attribute__((sda));
+extern void func_L00_002FC980(void);
+extern void func_002E64A0(void *);
+extern void func_L00_00326048(void *, void *, int, int, float);
+typedef struct { unsigned char pad[0x7C]; short f7C; } Obj_L13_00306F38;
+
+/* Walks the level's list of mobs like func_L02_00300CE8; when the game state is 0xD and the
+   list's word at +0x30 is 0 or 1 it sets the 0x7C halfword of two of the list's objects. */
+void func_L13_00306F38(void) {
+    int i;
+
+    func_L00_002FC980();
+    for (i = 0; i < ref_L13_00306F38_00.count; i++) {
+        Mob_L13_00306F38 *mob = ref_L13_00306F38_00.mobs[i];
+
+        if (mob != 0 && mob->type == 0xE29)
+            mob->flags |= 0x800;
+        if (mob->type == 0xD54)
+            func_002E64A0(mob);
+        if (mob != 0 && mob->type == 0xFA0 && mob->p68 != 0)
+            func_L00_00326048(mob, (unsigned char *)mob->p68 + 0xC, 0x80AAAAD2, 0x80396464, 0.0610865355f);
+    }
+    if (D_001A79F0 == 0xD) {
+        switch (ref_L13_00306F38_00.mode) {
+        case 0:
+            (*(Obj_L13_00306F38 **)((char *)&ref_L13_00306F38_00 + 0x1A0))->f7C = 7;
+            (*(Obj_L13_00306F38 **)((char *)&ref_L13_00306F38_00 + 0x1A4))->f7C = 7;
+            break;
+        case 1:
+            (*(Obj_L13_00306F38 **)((char *)&ref_L13_00306F38_00 + 0x19C))->f7C = 7;
+            (*(Obj_L13_00306F38 **)((char *)&ref_L13_00306F38_00 + 0x1A0))->f7C = 7;
+            break;
+        }
+    }
+}
 
 
 INCLUDE_ASM("asm/levels", func_L13_0035E890);
@@ -65,7 +118,6 @@ INCLUDE_ASM("asm/levels", func_L13_00397A18);
 
 INCLUDE_ASM("asm/levels", func_L13_0039CFF8);
 
-INCLUDE_ASM("asm/levels", func_L13_003D1778);
 
 void func_L13_003E1218(u8 *a0) {
     *(f32 *)(a0 + 0xF4) = func_2F9748(*(f32 *)(a0 + 0xF4), 0.017453296f);
@@ -182,7 +234,6 @@ INCLUDE_ASM("asm/levels", func_L13_0041BDA8);
 INCLUDE_ASM("asm/levels", func_L13_0041CD18);
 
 
-INCLUDE_ASM("asm/levels", func_L13_0041F8B8);
 
 /* The object's five states, state 0 to 4. The dispatch reads the level's own jump table
    (the five-word table in the level's data at 0x2ADD00); `cases` only keeps the labels alive. */

@@ -19,7 +19,6 @@ INCLUDE_ASM("asm/levels", func_L15_00381CF0);
 
 INCLUDE_ASM("asm/levels", func_L15_003AF878);
 
-INCLUDE_ASM("asm/levels", func_L15_003DBB08);
 
 INCLUDE_ASM("asm/levels", func_L15_0041F2F8);
 
@@ -42,7 +41,6 @@ INCLUDE_ASM("asm/levels", func_L15_004307E0);
 
 INCLUDE_ASM("asm/levels", func_L15_00430B30);
 
-INCLUDE_ASM("asm/levels", func_L15_00430C80);
 
 INCLUDE_ASM("asm/levels", func_L15_00430DF0);
 
@@ -51,7 +49,7 @@ INCLUDE_ASM("asm/levels", func_L15_00431590);
 /* func_L15_00432008: attempt kept in drafts (176 bytes, 4 instructions over). */
 /* func_L15_00432008 is defined in L15_00315428-g8.c (this unit has no $gp access for it). */
 
-INCLUDE_ASM("asm/levels", func_L15_004320B0);
+/* func_L15_004320B0 is matched in its own unit, src/levels/shared/L15_004320B0-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */
 
 extern unsigned char D_L15_004328E8[];
 

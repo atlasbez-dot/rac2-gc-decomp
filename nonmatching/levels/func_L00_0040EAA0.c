@@ -1,4 +1,11 @@
-/* 1540 bytes, retail 1540; six bounded C variants. Frame 0x60 vs retail 0x50: invariant bitset base or shift-one is retained across calls and the empty flag spills. Bit-mask lowering and branch-likely scheduling differ. Not linked. */
+/* Re-measured 26 October 2026 (fam5to9) under the TImode/2.95.3-gcse compiler: 1540/1540 bytes
+ * at -O2 -G0 (365/385 opcodes; -G8 gives 1528). Frame is still 0x60 vs retail 0x50. New: the
+ * unlock==-1 test in case 0 is now beq where retail has beql (reload of object[0xb0] in the
+ * likely slot). Retail loads D_001A79F0 once into $a3 and the speech index into $a2 before the
+ * speech loop and re-reads both at the loop bottom into $t1/$t0 (the error call's 4th/5th
+ * arguments), with the bitset address/shift-one rematerialised inside the !force arm.
+ */
+/* Sonnet pass 2 (family seed F7): 1532 vs 1540 bytes now, frame still 0x60 vs 0x50. Findings: (1) func_0026FEB8 must be declared (const char *,...); the K&R () declaration added a 0x10 outgoing-arg area. (2) Assigning the mask to a local inside the condition, bit=1u<<(entry&31), stops fold-const turning (x&(1<<n)) into (x>>n)&1 and gives the retail sllv/and. (3) Still different: retail keeps the constant 1 and the bitset address inside the !force arm (not hoisted) and hoists the D_L00_001BEFC0 high part into $fp, with empty/complete in $s5/$s6; mine spills empty and hoists 1 into $fp. Retail's error call also reloads level/index through $t1/$t0 copies. Needs loop.c invariant-motion research or the permuter. Earlier header: 1540 bytes, retail 1540; six bounded C variants. Frame 0x60 vs retail 0x50: invariant bitset base or shift-one is retained across calls and the empty flag spills. Bit-mask lowering and branch-likely scheduling differ. Not linked. */
 typedef struct { char pad[0x2290]; unsigned char *moby; int state; char pad2[0x234]; int count; } InteractionPlayer;
 extern InteractionPlayer D_00189E20;
 extern char D_00189EA0[];
@@ -26,14 +33,14 @@ extern unsigned int D_00139768[];
 extern char D_L00_001BEFC0[], D_L00_001B1210[], D_L00_002A2CC0[];
 extern void func_0029F338(void *),func_002A7750(void *,int,int);
 extern int func_002B38B8(void *),func_002F5D10(void),func_00288AA0(void *,int);
-extern void func_0026FEB8();
+extern void func_0026FEB8(const char *,...);
 extern void func_00288BE8(void *,int),func_002F5CC8(void);
 extern void func_L00_002B9D60(void *,void *,int,int);
 extern void func_002AD7B8(int),func_002AF0A8(int),func_002A0430(int);
 extern void func_002DF3F8(void *,void *),func_00288CB0(int,int),func_0029B3E0(int,int);
 void func_L00_0040EAA0(unsigned char *object) {
     InteractionVars *vars=*(InteractionVars **)(object+0x68);
-    int complete, empty, changed, i, entry;
+    int complete, empty, changed, i, entry; unsigned int bit;
 
     switch(object[0x20]) {
     case 0:
@@ -59,7 +66,7 @@ void func_L00_0040EAA0(unsigned char *object) {
                 empty=0;
                 do {
                     entry=D_L00_0029FC60[D_001A79F0][vars->speech_index][i];
-                    if(vars->tail.flags.force || !(D_00139768[(unsigned int)entry>>2]&(1<<(entry&31)))) {
+                    if(vars->tail.flags.force || !(D_00139768[(unsigned int)entry>>2]&(bit=1u<<(entry&31)))) {
                         if(!func_00288AA0(D_L00_001BEFC0,entry) && i==0) {
                             func_0026FEB8(D_L00_002A2CC0,*(short *)(object+0xaa),*(short *)(object+0xb2),D_001A79F0,vars->speech_index,entry);
                             return;

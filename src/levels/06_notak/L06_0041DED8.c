@@ -244,7 +244,7 @@ INCLUDE_ASM("asm/levels", func_L06_0041F558);
 INCLUDE_ASM("asm/levels", func_L06_0041F818);
 
 
-INCLUDE_ASM("asm/levels", func_L06_0041FC58);
+/* func_L06_0041FC58 is matched in its own unit, src/levels/06_notak/L06_0041FC58-qcopy.c (-frac2-qcopy -frac2-qcopy-barrier). */
 
 INCLUDE_ASM("asm/levels", func_L06_0041FD90);
 
@@ -348,7 +348,6 @@ void func_L06_00443E18(char *a0)
     func_366160(a0, s1 + 0x260, 2.5f, 0, 1);
 }
 
-INCLUDE_ASM("asm/levels", func_L06_00443F30);
 
 /* func_L06_00444168 and func_L06_00444300 live in L06_0041DED8-g8.c (func_L06_00444300 reaches
  * its constants through $gp; the pair is the level 6 twin of func_L14_00428A08/func_L14_00428BA0). */
@@ -437,9 +436,7 @@ void func_L06_00456EE0(void)
 
 /* func_L06_00456F08 is defined in L06_00456F08.c. */
 
-INCLUDE_ASM("asm/levels", func_L06_00457100);
-
-INCLUDE_ASM("asm/levels", func_L06_00457270);
+/* func_L06_00457270 is in L06_00457270.c: its zeroed vector is a por. */
 
 INCLUDE_ASM("asm/levels", func_L06_004573E8);
 

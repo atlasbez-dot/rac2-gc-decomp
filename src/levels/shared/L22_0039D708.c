@@ -27,11 +27,9 @@ INCLUDE_ASM("asm/levels", func_L22_003A2160);
 
 INCLUDE_ASM("asm/levels", func_L22_003A2780);
 
-INCLUDE_ASM("asm/levels", func_L22_003A2988);
+/* func_L22_003A2988 is defined in L22_003A2988-qcopy-barrier.c. */
 
-INCLUDE_ASM("asm/levels", func_L22_003A2A28);
-
-INCLUDE_ASM("asm/levels", func_L22_003A2B90);
+/* func_L22_003A2A28 is defined in L22_003A2A28-qcopy-barrier.c. */
 
 extern int func_L22_003A48F8(int);
 
@@ -100,17 +98,13 @@ INCLUDE_ASM("asm/levels", func_L22_003A3550);
 
 INCLUDE_ASM("asm/levels", func_L22_003A36A0);
 
-INCLUDE_ASM("asm/levels", func_L22_003A39C8);
-
 INCLUDE_ASM("asm/levels", func_L22_003A3B50);
-
-INCLUDE_ASM("asm/levels", func_L22_003A3CA0);
 
 INCLUDE_ASM("asm/levels", func_L22_003A3D50);
 
 INCLUDE_ASM("asm/levels", func_L22_003A4128);
 
-INCLUDE_ASM("asm/levels", func_L22_003A42E8);
+/* func_L22_003A42E8 uses the profile in L22_003A42E8-g8.c. */
 
 
 typedef struct Ctl_003A47E8 {
@@ -142,8 +136,6 @@ void func_L22_003A47E8(char *a0, int flags, int a2, int a3, int a4) {
 }
 
 INCLUDE_ASM("asm/levels", func_L22_003A4938);
-
-INCLUDE_ASM("asm/levels", func_L22_003A4CA8);
 
 extern float D_L22_001B2AA4 __attribute__((sda));
 extern char *D_0018C0B0;

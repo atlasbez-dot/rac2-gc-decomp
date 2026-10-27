@@ -1,26 +1,11 @@
-/* Current reconstruction, checked 2026-10-23.
-   Game profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
-   USA v1.01 and USA v2.00: 0/19 carrying placements each; absent from PAL.
-   812/852 bytes, frame 0x70 versus retail 0x80. Resident-base lifetime, vector-copy address roles, switch/register scheduling differ. Moving initial color setup to its measured phase removed unrelated long-lived registers; disabling the first scheduling pass was neutral. Reopen with the original resident-object layout and color/copy lifetimes.
-   The historical screening comment below is superseded by these C measurements.
-   No linked build was run for this draft.
-*/
-
-/* func_L00_002A5CB0 - 852 bytes, 19 places, level 00_aranos_tutorial at 0x002A5CB0.
-   Wave 13 s4: not attempted, screened.  This is the twin of func_L00_002A6008:
-   it builds the object the resident block points at (the pointer is at
-   0x1864 here), stores the two resident records into it and sets its flags.
-   The 128-bit copies are retail's materialised shape again -
-     addiu $a2,$s0,0x80 ; lq $v0,0($a2) ; sq $v0,0($v1)
-     addiu $a1,$a0,0xF0 ; addiu $v1,$s0,0x90 ; lq $v0,0($v1) ; sq $v0,0($a1)
-     addiu $v1,$s1,0x2010 ; lq $v0,0($sp) ; sq $v0,0($v1)
-     addiu $a1,$sp,0x40 ; addiu $v1,$a0,0x10 ; lq $v0,0($a1) ; sq $v0,0($v1)
-   (words 0x78C20000, 0x7C620000, 0x78620000, 0x7CA20000, 0x7BA20000,
-   0x78A20000) - the same wall as func_L00_002A6008: this cc1 folds the
-   constant offset into the lq/sq instead of keeping the address in a
-   register.  The body also carries the float constant 0x3FD9999A and a
-   `lw`/`sw` pair of the 0x801432D7 / 0x301432D7 tags.  Unblocker: the
-   quad-copy wall of func_L00_002A6008 has to fall first. */
+/* Nonmatching C: Create and update the resident effect object, transfer its joint data and blend its colors.
+ * Tested profile: -O2 -G0 -ffunction-sections.
+ * Measured US size: 812 bytes; retail: 852 bytes.
+ * Placement checks: US and US2: 0/19 each; PAL: absent from the catalogue.
+ * Remaining: Resident-base and vector-address lifetimes, dispatch scheduling and register allocation differ.
+ * Reopen with independent resident-field and color lifetime evidence; preserve the complete joint vector, 64-byte matrix and pointer-returning allocator.
+ */
+#include "common.h"
 
 typedef int Vector __attribute__((mode(TI)));
 extern unsigned char D_00189E20[];
@@ -39,8 +24,8 @@ extern float func_00283198(float);
 extern unsigned int func_00283D38(unsigned int, unsigned int, float);
 
 void func_L00_002A5CB0(void) {
-    float joint[4];
-    float matrix[16];
+    float joint[4] __attribute__((aligned(16)));
+    float matrix[16] __attribute__((aligned(16)));
     unsigned char *hero = D_00189E20;
     char *object;
     float scale;
@@ -54,8 +39,8 @@ void func_L00_002A5CB0(void) {
             *(unsigned int *)(object + 0x78) = 0x801432D7;
             *(unsigned int *)(hero + 0x2524) = 0x301432D7;
             object = *(char **)(hero + 0x1864);
-            *(Vector *)(object + 0x10) = *(Vector *)(hero + 0x80);
-            *(Vector *)(object + 0xF0) = *(Vector *)(hero + 0x90);
+            qcopy(object + 0x10, hero + 0x80);
+            qcopy(object + 0xF0, hero + 0x90);
             *(short *)(object + 0x32) = 0x40;
             (*(char **)(hero + 0x1864))[0x31] = 1;
             (*(char **)(hero + 0x1864))[0x30] = 0;
@@ -67,12 +52,12 @@ void func_L00_002A5CB0(void) {
     }
     if (!(*(unsigned short *)(*(char **)(hero + 0x2290) + 0x34) & 1)) {
         func_0029FCC0(*(char **)(hero + 0x2290), 7, (char *)joint);
-        *(Vector *)(hero + 0x2010) = *(Vector *)joint;
+        qcopy(hero + 0x2010, joint);
         func_L00_002A7A10();
         if (*(char **)(hero + 0x1864)) {
             func_0029FC20(*(char **)(hero + 0x2290), 7, (char *)matrix);
             object = *(char **)(hero + 0x1864);
-            *(Vector *)(object + 0x10) = *(Vector *)(matrix + 12);
+            qcopy(object + 0x10, matrix + 12);
             func_00283678(object + 0xC0, matrix);
             func_002A0F48(*(char **)(hero + 0x1864));
             scale = D_001A7A43 ? 3.1f : 1.7f;

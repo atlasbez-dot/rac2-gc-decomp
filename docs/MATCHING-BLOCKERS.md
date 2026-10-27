@@ -151,11 +151,89 @@ The numbered history below is retained, with obsolete conclusions and incorrect 
 
 ## 1. Register allocation on long bodies (the dominant wall)
 
+**Qualified field and call-lifetime remedies, 25 October 2026:**
+`func_002B52A0` is now a 980-byte C implementation at 21 places in each
+USA release; PAL has no matching canonical identity. Its controller +0x90
+field has two independently observed loads, faithfully represented by a
+volatile field. Complete 16-byte vectors preserve the real helper extents.
+The 200-byte `func_L14_003D18C8` matches its one place in all three releases:
+the true float return, bank-preserving call setup and separate matrix-basis
+pointer recover its actual lifetimes. Both are accepted in all 84 strict
+linked programs, with no new compiler mechanism.
+
+The existing 72-byte `func_L09_0033E8B0` wrapper now explicitly forwards
+all five GPR arguments and the FP step to the actual deep consumer. Its
+allocated sections remain byte-identical and all nine existing places pass;
+this repairs an interface, not additional coverage. Audit the complete call
+chain before deciding that apparently unused incoming registers are dead.
+
+**Truthful return types and EE call setup, 25 October 2026:**
+`func_L16_004110D0` is a 664-byte C implementation with its real 0x90
+frame. The earlier draft already matched through its first 356 bytes.
+Auditing every `func_002AAA00` return path established an explicit float
+result, including the early zero and normal updated-rate paths; the caller
+ignores it. Correcting the old void declaration changes four setup slots
+without changing arguments or introducing a result use. An independent
+source-only control confirms this effect.
+
+The actual lower/upper state stores and a typed `func_002A8D70` argument
+interleaving close the remaining differences. It preserves object, bone,
+mode, first, second and third in A0-A3/T0-T1 and x/y/z in F12-F14, with
+no stack arguments. This follows the current RAC1 call-shape practice in
+COMPILER-NOTES.md; it does not fabricate a prototype or reorder a bank.
+Six targeted trials required no compiler change. Both USA placements pass,
+PAL has no corresponding catalogue identity, and all 84 strict programs
+pass with the integrated source set. Different source declarations still
+need a consistent native interface or adapter before a PC-port claim.
+
+The two independent witnesses remain nonmatching: `func_L00_003A2668`
+is 1204/1204 bytes, 0/81 present placements, first difference +0x8.
+`func_L23_0041D398` remains 1432/1432, 0/1; a real phase-lifetime split
+instead gives 1412 bytes and a 0xC0 frame. Useful alternatives stay private.
+These negative controls do not establish a general allocator failure or
+justify repeating the same attempts without new evidence.
+
+**Measured phase-storage remedies, 25 October 2026:**
+In retained `func_L00_00398150`, the 96-byte collision query and later
+attachment transform have disjoint lifetimes; their real union restores
+the retail 0x1B0 frame, but 1,724/1,728 bytes remain 0/27 in each USA
+release with game `-O2 -G0 -ffunction-sections` (PAL absent). In
+`func_L06_003D64C0`, initializing the distance at its measured post-selection
+phase restores 0x440 instead of 0x450; 5,692/5,868 bytes remain 0/1 in
+USA v1.01 with game `-O2 -G8 -ffunction-sections` (other releases absent).
+Keep the full collision arrays and matrix outputs. Neither observation
+justifies padding or invented reference counts; reopen with independent
+phase/CFG or floating-live-range evidence. [Retained C](https://github.com/OpenRAC/rac2-decomp/commit/e73fb043ed96233298f7aaf60854484c0046ee16).
+
 Historically 148 of 240 notes mentioned allocation disagreements. A common signature was identical instruction order/size with different caller-saved registers, or an entry copy coalesced away. The approximate 250-byte threshold was a sample observation, not a compiler limit.
 
 Named counterexamples now pass: func_L09_004081F0 and func_L12_0041BDF8 each 1/1; func_L17_003E6F20 1/1; func_L22_003A2CB8 2/2. Other examples included func_L01_00416B30(five unsuccessful attempts), func_L07_003F8C38(a declaration-order observation), func_L20_00444018, and func_L00_00409480. Their status is not inferred from these successes.
 
 **23 October 2026 retained near miss:** `func_002F71B8` (356 bytes, boot plus 27 levels; game `-O2 -G8 -ffunction-sections`) remains unmatched after ten checker invocations across four plain-C forms. The best draft is exactly 356 bytes but 0/28 in USA v1.01, PAL and USA v2.00; each reports its first mismatch at +0x8. The five-word table copy, guarded call and three 12-byte record stores are recovered, while the prologue/base live ranges and initial register allocation still differ. Explicit SDA declarations produce the two GP-relative references in the size-exact draft; a no-SDA form was 348 bytes. Retained in `nonmatching/game/func_002F71B8.c`; reopen with a measured source-lifetime hypothesis, not artificial barriers.
+
+**Further qualified lifetime remedies, 25 October 2026:**
+`func_L00_004284B0` separates its initialization-only pointer from the
+reloaded persistent state; `func_L00_00427BE8` forms its target
+pointer where the copy and subsequent weight store actually use it.
+`func_L02_003C0890` uses separate metadata, snapshot and flag views for the
+three real child-pointer reloads. These are ordinary object/scope changes,
+without register pins or artificial references. The latter body and
+`func_L02_00348420` retain ordinary TImode transfers where their retail
+scheduling requires them; replacing every vector assignment with `qcopy`
+is not a remedy. All three releases accept their linked placements in the
+84-program strict build.
+[Qualified sources](https://github.com/OpenRAC/rac2-decomp/commit/3ba5ed46c8f1e03dd770bf80f181acf1f78de6e8).
+
+**Real scratch storage and live inputs, 25 October 2026:**
+`func_L20_00443B60` uses a 48-byte, three-row rotation basis alongside two
+16-byte records. The old 16-byte basis under-allocated the real output by
+32 bytes; the actual layout gives the retail 0xD0 frame and closes the
+396-byte body without padding. `func_L20_00443790` supplies the object's
+angles at `object + 0xF0` to the rotation helper, not the object base.
+Scoped constructor results in `func_L16_004050D8` also close its allocation
+while preserving the actual null-result store. These are measured source
+and storage remedies, not general evidence that larger frames need padding.
+[Qualified sources](https://github.com/OpenRAC/rac2-decomp/commit/bf60a47f1dacbbda3eb97762998188e3b4fd89ee).
 
 The wave 8 allocator investigation remains useful: global.c prioritizes approximately floor_log2(n_refs)*n_refs/live_length, with loop-weighted references; cc1 -dl exposes refs/live_length. In two samples, changing actual references moved a saved-register assignment while 15 declaration permutations did not. Inspect real live ranges and distinct pseudos before editing reference counts. Several identical compiles justify stopping one approach, not declaring every other meaningful source/profile impossible.
 
@@ -196,6 +274,82 @@ scheduling options did not close the body; the best remains 37,280/37,268 bytes.
 The three-function address follow-up adds no C match. Keep the retained body and
 reopen with independent object/lifetime evidence, not fabricated reference counts.
 
+**Complete table topology recovered, 25 October 2026:** the previous 588-byte
+compiler-owned table had 147 relocations but only 62 destinations. It merged
+selectors `0x3C`/`0x64` with `0x60`/`0x61`, although retail keeps their two
+clear-state blocks separate. Following RAC1's
+[real tail-layout method](https://github.com/OpenRAC/rac1-decomp/blob/e7e787ed94f0d56c1ab617e7abdb83ac6db787ec/docs/DECOMP_PROGRESS.md#two-exits-that-end-the-same-way-get-cross-jumped--arm-order-decides),
+repeating the actual two final tests/stores, in order, before returning from
+the first clear-state arm restores all 63 destination equivalence classes.
+No operation is added to a runtime path. The complete table has 147 self-text
+`R_MIPS_32` relocations and 16-byte alignment. An independent object parse
+confirms the complete selector partition.
+
+That structurally faithful form measured **37,336/37,268 bytes,
+0/1 USA v1.01 places**; the other canonical release identities are absent.
+Its table addresses and text do not match, so it is not linked or credited.
+The frame remains 0x1A0 rather than 0x1B0, with six saved FPRs rather than five,
+and the original object pointer still spilled. The former 37,280-byte baseline
+and useful alternatives remain private. `-fno-thread-jumps` did not fix the
+merge; this compiler rejects `-fno-crossjumping`. Next: identify the real
+address temporaries competing for `$fp` and their phase lifetimes while
+preserving the recovered topology. A smaller size delta is not a better
+reconstruction when it loses a measured control-flow distinction.
+
+**Resident-field and predicate follow-up:** the retained form is now
+**37,308/37,268 bytes**, still 0/1 USA v1.01 and absent under the other canonical
+release identities. A partial resident view of the actual float at `+0xA2C`
+and signed halfword at `+0xADC`, together with capturing the combined pose
+predicate before the path calls, restores the entry object to `$fp`. The
+configuration-table read remains unconditional. Its twelve references and
+all actual field reloads are preserved; no extra reference or padding is added.
+The isolated field and predicate controls do not recover that allocation.
+All 147 selector slots retain the 63 retail destination classes, complete
+588-byte table and self-text relocations. The frame is still `0x1A0` versus
+`0x1B0`, with six saved FPRs versus five; entry-load order, real workspace
+lifetimes and later address/scheduling differences remain. Investigate those
+measured residuals rather than repeating the archived whole-object views.
+
+**Large Snivelak and Oozla source remedies, 25 October 2026:**
+`func_L16_0040ECC0` captures the actual yaw-field pointer before its eight
+angle calculations. This restores the observed object/state/constant register
+roles and 0x90 frame; that corrected baseline measured 6476/6484 bytes.
+The retained follow-up is **6464/6484 bytes**, still 0/1 in each USA release,
+with PAL absent. Three `MACRO_ADDR` declarations restore the observed mixed
+address forms. A partial sound-anchor view keeps the actual owner pointer
+at `+0x88` and active byte at `+0x74`, independently of the 112-byte index
+stride; it does not claim an array element extent. Real sound phase scopes,
+the projectile-result lifetime joined to one store, positive-first state4
+guard and state19 set/clear order retain the measured operations and unordered
+behavior. The first aligned operation difference moves from `+0x25C` to
+`+0x568`; state3 joins, FP scheduling and later allocation remain unresolved.
+Private diagnostic branch mapping still leaves seven targets unproved and
+cannot substitute for exact text or linked table equality.
+`func_L16_00403900` represents the four
+observed firing phases and two bone sites explicitly, instead of the old
+shared loop skeleton: 2816 becomes 4396/4444 bytes with the real 0x80 frame.
+It remains 0/1 USA v1.01, with the other identities absent. Seven ordered
+floating guards and three helper-return contracts were independently corrected;
+`!(x < y)` must not be silently replaced by `x >= y` on an unordered input.
+`func_L16_0040D258` remains 660/656 bytes and 0/1 in both USA releases.
+Its AAA00 declaration is unused in the body: changing that declaration is
+not a causal explanation of its generated instructions.
+
+The Oozla body `func_L01_003B5878` is 4968/4972 bytes with the real 0x150
+frame, 0/1 in both USA releases and PAL absent. It preserves measured mixed
+absolute/GP reads of one mutable frame counter, actual raw-word snapshots,
+complete matrices and the dispatcher's 64-bit return; only its low flag bits
+are consumed. The corrected AAA00 return declaration alone is object-neutral
+here. Separate scalar locals after the complete vector/matrix workspace recover
+the retail F21 zero across the scale call, duration store and comparison at
+`+0x270..+0x2F8`, with unchanged measured scalar slots and frame. A single
+`MACRO_ADDR` frame-counter declaration recovers the absolute read at `+0x6C4`
+and GP read at `+0x99C`; the old explicit SDA alias forced both reads to GP.
+Neither improvement changes the nonmatching status: airborne F0/F1 roles,
+branch layout, target-address lifetimes and final easing setup still differ.
+Keep the useful alternatives private and reopen these bodies with the measured
+field/address and phase-lifetime evidence, not equivalent source permutations.
+
 The shorter retained `func_L00_003A2258` is still 420/420 bytes: its first
 pointer has 7 references over a live length of 60, versus the index's 9 over
 114. The ordinary and diagnostic objects agree, but the first-input/index
@@ -215,6 +369,8 @@ through +0xFC. Neither equal size nor a neutral allocator-dump build is a match.
 **Measured:** `for` and `do/while` both fold. Those tested loop forms did not move the original attempts. Later source/profile remedies mean this is not a universal impossibility claim; wave 8 recorded the two observations below.
 
 `__attribute__((sda))` in a `-G0` file on an **absolute** symbol stops the hoist: `lui %hi ; lw %lo` stay inside the loop as retail has them (side effect: the prologue's index/base register pair swaps). And there is a sub-case of its own: an **absolute global addressed in a loop that contains calls** - cc1 hoists the address into a callee-saved register (`lui $s1,%hi`, frame 0x20, two extra saves) where retail re-materialises `lui $v1,%hi ; lw $v1,%lo($v1)` at every iteration with one register (`func_L11_00440868`, one instruction off; `func_L11_004411C8`, 8 bytes off - bodies otherwise identical instruction for instruction). In those tested units the attribute produced an unwanted `$gp` form; qualify the actual unit instead of generalizing the declaration rule.
+
+**25 October 2026, saved-pair swap closed by block scope (measured, `func_L00_003EB400`, 528 bytes, 2/2 places):** the remaining disagreement was `$s1`/`$s2` only - retail kept the actor pointer in `$s1` and the precomputed `i + 1` in `$s2`, cc1 the other way. Declaring the loop index **inside the `if` block that owns the loop** (`if (state == 1) { int i; for (i = 0; i < 4; i++) ... }`) instead of at function scope reproduces retail's pair, because the parameter copy then sorts below the loop's live-across-call temporary. In the same body a named `char *row = (char *)state + i * 4;` before `id = *(int *)row;` gives retail's `addu $s0,$s4,$v0` operand order where the inline indexed read gives `addu $s0,$v0,$s4`. Both levers together closed the function; keep the block-scoped index for any similar 4-iteration loop whose counter lands in the wrong one of `$s1`/`$s2`.
 
 <a id="blocker-03"></a>
 
@@ -389,6 +545,8 @@ The historical sample is retained: 47 of 240 notes mentioned gp/sda/G8; one 23-t
 
 Two documented names may express different addressing forms of one real global. They must derive the same true identity; malformed names, invented addresses or aliases hiding inconsistent bindings are not remedies. PR #244's review corrected such naming defects. Use ref_LNN_XXXXXXXX_kk where a target's identity genuinely varies by placement, not as a substitute for a known correct data name.
 
+**24 October 2026, one declaration for both forms at -G0 (wave 10):** in the level-08 twins `func_L08_0042F440`/`0042FAC0`, `extern s32 D_L08_001B3AA0 __attribute__((sda));` under the file's `-O2 -G0` emits `lui`+`%lo` in ordinary flow and the single `$gp` form inside a `jal`/branch delay slot. Retail's body shows exactly that mix for the same word (absolute `lui a0`/`lw a0` for the increment, `lw`/`sw 0x4AB0($gp)` in two slots), so one sda declaration covers it: no -g8 sibling and no second name were needed. This does not contradict the -G8 `func_002721C8` note below, where the same attribute gives GP throughout; the threshold/profile decides. The lever did not close these two bodies' residual setup order.
+
 **24 October 2026, retained near miss:** `func_002721C8` (game `-O2 -G8 -ffunction-sections`) is 176/184 bytes and 0/28 placements in each of USA v1.01, PAL and USA v2.00. A typed partial camera-state view recovers the 0x30 frame and saved registers; a raw byte view was 168 bytes and a `nosda` scalar grew to 200. Retail uses absolute address/first-load forms and a later GP read of the same scalar, while the retained single canonical SDA declaration uses GP throughout. Six checker invocations, no scratch compiles; size mismatch prevents relocation-qualified binding checks. The actual C is in `nonmatching/game/func_002721C8.c`, with its source marker restored. Reopen with evidence for the real scalar storage/declaration and its two addressing forms, without duplicate invented identities or scheduling barriers.
 
 A bounded `-mno-split-addresses` trial for `func_L00_00396288` and
@@ -472,6 +630,12 @@ remain beside the retained C in `nonmatching/`.
 
 ## 11. MMI and undecodable words
 
+`func_002A0A28` has a retained review observation about working-register `$at`
+use and trapping arithmetic. The proposed `nonmatching/` file contained only
+that note, not a C reconstruction, so the observation belongs here instead.
+The `INCLUDE_ASM` marker is unchanged: instruction-set/control-flow review and
+the handwritten-assembly acceptance rule still apply before `ASM_FUNC` credit.
+
 The wave 8 correction correctly identified 0x700014A9 as por, not mtsa or an undecodable word. The recorded mtsa zero encoding was 0x00000029. A por-plus-sq zero mismatch remains separate from a decoder error (section 17).
 
 lq/sq are not VU0/COP2 and can be emitted from a TImode C assignment. Four targets were nearly misclassified because the reader used a generic instruction category. Use `rabbitizer.Instruction(word, address, rabbitizer.InstrCategory.R5900).disassemble()`; not every generic INVALID word is lq/sq, so decode each exact word. The reviewed qcopy/qzero helpers are also permitted under the updated source-method rule; none of these instructions alone proves a complete match.
@@ -536,6 +700,96 @@ fields `+0xE4/+0xE8` in 23 programs, and `q + 0x20` with `+0x1C/+0x20` in `16_sn
 `do not match` numbers too. `ref_LNN_XXXXXXXX_kk` cannot help here: it names a symbol *value*,
 not an immediate constant. Report the entry and keep the marker in place.
 
+**Byte-identical stubs do not establish one source ABI.**
+`func_L00_00345AF0` has 27 placements per release, all an eight-byte zero
+return. Across USA v1.01, USA v2.00 and PAL, three direct call sites treat V0
+as a nullable pointer; another prepares A0 and clears A1 while ignoring V0.
+Twenty-four initialized `.lit` words per release equal these addresses,
+but their indirect-call contracts have not been traced. Twenty-one canonical
+names share this fingerprint. Preserve observed caller arguments/results;
+do not impose one fixed arity from the stub body, invent a variadic
+signature, or silently drop arguments to agree with its historical C
+prototype. The shared callback family needs reference/ABI qualification.
+
+Four existing C interfaces now agree with independently measured call sites:
+`func_00291450` explicitly forwards the part index; `func_L06_003660F0`
+forwards all three node-initializer inputs; `func_L02_003FC248` retains its
+two unused integer callback slots; and `func_L02_003CAE68` retains the unused
+output pointer supplied by its update caller. Their 94 carrying checker
+placements and the complete 84-program strict build pass with the same retail
+operations. These are source-contract repairs, not new decompiled bytes; the
+ambiguous zero-stub family above remains unchanged.
+[Measured caller-interface repairs](https://github.com/OpenRAC/rac2-decomp/commit/623184a4e99a331b23db8b90f4defb1708f96f75).
+
+Five further existing caller interfaces preserve their actual inputs:
+`func_L09_00404F90`, `func_L02_003CE8B0` and their PAL-specific wrappers
+explicitly forward the two incoming pointers to integer-returning
+`func_L01_00321178`. The old no-argument calls happened to leave those
+registers intact. `func_L00_003BFF68` forwards its fourth incoming pointer as
+the third argument of `func_002B04E0`, without the invented
+duplicate fourth slot. All 51 carrying placements and the 84 strict programs
+pass. These repairs add no decompiled-byte credit.
+[Caller-interface corrections](https://github.com/OpenRAC/rac2-decomp/commit/a541245e66b8dfc8303cb72e07a4718e47301c76).
+
+Eight further existing interfaces pass 104 carrying placements without
+new byte credit. The two `func_002B60B0` callers retain the object plus four
+float inputs and the real pointer return; `func_L00_00323F28` explicitly
+forwards three floats. `func_L03_00419BD8` and `func_L03_00419B10` propagate
+the query result, point pointers, optional output pointers and floating
+inputs. The Aranos emitter preserves its caller-provided unused F12 slot,
+and `func_L02_003CE8B0` plus its PAL wrapper forward both pointers to the
+first entry hook. All 84 strict programs pass.
+[Caller-interface corrections](https://github.com/OpenRAC/rac2-decomp/commit/4a81f40f3099c9996fe4d8f5224133de7fd03040).
+
+Two explicit alternatives remain unlinked. `func_L03_0041F090` still has
+an existing byte-matched body whose first call relies on the incoming A0
+register being preserved implicitly. Its retained explicit-entity call is
+228/228 bytes but 0/1 in each USA release: a redundant A0 copy occupies
+retail's nop at +0x38. `-fcse-follow-jumps` ties; PAL has no canonical row.
+Do not use the old unspecified-argument declaration as a native interface.
+`func_L03_00419C00` retains corrected three-pointer/integer-return C at
+84/84 bytes and 0/2 in each release; sentinel stores and setup scheduling
+still differ from +0x1C. Neither case justifies a false prototype, pin or
+assembly classification. Reopen with independent reaching-value or output-
+lifetime evidence; the complete alternatives are in `nonmatching/`.
+
+Five existing C interfaces now preserve another measured call contract:
+the Maktar and Dobbo wrappers, including their PAL forms, explicitly pass
+the live object and target pointers plus the float amount to
+`func_002B4FF0`. `func_003225C0` accepts an object pointer and gives
+`func_0029FCC0` its full aligned 16-byte output instead of a 12-byte local.
+All 24 carrying placements and 84 strict programs pass, without new byte
+credit. [Interface and storage repairs](https://github.com/OpenRAC/rac2-decomp/commit/3638916fe51ef118070c96fd7eae30d3f580269b).
+
+The callback retains a real retail constraint: it reads its own uninitialized
+Z slot, adds the first RNG result and stores it before the bone helper
+initializes the output. Its existing matched C preserves that sequence;
+byte equality does not make it defined native C. The complete alternative
+in `nonmatching/game/func_003225C0.c` keeps the RNG call for its state
+effect and removes the dead, indeterminate calculation. It is 176/188
+bytes, 0/3 placements in each release, and remains unlinked. Native execution
+and floating-point exception-state equivalence have not been tested.
+Likewise, retained `func_L00_003EEE90` normalizes an impulse before its
+first fill, as retail does; do not conceal that constraint with invented
+initialization or describe every complete reconstruction as native-safe.
+
+Two indexed animation wrappers now preserve independently observed live
+inputs. `func_L09_00329178` forwards count/value in A2/A3 to
+`func_002B6228`; `func_L09_0033E690` forwards its F12 base to
+`func_L06_00382850`. Their L18 caller already supplies all these arguments
+and is unchanged. The former two-argument declarations matched because
+the register contents survived implicitly. The explicit contracts pass
+all 33 carrying placements and all 84 strict programs, with no new credit.
+[Measured wrapper repairs](https://github.com/OpenRAC/rac2-decomp/commit/e9253b20eda332eba59ec959541bf25013fbc7ec).
+
+Keep unused results distinct from unproved results. The actual allocation
+paths of `func_002C2210`, `func_002C16C0` and `func_002BFB38` return a
+pointer or null; `func_00277F48` returns a 32-bit count. Retained callers
+that ignore these results must not invent a void contract. Conversely,
+a live F0 scratch value alone does not establish a floating return:
+inspect a real consuming caller before changing an unrelated helper's
+interface. Physical input banks and stack words need the same control.
+
 <a id="blocker-13"></a>
 
 ## 13. Floating-point literals are calibrated, not computed
@@ -549,6 +803,15 @@ decimal that "obviously" means the same (`0.000290888f` for `0.000290888245f`).
 Two literals verified against this toolchain, their bodies placed by the build (so `cc1`'s word
 *is* the retail word): `0.017453294f` (pi/180) in `src/levels/12_todano/L12_00398E50.c`, and
 `0.055268768f` in `src/levels/shared/L01_00397110.c`.
+
+**Measured 2026-10-25, the loss is in `as`, not `cc1`:** for `pi/4` and `pi/6` the
+`li.s` line in `cc1`'s `.s` already holds the retail word (`7.85398185253143310547e-1` =
+`0x3F490FDC`, `5.23598790168762207031e-1` = `0x3F060A93`), but the assembled object holds one
+ulp less (`0x3F490FDB`, `0x3F060A92`). The pinned `as` re-parses the printed decimal
+imprecisely, so bisect the *object* word, not the `.s`. The pair that lands correctly is
+`0.78539825f` and `0.52359885f` (each makes `cc1` print the next float up, which `as` then
+rounds down onto the retail word). Debug recipe: compile a one-line probe with
+the configured compiler/profile and inspect the object, not only the assembly.
 
 <a id="blocker-14"></a>
 
@@ -669,6 +932,17 @@ the other observed differences. Nine bounded trials include three forms that
 end in the same two-word tie. Reopen with an independently justified constant
 or loop-lifetime model; another equivalent spelling is not new evidence.
 
+**24 October 2026, retained near miss:** `func_L08_0042F440` and
+`func_L08_0042FAC0` are 544/544 bytes and 0/1 each, byte-identical through
++0x128. Only two func_334BB0 argument-setup blocks and case 3's counter register
+differ: retail keeps `daddu $a0,$s0` in the `beqz` delay slot and materialises
+the a2 address after a1, this cc1 hoists `lui $a2,%hi` into the slot. Moving the
+last integer argument's declaration after the four floats (the integer/FP bank
+split of COMPILER-NOTES) puts only that argument in the `jal` slot; it does not
+move a2. Two different source orders and the `x = x + 1` / `x++` / named-temp
+counter forms measured. Retained: `nonmatching/levels/func_L08_0042F440.c`,
+`func_L08_0042FAC0.c`.
+
 <a id="blocker-20"></a>
 
 ## 20. Two exits where cc1 keeps one
@@ -703,9 +977,153 @@ reproduces retail's `sd a2..t3` + `swc1 f12..f18` save prologue **and** the fram
 
 ## 22. Vector copies: address materialisation is only part of the mismatch
 
-Historical Tabora near misses remain separate: func_L08_003D3D80(128-byte target), func_L08_003D8290(96) and func_L08_003D0508(192) differed in pointer materialisation, copy order, frame or scheduling. They are still markers. Approved qcopy/qzero helpers now provide a concrete reopening route; the historical experiments have not thereby gained linked qualification.
+**Qualified packet and call-contract remedies, 25 October 2026:**
+The 2,192-byte Damosel beam uses the real 144-byte packet, clobbering
+`qcopy` transfers and corner addresses formed at use. Its color packing
+casts to `u32` before shifting: the updater reaches fade 64, making signed
+alpha shifts undefined. The 168-byte effect wrapper preserves the optional
+fifth-GPR vector pointer; the 308-byte query wrapper preserves its integer
+mode and canonical interleaved FP arguments. Together with the target and
+constructor helpers, 7 functions (3,848 distinct bytes) pass 47
+carrying placements and all 84 strict programs without a compiler change.
+Profiles are game `-O2 -ffunction-sections`: `-G0` for the query and Dobbo
+helpers, `-G8` for the beam, effect wrapper, spawn and target helpers.
+[Qualified sources](https://github.com/OpenRAC/rac2-decomp/commit/e73fb043ed96233298f7aaf60854484c0046ee16).
 
-Plain TI-mode C can emit lq/sq; some struct/memcpy spellings instead emitted scalar or unaligned copies. Roughly twenty forms under game/SDK profiles did not close these candidates. Fixed offsets commonly folded into the access, but “only opaque pointer parameters can work” is too broad: current notes also document held/loop-carried/memory-loaded/join-dependent pointers and out-of-range offsets. These observations neither solve the three candidates nor prove all fixed-offset copies impossible.
+Retained storage repairs are not matches. `func_L23_0042ADB0` needs the
+rotation helper's full three-row, 48-byte output. `func_L06_003D64C0`
+uses a 32-bit cooldown with `func_00282948(int *)`, while its fork timers
+remain 16-bit with `func_00282978(short *)`. Preserve those measured widths
+and the complete buffers when revisiting their scheduling differences.
+
+**25 October 2026 linked helper qualification:**
+`func_L08_003D8290` (96 bytes) and `func_L08_003D0508` (192) pass their
+USA v1.01, USA v2.00 and PAL placement checks with the reviewed `qcopy` helper
+and default G0 profiles, then link successfully in all three editions.
+The combined tree passes all 84 strict programs without C fallback.
+[Qualified helper source and retained reconstructions](https://github.com/OpenRAC/rac2-decomp/commit/a49d016ad8f366dce34aebbcdeaa7c9472c074ef). The latter
+draft also needed a semantic repair: only
+initialization is conditional; projection, update and the final position
+snapshot execute unconditionally. Scratch vectors have explicit
+16-byte alignment. The historical folded-copy experiments did not establish
+an impossibility of C or require a new compiler pass.
+
+`func_L08_003D3D80` remains a 128/128-byte near miss. Its addressed copy now
+agrees, but the constant, source-byte and payload-pointer scratch roles and
+initialization stores differ from +0x24. Three meaningful record/lifetime
+forms produce identical text; keep the complete retained C and reopen with
+independent allocation or constructor-layout evidence, not another cosmetic
+permutation or an assembly classification.
+
+**Further qualified copy remedies, 25 October 2026:**
+`func_L02_002EF968` uses the real 144-byte packet and normal memory-clobbering
+`qcopy`; `func_L02_0032EF10` keeps its first transfer ordinary and uses
+`qcopy` for the conditional output transfers, preserving the subsequent Z
+write. `func_L07_003E5C78` captures the state pointer before the state-change
+call, then performs exactly two copies. The Joba position-choice family and
+the Dobbo Orbit constructors/update bodies also close with the reviewed
+helper and actual value lifetimes. The combined source change adds 17
+functions, 4,224 distinct bytes and 365 accepted placements across the three
+releases; all 84 strict programs pass. No new compiler mechanism was needed.
+[Source remedies and retained reconstructions](https://github.com/OpenRAC/rac2-decomp/commit/3ba5ed46c8f1e03dd770bf80f181acf1f78de6e8).
+
+The retained Feltzin color constructors now pass the packed-color result
+to the spawner independently of the converted angle; their smaller frames
+and timer/state lifetimes still differ. The half-speed store in
+`func_L05_00426568` is unconditional in retail and in its corrected draft.
+`func_L22_003C9D48` clears and copies local vectors, not controller fields.
+These semantic repairs are not matches. The three Joba visibility bodies
+remain 628/632 bytes with a 0x70 frame instead of 0x80 after restoring the
+true absolute entity-pool pointer and integer dispatcher interface.
+Preserve those fixes; their former invented array extent was not valid.
+
+Large Snivelak trail renderers still need independent packet/state-lifetime
+evidence. In `func_L07_003E5070`, the two observed 144-byte packets and the
+64-byte/48-byte matrix outputs leave an additional retail local range
+unqualified. Do not invent a third packet, padding or a complete global
+extent to reproduce the frame. Complete corrected C and measured reopening
+conditions remain in `nonmatching/`.
+
+**Additional qualified source remedies, 25 October 2026:**
+Three Aranos constructors/updates, four Yeedil handlers, a Snivelak
+constructor, two shared list/counter handlers and an Oozla effect add
+11 functions, 2,976 distinct bytes and 42 accepted carrying placements.
+The source keeps actual pointer returns, full aligned transfers, correct
+guard polarity and the real integer counter identity. All 84 strict
+programs pass; complete host/runtime source sets and hashes agree before
+and after qualification, with no compiler change or report regeneration.
+[Source remedies and retained large reconstructions](https://github.com/OpenRAC/rac2-decomp/commit/bf60a47f1dacbbda3eb97762998188e3b4fd89ee).
+
+Larger Endako, Jamming Array and Snivelak bodies remain near misses.
+Their corrected C preserves actual record strides, audio-bank views,
+aggregate alignment and context overlaps instead of fabricated extents.
+Store scheduling, state branches, floating setup and saved-value lifetimes
+remain measured constraints; equal sizes and matching prefixes are not
+matches. Keep the per-source residuals and reopening conditions when
+revisiting them. The Yeedil handler with a remaining post-branch nop
+is another witness for the scheduling issue in [section 30](#blocker-30),
+not proof that the function is handwritten or impossible in C.
+
+**Mixed transfers and independently bounded storage, 25 October 2026:**
+`func_L00_003F3518` keeps its two stack copies as ordinary TImode
+assignments and uses `qcopy` for two external transfers. Its real scratch
+storage is a 0x460-byte buffer, a 0x120-byte color array and six vectors;
+blanket helper substitution gives 648 bytes rather than the qualified 644.
+`func_L02_003D6690` uses four `qcopy_nc` table writes only after checking
+source and destination independence, including later accesses. Its
+captures and dependent transfers still clobber memory. The existing
+per-file `-frac2-hazard-labels` profile is unchanged.
+`func_L11_00442B60` restores the dot helper's second vector input and three
+full aligned vectors. These three functions add 1,792 distinct bytes and
+41 accepted placements across the releases; all 84 strict programs pass.
+[Qualified sources and retained reconstructions](https://github.com/OpenRAC/rac2-decomp/commit/db63b6b650a4765c84221ea7e3dfdda96f9ce1fc).
+
+Retained renderers require semantic review before allocator tuning. The
+actual `func_00283678` output is 48 bytes, whereas `func_00283698` writes
+64; qualify each producer independently rather than transferring an extent
+between similar names. The corrected Yeedil beam stores noise Z before
+publishing its vector, changing its frame from 0x440 to 0x430 while leaving
+the 5,716/5,868-byte residual unchanged. Preserve that order even when an
+older, incorrect variant fit the frame better. Its Aranos counterpart
+remains 5,828/5,868 with independently measured scratch ranges and a
+0x440 frame. Neither frame agreement nor a size improvement is a match.
+
+**Storage and source identity before allocator tuning, 25 October 2026:**
+Retained `func_L02_0043F4C8` had three matrix rows but calls
+`func_00283698`, whose output needs four rows. `func_L02_00421860` had
+a 32-byte impact record, but its initializer writes a word at +0x20;
+the aligned record needs 48 bytes. The real phase-local union and complete
+query fields recover the corresponding retail frames without invented
+padding. They remain near misses. For the beam packet, the initializer
+touches 36 bytes and the handwritten query consumer copies 40; the
+existing aligned 48-byte record covers both observed spans.
+
+`func_L00_003A3B58` also loads a quadword using a scalar's eight-aligned
+address. [PCSX2's LQ implementation](https://github.com/PCSX2/pcsx2/blob/master/pcsx2/R5900OpcodeImpl.cpp)
+rounds the effective address down to 16 bytes. This does not establish
+the surrounding C object's ownership or extent. The retained diagnostic
+stays unlinked; do not invent a vector global or bypass the reviewed
+copy helper's alignment precondition to claim a match.
+
+Check the generated behavior as well as the source. Two identifiers with
+the same assembler label can still hide their overlap from the compiler.
+In retained `func_L23_0041A7A0`, separate GP/absolute views made a clamp
+compare the old value: old 9 plus increment 2 with maximum 10 would leave 11.
+One scalar identity restores the compare against the sum, even though
+mixed retail address selection remains unmatched. Similarly,
+`func_L23_0041D398` now represents its observed ten pointer slots as one
+array with two five-slot windows; indexing past a declared five-element
+array was invalid even when another array followed it physically.
+
+Verify initialization and comparison polarity in each body's own retail.
+The Aranos/Grelbin beams zero Z before publishing the vector. Two burst
+effects also contain unconditional drift clears omitted by their older
+drafts; this is different from a genuinely uninitialized retail read.
+Preserve unordered branch behavior instead of rewriting every inverted
+comparison as an ordered `<=` or `>=`. Complete corrected reconstructions,
+their actual release coverage and reopening conditions remain unlinked;
+equal size, matching frames and prefixes receive no matching credit.
+[Retained source corrections](https://github.com/OpenRAC/rac2-decomp/commit/7799e607437c4e999af6be52050c904bbc5ef069).
 
 <a id="blocker-23"></a>
 
@@ -760,6 +1178,25 @@ materialises `0xFF` **twice**, `addiu $v0` then `addiu $v1`, cc1 keeps one).
 
 **Historical result:** these attempts did not close the named cases, which remain markers. Temporaries sometimes changed materialisation; that is a case-specific observation, neither a guaranteed repair nor proof that none exists.
 
+**25 October 2026 phase isolation:** `func_00308600` is still 356/360 bytes,
+0/28 in both USA releases; its PAL catalogue name is absent. The initial RTL
+contains separate HI- and QI-mode constants of 255. CSE1 removes the QI
+pseudo and substitutes the low byte of the HI pseudo, before scheduling or
+allocation. Writing the byte sentinel as `-1` while retaining its unsigned
+field type canonicalizes to the same QI constant and gives an identical
+complete object. Changing field signedness or inserting a barrier is not
+justified by that observation.
+
+The pinned public GCC `cse_insn` path searches wider integer modes for this
+constant and builds a low-part view. That path has no
+`flag_expensive_optimizations` guard; nearby guarded AND/MEM transformations
+are different paths. The maintained game patch 0048 does not change this
+block. Do not infer that `-fno-expensive-optimizations` controls it or start
+another flag sweep. The measured pointer/count priority tie could change if
+a real source change restored an instruction within their live intervals;
+that arithmetic model is a hypothesis, not a matching result. A compatibility
+proposal would need independent witnesses and neutral controls first.
+
 <a id="blocker-26"></a>
 
 ## 26. A dead store or dead load that retail keeps
@@ -801,6 +1238,15 @@ compares the WIDENED value in SImode (the mask comes from the u8 -> int promotio
 compiler folds it away"); `func_L18_00432E28`; `func_L12_00404778` (the same mask missing).
 
 **Current conclusion:** consult each matched source/profile. Those earlier folds did not prove every legal extension form would fail. Other bodies need their own measurements.
+
+**Byte range tests (2026-10-26):** `x == 6 || x == 7` on a byte becomes `(u8)(x - 6) <= 1`, and
+combine's stock range fold (simplify_comparison, SUBREG case) drops the `andi 0xFF` whenever
+the byte's nonzero bits are known, which is what retail shows at most sites. In the moby
+animation idiom (the anim byte re-read at the join after two call arms, an `== K` test,
+then the range test) retail keeps the `andi`: re-read the field in both tests instead of
+caching it in a local (`if (*(u8 *)(self + 0x43) == 0xB) ... else if (*(u8 *)(self + 0x43) == 6
+|| *(u8 *)(self + 0x43) == 7)`). Measured in func_00322CC0; the same idiom is in
+func_L04_003E2438, func_L04_0044C598, func_L11_0042F018 and func_L17_003E31E8.
 
 <a id="blocker-28"></a>
 
@@ -1731,7 +2177,7 @@ attributed for provenance, not exclusive ownership.
 | Function / family | Status | Evidence and next action |
 | --- | --- | --- |
 | **Vector copy as a scheduling barrier:** `func_002B5E48`, `func_002EE988`, `func_L23_00418650`, `func_L23_003C01F8`, `func_L23_00418DC0`, `func_L23_004256F0`, `func_L02_003DB158`, `func_L02_003D47B0`, `func_L26_003D4930`, `func_L12_00413CE0` (close: `func_002B50E0`, `func_L23_0041D0A0`); from today's first attempts at level 2, also `func_L02_00401BF8`, `func_L02_003F1A88`, `func_L02_003EE938`, `func_L02_003E8CE8` | Merged, #275 | Each is retail's size with `-frac2-qcopy` in a unit of its own. Each is exact when the copy is the volatile asm `lq $2,0(%1) ; sq $2,0(%0)`, in scratch copies only. The profile's grouped pair lets independent instructions cross it. About 50 single flags and many source orders, including `-frac2-zero-ti-barrier`, do not. #275 (merged) adds the opt-in `-frac2-qcopy-barrier`, the clear's block in `sched_analyze_insn` applied to the qcopy insn. Twelve witnesses landed with it. Twenty-three more near misses are exact with it as their records stand, in #283; two more follow. `func_002B50E0` is still 3 words off, a sched1 tie on argument moves. |
-| **The barrier copy's link costs:** `func_L02_003F1A88` | Open, measured | With `-frac2-qcopy-barrier` it is 5 words off. The links into the copy keep their producers' latencies (an `add.s` link costs 3), where a volatile asm makes them cost 1 in `insn_cost`. A constant's load then outranks the state `lw` (priority 24 against 22). With the asm copy in a scratch copy, the priorities tie and it is exact. **Next:** give the barrier's incoming links the asm's cost, then re-check #275's twelve witnesses. |
+| **The barrier copy's link costs:** `func_L02_003F1A88` | Qualified with reviewed helper | The TI/barrier profile was five words off because its producer-link latency differed from the real macro dependency graph. The approved `qcopy` helper closes the 228-byte function under default G0, 1/1 in each release. No compiler link-cost patch is needed. Preserve the original distinction: modeling only part of an inline helper's optimizer effects need not reproduce the actual helper. |
 | **A TImode zero reloaded as a register pair:** `func_L02_004388A0` | Open, measured | 5 words off with the barrier: its 16-byte zero clear is reloaded as a group of two general registers, though the R5900 holds it in one. That makes `$v1` a spill register, so a hoisted sentinel -1 left unassigned gets `$v1` where retail has `$v0`. Without the clear (diagnostic only), every -1 is in `$v0`. |
 | **A register saved and never used:** `func_L02_003FF6E8` | Open, measured | Retail saves `$s2` and never uses it; 21 retail game functions do so, and none of them is C. A plain C spelling reproduces the frame and register roles but keeps the value in `$s2`, 700 bytes against 696. |
 | **Clear through a register address at a nonzero offset:** `func_002B5678` | Open | Retail has `addiu $v0,$s1,0x60 ; sq $zero,0($v0)`, the clear macro's register operand. After #258, C gives `por` + `sq $v0,0x60($s1)`. **Next:** a profile that materializes the address of a displaced const-0 TImode store. |
@@ -1741,7 +2187,7 @@ attributed for provenance, not exclusive ownership.
 | **Jump tables the build cannot place:** `func_L06_003FDA08`, `func_L13_00422CB8`, `func_L03_003C4578`, `func_L02_003F9AF0`, `func_L02_003F9B70`, `func_L02_003FE1B0` | Solved, PR pending | A computed goto through retail's own table, in the form of `func_00310A40`, matches all six. The three level 2 records' in-order switches were wrong: retail's tables map the values to the bodies in another order. Decode the table before trusting a record's `switch`. |
 | **Labels behind hazard nops:** `func_L18_004308F0`, `func_L02_00411530` | Merged, #264 | Opt-in `-frac2-hazard-labels`. 198 retail branch targets after a compare or `mtc1` sit on the nop, and SN's `Ps2EeAs` agrees. Forced on everywhere it is neutral (778 of 779, one `.mdebug`). |
 | **gcse critical-edge split, Cygnus block merge:** `func_002CD720`, `func_L02_003E79F8`, `func_L02_003FCCA0`, `func_L18_004283F0` | Merged, #261 | Opt-in `-frac2-gcse-unsplit-edges` and `-frac2-keep-block-order`. `func_L23_0041B9F0` reaches retail's size with the gcse switch and still stops at the copy order. |
-| **PRE keeps a load across a store to another offset:** `func_L02_003EEC58` (and `func_L23_0041C0E8`) | Open | Retail reloads the index after a store to a disjoint offset of the same base. A `volatile` read reproduces it, which is not allowed. **Next:** an opt-in PRE rule in which any store kills the load. |
+| **PRE keeps a load across a store to another offset:** `func_L02_003EEC58` (and `func_L23_0041C0E8`) | Open | Retail reloads the index after a store to a disjoint offset of the same base. A historical `volatile` probe reproduces it. Current RAC1 also uses volatile fields; this is not a blanket-forbidden source method (see COMPILER-NOTES.md). **Next:** establish whether a faithful field qualifier describes the target's actual accesses before considering an opt-in PRE rule. The old probe alone does not qualify either solution. |
 | **Wide store in an annulled slot:** `func_L02_0042EDD0`, `func_L23_00422668`, `func_L02_003E7370` | Merged, #279 | Retail's game code has no `sd` or `sq` among the 2,895 stores in annulled slots. Ordinary slots hold 547 `sq` and 497 `sd`, and annulled slots do take wide loads.<br><br>PR #279 adds the opt-in `-frac2-no-annulled-wide-stores` (reorg's thread and steal paths; `optimize_skip` is kept). It is neutral by default (796 of 796 units); forced on in every game-compiler unit, it changes only the two witnesses. `func_L02_0042EDD0` (2 places, with the clear barrier) and `func_L23_00422668` (with `-frac2-qcopy`) are exact with it. `func_L02_003E7370` also needs the clear barrier in a call slot, and the barrier then also catches a plain C clear. |
 | **Catalogue rows that are not functions:** `func_00288D40` (20 bytes), `func_00290718` (4), `func_00298D10` (20), `func_002B4068` (36), `func_002B49A0` (12), `func_002ED570` (4), `func_002FC460`, `func_002FC510`, `func_002FC618`, `func_002FC868` (4 each), `func_0033B538` (4) | Evidence, left as markers | Each row starts right after a complete function, its `jr $ra` and the delay slot, and ends at the next function. No branch or jump in any catalogued boot function reaches it (scan of every boot row). Their words, like `sw $v0,-0x3D14($gp)` or `addiu $sp,$sp,0x10 ; nop`, read as unreachable tails. **Next:** a `tools/levels.py` rule for unreachable inter-function words, if maintainers want one. |
 | **Rows that begin inside the previous epilogue:** 113 unmatched level-catalogue rows, 8 of them reserved by me (`func_L02_003EA180`, `func_L02_004004D0`, `func_L02_00439CD8`, `func_L03_00421398`, `func_L19_003DCCC8`, `func_L19_003DD9D8`, `func_L23_00415988`, `func_L23_004277B0`) | Evidence for §47's entry corrections | Each row starts with 8 to 104 bytes of epilogue words (a positive `addiu $sp,$sp,N`, `nop`), then directly a prologue `addiu $sp,$sp,-N`. None of the 137 rows that begin with such words is C. In all 1,065 placements, no branch or jump reaches the leading words.<br><br>106 rows have a reference to the prologue (a code address pair, a data pointer or a call) and none into the leading words. Two also have a data word equal to a leading address. Five have no reference found.<br><br>`func_L02_004004D0` is one of them: `func_L02_003FAF28` passes `D_L02_004004D8` as a callback, and its C equals retail from +8 except for the copy barrier. **Next:** entry corrections such as `LEVEL_ENTRY_OFFSETS`, keyed so that boot and level identity holds. I can prepare them for my eight if wanted. The list is below the table. |
@@ -1908,3 +2354,32 @@ likewise use scoped references for measured placement-dependent families.
 Duplicate numbered data externs used during clock/range experiments were removed:
 the retained drafts preserve each actual containing object under one canonical
 identity and report the resulting nonmatching measurements.
+
+### Level-shared bodies that read $gp (wave 10, 25 October 2026)
+
+Three retained near misses from this wave (`func_L09_003FE0C0`, `func_L10_00423788`,
+`func_L12_003E1EE8`) plus the observations below.
+
+- A `disp($gp)` access in a body that is byte-identical at several places reads the
+  **same absolute address** in every program (GP is 0x1AEFF0 everywhere), so the C name
+  is the defining level's `D_LNN_XXXXXXXX` (GP + disp) in a `-g8.c` sibling, declared
+  `__attribute__((sda))` when it must stay a scalar. Measured in this wave:
+  0x1550/0x1554/0x1560/0x1564/0x1568 -> D_L11_001B0540/..44/..50/..54/..58,
+  0x1390/0x13A0 -> D_L17_001B0380/001B0390, 0x3758 -> D_L17_001B2748,
+  0xAB0 -> D_L05_001AFAA0, 0x2250/0x227C/0x2290/0x2294 -> D_L18_001B1240/..6C/..80/..84,
+  0x1B20 -> D_L12_001B1B10, -0x3FEC -> D_L17_001AB004, -0x66F0 -> D_L00_001A8900.
+  The `L12_003E1CB0-g8.c` header records the sda-size and second-name tricks needed to
+  keep a nearby `lui`/`lw` bare while the scalar takes the `$gp` form.
+- `func_L17_003A4740` starts with `sw $a0,-0x3FEC($gp); nop` **before** `addiu $sp,-0xB0`.
+  This cc1 never schedules a store ahead of the frame adjustment, so plain C cannot
+  produce the first two words. The extent itself is not suspect: the preceding row
+  `func_L04_003C6FE8` ends exactly at 0x3A4740. Do not call it handwritten on this
+  alone; the entry needs an indirect-reference audit first.
+- `func_L11_003F2A30` dispatches through a compiler jump table of 11 entries based at
+  D_L11_002BAA10 (`lw $a0,0($v1); jr $a0`, cases reached from `a0[0x42]`). wslcmp
+  checks only the function bytes, so a `switch` whose case *order* differs can look
+  close; `tools/build.py`'s jump-table qualification is the real check.
+- `func_L18_00428138` repeats its last two guards (`D_L18_001AFBB0 != 0` and
+  `D_L18_00189E20+0x2294 == 0x6F`) inside each case of its kind switch after checking
+  them before the switch. The duplication is in retail, so the retained C has to spell
+  it twice; merging it changes the branch layout.

@@ -1,27 +1,10 @@
-/* Measured profile: -O2 -G0 -ffunction-sections. us: 18_damosel: 612 bytes, expected 632; us2:
-   18_damosel: 612 bytes, expected 632; pal: absent pal. 612 bytes versus 632. Common stop paths,
-   collision-state dispatch and address lifetimes differ. All current helper inputs are preserved,
-   including the actual companion pointer passed to 003F8E30. Reopen with a matching branch/join source
-   form. No linked build or functional execution run. */
-
-/* Historical screening below; superseded by the measured C reconstruction. */
-/* func_L18_003F53D8 - 632 bytes, 3 place(s), level 18_damosel, retail at
-   0x003f53d8. Screened with tools/w10_screen.py: 12 call(s)
-   [func_002A9640@003F53F8, func_002A7750@003F544C, func_002B0ED8@003F5464,
-   func_L18_003F7AB8@003F54BC, func_L18_003F74B8@003F551C,
-   func_L18_003F74B8@003F5538, func_002A6C58@003F5568,
-   func_L18_0033B628@003F55B0, func_L18_003F74B8@003F55C4,
-   func_002B3BA8@003F55E8, func_L18_003F8E30@003F55FC,
-   func_002A7750@003F5630]; data addresses materialised [0x10000, 0x190000];
-   float constants [0x42b40000, 0xbf800000]; $gp-relative small data: no
-   saves: -; callee-saved registers saved [-]; words plain C cannot emit
-   [-]. Head: addiu $sp, $sp, -0x20 ; lui $a1, 0x1 ; sd $s0, 0x0($sp) ;
-   addiu $a2, $zero, 0x1 ; sd $s2, 0x10($sp) ; daddu $s0, $a0, $zero. Not
-   matched in this wave: the body is straight-line code whose register
-   allocation and the materialisation of its constant addresses have to be
-   reproduced word for word. What would unblock it: the exact source
-   expression tree, so this cc1 picks the same registers in the same order. */
-
+/* Near miss (M36, 26 October 2026): 628/632 bytes at -O2 -G0 -ffunction-sections, 3 places
+   (us 18/19/20, us2 the same, pal absent). The stop call is written inline as the then-arm of the
+   0033B628 test (goto stop from the two earlier exits), which fixes every branch and tail.
+   Only difference: retail re-zero-extends object[0x20] (andi v0,v1,0xFF) before the sltiu 6 of
+   the ">= 6" test, though the value comes from the lbu in the preceding bnez slot. A u8/int local,
+   (u8) casts and "> 5" were neutral. Reopen with a source form whose value has unknown high bits
+   at that test. */
 #include "common.h"
 extern void *func_002A9640(void *, u32, s32);
 extern void func_002A7750(u8 *, u8, s32);
@@ -61,11 +44,12 @@ void func_L18_003F53D8(u8 *object)
         goto stop;
     }
     if (*(s32 *)(state + 0x180) > 300 && object[0x20] != 2) goto stop;
-    if (object[0x20] >= 6 && *(s32 *)(state + 0x260) != -1 && !func_L18_0033B628((s32)(object + 0x10), *(s32 *)(state + 0x260), 0)) goto stop;
+    if (object[0x20] >= 6 && *(s32 *)(state + 0x260) != -1 && !func_L18_0033B628((s32)(object + 0x10), *(s32 *)(state + 0x260), 0)) {
+stop:
+        func_L18_003F74B8(object, 0);
+        return;
+    }
     *(s32 *)(state + 0x248) = func_002B3BA8(object, *(s32 *)(state + 0x240), 0, 0, *(float *)(state + 0x244), 0.0f);
     if (*(u8 **)(state + 0x258)) func_L18_003F8E30(*(u8 **)(state + 0x258));
     if (D_0018C0B4 == 0x6F && (u32)(object[0x20] - 9) < 4) func_002A7750(object, 6, -1);
-    return;
-stop:
-    func_L18_003F74B8(object, 0);
 }

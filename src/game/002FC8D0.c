@@ -341,7 +341,7 @@ extern void func_0029F9F0(char *, char *);
 void func_002FED28(unsigned int index) { if (index < 64u) { char *p = D_0021F9C0 + index * 0x50; func_0029F9F0(*(char **)(p + 0x40), p); *(char **)(p + 0x40) = 0; } }
 
 
-INCLUDE_ASM("asm/game", func_002FED90);
+/* func_002FED90 is matched in its own unit, src/game/002FED90-qcopy.c (-frac2-qcopy). */
 
 extern char D_002212E0[];
 
@@ -377,7 +377,7 @@ void func_002FF290(char *object, int kind)
         func_002A0F48(object);
 }
 
-INCLUDE_ASM("asm/game", func_002FF300);
+/* func_002FF300 is matched in its own unit, src/game/002FF300.c (default flags). */
 
 extern char *D_001B2348 __attribute__((sda));
 extern void func_002FF290(char *, int);
@@ -398,8 +398,6 @@ void func_002FF3F8(void)
 INCLUDE_ASM("asm/game", func_002FF450);
 
 INCLUDE_ASM("asm/game", func_002FF968);
-
-INCLUDE_ASM("asm/game", func_002FFB68);
 
 INCLUDE_ASM("asm/game", func_002FFCF8);
 
@@ -425,7 +423,6 @@ void func_002FFFE0(void)
 
 
 
-INCLUDE_ASM("asm/game", func_003001E0);
 
 
 

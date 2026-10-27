@@ -1,26 +1,11 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Reported final C / retail: 796 / 800 bytes; size equality is not a match.
- * us: 0/27 placements; 796/800 bytes.
- * us2: 0/27 placements; 796/800 bytes.
- * pal: absent from catalogue (not a match).
- * Residual: 796/800 bytes. B4038 canonical int(int,int): secondargument is livea1 ownerstate+12, explicitly passed and returntested. AB1F0 retains canonical int result before addresscast. Specialarc constant corrected to exact0x3eb2b8c4. Register and copy scheduling unresolved.
- * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+/* M13, 26 October 2026: 800/800 B under -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g
+ * (the nops before both div.s are -g statement boundaries). 24 words off: state and the
+ * target+0x10 pointer swap s3/s4, the object+0x10 copy is placed after the 30.0 load, and
+ * func_002FED90's a1 is loaded first instead of in the delay slot. Fixed: if(object)
+ * wrapper, then-arm target test, hero fields through a pointer local (t0), qcopy of the
+ * target position, a ShotState struct view, the shot-kind table as a 224-byte struct array.
+ * Reopen: an allocation-order explanation for state vs point.
  */
-
-/* Historical screen/map retained privately. The current manual reconstruction and measured residual above supersede that screen; its extracted instruction, opcode and address lists establish neither matching nor handwritten-assembly status. */
-
-/* Wave4 next-family manual reconstruction, 2026-10-23. Nonmatching.
-   Historical screening above remains as history.
-   Trial source: src/levels/shared/L00_0041EB38-g8-qcopy-next.c
-   Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
-   796/800 bytes. B4038 canonical int(int,int): secondargument is livea1 ownerstate+12, explicitly passed and returntested. AB1F0 retains canonical int result before addresscast. Specialarc constant corrected to exact0x3eb2b8c4. Register and copy scheduling unresolved.
-   us: func_L00_0041EB38: 0 of 27 places match (src/levels/shared/L00_0041EB38-g8-qcopy-next.c), exit 1; us2: func_L00_0041EB38: 0 of 27 places match (src/levels/shared/L00_0041EB38-g8-qcopy-next.c), exit 1; pal: absent_from_catalogue, exit 1
-*/
 #include "common.h"
 typedef int Quad128 __attribute__((mode(TI)));
 typedef void (*DrawCallback_r002E6EF8)(void *);
@@ -36,63 +21,81 @@ extern int func_00283CF0(float);
 extern float func_00283CE0(int);
 extern int func_002B4038(int,int);
 extern void func_0029F338(void *);
-extern int func_002FED90(void *,int,float,float,float);
+extern int func_002FED90(void *,void *,float,float,float);
 extern void func_L00_002E6EF8(DrawCallback_r002E6EF8,void *);
 extern void func_L00_0041F570(void *);
 extern void func_002A0F48(void *);
-extern char D_L00_00262570[],D_00139568[];
-extern short D_0018C30C __attribute__((nosda));
-extern int D_0018B320 __attribute__((nosda));
-extern Quad128 D_0018A580 __attribute__((nosda)),D_00189EA0 __attribute__((nosda));
+typedef struct { char pad[0x50]; float speed; char rest[224-0x54]; } ShotKind;
+extern ShotKind D_L00_00262570[];
+extern char D_00139568[];
+extern Quad128 D_00189EA0 __attribute__((nosda));
+extern char D_00189E20[];
 extern float D_L00_001B1498 __attribute__((sda)),D_L00_001B1494 __attribute__((sda));
 extern unsigned int D_L00_001B1490 __attribute__((sda));
+typedef struct {
+    unsigned int slot;      /* 0x00 */
+    int pad04[3];
+    int frame;              /* 0x10 */
+    int ownerIndex;         /* 0x14 */
+    int ownerKind;          /* 0x18 */
+    char *target;           /* 0x1C */
+    float velocity[3];      /* 0x20 */
+    float speed;            /* 0x2C */
+    int pad30;
+    int handle;             /* 0x34 */
+    int count;              /* 0x38 */
+    float step;             /* 0x3C */
+    float fade;             /* 0x40 */
+} ShotState;
 char *func_L00_0041EB38(Quad128 *origin,char *owner,char *target)
 {
-    Quad128 position,normal;
-    char *object,*state,*collision;
+    Quad128 normal,position;
+    char *object,*collision,*hero;
+    ShotState *state;
     float speed;
     int count,ownerIndex,ownerKind;
     object=func_0029EFD0(0xc89);
-    if(!object) return object;
-    object[0x30]=255; *(short *)(object+0x34)=0x100; object[0x31]=1; *(short *)(object+0x32)=255;
+    if(object) {
+    ((unsigned char *)object)[0x30]=255; *(short *)(object+0x34)=0x100; *(short *)(object+0x32)=255; object[0x31]=1;
     *(char **)(object+0xb8)=owner; object[0x20]=0;
-    state=*(char **)(object+0x68);
-    speed=*(float *)(D_L00_00262570+((unsigned char *)D_00139568)[0x16]*224+0x50)*0.016666668f;
-    if(D_0018C30C==1) func_00282F20(state+0x20,owner+0xd0,-speed);
-    else if(!target) {
-        if(!D_0018B320) func_00282F20(state+0x20,&D_0018A580,speed);
-        else func_L00_0037FA90(state+0x20,(char *)origin,speed,30.0f,0.3490658998f);
-    } else {
-        position=*(Quad128 *)(target+0x10);
+    state=*(ShotState **)(object+0x68);
+    speed=(D_L00_00262570+((unsigned char *)D_00139568)[0x16])->speed*0.016666668f;
+    hero=D_00189E20;
+    if(*(short *)(hero+0x24EC)==1) func_00282F20(state->velocity,owner+0xd0,-speed);
+    else if(target) {
+        char *point=target+0x10;
+        qcopy(&position,point);
         collision=(char *)func_002AB1F0((u8 *)target);
         if(collision) {
-            func_002AFFD8(target+0x10,(char *)&normal,1);
+            func_002AFFD8(point,(char *)&normal,1);
             func_00282D30(&normal,&normal,*(float *)(collision+0x10));
             func_00282CC0(&position,&position,&normal);
         }
-        func_00282CF0(state+0x20,&position,origin); func_00282F20(state+0x20,state+0x20,speed);
-    }
+        func_00282CF0(state->velocity,&position,origin); func_00282F20(state->velocity,state->velocity,speed);
+    } else if(*(int *)(hero+0x1500)) func_L00_0037FA90(state->velocity,(char *)origin,speed,30.0f,0.3490658998f);
+    else func_00282F20(state->velocity,hero+0x760,speed);
     *(Quad128 *)(object+0x10)=*origin;
-    *(float *)(state+0x2c)=speed;
-    count=func_00283CF0(30.0f/speed)+1; *(int *)(state+0x38)=count;
-    *(float *)(state+0x3c)=1.0f/func_00283CE0(count);
+    state->speed=speed;
+    count=func_00283CF0(30.0f/speed)+1; state->count=count;
+    state->step=1.0f/func_00283CE0(count);
     *(float *)(object+0x2c)=*(float *)(*(char **)(object+0x24)+0x24)*D_L00_001B1498;
-    object[0x20]=0; *(char **)(state+0x1c)=target;
+    object[0x20]=0; state->target=target;
     if(target) {
         collision=(char *)func_002AB1F0((u8 *)target);
         if(collision) *(unsigned short *)(collision+0x1e)|=0x80;
     }
-    *(float *)(state+0x40)=1;
-    ownerIndex=*(short *)(*(char **)(owner+0x68)+0x12); *(int *)(state+0x14)=ownerIndex;
-    ownerKind=*(short *)(owner+0xaa); *(int *)(state+0x18)=ownerKind;
+    state->fade=1;
+    ownerIndex=*(short *)(*(char **)(owner+0x68)+0x12); state->ownerIndex=ownerIndex;
+    ownerKind=*(short *)(owner+0xaa); state->ownerKind=ownerKind;
     if(!func_002B4038(ownerKind,ownerIndex)) { func_0029F338(object); return 0; }
-    *(int *)(state+0x10)=0; D_L00_001B1494=0;
+    state->frame=0; D_L00_001B1494=0;
     if(D_L00_001B1490>15) D_L00_001B1490=0;
-    *(unsigned int *)state=D_L00_001B1490; D_L00_001B1490++;
+    state->slot=D_L00_001B1490; D_L00_001B1490++;
     if((int)D_L00_001B1490>15) D_L00_001B1490=0;
     position=*(Quad128 *)(object+0x10); *(Quad128 *)(object+0x10)=D_00189EA0;
-    *(int *)(state+0x34)=func_002FED90(object,0,1.0f,1.0f,1.0f);
+    state->handle=func_002FED90(object,0,1.0f,1.0f,1.0f);
     *(Quad128 *)(object+0x10)=position;
     func_L00_002E6EF8(func_L00_0041F570,object); func_002A0F48(object);
+    }
     return object;
 }

@@ -25,7 +25,7 @@ extern void *func_332F58(s32);
 
 extern u8 *D_001FF814;
 
-INCLUDE_ASM("asm/levels", func_L22_002D0C98);
+/* func_L22_002D0C98 is in the sibling file L22_002D0C98-decider.c (its own profile). */
 
 /* VU0 macro-op helper (lqc2/sdc2 + a COP2 op): hand-written assembly. */
 ASM_FUNC("asm/levels", func_L22_002F3B38);

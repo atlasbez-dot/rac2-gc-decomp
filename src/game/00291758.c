@@ -85,13 +85,12 @@ INCLUDE_ASM("asm/game", func_00291850);
 
 INCLUDE_ASM("asm/game", func_00291CA8);
 
-INCLUDE_ASM("asm/game", func_00291DE0);
+/* func_00291DE0 is matched in its own unit, 00291DE0.c. */
 
 INCLUDE_ASM("asm/game", func_00291EC0);
 
 INCLUDE_ASM("asm/game", func_00292078);
 
-INCLUDE_ASM("asm/game", func_00292328);
 
 extern void func_00292078(void *);
 extern void func_00292328(void *);
@@ -111,7 +110,6 @@ void func_002923C0(void *param)
 INCLUDE_ASM("asm/game", func_00292408);
 
 
-INCLUDE_ASM("asm/game", func_002925F0);
 
 INCLUDE_ASM("asm/game", func_002926B8);
 
@@ -190,7 +188,6 @@ void func_00293260(int *a0, int a1){
   for (i = 0; i < r->n; i++) r->ent[i] = (int)r + r->ent[i];
 }
 
-INCLUDE_ASM("asm/game", func_002932B8);
 
 INCLUDE_ASM("asm/game", func_002933D0);
 
@@ -236,7 +233,27 @@ int func_00293CA8(int index)
 
 INCLUDE_ASM("asm/game", func_00293F98);
 
-INCLUDE_ASM("asm/game", func_00294070);
+struct SegTable {
+    int pad[0x1C];
+    int cur;
+    int entry[1];
+};
+
+extern struct SegTable ref_00294070_00;
+extern int ref_00294070_01;
+extern int ref_00294070_02 __attribute__((sda));
+extern void func_00293D30(void);
+
+/* Copy one entry of the segment table into its current slot, let the world
+   update run, then store the sum of the two counters there. */
+void func_00294070(int index)
+{
+    struct SegTable *p = &ref_00294070_00;
+
+    p->cur = p->entry[index];
+    func_00293D30();
+    p->cur = ref_00294070_01 + ref_00294070_02;
+}
 
 void func_002940C0(void)
 {
@@ -252,9 +269,7 @@ void func_002940C0(void)
 
 /* func_00294130 is matched in 00291758-g8.c (-G8 small data). */
 
-INCLUDE_ASM("asm/game", func_00294180);
 
-INCLUDE_ASM("asm/game", func_002942A0);
 
 extern void func_002942A0(int, int, int, int);
 

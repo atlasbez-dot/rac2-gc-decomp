@@ -1,14 +1,15 @@
-/* Retained manual C reconstruction; not linked and not matching.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -fno-schedule-insns
- * Local tools/check.py measurements: us: 988 compiled bytes, 0/1 placements, exit 1; us2: 988 compiled bytes, 0/1 placements, exit 1; pal: catalogue absent (exit 1).
- * Retail extent: 988 bytes. No exact-C credit and no full build performed.
- * Residual: Equal 988-byte extent; first differing instruction is +0x10. The position pointer is scheduled into the entry before the calls; retail forms it after contact. Effect cleanup and timer block scheduling also differ.
- * Reopen: Reopen with a measured RTL/source-lifetime hypothesis that preserves real position access and reduces entry/tail scheduling differences without barriers.
- * Arrays with unknown total extent remain incomplete. Pointer-offset views do
- * not establish the full sizes or ownership of game records.
+/*
+ * Retained complete manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections -fno-schedule-insns
+ * 988/988 bytes; 0/1 placements in us and us2; pal has no catalogue entry.
+ * Residual: Both full 16-byte sphere/effect copies preserve size, but the object-position
+ * address is still hoisted before calls; the first difference is +0x10. Timer fields are 32-bit.
+ * Reopen: Independent contact-use pointer lifetime/RTL evidence preserving both complete
+ * vectors, the measured effect cleanup guards and 32-bit timers.
+ * Trial-only source markers and profiles are restored after checking.
  */
-/* Updates contact handling, the attached effect and the two idle timers. */
-typedef unsigned char u8;
+
+#include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 #define I32(p,o) (*(int *)((p)+(o)))
 #define F32(p,o) (*(float *)((p)+(o)))
@@ -21,7 +22,7 @@ extern int func_00283DB8(void *,float);
 extern int func_L00_002FCF18(void *,float,float,float,float,float);
 extern u8 D_L01_001C7640[];
 extern u8 *func_L01_00333FA8(void *,unsigned int,int,float);
-extern int func_00282948(void *);
+extern int func_00282948(int *);
 extern float func_002A7878(float,float);
 extern int func_002A7820(int,int);
 void func_L01_003BE628(u8 *object)
@@ -46,12 +47,12 @@ void func_L01_003BE628(u8 *object)
             *(u8 **)(state+0x290)=0;
         }
     }
-    *(Quad *)sphere=*(Quad *)object_position;
+    qcopy(sphere, object_position);
     sphere[3]=4.0f;
     if((object[0x31] || func_00283DB8(sphere,(float)S16(object,0x32))!=-1)
         && (unsigned int)(object[0x20]-2)<7) {
         if(S16(state,0x202)==-1) {
-            *(Quad *)effect_position=*(Quad *)object_position;
+            qcopy(effect_position, object_position);
             effect_position[2]+=1.0f;
             F32(state,0x204)=0.01f;
             S16(state,0x202)=func_L00_002FCF18(effect_position,4.0f,0.0f,0.01f,0.008999999612569809f,0.003000000026077032f);
@@ -76,13 +77,13 @@ void func_L01_003BE628(u8 *object)
         }
         if(S16(state,0x202)!=-1) func_L01_003BE488(object);
     }
-    if(object[0x20]>=6 && func_00282948(state+0x258)) {
+    if(object[0x20]>=6 && func_00282948((int *)(state+0x258))) {
         if(F32(state,0x24c)>0.5f) F32(state,0x24c)=func_002A7878(0.0f,0.4f);
         else F32(state,0x24c)=func_002A7878(0.6f,1.0f);
         I32(state,0x258)=func_002A7820(45,150);
     }
     if(object[0x20]==8) F32(state,0x28c)=1.0f;
-    else if(object[0x20]>=6 && func_00282948(state+0x25c)) {
+    else if(object[0x20]>=6 && func_00282948((int *)(state+0x25c))) {
         if(F32(state,0x28c)>-1.75f) F32(state,0x28c)=func_002A7878(0.5f,1.1f);
         else F32(state,0x28c)=func_002A7878(1.6500000953674316f,5.0f);
         I32(state,0x25c)=func_002A7820(110,60);

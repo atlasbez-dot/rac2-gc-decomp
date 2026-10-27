@@ -72,6 +72,38 @@ s64 func_0012DAC0(void *arg0, void *arg1, void *arg2, void *arg3, void *arg4) {
     return packed;
 }
 
-INCLUDE_ASM("asm/core", func_0012DC50);
+extern void func_0012DC50();
+extern long r1_func_00129CA0(void *s, void *t, void *o1, void *o3, void *o4);
+extern unsigned int r1_D_00132F98[];
+extern void r1_func_0012A7E8(void *arg0, void *arg1);
+
+/* rac1-decomp src/core/00125630.c: func_0012DC50 */
+void func_0012DC50(char *s, char *t) {
+    char *base;
+    long x;
+
+    base = *(char **)(s + 0x858);
+    r1_func_00129CA0(s, t, base + 0x10, base + 0x18, base + 0x20);
+    base = *(char **)(s + 0x858);
+    x = *(long *)(base + 0x20);
+    *(int *)(s + 0x80) = *(int *)(base + 0x10);
+    *(unsigned long *)(s + 0x88) = r1_D_00132F98[(int)(x >> 5) & 0xF];
+    *(int *)(s + 0xCC) = *(int *)(t + 0x5C);
+    *(int *)(s + 0xD0) = *(int *)(t + 0x60);
+    *(int *)(s + 0xB4) = *(int *)(t + 0x44);
+    *(int *)(s + 0xB8) = *(int *)(t + 0x48);
+    *(int *)(s + 0xBC) = *(int *)(t + 0x4C);
+    *(int *)(s + 0xC0) = *(int *)(t + 0x50);
+    *(int *)(s + 0xC4) = *(int *)(t + 0x54);
+    *(int *)(s + 0xC8) = *(int *)(t + 0x58);
+    if (r1_func_00129948(s, t) == 0) return;
+    if (*(int *)(t + 0x28) != 1) return;
+    if (*(int *)(s + 0xB0) != 0) {
+        r1_func_0012A7E8(s, t);
+    } else {
+        r1_func_001299E8((void *)s, (void *)t);
+    }
+    r1_func_00129C78(s);
+}
 
 ASM_FUNC("asm/core", func_0012DF18);

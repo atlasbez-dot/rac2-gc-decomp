@@ -92,7 +92,6 @@ void func_L00_00414350(char *object)
 
 INCLUDE_ASM("asm/levels", func_L00_004143D0);
 
-INCLUDE_ASM("asm/levels", func_L00_00414540);
 
 INCLUDE_ASM("asm/levels", func_L00_00415210);
 
@@ -111,9 +110,7 @@ void func_L00_00415A38(char *object)
     }
 }
 
-INCLUDE_ASM("asm/levels", func_L00_00415AA0);
 
-INCLUDE_ASM("asm/levels", func_L00_00415DE8);
 
 INCLUDE_ASM("asm/levels", func_L00_00416A38);
 
@@ -127,9 +124,8 @@ INCLUDE_ASM("asm/levels", func_L00_004173B0);
 
 INCLUDE_ASM("asm/levels", func_L00_00417700);
 
-INCLUDE_ASM("asm/levels", func_L00_00417868);
+/* func_L00_00417868 is defined in x-qcopy.c. */
 
-INCLUDE_ASM("asm/levels", func_L00_00417A40);
 
 INCLUDE_ASM("asm/levels", func_L00_00417D70);
 
@@ -194,7 +190,7 @@ INCLUDE_ASM("asm/levels", func_L00_004195C8);
 
 INCLUDE_ASM("asm/levels", func_L00_00419668);
 
-INCLUDE_ASM("asm/levels", func_L00_00419A80);
+/* func_L00_00419A80 is defined in L00_00419A80-flags-g8.c. */
 
 /* Marks the object as started and raises the high bit of its flag word, once. */
 void func_L00_00419B58(char *object)
@@ -208,7 +204,5 @@ void func_L00_00419B58(char *object)
 INCLUDE_ASM("asm/levels", func_L00_00419C98);
 
 /* func_L00_0041A490 is defined in L00_0041A490-dbg.c. */
-
-INCLUDE_ASM("asm/levels", func_L00_0041A500);
 
 INCLUDE_ASM("asm/levels", func_L00_0041A5C0);

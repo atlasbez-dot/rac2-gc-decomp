@@ -1,18 +1,16 @@
-/* Retained nonmatching C; measured 25 October 2026.
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Final check.py coverage: us 0/27, us2 0/27, pal 0/27.
- * 1788/1784 bytes. First bound instruction difference +0x94: six workspace/packet address spill slots differ; UV stores and later scheduling remain different. -g did not close it.
- * Reopen: Independently establish real draw-packet/workspace pointer lifetimes and spill interference; preserve complete 144-byte packet and 16-byte vectors. Do not permute names, shrink storage or add barriers.
- * Shared EE transfer helpers are approved; their use is not matching evidence.
- * Earlier complete drafts and all trial sources/logs are preserved privately.
+/* M13, 26 October 2026: 1784/1784 B under -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 33 words off: the spill slots of the six hoisted addresses (quad.vertex[1..3] and three
+ * work vectors) come out rotated, plus the state+0x28 store is not sunk past the 0x2C
+ * argument loads. UVs as separate constant stores (sw $0 for 0.0f) and the screen table
+ * as D_001A6480[0xA9]/[0xA8] fix the rest. Queued for the permuter.
+ * Reopen: evidence for the pseudo order of the hoisted vertex addresses.
  */
-
 #include "common.h"
 typedef int VectorBits __attribute__((mode(TI)));
 typedef struct { u8 pad[0x70]; long f70, f78, f80, f88; } QuadPacket;
 typedef struct { float vertex[4][4]; unsigned int color[4]; float uv[4][2]; long registers[4]; } EffectQuad;
 extern float D_L00_001B8DC0[4];
-extern short D_001A65D0 NOT_SDA, D_001A65D2 NOT_SDA;
+extern short D_001A6480[];
 extern float D_L00_001AF694 __attribute__((sda));
 extern float D_L00_001AF698 __attribute__((sda));
 extern float D_L00_001AF69C __attribute__((sda));
@@ -58,8 +56,8 @@ void func_L00_003A6538(void *object)
         func_00281DE8((QuadPacket *)&quad, 11, 1, 0x80);
         color = (func_00283CF0(ringAlpha * 255.0f) << 24) | 0x2040FF;
         quad.color[0] = quad.color[1] = quad.color[2] = quad.color[3] = color;
-        quad.uv[0][0] = quad.uv[1][0] = 0.5f;
-        quad.uv[0][1] = 0.0f; quad.uv[1][1] = 1.0f;
+        quad.uv[0][0] = 0.5f; quad.uv[0][1] = 0.0f;
+        quad.uv[1][0] = 0.5f; quad.uv[1][1] = 1.0f;
         quad.uv[2][0] = 1.0f; quad.uv[2][1] = 0.0f;
         quad.uv[3][0] = 1.0f; quad.uv[3][1] = 1.0f;
         func_00282D30(radius, normal, D_L00_001AF694);
@@ -88,9 +86,10 @@ void func_L00_003A6538(void *object)
     func_00281DE8((QuadPacket *)&quad, 0x38, 1, 0x80);
     color = (func_00283CF0(alpha * 20.0f) << 24) | 0x8080FF;
     quad.color[0] = quad.color[1] = quad.color[2] = quad.color[3] = color;
-    quad.uv[0][0] = quad.uv[0][1] = quad.uv[1][0] = 0.0f;
-    quad.uv[1][1] = quad.uv[2][0] = quad.uv[3][0] = quad.uv[3][1] = 1.0f;
-    quad.uv[2][1] = 0.0f;
+    quad.uv[0][0] = 0.0f; quad.uv[0][1] = 0.0f;
+    quad.uv[1][0] = 0.0f; quad.uv[1][1] = 1.0f;
+    quad.uv[2][0] = 1.0f; quad.uv[2][1] = 0.0f;
+    quad.uv[3][0] = 1.0f; quad.uv[3][1] = 1.0f;
     func_00282D30(radius, state + 0x30, alpha * -16.0f + 16.0f);
     func_00282CC0(center, position, radius);
     func_00282CF0(rotation, D_L00_001B8DC0, center);
@@ -143,6 +142,6 @@ void func_L00_003A6538(void *object)
         color = (func_00283CF0(D_L00_001AF6B8 * alpha) << 24) | 0x808080;
         quad.color[0] = quad.color[1] = quad.color[2] = quad.color[3] = color;
         func_002FC560(0x42, 0x48ULL);
-        func_0027DE50(0, D_001A65D2, 0, D_001A65D0, (long)(int)quad.color[0]);
+        func_0027DE50(0, D_001A6480[0xA9], 0, D_001A6480[0xA8], (long)(int)quad.color[0]);
     }
 }

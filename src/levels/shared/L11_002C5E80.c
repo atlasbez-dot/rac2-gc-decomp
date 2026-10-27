@@ -67,13 +67,13 @@ void func_L11_003404E0(char *a0)
     func_L02_00333480(a0, a0 + 0x10, a0 + 0xC0);
 }
 
-INCLUDE_ASM("asm/levels", func_L11_00397C08);
+/* func_L11_00397C08 lives in L11_00397C08-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L11_00397E68);
 
 INCLUDE_ASM("asm/levels", func_L11_003CF250);
 
-INCLUDE_ASM("asm/levels", func_L11_003F4198);
+/* func_L11_003F4198 lives in L11_003F4198-helpers.c. */
 
 INCLUDE_ASM("asm/levels", func_L11_00414660);
 

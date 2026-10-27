@@ -1,3 +1,7 @@
+/* Opus big44, 26 October 2026: with -O2 -G8 -ffunction-sections -g -frac2-qcopy
+ * -frac2-qcopy-barrier this source is 158/161 words, 25 register-blind lines off (53 without
+ * -g and qcopy). Left: s3/s4 roles (state is s4 in retail), the 1/x products' constant and
+ * $gp load order around the first div.s, and the walk's index addressing (-0x4 offset). */
 /* Near miss: func_L07_0040E980 (src/levels/07_siberius/L07_003F4578.c), 600 bytes against
    retail's 644; 84 of retail's 161 words line up (relocations ignored). It has to be built in the
    -G8 sibling (L07_003F4578-g8.c): it reads D_L07_001B1700 and ..1704 through $gp outside a

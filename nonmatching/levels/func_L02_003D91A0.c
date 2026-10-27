@@ -1,13 +1,21 @@
-/* Nonmatching reconstruction, checked 2026-10-23.
-   Profile: game -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
-   USA v1.01 and USA v2.00: 0/1 carrying placements each.
-   PAL: this canonical function is absent from both catalogues.
-   1100/1124 bytes; initialization ordering and the damage/animation-selector control flow differ. Direct branch spelling replaced an indexed selector expression; the displayed damage scale constants retain the measured float values. Reopen with the original state-field grouping or branch layout.
-   No linked build was run for this draft.
-*/
+/*
+ * Retained complete manual reconstruction; not linked or counted.
+ * Profile: -O2 -G0 -ffunction-sections
+ * Retail: 1124 bytes; compiled: 1100 bytes.
+ * Final coverage: us: 0/1; us2: 0/1; pal: catalogue absent.
+ * Residual: 1100/1124 bytes. The initial field group has a measured prefix view without
+ * implying the whole state size; owner-table storage is an actual pointer. Full
+ * state-vector capture uses qcopy. Initialization constant/store ordering and
+ * damage/animation selector control flow still differ.
+ * Reopen: A retail-backed initializer grouping and selector lifetime witness. Preserve
+ * the metadata-word interpretation of the canonical integer first input to AB800 and
+ * actual pointer return of the damage selector; do not permute prototypes for
+ * scheduling.
+ */
+#include "common.h"
 
 typedef int Vector __attribute__((mode(TI)));
-extern int D_L02_001B359C;
+extern char *D_L02_001B359C;
 extern int D_L02_001FF798[];
 extern int func_00283CF0(float);
 extern void func_002A04B8(char *, void *, void *, void *);
@@ -15,7 +23,7 @@ extern void func_00282A60(void *, int, int);
 extern void func_L02_003DB6D8(char *);
 extern void *func_002A9640(char *, int, int);
 extern float func_002A96A0(char *, void *);
-extern void func_002AB800(char *, void *);
+extern void func_002AB800(int, char *);
 extern void func_002A7750(char *, int, int);
 extern void func_002AF1D0(char *, char *, int, int);
 extern int func_002B3BA8(char *, int, int, int, float, float);
@@ -24,6 +32,15 @@ extern void func_L02_003FC020(void *, void *);
 extern void func_L02_003D9728(char *);
 extern void func_L02_003D9E68(char *);
 
+/* Field-at-use prefix only; the full state allocation is not inferred. */
+struct InitPrefix {
+    u8 reserved00[0x28]; u8 mode, ready; u8 reserved2A[6];
+    float radius; u8 reserved34[0x14]; u8 flag; u8 reserved49; u8 limit;
+    u8 reserved4B[5]; int enabled; float gain, weight, scale, turn;
+    u8 reserved64[0x18]; float rate, maximum, epsilon; int phase;
+    u8 reserved8C[0x98]; float blend; u8 reserved128[0x11]; u8 active;
+};
+
 void func_L02_003D91A0(char *self) {
     char *state = *(char **)(self + 0x68);
     char *part;
@@ -31,22 +48,23 @@ void func_L02_003D91A0(char *self) {
     char *source;
     float amount;
     if (*(unsigned char *)(self + 0x20) == 0) {
-        *(unsigned char *)(state + 0x48) = func_00283CF0(15.0f);
-        *(unsigned char *)(state + 0x4A) = func_00283CF0(24.0f);
-        *(float *)(state + 0x124) = 0.5f;
-        *(float *)(state + 0x5C) = 1.0f;
-        *(int *)(state + 0x88) = 2;
-        *(float *)(state + 0x60) = 1.1344641f;
-        *(float *)(state + 0x80) = 0.52359885f;
-        *(float *)(state + 0x84) = 0.01f;
-        *(float *)(state + 0x7C) = 0.013888889f;
-        *(float *)(state + 0x30) = 11.0f;
-        *(float *)(state + 0x54) = 1.0f;
-        *(float *)(state + 0x58) = 1.0f;
-        *(unsigned char *)(state + 0x139) = 1;
-        *(unsigned char *)(state + 0x28) = 3;
-        *(unsigned char *)(state + 0x29) = 0;
-        *(int *)(state + 0x50) = 0;
+        struct InitPrefix *initial = (struct InitPrefix *)state;
+        initial->flag = func_00283CF0(15.0f);
+        initial->limit = func_00283CF0(24.0f);
+        initial->blend = 0.5f;
+        initial->scale = 1.0f;
+        initial->phase = 2;
+        initial->turn = 1.1344641f;
+        initial->maximum = 0.52359885f;
+        initial->epsilon = 0.01f;
+        initial->rate = 0.013888889f;
+        initial->radius = 11.0f;
+        initial->gain = 1.0f;
+        initial->weight = 1.0f;
+        initial->active = 1;
+        initial->mode = 3;
+        initial->ready = 0;
+        initial->enabled = 0;
         part = (char *)(D_L02_001B359C + (*(int *)(*(char **)(self + 0x68) + 0x244) << 8));
         *(unsigned short *)(part + 0x34) |= 6;
         *(short *)(state + 0x286) = 60;
@@ -76,7 +94,7 @@ void func_L02_003D91A0(char *self) {
             *(float *)(state + 0x20) -= amount;
             D_L02_001FF798[*(unsigned char *)(state + 0x37)] += (int)(amount * 32.0f);
             if (*(short *)(state + 0x140) == 0)
-                func_002AB800(self, state + 0x140);
+                func_002AB800((int)self, state + 0x140);
             if (amount > 3.0f && *(unsigned char *)(self + 0x20) == 6 && *(unsigned char *)(self + 0x42) == 7) {
                 *(short *)(state + 0x28A) = *(unsigned char *)(self + 0x20);
                 part = (char *)(D_L02_001B359C + (*(int *)(*(char **)(self + 0x68) + 0x244) << 8));
@@ -103,7 +121,7 @@ void func_L02_003D91A0(char *self) {
     part = *(char **)(state + 0x160);
     *(char **)(state + 0x240) = part;
     if (*(unsigned char *)(self + 0x20) != 3)
-        *(Vector *)(state + 0x230) = *(Vector *)(part + 0x10);
+        qcopy(state + 0x230, part + 0x10);
     if (*(unsigned char *)(state + 0x2E) == 2) {
         source = *(char **)(state + 0x264);
         if (source && *(unsigned char *)(source + 0x20) != 254 && *(unsigned char *)(source + 0x20) != 253 &&

@@ -1,12 +1,11 @@
-/* 2026-10-23 bounded readable-C attempt.
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * US: 828 versus 840; union vectors fix scalar/TI alias lowering and most copy blocks; float/divide scheduling and delay slots remain.
- * All carrying placements checked in us, us2 and pal; no candidate.
- * Tried scalar/TI versus union vectors, pointer grouping, expression/control flow
- * spelling, and applicable qualified copy profiles. Reopen with a demonstrated
- * scheduling or symbol declaration remedy; do not infer handwritten assembly.
+/* Near miss, 26 October 2026 (M6): 836/840 bytes under
+ * -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier -g.
+ * -g plus the scale ratio as its own statement gives retail's pre-div.s nop pair (828 -> 836).
+ * Left: two delay slots. The spin else-arm's spill reload (lw $a0, 0x10($sp)) is
+ * scheduled before the destination addiu (retail: addiu first, stolen into the bc1f slot),
+ * and the bounds then-arm's `daddu $a0, $sp` fills the second bc1f slot where retail
+ * leaves a nop (retail sets $a0 after the scale constant). qcopy/union/order trials did not move them.
  */
-
 typedef int TI128 __attribute__((mode(TI)));
 typedef union { TI128 q; float f[4]; } Vec4;
 extern float func_002A7940(void);
@@ -29,8 +28,8 @@ char *func_L02_0032B468(char *source, int kind, TI128 *position, void *rotation,
     char *state;
     float scale, angle, radial;
     if (object) {
-    *(float *)(object + 0x2C) = *(float *)(*(char **)(object + 0x24) + 0x24) *
-        (*(float *)(source + 0x2C) / *(float *)(*(char **)(source + 0x24) + 0x24));
+    scale = *(float *)(source + 0x2C) / *(float *)(*(char **)(source + 0x24) + 0x24);
+    *(float *)(object + 0x2C) = *(float *)(*(char **)(object + 0x24) + 0x24) * scale;
     *(char *)(object + 0x31) = 1;
     *(unsigned short *)(object + 0x34) |= 0x100;
     state = *(char **)(object + 0x68);

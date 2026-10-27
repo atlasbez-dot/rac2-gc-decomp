@@ -44,7 +44,96 @@ extern int func_0012B1C0(void *);
 /* func_0012C508 returns a short: its epilogue sign-extends $v0. */
 extern short func_0012C508(int, int);
 
-INCLUDE_ASM("asm/core", func_00129450);
+struct MpegDecoder;
+extern void r1_func_0012C430(void *, char *, int);
+extern void r1_func_00125880(struct MpegDecoder *d, int bx, int by, int mb_type, int motion_type,
+                          int pmv[2][2][2], int mvfs[2][2], int *dmvector);
+extern void r1_func_0012A0F8(void *);
+extern char r1_D_001537E8[];
+typedef struct {
+    char pad0[0x128];
+    int unk128;
+    int unk12C;
+    int unk130;
+    int unk134;
+    int unk138;
+    int unk13C;
+} Elem00125630;
+typedef struct {
+    int unk0;
+    int pad4[3];
+    int unk10;
+} Ref00125630;
+typedef struct {
+    char pad0[0x11C];
+    int unk11C;
+    char pad120[0xC];
+    int unk12C;
+    char pad130[0x44];
+    int unk174;
+    char pad178[0x48];
+    Ref00125630 *unk1C0;
+    char pad1C4[0xC];
+    Ref00125630 *unk1D0;
+    char pad1D4[0xC];
+    Ref00125630 *unk1E0;
+    char pad1E4[0x3AC];
+    Elem00125630 e[2];
+    int unk810;
+} Dec00125630;
+
+/* rac1-decomp src/core/00125630.c: func_00129450 */
+/* Motion-compensate one macroblock (or wait for the intra IDCT) and record its output slot. */
+int func_00129450(void *arg0, int mbAddr, int arg2, int mbType, int motionType,
+                  void *pmv, void *mvfs, void *dmv) {
+    Dec00125630 *d = (Dec00125630 *)arg0;
+    int intra;
+    int x;
+    int y;
+    int bx;
+    int by;
+    Ref00125630 *ref;
+
+    intra = mbType & 1;
+    y = mbAddr / d->unk12C;
+    x = mbAddr % d->unk12C;
+    by = y * 16;
+    bx = x * 16;
+    if (intra) {
+        while ((*(volatile unsigned int *)0x1000D400 >> 8) & 1)
+            ;
+        d->e[d->unk810].unk138 = 0;
+    } else {
+        if ((unsigned int)(motionType - 1) >= 3) {
+            r1_func_0012C430(d, r1_D_001537E8, motionType);
+            d->unk11C = 1;
+            return 0;
+        }
+        r1_func_00125880((struct MpegDecoder *)d, bx, by, mbType, motionType,
+                      pmv, mvfs, dmv);
+        while ((*(volatile unsigned int *)0x1000D400 >> 8) & 1)
+            ;
+        r1_func_0012A0F8(d);
+        d->e[d->unk810].unk138 = 1;
+    }
+    if (arg2 == 1 && (mbType & 2)) {
+        d->e[d->unk810].unk134 = arg2;
+    } else {
+        d->e[d->unk810].unk134 = 0;
+    }
+    d->e[d->unk810].unk130 = intra;
+    if (d->unk174 == 3) {
+        d->e[d->unk810].unk128 = d->unk1C0->unk0 + (x * d->unk1C0->unk10 + y) * 0x180;
+    } else {
+        if (d->unk174 == 2) {
+            ref = d->unk1E0;
+        } else {
+            ref = d->unk1D0;
+        }
+        d->e[d->unk810].unk128 = ref->unk0 + (x * ref->unk10 + y) * 0x180;
+    }
+    return 1;
+}
 
 /* libmpeg. func_001296A0 is rac1-decomp src/core/00125630.c func_00125880
    (_getAllRefs) and func_00129DA8 is Lombyte (MIT) src/assembly/sdk/library/
@@ -231,7 +320,56 @@ void func_001296A0(MpegDecoderC *d, int bx, int by, int mb_type, int motion_type
 
 INCLUDE_ASM("asm/core", func_00129DA8);
 
-INCLUDE_ASM("asm/core", func_0012A1C8);
+extern void r1_func_0012C468(void *, void *);
+extern void r1_func_00127318(int, int);
+extern void r1_func_001272B8(int, int, int);
+extern char r1_D_00153870[];
+typedef struct {
+    int unk0;
+    int unk4;
+    char pad8[0x20];
+    void (*fa[4])(void *);
+    void (*fb[4])(void *);
+    char a[4][0x1C];
+    char b[4][0x1C];
+    int unk128;
+    int count;
+    int unk130;
+    int pad134;
+    int unk138;
+    int unk13C;
+} Elem001263A8;
+typedef struct {
+    char pad0[0x590];
+    Elem001263A8 e[2];
+    char pad810[0xC];
+    int unk81C;
+} Dec001263A8;
+
+
+/* rac1-decomp src/core/00125630.c: func_0012A1C8 */
+/* Run a channel's per-block callbacks, then hand its buffer to the output routine. */
+void func_0012A1C8(void *arg0, int idx) {
+    Dec001263A8 *p = (Dec001263A8 *)arg0;
+    int i;
+
+    if (p->e[idx].unk138 != 0) {
+        for (i = 0; i < p->e[idx].count; i++) {
+            p->e[idx].fa[i](p->e[idx].a[i]);
+            p->e[idx].fb[i](p->e[idx].b[i]);
+        }
+    }
+    if (p->e[idx].unk130 != 0 && p->e[idx].unk13C != 0) {
+        r1_func_0012C468(p, r1_D_00153870);
+    }
+    if (p->e[idx].unk130 != 0) {
+        r1_func_00127318(p->e[idx].unk128, p->e[idx].unk4);
+    } else if (p->e[idx].unk13C != 0) {
+        r1_func_00127318(p->e[idx].unk128, p->unk81C);
+    } else {
+        r1_func_001272B8(p->e[idx].unk128, p->unk81C, p->e[idx].unk4);
+    }
+}
 
 ASM_FUNC("asm/core", func_0012A3E8);
 

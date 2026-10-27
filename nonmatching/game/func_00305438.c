@@ -1,3 +1,37 @@
+/* OF2 (2026-10-26): 172 of 172 bytes in a -frac2-qcopy unit ("-O2 -G0 -ffunction-sections
+   -frac2-qcopy", src/game/00305438-qcopy.c): retail's two copies both go through $v0 with
+   the addresses in registers ($a1 = &e->b as its own giv, $a3 = &local hoisted), which is
+   the qcopy form, not a compiled TI move. With the indexed loop below (fill and return
+   inside), everything matches except the loop entry: retail enters with `b` to the
+   rotated test (the first `i < 100` is evaluated), ours has the exit test duplicated by
+   jump.c and folded (0 < 100), so the body comes first and the test sits at the bottom.
+   Pointer walks, && tests and int-cast compares were worse. What stops retail's
+   duplicate_loop_exit_test is the open question. */
+#include "common.h"
+typedef int TI128 __attribute__((mode(TI)));
+typedef struct { TI128 a; TI128 b; float f20; void *owner; int pad28, pad2C; } Slot;
+extern void func_0029FCC0(void *a, int b, void *c);
+extern Slot ref_00305438_00[];
+void func_00305438(void *obj, void *other)
+{
+    char *s0 = *(char **)((char *)obj + 0x68);
+    TI128 local;
+    int i;
+    func_0029FCC0(obj, 1, &local);
+    for (i = 0; i < 100; i++) {
+        Slot *e = &ref_00305438_00[i];
+        if (e->owner == 0) {
+            *(int *)(s0 + 0x64) += 1;
+            e->owner = obj;
+            e->f20 = 120.0f;
+            e->b = *(TI128 *)other;
+            e->a = local;
+            return;
+        }
+    }
+}
+
+#if 0
 /* func_00305438 - 172 bytes, 28 places (the boot and every level), retail at
    0x00305438: addiu $sp,$sp,-0x30 ; sd $s1,0x18($sp) ; daddu $a2,$sp,$zero ;
    sd $s2,0x20($sp) ; daddu $s1,$a0,$zero ; sd $ra,0x28($sp) ; daddu $s2,$a1,$zero ;
@@ -83,3 +117,5 @@ void func_00305438(void *obj, void *other)
     *(TI128 *)p = *(TI128 *)s2;
     *(int *)((char *)s0 + 0x64) += 1;
 }
+
+#endif

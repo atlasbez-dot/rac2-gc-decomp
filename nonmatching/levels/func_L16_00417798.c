@@ -1,18 +1,20 @@
+/* Opus big44, 26 October 2026: -O2 -G8 -ffunction-sections, 126/126 words, 122 identical.
+ * D_L16_001B1BB0 is a plain incomplete array (retail builds it with %hi/%lo after the call;
+ * the old sda declaration hoisted it). Left: preheader order only. Retail sets the hoisted
+ * stack-argument constant 1 ($s3) in the call slot, then the table, then the counter 2;
+ * this cc1 emits counter, constant, table. Same family as the probe-loop preheader question.
+ */
+#include "common.h"
 /* Nonmatching reconstruction; game compiler, -O2 -G8 -ffunction-sections.
    us: 16_snivelak: instruction at +0x12c differs.
    us2: 16_snivelak: instruction at +0x12c differs.
    pal: func_L16_00417798 is in neither catalogue of pal.
    Same 504-byte extent after replacing a conditional expression by explicit branches. The constant setup/table-pointer scheduling near +0x12c still differs. Reopen with a measured table-address and loop setup model. */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef int s32;
-typedef float f32;
 extern char D_L16_001B1B70[8] __attribute__((sda));
 extern char D_L16_001B1B68[8] __attribute__((sda));
 extern char D_L16_001B1B60[8] __attribute__((sda));
 extern s32 D_L16_001B1B90 __attribute__((sda));
-extern f32 D_L16_001B1BB0[] __attribute__((sda));
+extern f32 D_L16_001B1BB0[];
 extern s32 func_00282948(char *);
 extern void func_002A7750(char *, s32, s32);
 extern s32 func_002A9640(char *, u32, s32);

@@ -1,24 +1,27 @@
 /*
- * Manual reconstruction retained as a near miss; no linked-build or runtime credit.
- * Prior worker profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Prior worker coverage: US 0/1; US2 0/1; PAL absent from catalogue.
- * These are the recorded worker checks; no fresh compilation was run for retention.
+ * Complete manual reconstruction retained as nonmatching; no exact-C, linked-build
+ * or runtime credit. Fresh worker checks on 2026-10-25, base dcfcd1f90746f3fbba715825d25bf19e88bf875c.
+ * Tested profile: -O2 -G8 -ffunction-sections -mno-split-addresses
+ * Coverage: US: 0/1 placements; US2: 0/1 placements; PAL: absent from both catalogues.
+ * US compiled size: 3296 bytes; retail: 3304 bytes.
+ * Remaining difference: 3296 bytes versus 3304. The target-selection branch shape, float-component staging and later scheduling differ. Native TI copies are deliberately retained because the three observed retail transfers fold LQ/SQ into ordinary scheduling. FC248 is called with all three actual GPR slots.
+ * Reopen only with: A source-backed target-selection/control-flow lifetime that reproduces branch-likely and float staging, with the actual native TI copies and full integer/FP call interfaces unchanged.
+ * Earlier complete variants and command logs are preserved privately.
  */
-
-/* Nonmatching: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. us: func_L02_003D0408: 0 of 1 places match (src/levels/02_maktar_nebula/L02_003D0408.c); us2: func_L02_003D0408: 0 of 1 places match (src/levels/02_maktar_nebula/L02_003D0408.c); pal: absent. Two manual forms; final3304/3304 frame0x80 firstdiff+0x84 targetpointer caching/register. Bothcomplete switches preserved. Verified F0-returning L02_003D1820 (legacysharedCvoid repair requestedfromlead), unsignedlong64dispatch flags, all B60B0fourFP/pointerreturn and real floating constants. Unused currentFC248callerinputs omitted. Reopen on original target/address expression lifetimes. Unused declarations removed; no behavioral change. */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 typedef union { Quad quad; float f[4]; } Vector;
 extern char D_00189E20[] NOT_SDA;
 extern int D_L02_001B0148 __attribute__((sda));
 extern void func_L02_003D10F0(char *), func_L02_003D14F8(char *), func_L02_003D1588(char *), func_L02_003D1610(char *), func_L02_003D1430(char *), func_L02_003D1C38(char *);
-extern void func_L02_003D25C8(char *, float *), func_L02_003D1ED0(char *, Quad *), func_L02_003D2390(char *), func_L02_003FC248(void *);
+extern void func_L02_003D25C8(char *, float *), func_L02_003D1ED0(char *, Quad *), func_L02_003D2390(char *), func_L02_003FC248(void *, int, int);
 extern int func_L02_003D26B0(char *), func_L02_003D1698(char *), func_002B3868(u8 *), func_002B3890(u8 *), func_002A77E0(int), func_L02_003FC0B8(char *), func_L00_003206B8(void *, int), func_L00_0042AB40(void);
 extern char *func_L02_003FC098(char *);
 extern float func_00283248(float, float), func_00282E80(void *, void *), func_00283C80(float, float), func_0029F530(char *);
 /* Retail forwards the final dot product in F0. */
 extern float func_L02_003D1820(char *, char *);
-extern void func_002A7750(u8 *, u8, int), func_002A7470(char *, int, int, int), func_L01_00321178(char *, char *);
+extern void func_002A7750(u8 *, int, int), func_002A7470(char *, int, int, int);
+extern int func_L01_00321178(char *, char *);
 extern int func_002B50E0(char *, int, float), func_002B4FF0(char *, float *, float);
 extern void func_002B5258(char *), func_002B5278(u8 *, float), func_0029F978(u8 *, u32, u8 *), func_00282A60(char *, int, int), func_002A7A00(float *, float, float);
 extern unsigned long func_002B1C20(void *, void *);
@@ -28,6 +31,7 @@ extern void *func_002B60B0(u8 *, float, float, float, float);
 void func_L02_003D0408(char *self) {
     Vector target, scratch;
     char *state, *owner, *point;
+    char *targetObject;
     float heading, distance, turn, time, saved, targetX, targetY;
     unsigned long flags;
     int stateByte = (u8)self[0x20], choice;
@@ -41,15 +45,15 @@ void func_L02_003D0408(char *self) {
         *(char **)(state + 0x2E0) = 0;
         if ((u8)self[0x95] != 2 && (u8)self[0x95] != 7 && (u8)self[0x95] != 1) func_L02_003D14F8(self);
     }
-    point = *(char **)(state + 0x2E0);
-    if (!point) {
+    targetObject = *(char **)(state + 0x2E0);
+    if (targetObject) {
+        target.quad = *(Quad *)(targetObject + 0x10);
+        targetX = *(float *)(*(char **)(state + 0x2E0) + 0x10);
+        targetY = *(float *)(*(char **)(state + 0x2E0) + 0x14) - *(float *)(self + 0x14);
+    } else {
         target.quad = *(Quad *)(D_00189E20 + 0x80);
         targetX = *(float *)(D_00189E20 + 0x80);
         targetY = *(float *)(D_00189E20 + 0x84) - *(float *)(self + 0x14);
-    } else {
-        target.quad = *(Quad *)(point + 0x10);
-        targetX = *(float *)(*(char **)(state + 0x2E0) + 0x10);
-        targetY = *(float *)(*(char **)(state + 0x2E0) + 0x14) - *(float *)(self + 0x14);
     }
     heading = func_00283248(targetX - *(float *)(self + 0x10), targetY);
     distance = func_00282E80(self + 0x10, &target);
@@ -102,7 +106,7 @@ void func_L02_003D0408(char *self) {
             func_002B0A68(self, 0x20, (int)&scratch, 0xFF, 3.0f, 6.0f, 3.0f, 6.0f);
         }
         if ((flags & 1) || (*(float *)(state + 0x20) <= 0 && *(u16 *)(self + 0x96) > 60)) {
-            *(int *)(self + 0x98) = 0; func_L02_003FC248(self); func_L01_003E9CF8(self, 0, func_L02_003D2390);
+            *(int *)(self + 0x98) = 0; func_L02_003FC248(self, 0, -1); func_L01_003E9CF8(self, 0, func_L02_003D2390);
         }
         break;
     }
@@ -196,5 +200,3 @@ face_target:
     }
     func_L02_003D1430(self);
 }
-
-/* Historical screening only; superseded by the measured reconstruction above. */

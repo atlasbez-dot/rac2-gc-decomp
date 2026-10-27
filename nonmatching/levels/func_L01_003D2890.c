@@ -1,13 +1,17 @@
-/* Retained manual C reconstruction; not linked and not credited as matching.
- * Checked source: src/levels/01_oozla/L01_003D2890.c
- * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
- * Retail US extent: 932 bytes.
- * us: 0/1 (exit 1, 940 compiled bytes); us2: 0/1 (exit 1, 940 compiled bytes); pal: catalogue absent (exit 1).
- * Residual: 940/932 bytes. The frame is 0x70. Two list cursors improve the frame but alter allocation and common-field reloads. The fifth argument to the spawn helper is preserved.
- * Reopen only with: A measured source type/lifetime model for the two validation lists and current state data; retain the complete pool-record writes and helper index ABI.
- * No complete linked build was run for this candidate.
+/* Bounded manual reconstruction, 2026-10-25; not linked.
+ * Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 940/932 bytes; us: 0/1 placements; us2: 0/1 placements; pal: absent from catalogue.
+ * The complete launch-point/target captures use qcopy and the real pool field clear uses qzero. The
+ * fifth spawn input, both validation lists, timer widths and all 64-byte pool-record writes are
+ * preserved. Two cursor/state live ranges and reload scheduling still differ.
+ * Reopen with actual validation-list and pool/state lifetime evidence, preserving every record
+ * field and real allocation return.
+ * Original variants, retail context and allocator diagnostics remain private.
+ * No exact-C, linked-build or runtime credit is claimed.
  */
-#include "include_asm.h"
+#include "common.h"
+
+
 typedef unsigned int Quad __attribute__((mode(TI)));
 typedef union { Quad quad; float value[4]; } LaunchVector;
 typedef struct {
@@ -76,8 +80,8 @@ void func_L01_003D2890(unsigned char *self)
             }
             FIELD(0x3c)++;
             i = ((int *)(data + 0x18))[HALF(0x30)];
-            point = *(LaunchVector *)(D_L01_001B264C + i * 128 + 0x30);
-            target = *(LaunchVector *)(D_L01_001B264C + i * 128 + 0x70);
+            qcopy(&point, D_L01_001B264C + i * 128 + 0x30);
+            qcopy(&target, D_L01_001B264C + i * 128 + 0x70);
             func_L01_003D25B8(self, &point, &target, HALF(0x32) + 0xa9e, HALF(0x30));
             FIELD(0x28) = FIELD(0);
             D_L01_001B255C[FIELD(8) * 256 + 0xbc] = 1;
@@ -95,7 +99,7 @@ void func_L01_003D2890(unsigned char *self)
     if (self[0x20] == 2 && FIELD(0x38) != -1 && func_002ACBC8(D_00189EA0, FIELD(0x38))) {
         if (POOL == 0) {
             POOL = func_L00_002D70A0(5);
-            *(Quad *)((unsigned char *)POOL + 0x20) = 0;
+            qzero((unsigned char *)POOL + 0x20);
             *(float *)((unsigned char *)POOL + 0x20) = -1.0f;
             POOL->f24 = 1;
             POOL->f4 = 6.0f;

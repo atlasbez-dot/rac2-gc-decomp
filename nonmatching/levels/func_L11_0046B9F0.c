@@ -1,3 +1,13 @@
+/* Retained readable reconstruction; NOT MATCHING and no exact-C credit.
+ * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier
+ * Fresh local measure: 536/536 bytes; 0/2 USA v1.01 placements; first mismatch +0x144.
+ * Evidence: Approved aligned state copies and the true callback-function pointer declaration are retained. The tail keeps TI transfers: qcopy adds a loop-padding nop. Callback no-split-addresses gave 544 bytes. Tail pointer allocation/induction and final store scheduling still differ.
+ * Reopen: Obtain a measured loop/allocator witness for the existing tail transfers; preserve the dynamic source count and 640-byte destination stride.
+ * Older notes below are historical. Equal size and allocator diagnostics do
+ * not establish relocation/binding qualification or linked equality.
+ */
+#include "common.h"
+
 /* 2026-10-23 readable reconstruction. Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
  * 536/536 bytes, 0/2 placements in us and us2; not carried by pal. First mismatch +0x144: tail-copy register allocation and pointer induction; final state-store order also differs. Six trials covered sda, comparison order, branch wording, indexed versus explicit pointer loops, and -g. Reopen with an equivalent pointer-loop witness.
  * Earlier screening-only commentary is preserved below as historical context.
@@ -24,9 +34,9 @@ extern int func_002A77E0(int);
 extern void func_00282CC0(void *, void *, void *);
 extern void func_L11_0046BC08(void *);
 extern void func_L11_0046BD18(char *);
-extern void func_L00_002E6EF8(void *, void *);
+extern void func_L00_002E6EF8(void (*)(void *), void *);
 extern int func_00291308(void *, int, float, float);
-extern char ref_L11_0046B9F0_00[];
+extern void ref_L11_0046B9F0_00(void *);
 
 void func_L11_0046B9F0(char *object)
 {
@@ -40,14 +50,14 @@ void func_L11_0046B9F0(char *object)
     if (*(int *)(state + 0x38) >= 20) *(int *)(state + 0x3c) = 1;
     if (*(int *)(state + 0x3c) || D_001A79F0 == 4 || D_001A79F0 == 11) {
         if (*(int *)(state + 0x38) >= 20 && 85.0f < *(float *)(D_00189EA0 + 8)) return;
-        *(Vec128_L11 *)state = *(Vec128_L11 *)(object + 0x10);
-        *(Vec128_L11 *)(state + 0x10) = *(Vec128_L11 *)state;
+        qcopy(state, object + 0x10);
+        qcopy(state + 0x10, state);
         *(float *)(state + 0x20) += (6.0f - *(float *)(state + 0x20)) * 0.07f + 12.0f;
         position[0] = 0.0f;
         position[1] = *(float *)(state + 0x20);
         position[2] = 0.0f;
         func_00282CC0(state + 0x10, state, position);
-        *(Vec128_L11 *)position = *(Vec128_L11 *)(state + 0x10);
+        qcopy(position, state + 0x10);
         if (D_001A79F0 != 4 && D_001A79F0 != 11) D_L11_001B25A0 = func_002A77E0(20);
         else D_L11_001B25A0 = 20;
         func_L11_0046BC08(object);

@@ -33,7 +33,6 @@ typedef struct {
 } Vec16_Fc936841d;
 #endif
 
-INCLUDE_ASM("asm/game", func_0030F7B0);
 
 
 extern unsigned char D_0018C0DF;
@@ -200,15 +199,12 @@ int func_00312B58(Level16VendorMoby *moby) {
 }
 
 
-INCLUDE_ASM("asm/game", func_00312B70);
 
 
-INCLUDE_ASM("asm/game", func_00312D58);
 
 
 int func_00312E10(unsigned char *p) { return p[0x20] == 1; }
 
-INCLUDE_ASM("asm/game", func_00312E20);
 
 
 INCLUDE_ASM("asm/game", func_00312EB0);
@@ -235,7 +231,6 @@ void func_00313548(unsigned char *object, float *out, int index)
     out[2] += *(float *)data;
 }
 
-INCLUDE_ASM("asm/game", func_00313600);
 
 /* func_00313678 uses the profile in 0030F7B0-qcopy.c. */
 
@@ -245,7 +240,6 @@ INCLUDE_ASM("asm/game", func_003146C0);
 
 INCLUDE_ASM("asm/game", func_00314CF8);
 
-INCLUDE_ASM("asm/game", func_00314E28);
 
 INCLUDE_ASM("asm/game", func_00314FD0);
 
@@ -296,7 +290,7 @@ void func_00316B40(char *p)
     *(float *)(p + 60) = 1.0f;
 }
 
-INCLUDE_ASM("asm/game", func_00316BC8);
+/* func_00316BC8 is defined in 00316BC8-qcopy.c. */
 
 void func_00316DA0(Vec16_Fc936841d *object, int index)
 {

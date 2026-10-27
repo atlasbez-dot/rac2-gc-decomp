@@ -72,7 +72,18 @@ void func_L02_003DB870(char *arg0, int arg1) {
     *(int *)(*(char **)(arg0 + 0x68) + 0x264) = arg1;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003DB880);
+/* Same body as func_L02_003D4990, with this function's own callees. */
+void func_L02_003DB880(char *arg0) {
+    char *state = *(char **)(arg0 + 0x68);
+
+    if (*(short *)(state + 0x280) != 0)
+        return;
+    (*(short *)(state + 0x282))++;
+    while (*(float *)(state + 0x20) <
+           (float)*(short *)(state + 0x24) * (3.0f - (float)*(short *)(state + 0x282)) * 0.33333334f)
+        (*(short *)(state + 0x282))++;
+    *(short *)(state + 0x280) = 1;
+}
 
 void func_L02_003DB938(char *arg0) {
     char *state = *(char **)(arg0 + 0x68);
@@ -129,11 +140,10 @@ void func_L02_003DBE60(char *arg0) {
 
 /* func_L02_003DBFD8 is defined in L02_003DB310-g8.c (it reads D_L02_001B0530 through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L02_003DEDA0);
 
 INCLUDE_ASM("asm/levels", func_L02_003E6D70);
 
-INCLUDE_ASM("asm/levels", func_L02_003E7370);
+/* func_L02_003E7370 is defined in L02_003E7370-g8.c. */
 
 extern int func_002B3868(char *);
 extern int func_00282948(int *);
@@ -332,7 +342,6 @@ void func_L02_003EA488(char *arg0) {
         (*(unsigned short *)(arg0 + 0x34) & 0xEFFF) | 0x43;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003EA4E0);
 
 /* func_L02_003EAA68 is matched in L02_003EAA68.c (built with -frac2-qcopy -frac2-qcopy-barrier -frac2-zero-ti-barrier). */
 
@@ -350,7 +359,55 @@ INCLUDE_ASM("asm/levels", func_L02_003EB258);
 
 /* func_L02_003EEAD8 is matched in L02_003EEAD8.c (built with -g). */
 
-INCLUDE_ASM("asm/levels", func_L02_003EEC58);
+typedef struct {
+    float x, y, z, w;
+} V4;
+
+typedef struct {
+    int count;
+    int pad[3];
+    V4 pts[1];
+} Entry;
+
+typedef struct {
+    int id;
+    char pad04[0x2C];
+    int idx;
+    float t;
+} State;
+
+extern char *D_L02_001FF1C0[];
+extern char D_00189EA0[];
+extern float func_00282E80(char *, char *);
+
+float func_L02_003EEC58(char *arg0) {
+    State *state = *(State **)(arg0 + 0x68);
+    Entry *entry = (Entry *)D_L02_001FF1C0[state->id];
+    float cur = func_00282E80(D_00189EA0, (char *)&entry->pts[state->idx]);
+    float d;
+
+    if (state->idx < entry->count - 1) {
+        d = func_00282E80(D_00189EA0, (char *)&entry->pts[state->idx + 1]);
+        if (d < cur) {
+            state->t += entry->pts[state->idx].w;
+            if (state->t > 14.0f)
+                state->t = 14.0f;
+            state->idx += 1;
+            return d;
+        }
+    }
+    if (state->idx > 0) {
+        d = func_00282E80(D_00189EA0, (char *)&entry->pts[state->idx - 1]);
+        if (d < cur) {
+            state->t -= entry->pts[state->idx].w;
+            if (state->t < 0.0f)
+                state->t = 0.0f;
+            state->idx -= 1;
+            return d;
+        }
+    }
+    return cur;
+}
 
 extern float func_00282C48(float);
 extern float func_00283248(float, float);
@@ -455,7 +512,6 @@ int func_L02_003EEFB8(char *arg0) {
     return 0;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003F0798);
 
 extern float func_002A7878(float, float);
 extern int func_002A77E0(int);
@@ -594,7 +650,7 @@ void func_L02_003F1578(char *arg0) {
 
 extern void func_002A91F0(char *, char *);
 
-INCLUDE_ASM("asm/levels", func_L02_003F1608);
+/* func_L02_003F1608 is defined in L02_003F1608.c. */
 
 /* func_L02_003F16A8 is defined in L02_003DB310-g8.c (this unit has no $gp access for it). */
 
@@ -729,7 +785,7 @@ void func_L02_003F18E8(char *arg0) {
         (*(unsigned short *)(arg0 + 0x34) & 0xEFFF) | 0x47;
 }
 
-INCLUDE_ASM("asm/levels", func_L02_003F1A88);
+/* func_L02_003F1A88 is defined in L02_003F1A88.c. */
 
 void func_L02_003F1B70(char *arg0) {
     char *state = *(char **)(arg0 + 0x68);

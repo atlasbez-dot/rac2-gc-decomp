@@ -1,31 +1,23 @@
-/*
- * Retained handwritten near miss; historical evidence only.
- * No linked-image equality or complete retail semantics is established.
- * Compiler: game EE-GCC 2.9-ee-991111b (project profile).
- * Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Reported final C / retail: 3728 / 3716 bytes; size equality is not a match.
- * us: 0/1 placements; 3728/3716 bytes.
- * us2: not run / not reported.
- * pal: not run / not reported.
- * Residual: Retained complete readable C. Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier. Seven complete-source trials produced 3536, 3664, 3696, 3720 and 3728 bytes against 3716, US 0/1. The retail frame is 0x150. Charge/age fields are integer counters despite the decompiler float view. Existing 16-byte effect blocks and 12-byte color view extents are preserved. Substantial register allocation/control-flow/scheduling differences remain; equal size would not prove a match. Some ASM emitter interfaces still require independent qualification. Reopen only with qualified APIs and a meaningful source-layout hypothesis.
- * Reopening condition: Reopen only after independent source, data-layout, ABI or compiler evidence specifically explains the residual above; then test that single hypothesis. Do not repeat tied source forms or flag sweeps.
- * Where listed, tools/check.py measurements predate retention; no compilation was rerun for this copy.
+/* Retained complete C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections.
+ * Compiled 3720 bytes; retail 3716 bytes.
+ * us: 0/1 placements match (exit 1).
+ * us2: 0/1 placements match (exit 1).
+ * pal: canonical name absent; no match credit.
+ * Remaining: Integer charge/age fields, complete effect vectors, the 48-byte rotation output and
+ * existing 16-byte effect blocks/12-byte color view remain. Every color shift first converts its
+ * component to u32. The absolute LD/SD at D_L23_001A8AC8 is a scalar 64-bit field view,
+ * replacing the old two-element extent; this reduces 3728 to 3720 bytes while frame 0x150
+ * agrees. Emitter ownership globals and random-vector output use pointers; the 82 static call
+ * sites remain but phase order and allocation differ.
+ * Reopen: Independent emitter/particle phase lifetime evidence preserving the actual
+ * pointer/FP/stack contracts and all true data widths.
  */
 
-/* Retained complete readable C. Profile: -O2 -G8 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
- * Seven complete-source trials produced 3536, 3664, 3696, 3720 and 3728 bytes against 3716, US 0/1.
- * The retail frame is 0x150.
- * Charge/age fields are integer counters despite the decompiler float view.
- * Existing 16-byte effect blocks and 12-byte color view extents are preserved.
- * Substantial register allocation/control-flow/scheduling differences remain; equal size would not prove a match.
- * Some ASM emitter interfaces still require independent qualification.
- * Reopen only with qualified APIs and a meaningful source-layout hypothesis.
- */
-typedef unsigned char u8;
-typedef unsigned int u32;
+#include "common.h"
 typedef int Quadword __attribute__((mode(TI)));
 typedef struct ProjectileEffectState {
-    float velocity[4];
+    float velocity[4] __attribute__((aligned(16)));
     int charge_ticks;
     int age_ticks;
     u8 pad_18[0x2C - 0x18];
@@ -50,13 +42,14 @@ typedef struct PlayerView {
 } PlayerView;
 extern PlayerView D_00189E20;
 extern int D_L23_001A8FF0;
-extern int D_L23_001B1954 __attribute__((sda)), D_L23_001B1958 __attribute__((sda));
+extern u8 *D_L23_001B1954 __attribute__((sda)), *D_L23_001B1958 __attribute__((sda));
 extern int D_L23_001B194C __attribute__((sda)), D_L23_001B1950 __attribute__((sda));
 extern float D_L23_001B1934 __attribute__((sda)), D_L23_001B1938 __attribute__((sda));
 extern int D_L23_001A8AB0[4] __attribute__((sda));
 extern int D_L23_001A8AC0[4] __attribute__((sda));
 extern u32 D_L23_001A8AC4[3] __attribute__((sda));
-extern long long D_L23_001A8AC8[2] __attribute__((sda));
+/* The measured absolute LD/SD is the 64-bit field inside the 16-byte effect block. */
+extern u64 D_L23_001A8AC8 NOT_SDA;
 extern u32 D_L23_001B22C8;
 extern u8 D_L23_001C87C0[];
 extern u8 D_L23_001C4B00[];
@@ -85,9 +78,9 @@ extern void func_00291450(int);
 extern void func_0029F338(void *);
 extern int func_00277F48(void *, int, void *, void *, float);
 extern void func_002A9850(void *, Vec16_F5621621c *, int *, int, int, int, int, int, float, float, float);
-extern void func_0032C700(void *, int, int, int, int, int, int, int, float, float, int, int, int, int);
+extern void *func_0032C700(void *, int, int, int, int, int, int, int, float, float, int, int, int, void *);
 extern void func_L04_00358868(void *, u32, int, int, float);
-extern void func_002A7988(int, float, float);
+extern void func_002A7988(float *, float, float);
 extern void func_002BCB00(void *, void *, u32, u32, int, int, int, int, int, float);
 extern u8 *func_L08_0034A078(void *, void *, int, void *);
 extern int func_002A77E0(int);
@@ -95,10 +88,10 @@ extern void func_L00_00325600(void *, void *, void *);
 #define LIGHT ((float *)(D_L23_001C87C0 + vars->light_index * 0x20))
 
 void func_L23_004236B8(u8 *object) {
-    float particle[4], velocity[4], offset[4], motion[4];
-    float rotation[12], perpendicular[4], scaled[4], normalized[4];
+    float particle[4] __attribute__((aligned(16))), velocity[4], offset[4], motion[4];
+    float rotation[12] __attribute__((aligned(16))), perpendicular[4], scaled[4], normalized[4];
     ProjectileEffectState *vars = *(ProjectileEffectState **)(object + 0x68);
-    int *word = &D_L23_001B1958;
+    u8 **word = &D_L23_001B1958;
     int i, red, green, blue, alpha, ticks, hit, count, side;
     u8 *emitter;
     float strength, spread, radius, extent, value, sign;
@@ -136,7 +129,7 @@ charge: {
             *(Quadword *)velocity = 0;
             velocity[0] = func_002A7878(-1.0f, 1.0f);
             velocity[1] = func_002A7878(-1.0f, 1.0f);
-            *(Quadword *)particle = *(Quadword *)velocity;
+            qcopy(particle ,velocity);
             particle[2] = func_002A7878(-1.0f, 1.0f);
             velocity[2] = particle[2];
             if (vars->kind == 0) {
@@ -155,16 +148,16 @@ charge: {
             radius = func_002A7878(15.0f, 30.0f);
             func_00282F20(particle, particle, radius);
             func_00282CD8(velocity, particle, ((float *)(object + 0x10)));
-            func_L22_003398B8(((green << 8) | 0x7F000000) | (red << 16) | blue, particle, object);
+            func_L22_003398B8((((u32)green << 8) | 0x7F000000) | ((u32)red << 16) | blue, particle, object);
             ++i;
         }
         if (vars->charge_ticks < 50) {
             alpha = D_L23_001A8AC4[0] >> 24;
-            if (D_L23_001A8AC8[0] == 0 && alpha == 255) alpha = 37;
+            if (D_L23_001A8AC8 == 0 && alpha == 255) alpha = 37;
             ticks = alpha + 1;
             if (alpha > 35) ticks = 37;
-            D_L23_001A8AC8[0] = 0x1F00000042LL;
-            D_L23_001A8AC4[0] = (D_L23_001A8AC4[0] & 0xFFFF00) | (ticks << 24);
+            D_L23_001A8AC8 = 0x1F00000042LL;
+            D_L23_001A8AC4[0] = (D_L23_001A8AC4[0] & 0xFFFF00) | ((u32)ticks << 24);
         } else D_L23_001A8AC4[0] |= 0xFF000000;
         if (vars->light_index == -1) {
             if (!(D_L23_001B22C8 & 3)) vars->light_index = func_00291308((Quadword *)((float *)(object + 0x10)), 0, 0, 0);
@@ -234,9 +227,9 @@ flight:
         if (vars->kind == 0) func_00282D30(motion, vars->custom_velocity, 1.0f);
         else func_00282D30(motion, vars->custom_velocity, 0.6666667f);
         func_00282F20(normalized, motion, 1.0f);
-        *(Quadword *)(object + 0xC0) = *(Quadword *)normalized;
+        qcopy((object + 0xC0) ,normalized);
     }
-    *(Quadword *)vars = *(Quadword *)motion;
+    qcopy(vars ,motion);
     if (vars->light_index != -1) {
         LIGHT[7] *= 0.39999998f;
         if (LIGHT[7] < 0.0001f) {
@@ -249,7 +242,7 @@ flight:
     if (position[0] < 2.0f || position[0] > 1021.0f || position[1] < 2.0f || position[1] > 1021.0f || position[2] < 2.0f || position[2] > 1021.0f) goto retire;
     if (vars->kind == 0) {
         hit = func_00277F48(position, 16, *(u8 **)(object + 0xB8), 0, radius);
-        *(Quadword *)offset = *(Quadword *)position;
+        qcopy(offset ,position);
         func_002A9850(object, (Vec16_F5621621c *)offset, (int *)D_L23_001C4B00, hit, 0, 0x8B0007, 2, 1, D_L23_001B3704, 1.0f, 1.0f);
         if (hit) func_0032C700(position, 0, 25, 20, 20, 20, 45, 1, 1.0f, 20.0f, 1, 0, 0, 0);
         value = extent * 105000.0f;
@@ -258,15 +251,15 @@ flight:
         red = func_002A7820(15, 47);
         green = func_002A7820(47, 63);
         blue = func_002A7820(63, 127);
-        func_L04_00358868(object, ((green << 8) | 0x4F000000) | (red << 16) | blue, count, -1, value);
-        func_002A7988((int)particle, extent * 0.016666668f, (extent + extent) * 0.016666668f);
+        func_L04_00358868(object, (((u32)green << 8) | 0x4F000000) | ((u32)red << 16) | blue, count, -1, value);
+        func_002A7988(particle, extent * 0.016666668f, (extent + extent) * 0.016666668f);
         red = func_002A7820(15, 47);
         green = func_002A7820(31, 47);
         blue = func_002A7820(63, 127);
-        func_002BCB00(position, particle, ((green << 8) | 0x7F000000) | (red << 16) | blue, 0x4F1F1F7F, 45, 1, *D_L23_002001EC, -1, 0, 210000.0f);
+        func_002BCB00(position, particle, (((u32)green << 8) | 0x7F000000) | ((u32)red << 16) | blue, 0x4F1F1F7F, 45, 1, *D_L23_002001EC, -1, 0, 210000.0f);
     } else {
         hit = func_00277F48(position, 16, object, 0, radius);
-        *(Quadword *)offset = *(Quadword *)position;
+        qcopy(offset ,position);
         func_002A9850(object, (Vec16_F5621621c *)offset, (int *)D_L23_001C4B00, hit, 0, 0x8B0000, 2, 1, D_L23_001B3704, 1.0f, 1.0f);
         if (hit) func_0032C700(position, 0, 25, 20, 20, 20, 45, 1, 1.0f, 20.0f, 1, 0, 0, 0);
         value = extent * 105000.0f;
@@ -275,17 +268,17 @@ flight:
         red = func_002A7820(63, 127);
         green = func_002A7820(47, 63);
         blue = func_002A7820(15, 47);
-        func_L04_00358868(object, ((green << 8) | 0x4F000000) | (red << 16) | blue, count, -1, value);
+        func_L04_00358868(object, (((u32)green << 8) | 0x4F000000) | ((u32)red << 16) | blue, count, -1, value);
         spread = extent + extent;
-        func_002A7988((int)particle, extent * 0.016666668f, spread * 0.016666668f);
+        func_002A7988(particle, extent * 0.016666668f, spread * 0.016666668f);
         red = func_002A7820(63, 127);
         green = func_002A7820(47, 63);
         blue = func_002A7820(15, 47);
-        func_002BCB00(position, particle, ((green << 8) | 0x7F000000) | (red << 16) | blue, 0x4F7F4F2F, 45, 1, *D_L23_002001EC, -1, 0, 210000.0f);
+        func_002BCB00(position, particle, (((u32)green << 8) | 0x7F000000) | ((u32)red << 16) | blue, 0x4F7F4F2F, 45, 1, *D_L23_002001EC, -1, 0, 210000.0f);
         i = 5;
         do {
-            func_002A7988((int)particle, extent * 0.016666668f, spread * 0.016666668f);
-            func_002A7988((int)velocity, 0, extent * 0.5f);
+            func_002A7988(particle, extent * 0.016666668f, spread * 0.016666668f);
+            func_002A7988(velocity, 0, extent * 0.5f);
             func_00282CD8(offset, velocity, position);
             emitter = func_L08_0034A078(velocity, particle, 127, object);
             --i;
@@ -321,6 +314,6 @@ retire:
         func_002E59F8(D_L23_001B194C);
         D_L23_001B194C = -1;
     }
-    func_0029F338((void *)*word);
+    func_0029F338(*word);
     *word = 0;
 }

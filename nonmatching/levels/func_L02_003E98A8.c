@@ -1,8 +1,22 @@
+/*
+ * Updated manual-C near miss, 2026-10-25.
+ * Measured unit: src/levels/02_maktar_nebula/L02_003E98A8-g8.c
+ * Profile: -O2 -G8 -ffunction-sections -fno-strength-reduce
+ * Actual release coverage: US 0/1 (exit1); US2 0/1 (exit1); PAL absent (exit1).
+ * Current residual: 784/776 bytes. The source vector is now an incomplete view rather than
+ * a one-byte object. GP versus absolute address formation, saved-register assignment and
+ * nested strip loop allocation differ. The 64-byte inverse matrix and both 20-point strips
+ * are retained.
+ * Reopen only for: Independent global extent/storage evidence and a real actor/state/strip
+ * lifetime model; no false size to enable GP addressing.
+ * Older notes below are historical. Marker and trial-only profiles were restored.
+ */
+
 /* Nonmatching: USA v1.01: 0/1 carrying places; USA v2.00: 0/1 carrying places; PAL: absent. Final C 776/776 retail bytes. game -O2 -G8 -frac2-qcopy -frac2-qcopy-barrier -fno-strength-reduce. USA v1.01 and v2.00: 0/1 places, 776/776 bytes, first difference +0x14 (saved-register allocation). Absent from PAL catalogue. Seven measured trials: counted/unsigned/do loops and explicit next-side value. Ordinary strength reduction yields 752 or 792 bytes; disabling it and carrying nextSide reaches retail size. Reopen with a register-allocation/source-shape hypothesis; no linked build was run.  */
 #include "common.h"
 typedef int Quad __attribute__((mode(TI)));
 extern char *D_L02_001B359C;
-extern char D_L02_001B0BC0 __attribute__((sda));
+extern char D_L02_001B0BC0[] __attribute__((sda));
 extern float D_L02_001B0C68 __attribute__((sda));
 extern float D_L02_001B0C6C __attribute__((sda));
 extern int D_L02_001B0C50 __attribute__((sda));
@@ -36,7 +50,7 @@ void func_L02_003E98A8(char *actor) {
     *(char **)(state + 0x4C) = record;
     func_00283098(state + 0x20, &D_L02_001B0BC0, actor + 0xC0);
     func_00282CC0(state + 0x20, state + 0x20, actor + 0x10);
-    *(Quad *)(state + 0x30) = *(Quad *)(record + 0x10);
+    qcopy(state + 0x30, record + 0x10);
     D_L02_001B0C68 -= D_L02_001B0C6C;
     if (D_L02_001B0C68 <= -8.0f) D_L02_001B0C68 += 8.0f;
     color0 = (D_L02_001B0C50 << 24) | D_L02_001B0C74;

@@ -1,4 +1,13 @@
+/* Reconstruction; not linked. Profile: -O2 -G0 -ffunction-sections -frac2-qcopy -frac2-qcopy-barrier.
+ * 26 October 2026 (M14): 568/580 bytes (was 556). Retail's slot loop is not loop-optimised (the
+ * index check is recomputed, 1 is rematerialised in the loop, no reversal), which a goto loop
+ * gives; direction as a union so it is allocated first (sp+0, impact at sp+0x10); 1/600 is
+ * 0x3ADA740F; the remove flag as select-style stores. Left: retail keeps the table base and a
+ * second slot copy in callee-saved registers (eight saved, 0x90 frame) and holds 1 in s3 for the
+ * impact stores.
+ */
 typedef int Quad __attribute__((mode(TI)));
+typedef union { Quad q; float f[4]; } Vec;
 typedef unsigned char u8;
 typedef struct { Quad vector; int owner, flags; u8 kind, active; unsigned short id; float delay; int enabled; } Impact;
 typedef struct { int timer, first, second; float phase, damage; char *object; int owner, hold; } Slot;
@@ -21,7 +30,7 @@ extern void func_L00_003F9040(char *);
 
 void func_L00_003F87B0(char *object)
 {
-    Quad direction;
+    Vec direction;
     Impact impact;
     Slot *slot;
     int i;
@@ -30,10 +39,17 @@ void func_L00_003F87B0(char *object)
     int color;
 
     *(Quad *)(object + 0x10) = D_00189E20;
-    for (i = 0, slot = D_L00_002533B0; i < 30; i++, slot++) {
+    slot = D_L00_002533B0;
+    i = 0;
+loop:
+    {
         if (D_L00_002533B0[i].object != 0) {
             slot->phase = func_00283B98(slot->phase, 0.20943955f);
-            remove = (*(int *)(slot->object + 0x98) == 0 || *(signed char *)(slot->object + 0x20) < 0);
+            remove = 0;
+            if (*(signed char *)(slot->object + 0x20) < 0)
+                remove = 1;
+            if (*(int *)(slot->object + 0x98) == 0)
+                remove = 1;
             health = (float *)func_002AB1F0((u8 *)slot->object);
             if (health == 0) {
                 remove = 1;
@@ -42,10 +58,10 @@ void func_L00_003F87B0(char *object)
                 if (*health <= 0.0f) {
                     remove = 1;
                     func_00282D30(&direction, slot->object + 0xC0, -1.0f);
-                    func_00282F20(&impact, &impact, 0.0016666667f);
+                    func_00282F20(&impact, &impact, 0.0016666668f);
                     *(int *)(object + 0xB8) = slot->owner;
                     func_002A8C00((char *)&impact, (int)object, 0x810000, 0.001f, &direction);
-                    impact.vector = direction;
+                    impact.vector = direction.q;
                     *(float *)((char *)&impact.vector + 12) = 5627.925f;
                     impact.active = 1;
                     impact.kind = 5;
@@ -66,6 +82,10 @@ void func_L00_003F87B0(char *object)
                 slot->hold--;
             }
         }
+        slot++;
+        i++;
+        if (i < 30)
+            goto loop;
     }
     ref_L00_003F87B0_00(func_L00_003F9040, object);
 }

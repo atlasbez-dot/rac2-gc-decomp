@@ -76,7 +76,6 @@ INCLUDE_ASM("asm/levels", func_L12_003B5240);
 INCLUDE_ASM("asm/levels", func_L12_003BE7D0);
 
 
-INCLUDE_ASM("asm/levels", func_L12_003CC140);
 
 INCLUDE_ASM("asm/levels", func_L12_003D4110);
 
@@ -118,7 +117,50 @@ void func_L12_003E1AA8(s32 a0) {
     } while (*p++ >= 0);
 }
 
-INCLUDE_ASM("asm/levels", func_L12_003E1B28);
+extern s32 *D_L12_001FEAC0[];
+extern s32 func_002A8AF0(void *, void *, s32);
+extern void func_002A7470(void *, s32, s32, s32);
+extern void func_002A7750(void *, s32, s32);
+
+u8 *func_L12_003E1B28(s32 index, u8 *obj)
+{
+    u16 *list = D_L12_001FB960[index];
+    u16 *entry;
+    u8 *found = 0;
+
+    if (list == 0) {
+        return 0;
+    }
+    entry = list;
+    do {
+        u8 *rec = (u8 *)D_L12_001B2E9C + (*entry & 0x7FFF) * 0x100;
+
+        if (*(s16 *)(rec + 0xAA) == 0xFB4) {
+            u8 *vars = *(u8 **)(rec + 0x68);
+            s32 *zone = D_L12_001FEAC0[*(s32 *)(vars + 0x138)];
+
+            if (func_002A8AF0(obj + 0x10, zone + 4, zone[0]) != 0) {
+                if (rec[0x20] == 9) {
+                    *(u16 *)(rec + 0x34) = (*(u16 *)(rec + 0x34) & 0xFFBE) | 0x1000;
+                    *(s32 *)(rec + 0x98) = *(s32 *)(*(u8 **)(rec + 0x24) + 0x10);
+                    if (rec[0x43] != 5) {
+                        func_002A7470(rec, 5, 0, 10);
+                    }
+                    func_002A7750(rec, 10, -1);
+                } else if (rec != 0 && rec[0x20] != 0xFE && rec[0x20] != 0xFD) {
+                    func_002A7750(rec, 11, 4);
+                    if (rec[0x43] != 7) {
+                        func_002A7470(rec, 7, 0, 0x14);
+                    }
+                }
+                *(u8 **)(vars + 0x374) = obj;
+                found = rec;
+                break;
+            }
+        }
+    } while ((s16)*entry++ >= 0);
+    return found;
+}
 
 INCLUDE_ASM("asm/levels", func_L12_003EB470);
 
@@ -136,7 +178,7 @@ INCLUDE_ASM("asm/levels", func_L12_00412898);
 
 INCLUDE_ASM("asm/levels", func_L12_00412E50);
 
-INCLUDE_ASM("asm/levels", func_L12_00413108);
+/* func_L12_00413108 is defined in L12_00413108-por.c. */
 
 INCLUDE_ASM("asm/levels", func_L12_004135A8);
 

@@ -43,7 +43,6 @@ INCLUDE_ASM("asm/levels", func_L26_0038BF40);
 
 INCLUDE_ASM("asm/levels", func_L26_00391520);
 
-INCLUDE_ASM("asm/levels", func_L26_003BFF58);
 
 INCLUDE_ASM("asm/levels", func_L26_003D4590);
 
@@ -65,12 +64,9 @@ extern char D_L26_001A8F20[];
 
 /* func_L26_003DC128 lives in the -g8 sibling file (it reaches a global through $gp). */
 
-INCLUDE_ASM("asm/levels", func_L26_003DF680);
-
 INCLUDE_ASM("asm/levels", func_L26_003DF7E8);
 
 INCLUDE_ASM("asm/levels", func_L26_004070F8);
 
 INCLUDE_ASM("asm/levels", func_L26_0040C8A8);
 
-INCLUDE_ASM("asm/levels", func_L26_0041C598);
