@@ -1,5 +1,14 @@
 #include "include_asm.h"
 
+typedef struct { int colors[6]; } Colors1043;
+extern Colors1043 ref_L00_002AC728_00, ref_L00_002AC728_01;
+extern float ref_L00_002AC728_02[];
+extern int func_002A77E0(int);
+extern void func_002BBCB0(void *, void *, int, int, float, int, int, float, int, int);
+extern void func_00308408(void *, void *, void *, int, int, int, int, int, float);
+extern void func_002E5CF8(int, int, void *);
+extern void func_00312B70(void *, void *, int, int);
+
 extern float func_002AA738 (float x, int a1, float y);
 
 extern float func_00283B98_14 (float x, float y);
@@ -449,7 +458,44 @@ check:
 
 INCLUDE_ASM("asm/game", func_002ABBB8);
 
-INCLUDE_ASM("asm/game", func_002AC728);
+void func_002AC728(unsigned char *object, void *position, int sound, float scale, float radius)
+{
+    float zero[4];
+    Colors1043 first, second;
+    float speed, energy;
+    int i, life;
+    int *a, *b;
+    func_00282C88_3((char *)zero);
+    for (i=2;i>=0;i--) {
+        speed = func_002A7878(8.0f,10.0f) * 0.01666666753590107f;
+        energy = scale * 400000.0f;
+        first = ref_L00_002AC728_00;
+        second = ref_L00_002AC728_01;
+        a = &first.colors[func_002A77E0(6)];
+        b = &second.colors[func_002A77E0(6)];
+        life = func_002A7820(15,20);
+        func_002BBCB0(position,zero,*a,*b,energy,life,func_002A7820(25,30),speed*scale,0,0);
+    }
+    if (object) {
+        func_00308408(object,position,zero,20,127,64,0,48,scale*4.0f);
+        func_00308408(object,position,zero,29,96,32,0,32,scale*3.0f);
+        if (object[0x20] != 0xfe)
+            if (object[0x20] != 0xfd)
+                if (sound != -1) func_002E5CF8(sound,0,object);
+    }
+    if (radius != 0.0f) {
+        if (radius > 0.0f) {
+            ref_L00_002AC728_02[9]=radius;
+            ref_L00_002AC728_02[10]=radius;
+            ref_L00_002AC728_02[8]=radius;
+        } else {
+            ref_L00_002AC728_02[9]=13.0f;
+            ref_L00_002AC728_02[10]=13.0f;
+            ref_L00_002AC728_02[8]=13.0f;
+        }
+        func_00312B70(ref_L00_002AC728_02,position,0,0);
+    }
+}
 
 
 extern void func_00282F20(float *, float *, float);
@@ -569,7 +615,6 @@ extern float func_00282C10(float x);
 void func_002ACE78(float *p, float *src, float x) { func_00282F20(p, src, x); p[3] = func_00282C10(1.0f - x * x); }
 
 
-INCLUDE_ASM("asm/game", func_002ACF68);
 
 
 s32 func_002AD0B0(u8 *a0) {
@@ -614,7 +659,6 @@ int func_002AD330(char *a0, char *a1, char *a2, char *a3)
     return 1;
 }
 
-INCLUDE_ASM("asm/game", func_002AD470);
 
 int func_002AD5F8(char *unused, char *obj, char *arg2, char *arg3, char *arg4, char *arg5)
 {
@@ -644,11 +688,9 @@ int func_002AD5F8(char *unused, char *obj, char *arg2, char *arg3, char *arg4, c
 
 INCLUDE_ASM("asm/game", func_002AD7B8);
 
-INCLUDE_ASM("asm/game", func_002AD860);
+/* func_002AD860 is in 002AD860.c. */
 
 INCLUDE_ASM("asm/game", func_002AD980);
-
-INCLUDE_ASM("asm/game", func_002ADB78);
 
 
 extern int func_00283108(float *);
@@ -703,7 +745,48 @@ int func_002AEB60(char *object, float threshold)
 
 void func_002AEC18(void *a0, int a1) { extern void func_002A0488(void *, unsigned char, unsigned char, unsigned char); int high = a1 >> 16; int middle = a1 >> 8; func_002A0488(a0, (unsigned char)a1, (unsigned char)middle, (unsigned char)high); }
 
-INCLUDE_ASM("asm/game", func_002AEC48);
+extern void func_0029F9F0(char *list, unsigned char *node);
+extern void func_0029F978(char *a0, char *a1, unsigned char *a2);
+extern void func_002A91F0(unsigned char *a0, unsigned char *a1);
+extern void func_00282C88(unsigned char *);
+extern float func_002AA898(float *position, float target, float *velocity,
+                           float acceleration, float damping, float limit, int direction);
+
+void func_002AEC48(char *owner, unsigned char *obj, char *arg2, float acceleration, float damping)
+{
+    char *current = *(char **)(obj + 0x78);
+    float scale;
+
+    if (current == 0) {
+        *(char **)(obj + 0x78) = owner;
+    } else if (current != owner) {
+        if (obj[1] != 0 && (unsigned char)current[0x20] < 0x7F)
+            func_0029F9F0(current, obj);
+        obj[1] = 0;
+        *(char **)(obj + 0x78) = owner;
+    }
+    if (*(float *)(obj + 0x60) == 0.0f && *(float *)(obj + 0x64) == 0.0f &&
+        *(float *)(obj + 0x68) == 0.0f && *(float *)(obj + 0x70) == 1.0f) {
+        if (func_00282C48(*(float *)(obj + 0x40)) < 0.005f && func_00282C48(*(float *)(obj + 0x44)) < 0.005f &&
+            func_00282C48(*(float *)(obj + 0x48)) < 0.005f) {
+            if (obj[1] != 0)
+                func_0029F9F0(owner, obj);
+            return;
+        }
+    }
+    func_002AA898((float *)(obj + 0x40), *(float *)(obj + 0x60), (float *)(obj + 0x50), acceleration, damping, 0.0f, 0);
+    func_002AA898((float *)(obj + 0x44), *(float *)(obj + 0x64), (float *)(obj + 0x54), acceleration, damping, 0.0f, 0);
+    func_002AA898((float *)(obj + 0x48), *(float *)(obj + 0x68), (float *)(obj + 0x58), acceleration, damping, 0.0f, 0);
+    if (obj[1] == 0)
+        func_0029F978(owner, arg2, obj);
+    func_002A91F0(obj + 0x10, (char *)(obj + 0x40));
+    scale = *(float *)(obj + 0x70);
+    *(float *)(obj + 0x20) = scale;
+    *(float *)(obj + 0x24) = scale;
+    *(float *)(obj + 0x28) = scale;
+    func_00282C88(obj + 0x60);
+    *(float *)(obj + 0x70) = 1.0f;
+}
 
 /* Branches on a float argument: when it is positive it rewrites a float in place with a helper result and sets a field at offset 24 to (helper2 * scale) + offset; otherwise it subtracts a float through a third pointer, rewrites that pointer with (helper2 * scale) and adds it back to the field. */
 void func_002AEE70(float *a0, float *a1, float *a2,

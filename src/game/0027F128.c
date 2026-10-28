@@ -90,8 +90,7 @@ int func_0027F288(u8 *text, int length, float scale) {
     return func_0027F1D8(text, length, D_00263B50, scale);
 }
 
-INCLUDE_ASM("asm/game", func_0027F2A8);
-
+/* func_0027F2A8 is in 0027F128-font-g8.c. */
 
 extern u64 func_0027C878(int);
 extern void func_0027F2A8(int, int, u64, u8 *, int, u64, u8 *);
@@ -230,7 +229,7 @@ void func_00281DE8(QuadPacket *q, int a1, int a2, int a3) {
 }
 
 
-INCLUDE_ASM("asm/game", func_00281EB8);
+/* func_00281EB8 lives in 00281EB8.c. */
 
 
 /* calls the measured callee with constants 0x47 and 0x513f1 */

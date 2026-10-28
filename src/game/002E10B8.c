@@ -205,8 +205,6 @@ INCLUDE_ASM("asm/game", func_002E3998);
 
 INCLUDE_ASM("asm/game", func_002E3BD8);
 
-INCLUDE_ASM("asm/game", func_002E3E50);
-
 ASM_FUNC("asm/game", func_002E3E54);
 
 ASM_FUNC("asm/game", func_002E3FA0);
@@ -522,4 +520,4 @@ INCLUDE_ASM("asm/game", func_002E6A60);
 
 INCLUDE_ASM("asm/game", func_002E6B78);
 
-INCLUDE_ASM("asm/game", func_002E6D88);
+/* func_002E6D88 is in 002E10B8-transition-g8.c. */

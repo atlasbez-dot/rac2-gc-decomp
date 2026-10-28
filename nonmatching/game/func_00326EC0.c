@@ -1,7 +1,21 @@
-/* func_00326EC0 (376 B, boot only), M31 26 Oct 2026: 380 of 376 bytes as src/game/00326EC0-g8.c
-   (default -G8, sda floats, sda incomplete D_001B27B0 so its la stays in the loop). Left:
-   register numbering (retail out=s0, i=s1, self=s3) and the loop head: retail computes
-   i<4 before the label and again in the bnel slot, and bumps i after the conditional call. */
+/*
+ * Retained manual C reconstruction; not linked or counted.
+ * Profile: -O2 -G8 -ffunction-sections; the complete retained compilation context
+ * follows below, independently of any linked source unit.
+ * Retail: 376 bytes; compiled: 380 bytes.
+ * Contract-correction replay: US 0/1, US2 0/1, PAL 0/1; each compiles to 380/376 bytes.
+ * The complete retained body is compiled as an isolated private G8 unit, never linked.
+ * Residual: the loop. Retail tests `i < 4` first in each iteration (the test is also
+ * copied into the latch's `bnel` slot) and increments i after the second call; this C
+ * computes the corner arguments before the test and increments early, one word longer;
+ * the saved registers are rotated (retail: table in $s0, position in $s3).
+ * Measured: the four extents as one Vec4[4] (two arrays cost two more saves); the push
+ * vector D_001B27B0 as an incomplete `sda` array keeps retail's per-iteration
+ * `lui ; addiu` (an ordinary array is hoisted into $s5, 20 bytes long). The increment
+ * moved after the if or a while loop changes nothing.
+ * Reopen: a loop form that puts the `i < 4` test at the iteration's head.
+ */
+
 #include "include_asm.h"
 #include "common.h"
 

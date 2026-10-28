@@ -304,7 +304,7 @@ float func_002A7E08(struct family_27f9_object *object, float *target, float *val
 }
 
 
-INCLUDE_ASM("asm/game", func_002A7EA0);
+/* func_002A7EA0 is in 002A7EA0.c. */
 
 
 INCLUDE_ASM("asm/game", func_002A8240);
@@ -360,9 +360,11 @@ void func_002A8598(int i, int v) {
 }
 
 
+/* rac1-decomp src/overlays/shared/moby_ground_collision.c: get_first_moby_in_group */
+// Starts the group cursor at the first moby of a group; when the state filter
+// rejects it, advances to the next accepted moby.
 INCLUDE_ASM("asm/game", func_002A8600);
 
-INCLUDE_ASM("asm/game", func_002A86E8);
 
 
 int func_002A8860(int *p, int b) {
@@ -674,7 +676,7 @@ void func_002A9850(void *a0, Vec16_F5621621c *src, int *p, int n,
     }
 }
 
-INCLUDE_ASM("asm/game", func_002A99A0);
+/* func_002A99A0 is in 002A99A0.c. */
 
 
 f32 func_002AA140(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
@@ -770,7 +772,7 @@ float func_002AA458(void *a0, void *a1, void *a2, float f1, float f2, float f3)
     return *(float *)a2;
 }
 
-INCLUDE_ASM("asm/game", func_002AA548);
+/* func_002AA548 is implemented in 002AA548.c. */
 
 extern float func_00283BE0(float, float);
 extern float func_00282C48(float);

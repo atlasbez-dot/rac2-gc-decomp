@@ -1,5 +1,10 @@
 #include "include_asm.h"
 
+extern void func_00270598(char *);
+extern int func_00270838(char *, char *);
+extern int func_002A6640(void *, float *, int *);
+extern int func_00283CF0(float);
+
 /* Family 34e74db3063e7a24 — 108 bytes, 2 placements (18_damosel, 6_notak).
    Same shape as be569dc253cd5555: walk the resident function-pointer table at
    0x1B2180, call each entry while the resident count at 0x1B21C0 says there is
@@ -351,7 +356,63 @@ void func_0026FEB8(const char *format,...) {
 INCLUDE_ASM("asm/game", func_0026FEF0);
 
 
-INCLUDE_ASM("asm/game", func_00270018);
+typedef struct {
+    u8 pad[0x3D0];
+    float f3D0;
+    float f3D4;
+    float f3D8;
+    float f3DC;
+    float f3E0;
+    float f3E4;
+    u8 mode;
+    u8 active;
+    short s3EA;
+    float f3EC;
+    float f3F0;
+} F270018Aim;
+
+extern F270018Aim D_001B5200;
+extern float D_001B90F0[];
+extern float func_002703B0(char *, float, float, float, float, float);
+extern float func_00283198(float);
+extern float func_00283180(float);
+extern float func_002A7C00(float, float, float);
+extern float func_00283CE0(int);
+extern int func_00282978(void *);
+extern void func_0027AB40(void);
+
+void func_00270018(void) {
+    float half;
+    float t;
+
+    if (D_001B5200.active == 1) {
+        switch (D_001B5200.mode) {
+        case 0:
+            D_001B5200.f3D8 = D_001B5200.f3D4;
+            D_001B5200.active = 0;
+            break;
+        case 3:
+            D_001B5200.f3D8 = func_002703B0((char *)&D_001B5200.f3D0, D_001B5200.f3D8, D_001B5200.f3D4, D_001B5200.f3DC, D_001B5200.f3E0, D_001B5200.f3E4);
+            if (func_00282C48(D_001B5200.f3D0) < 0.0001f)
+                D_001B5200.active = 0;
+            break;
+        case 1:
+            if (func_00282978(&D_001B5200.s3EA))
+                D_001B5200.active = 0;
+            t = func_00283CE0(D_001B5200.s3EA) * D_001B5200.f3EC;
+            D_001B5200.f3D8 = D_001B5200.f3D4 + (D_001B5200.f3F0 - D_001B5200.f3D4) * t;
+            break;
+        case 2:
+            if (func_00282978(&D_001B5200.s3EA))
+                D_001B5200.active = 0;
+            D_001B5200.f3D8 = func_002A7C00(D_001B5200.f3D4, D_001B5200.f3F0, func_00283CE0(D_001B5200.s3EA) * D_001B5200.f3EC);
+            break;
+        }
+        half = D_001B5200.f3D8 * 0.5f;
+        D_001B90F0[0] = func_00283198(half) / func_00283180(half);
+        func_0027AB40();
+    }
+}
 
 
 extern void func_00282B50(void *, void *, int);
@@ -400,8 +461,6 @@ char *func_00270280(int a0)
         }
     }
 }
-
-INCLUDE_ASM("asm/game", func_002702B8);
 
 /* Integrates one float field with a spring-damper step, clamps it to a symmetric limit, then lets a helper raise or lower it, returning a bias plus the field. */
 float func_002702C8(float *p, float a, float b, float c, float d, float lim)
@@ -495,7 +554,7 @@ void func_00270550(char *object) {
         callback(object);
 }
 
-INCLUDE_ASM("asm/game", func_00270598);
+/* func_00270598 is in 00270598.c. */
 
 INCLUDE_ASM("asm/game", func_00270838);
 
@@ -576,13 +635,13 @@ void func_00270B58(float *out, float *p0, float *p1, float *dir0, float *dir1, f
 
 INCLUDE_ASM("asm/game", func_00270EE0);
 
-INCLUDE_ASM("asm/game", func_002712D8);
+/* func_002712D8 is in 002712D8.c. */
 
 /* func_002718B8 uses the quadword-copy profile in 0026EA00-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_00271958);
 
-INCLUDE_ASM("asm/game", func_00271B90);
+/* func_00271B90 is in 00271B90.c. */
 
 INCLUDE_ASM("asm/game", func_00271FD8);
 
@@ -638,7 +697,6 @@ void func_00272280(void)
     }
 }
 
-INCLUDE_ASM("asm/game", func_00272368);
 
 INCLUDE_ASM("asm/game", func_00272540);
 
@@ -669,7 +727,6 @@ INCLUDE_ASM("asm/game", func_00272CB0);
 
 
 
-INCLUDE_ASM("asm/game", func_00273418);
 
 
 /* Blends the fog preset between the two colours and depth ranges of the camera environment
@@ -701,6 +758,8 @@ extern FogPresetView D_001B1640 MACRO_ADDR;
 extern int func_002A6640(void *, float *, int *);
 extern int func_00283CF0(float);
 
+/* Arithmetic follows RAC1's update_camera_environment_from_regions,
+   src/game/effects.c (Lombyte/OpenRAC, GPL-3.0). */
 void func_002735A0(void *position)
 {
     float blend;
