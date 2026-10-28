@@ -241,7 +241,7 @@ def compile_key(source: Path, flags: str) -> str:
         stat = path.stat()  # A missing tool must not silently reuse an old object.
         version = (stat.st_mtime_ns, stat.st_ctime_ns, stat.st_size, stat.st_ino)
         digests.append((str(path), file_digest(path, version)))
-    return json.dumps([flags, os.environ.get("RAC2_LINUX", ""), digests])
+    return json.dumps([flags, levels.VERSION, os.environ.get("RAC2_LINUX", ""), digests])
 
 
 def split_flags(flags: str) -> tuple[list[str], list[str]]:
@@ -274,6 +274,7 @@ def compile_c(source: Path) -> Path:
         compiler_args, assembler_args = split_flags(flags)
     except ValueError as error:
         sys.exit(f"{source.relative_to(ROOT)} has invalid compiler flags: {error}")
+    release_define = "-DRAC2_RELEASE_" + levels.VERSION.upper() + "=1"
     compiler_flags = shlex.join(compiler_args)
     assemble = shlex.join([str(COMPILER / "as"), *assembler_args, "-o", "x.o", "x.s"])
     metadata = f"python3 '{SDATA_ALIASES}' x.s; "
@@ -286,11 +287,11 @@ def compile_c(source: Path) -> Path:
     if flags.startswith("sdk"):
         # the SDK compiler's driver (integrated cpp), then the game compiler's assembler
         script = (f"set -e; t=$(mktemp -d); cd $t; cp '{source}' x.c; "
-                  f"'{SDK_COMPILER}/xgcc' -B'{SDK_COMPILER}/' -S {compiler_flags} -I'{ROOT}/include' -I'{SDK_COMPILER}/include' "
+                  f"'{SDK_COMPILER}/xgcc' -B'{SDK_COMPILER}/' -S {compiler_flags} {release_define} -I'{ROOT}/include' -I'{SDK_COMPILER}/include' "
                   f"-I'{source.parent}' x.c -o x.s; {metadata}{assemble}; cp x.o '{out}'.$$; mv '{out}'.$$ '{out}'; rm -rf $t")
     else:
         script = (f"set -e; t=$(mktemp -d); cd $t; cp '{source}' x.c; "
-                  f"'{COMPILER}/cpp' -I'{COMPILER}/include' -I'{ROOT}/include' -I'{source.parent}' x.c > x.i; "
+                  f"'{COMPILER}/cpp' {release_define} -I'{COMPILER}/include' -I'{ROOT}/include' -I'{source.parent}' x.c > x.i; "
                   f"'{COMPILER}/cc1' -quiet {compiler_flags} x.i -o x.s; {metadata}{assemble}; "
                   f"cp x.o '{out}'.$$; mv '{out}'.$$ '{out}'; rm -rf $t")
     result = subprocess.run([*runner, "bash", "-c", script], capture_output=True, text=True)
@@ -813,7 +814,7 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
     extra, script = dict(placement.values), (directory / "config/rac2.ld").read_text()
     aliases = {}
     if placement.placed:
-        bodies = {a: (sym, n, f"{o.relative_to(directory, walk_up=True).as_posix()}({sec})")
+        bodies = {a: (sym, n, f"{Path(os.path.relpath(o, directory)).as_posix()}({sec})")
                   for sym, (a, n, o, sec) in placement.placed.items()}
         kept = []
         for source in sources:
@@ -845,7 +846,7 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
         # Separate passes preserve the branch-table directive checks while allowing
         # relocation-free byte/halfword scalar pools in the same retail assembly file.
         for scalar in (False, True):
-            tables = {a: (n, f"{o.relative_to(directory, walk_up=True).as_posix()}({sec});")
+            tables = {a: (n, f"{Path(os.path.relpath(o, directory)).as_posix()}({sec});")
                       for (o, sec), (a, n) in placement.tables.items()
                       if ((o, sec) in placement.scalar_pools) == scalar}
             kept = []
@@ -884,7 +885,7 @@ def build_program(name: str, reference: Path, strict: bool = False) -> tuple[int
             if tables:
                 sys.exit(f"{name}: compiler data missing from assembly data")
             sources = kept
-        discard = "".join(f"        {o.relative_to(directory, walk_up=True).as_posix()}(*)\n" for o in placement.objects)
+        discard = "".join(f"        {Path(os.path.relpath(o, directory)).as_posix()}(*)\n" for o in placement.objects)
         end = script.rindex("}")
         script = script[:end] + "    /DISCARD/ :\n    {\n" + discard + "    }\n" + script[end:]
         (directory / "config/rac2.ld").write_text(script)

@@ -83,6 +83,18 @@ class ObjectCache(unittest.TestCase):
         self.out.write_bytes(b"compiled object")
         return SimpleNamespace(returncode=0, stderr="")
 
+    def test_release_change_invalidates_cache_and_reaches_both_preprocessors(self):
+        for prefix in ("", "sdk "):
+            self.write(self.root / "config/cflags.txt", "src/game/example.c\t" + prefix + "-O2\n")
+            before = self.compiler.call_count
+            for version in ("us", "us2", "pal"):
+                with patch.object(build.levels, "VERSION", version):
+                    build.compile_c(self.source)
+                    self.assertIn("-DRAC2_RELEASE_" + version.upper() + "=1",
+                                  self.compiler.call_args.args[0][-1])
+                    build.compile_c(self.source)
+            self.assertEqual(self.compiler.call_count, before + 3)
+
     def test_unchanged_inputs_reuse_object(self):
         build.compile_c(self.source)
         build.compile_c(self.source)

@@ -49,12 +49,12 @@ This fork's progress is shown in the generated summary below and the
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 2,521 of 3,127 | 607,716 of 1,044,804 bytes |
-| Levels | 3,605 of 5,452 | 2,363,564 of 4,481,044 bytes |
-| **Total** | 6,126 of 8,579 | 2,971,280 of 5,525,848 bytes (53.77%) |
+| Boot executable | 2,527 of 3,126 | 610,828 of 1,044,736 bytes |
+| Levels | 3,696 of 5,452 | 2,398,432 of 4,481,044 bytes |
+| **Total** | 6,223 of 8,578 | 3,009,260 of 5,525,780 bytes (54.46%) |
 
-The 27 levels hold 100,930 function placements; C covers 70,703 of them.
-334 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
+The 27 levels hold 100,903 function placements; C covers 71,706 of them.
+335 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
 <!-- /progress -->
 
 [Canonical function treemap](assets/progress.svg) (area by code bytes; one entry per function).
