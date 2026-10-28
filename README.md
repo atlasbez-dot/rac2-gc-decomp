@@ -49,11 +49,11 @@ This fork's progress is shown in the generated summary below and the
 <!-- progress -->
 | | Functions | Code |
 | --- | ---: | ---: |
-| Boot executable | 2,526 of 3,126 | 610,780 of 1,044,736 bytes |
+| Boot executable | 2,527 of 3,126 | 610,828 of 1,044,736 bytes |
 | Levels | 3,696 of 5,452 | 2,398,432 of 4,481,044 bytes |
-| **Total** | 6,222 of 8,578 | 3,009,212 of 5,525,780 bytes (54.46%) |
+| **Total** | 6,223 of 8,578 | 3,009,260 of 5,525,780 bytes (54.46%) |
 
-The 27 levels hold 100,903 function placements; C covers 71,679 of them.
+The 27 levels hold 100,903 function placements; C covers 71,706 of them.
 335 of the matched functions are the original's own assembly (`ASM_FUNC`), kept as assembly.
 <!-- /progress -->
 
