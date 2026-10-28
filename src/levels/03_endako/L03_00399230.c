@@ -240,6 +240,13 @@ INCLUDE_ASM("asm/levels", func_L03_003D2018);
 
 extern u8 *D_L03_001B2A1C_tbl[] __asm__("D_L03_001B2A1C") __attribute__((sda));
 
+/* Constant-address stores retain retail scheduling. US2 moves these resident
+ * bytes by eight; the build's release define is included in the object-cache key. */
+#ifdef RAC2_RELEASE_US2
+#define ENDAKO_RESIDENT_SHIFT 8
+#else
+#define ENDAKO_RESIDENT_SHIFT 0
+#endif
 void func_L03_003D20F8(char *a0)
 {
     char *s0 = a0;
@@ -254,12 +261,12 @@ void func_L03_003D20F8(char *a0)
     D_001395C0 = 1;
     /* Resident bytes shared by all programs, written at their constant addresses
        (retail's lui $at,0x1A; sb form), as in 0033CB18.c. */
-    *(u8 *)0x001A7B32 = 1;
-    *(u8 *)0x001A7AFB = 1;
-    *(u8 *)0x001A7B33 = 1;
-    *(u8 *)0x001A7AFC = 1;
-    *(u8 *)0x001A7B34 = 1;
-    *(u8 *)0x001A7AFA = 1;
+    *(u8 *)(0x001A7B32 + ENDAKO_RESIDENT_SHIFT) = 1;
+    *(u8 *)(0x001A7AFB + ENDAKO_RESIDENT_SHIFT) = 1;
+    *(u8 *)(0x001A7B33 + ENDAKO_RESIDENT_SHIFT) = 1;
+    *(u8 *)(0x001A7AFC + ENDAKO_RESIDENT_SHIFT) = 1;
+    *(u8 *)(0x001A7B34 + ENDAKO_RESIDENT_SHIFT) = 1;
+    *(u8 *)(0x001A7AFA + ENDAKO_RESIDENT_SHIFT) = 1;
     func_2BEE78(s0 + 0x10, s0 + 0xF0, 0, 1);
     p = *(void **)(s1 + 0x2C);
     if (p != 0) {

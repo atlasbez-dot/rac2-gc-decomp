@@ -83,6 +83,18 @@ class ObjectCache(unittest.TestCase):
         self.out.write_bytes(b"compiled object")
         return SimpleNamespace(returncode=0, stderr="")
 
+    def test_release_change_invalidates_cache_and_reaches_both_preprocessors(self):
+        for prefix in ("", "sdk "):
+            self.write(self.root / "config/cflags.txt", "src/game/example.c\t" + prefix + "-O2\n")
+            before = self.compiler.call_count
+            for version in ("us", "us2", "pal"):
+                with patch.object(build.levels, "VERSION", version):
+                    build.compile_c(self.source)
+                    self.assertIn("-DRAC2_RELEASE_" + version.upper() + "=1",
+                                  self.compiler.call_args.args[0][-1])
+                    build.compile_c(self.source)
+            self.assertEqual(self.compiler.call_count, before + 3)
+
     def test_unchanged_inputs_reuse_object(self):
         build.compile_c(self.source)
         build.compile_c(self.source)
@@ -313,26 +325,3 @@ class StrictBuild(unittest.TestCase):
             self.assertEqual(run.call_count, 2)
             for call in run.call_args_list:
                 self.assertIn("--strict", call.args[0])
-
-
-class RegionalSourceSelection(unittest.TestCase):
-    def test_regional_unit_replaces_common_and_keeps_unrelated_sources(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            common = root / "src/levels/03_endako/unit.c"
-            regional = root / "src/us2/levels/03_endako/unit.c"
-            unrelated = root / "src/game/own.c"
-            extra = root / "src/us2/game/extra.c"
-            for p in (common, regional, unrelated, extra):
-                p.parent.mkdir(parents=True, exist_ok=True)
-                p.write_text("/* fixture */")
-            with patch.object(build, "ROOT", root), patch.object(build.levels, "VERSION", "us2"):
-                selected = build.sources_for("03_endako")
-                self.assertNotIn(common, selected)
-                self.assertEqual(selected.count(regional), 1)
-                self.assertIn(unrelated, selected)
-                self.assertIn(extra, selected)
-            for version in ("us", "pal"):
-                with patch.object(build, "ROOT", root), patch.object(build.levels, "VERSION", version):
-                    self.assertIn(common, build.sources_for("03_endako"))
-                    self.assertNotIn(regional, build.sources_for("03_endako"))

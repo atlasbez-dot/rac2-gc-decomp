@@ -241,7 +241,7 @@ def compile_key(source: Path, flags: str) -> str:
         stat = path.stat()  # A missing tool must not silently reuse an old object.
         version = (stat.st_mtime_ns, stat.st_ctime_ns, stat.st_size, stat.st_ino)
         digests.append((str(path), file_digest(path, version)))
-    return json.dumps([flags, os.environ.get("RAC2_LINUX", ""), digests])
+    return json.dumps([flags, levels.VERSION, os.environ.get("RAC2_LINUX", ""), digests])
 
 
 def split_flags(flags: str) -> tuple[list[str], list[str]]:
@@ -274,6 +274,7 @@ def compile_c(source: Path) -> Path:
         compiler_args, assembler_args = split_flags(flags)
     except ValueError as error:
         sys.exit(f"{source.relative_to(ROOT)} has invalid compiler flags: {error}")
+    release_define = "-DRAC2_RELEASE_" + levels.VERSION.upper() + "=1"
     compiler_flags = shlex.join(compiler_args)
     assemble = shlex.join([str(COMPILER / "as"), *assembler_args, "-o", "x.o", "x.s"])
     metadata = f"python3 '{SDATA_ALIASES}' x.s; "
@@ -286,11 +287,11 @@ def compile_c(source: Path) -> Path:
     if flags.startswith("sdk"):
         # the SDK compiler's driver (integrated cpp), then the game compiler's assembler
         script = (f"set -e; t=$(mktemp -d); cd $t; cp '{source}' x.c; "
-                  f"'{SDK_COMPILER}/xgcc' -B'{SDK_COMPILER}/' -S {compiler_flags} -I'{ROOT}/include' -I'{SDK_COMPILER}/include' "
+                  f"'{SDK_COMPILER}/xgcc' -B'{SDK_COMPILER}/' -S {compiler_flags} {release_define} -I'{ROOT}/include' -I'{SDK_COMPILER}/include' "
                   f"-I'{source.parent}' x.c -o x.s; {metadata}{assemble}; cp x.o '{out}'.$$; mv '{out}'.$$ '{out}'; rm -rf $t")
     else:
         script = (f"set -e; t=$(mktemp -d); cd $t; cp '{source}' x.c; "
-                  f"'{COMPILER}/cpp' -I'{COMPILER}/include' -I'{ROOT}/include' -I'{source.parent}' x.c > x.i; "
+                  f"'{COMPILER}/cpp' {release_define} -I'{COMPILER}/include' -I'{ROOT}/include' -I'{source.parent}' x.c > x.i; "
                   f"'{COMPILER}/cc1' -quiet {compiler_flags} x.i -o x.s; {metadata}{assemble}; "
                   f"cp x.o '{out}'.$$; mv '{out}'.$$ '{out}'; rm -rf $t")
     result = subprocess.run([*runner, "bash", "-c", script], capture_output=True, text=True)
@@ -328,13 +329,6 @@ def sources_for(name: str) -> list[Path]:
             found += sorted((root / d).rglob("*.c"))
         if name != "boot":
             found += sorted((root / "levels" / name).rglob("*.c"))
-    # A release-specific unit replaces its common counterpart, rather than linking
-    # both definitions. All functions in the selected unit still pass strict checks.
-    if levels.VERSION != "us":
-        regional_root = ROOT / "src" / levels.VERSION
-        overrides = {p.relative_to(regional_root) for p in found if p.is_relative_to(regional_root)}
-        found = [p for p in found if p.is_relative_to(regional_root)
-                 or p.relative_to(ROOT / "src") not in overrides]
     return found
 
 
