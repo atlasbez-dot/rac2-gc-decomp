@@ -328,6 +328,13 @@ def sources_for(name: str) -> list[Path]:
             found += sorted((root / d).rglob("*.c"))
         if name != "boot":
             found += sorted((root / "levels" / name).rglob("*.c"))
+    # A release-specific unit replaces its common counterpart, rather than linking
+    # both definitions. All functions in the selected unit still pass strict checks.
+    if levels.VERSION != "us":
+        regional_root = ROOT / "src" / levels.VERSION
+        overrides = {p.relative_to(regional_root) for p in found if p.is_relative_to(regional_root)}
+        found = [p for p in found if p.is_relative_to(regional_root)
+                 or p.relative_to(ROOT / "src") not in overrides]
     return found
 
 
@@ -411,9 +418,9 @@ class Placement:
 
         def name_of(sym: int) -> str:
             """A symbol's name; a section symbol (a call or address within the same object)
-            becomes "§" and the section's name, whose start the linker places."""
+            becomes "Â§" and the section's name, whose start the linker places."""
             s = obj["symbols"][sym]
-            return s["name"] if s["type"] != 3 else "§" + obj["sections"][s["section"]]["name"]
+            return s["name"] if s["type"] != 3 else "Â§" + obj["sections"][s["section"]]["name"]
         word = lambda b, at: struct.unpack_from("<I", b, at)[0]
         i = 0
         while i < len(relocs):
@@ -458,7 +465,7 @@ class Placement:
             if (mine ^ theirs) & 0xFFFF0000 or (values[symbol] + sext(mine & 0xFFFF) - theirs) & 0xFFFF:
                 return {}, f"%lo at +{at:#x} differs"
         for symbol, value in values.items():
-            if symbol.startswith("§"):
+            if symbol.startswith("Â§"):
                 continue
             want = self.expected(symbol)
             if want is not None and want != value:
@@ -493,13 +500,13 @@ class Placement:
                             break
                         size = have
                     values, why = self.derive(obj, index, address)
-                    clash = next((s for s, v in values.items() if not s.startswith("§")
+                    clash = next((s for s, v in values.items() if not s.startswith("Â§")
                                   and self.values.get(s, v) != v), None)
                     if why or clash:
                         self.differ.append((sym["name"], why or f"{clash} needs two values"))
                         break
-                    self.values.update({k: v for k, v in values.items() if not k.startswith("§")})
-                    needs[sym["name"]] = {k[1:]: v for k, v in values.items() if k.startswith("§")}
+                    self.values.update({k: v for k, v in values.items() if not k.startswith("Â§")})
+                    needs[sym["name"]] = {k[1:]: v for k, v in values.items() if k.startswith("Â§")}
                     self.placed[sym["name"]] = (address, size, path, section)
                     taken.add(address)
                     break
@@ -616,7 +623,7 @@ class Placement:
             base = where.get((path, text["name"]))
             offset = struct.unpack_from("<I", sec["data"], at)[0]
             if (base is None or not text["name"].startswith(".text") or offset % 4
-                    or offset >= text["size"] or values.get("§" + text["name"]) != base):
+                    or offset >= text["size"] or values.get("Â§" + text["name"]) != base):
                 return False
         return True
 

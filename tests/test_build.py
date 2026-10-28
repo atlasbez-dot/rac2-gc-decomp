@@ -313,3 +313,26 @@ class StrictBuild(unittest.TestCase):
             self.assertEqual(run.call_count, 2)
             for call in run.call_args_list:
                 self.assertIn("--strict", call.args[0])
+
+
+class RegionalSourceSelection(unittest.TestCase):
+    def test_regional_unit_replaces_common_and_keeps_unrelated_sources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            common = root / "src/levels/03_endako/unit.c"
+            regional = root / "src/us2/levels/03_endako/unit.c"
+            unrelated = root / "src/game/own.c"
+            extra = root / "src/us2/game/extra.c"
+            for p in (common, regional, unrelated, extra):
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("/* fixture */")
+            with patch.object(build, "ROOT", root), patch.object(build.levels, "VERSION", "us2"):
+                selected = build.sources_for("03_endako")
+                self.assertNotIn(common, selected)
+                self.assertEqual(selected.count(regional), 1)
+                self.assertIn(unrelated, selected)
+                self.assertIn(extra, selected)
+            for version in ("us", "pal"):
+                with patch.object(build, "ROOT", root), patch.object(build.levels, "VERSION", version):
+                    self.assertIn(common, build.sources_for("03_endako"))
+                    self.assertNotIn(regional, build.sources_for("03_endako"))
