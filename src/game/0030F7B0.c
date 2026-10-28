@@ -187,7 +187,7 @@ INCLUDE_ASM("asm/game", func_00310E98);
 
 INCLUDE_ASM("asm/game", func_003116E8);
 
-INCLUDE_ASM("asm/game", func_00311F70);
+/* func_00311F70 is in 0030F7B0-loot-g8.c. */
 
 INCLUDE_ASM("asm/game", func_003120C8);
 
@@ -207,7 +207,7 @@ int func_00312E10(unsigned char *p) { return p[0x20] == 1; }
 
 
 
-INCLUDE_ASM("asm/game", func_00312EB0);
+/* func_00312EB0 is defined in 00312EB0-qcopy.c. */
 
 INCLUDE_ASM("asm/game", func_00313210);
 
@@ -244,7 +244,7 @@ INCLUDE_ASM("asm/game", func_00314CF8);
 INCLUDE_ASM("asm/game", func_00314FD0);
 
 
-INCLUDE_ASM("asm/game", func_003158A8);
+/* func_003158A8 uses the profile in 0030F7B0-spawn.c. */
 
 INCLUDE_ASM("asm/game", func_003159D0);
 

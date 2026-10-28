@@ -1,6 +1,7 @@
 #include "include_asm.h"
-typedef unsigned char u8;
-typedef int s32;
+#include "common.h"
+
+/* func_L18_003FB620 is in L18_003FB620-particles.c (-G32 settings record). */
 
 extern int D_L18_001B15C0 __attribute__((sda));
 extern int D_L18_001B15B0 __attribute__((sda));
