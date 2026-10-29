@@ -1,11 +1,10 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/levels", func_L12_0041E3E8);
+/* func_L12_0041E3E8 is defined in L12_0041E3E8-update-g8.c. */
 
 s32 func_L12_0041E8E8(u8 *a0) {
     return *(u8 *)(a0 + 0x20) == 3;
 }
-
 extern int D_001A79F0 __attribute__((sda));
 extern char D_0019B4A8[];
 extern char D_00189EA0[];
@@ -41,7 +40,7 @@ void func_L12_0041E8F8(u8 *a0) {
     func_002E5CF8(1, 0, self);
 }
 
-INCLUDE_ASM("asm/levels", func_L12_0041EA18);
+/* func_L12_0041EA18 is defined in L12_0041EA18-g8.c. */
 
 /* func_L12_0041EDB8 is defined in L12_0041E3E8-split-g8.c (this unit keeps split addresses). */
 
@@ -137,8 +136,61 @@ void func_L12_004254A8(u8 *arg0) {
 
 INCLUDE_ASM("asm/levels", func_L12_004285A8);
 
-INCLUDE_ASM("asm/levels", func_L12_004293A0);
+extern s32 func_002A77E0(s32);
+extern s32 func_00283CF0(f32);
+extern void func_L02_0031E9E8(f32 *, f32);
+extern u8 *func_002BDCE8(void *, f32, f32, f32, s32, void *, f32, u32, s32);
 
-INCLUDE_ASM("asm/levels", func_L12_00429610);
+/* Retail tests the first allocation again after its second and third calls;
+ * preserve that behavior instead of changing the test to the newer pointer. */
+void func_L12_004293A0(u8 *self)
+{
+    u8 *state = *(u8 **)(self + 0x68);
+    f32 pos[4];
+    f32 velocity[4];
+    u8 *p;
+    u8 *q;
+
+    qcopy(pos, self + 0x10);
+    pos[2] = *(f32 *)(state + 0x7C);
+    func_L02_0031E9E8(velocity, 0.5f);
+    velocity[2] = 0.083333336f;
+    p = func_002BDCE8(pos, 0.1f, 1.0f, 0.9f, func_002A77E0(16), velocity, 420000.0f, 0xDF202020, 0);
+    if (p) {
+        u8 *d = p + 0x20;
+        *(u16 *)(p + 10) = 10;
+        p[9] = func_00283CF0(4.0f) + 0x70;
+        *(s32 *)(d + 4) = 2;
+        d[10] = 0xDF;
+        d[11] = p[10];
+        p[3] = 0x44;
+    }
+    func_L02_0031E9E8(velocity, 0.5f);
+    velocity[2] = 0.083333336f;
+    q = func_002BDCE8(pos, 0.1f, 1.0f, 0.9f, func_002A77E0(16), velocity, 420000.0f, 0xDF208080, 0);
+    if (p) {
+        u8 *d = q + 0x20;
+        *(u16 *)(q + 10) = 10;
+        q[9] = func_00283CF0(4.0f) + 0x70;
+        *(s32 *)(d + 4) = 2;
+        d[10] = 0xDF;
+        d[11] = q[10];
+        q[3] = 0x48;
+    }
+    func_L02_0031E9E8(velocity, 0.33333334f);
+    velocity[2] = 0.083333336f;
+    q = func_002BDCE8(pos, 0.1f, 1.0f, 0.9f, func_002A77E0(16), velocity, 420000.0f, 0xDF808080, 0);
+    if (p) {
+        u8 *d = q + 0x20;
+        *(u16 *)(q + 10) = 10;
+        q[9] = func_00283CF0(4.0f) + 0x70;
+        *(s32 *)(d + 4) = 2;
+        d[10] = 0xDF;
+        d[11] = q[10];
+        q[3] = 0x44;
+    }
+}
+
+/* func_L12_00429610 is in L12_00429610.c. */
 
 /* func_L12_00429868 is defined in L12_0041E3E8-g8.c. */
