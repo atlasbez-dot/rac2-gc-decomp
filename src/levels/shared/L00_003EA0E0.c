@@ -365,6 +365,8 @@ void func_L00_003ECB00(void)
 
 /* func_L00_003ECB38 is retained in L00_003ECB38-rc2.c. */
 
+typedef struct { char pad[0x2290]; char *tbl; } Rac2Native_003ECB38_ConstBlock;
+
 extern Rac2Native_003ECB38_ConstBlock D_00189E20;
 
 void func_L00_003ECC90(char *a, int b)
